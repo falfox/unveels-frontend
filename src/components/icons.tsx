@@ -158,4 +158,47 @@ export const Icons = {
       />
     </svg>
   ),
+  unselect: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill="none" viewBox="0 0 29 29" {...props}>
+      <circle
+        cx="14.5"
+        cy="14.5"
+        r="14"
+        stroke="#fff"
+        transform="rotate(-90 14.5 14.5)"
+      />
+      <path stroke="#fff" stroke-linecap="round" d="M5 24 24.5 4.5" />
+    </svg>
+  ),
+  myCart: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill="none" viewBox="0 0 24 24" {...props}>
+      <path
+        stroke="#fff"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="M9.999 20.003H4.997a2 2 0 0 1-2-2V7.498c0-.828.671-1.5 1.5-1.5h13.005c.829 0 1.5.672 1.5 1.5V10M6.998 5.997v-.25 0a3.752 3.752 0 0 1 3.752-3.751h.5A3.752 3.752 0 0 1 15 5.747v.25"
+      />
+      <path
+        fill="red"
+        fill-rule="evenodd"
+        d="M19.691 13.34a4.488 4.488 0 0 1-.832 7 4.45 4.45 0 0 1-4.675 0 4.489 4.489 0 0 1-.832-7 4.484 4.484 0 0 1 6.34 0Z"
+        clip-rule="evenodd"
+      />
+      <path
+        stroke="#fff"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="M19.691 13.34a4.488 4.488 0 0 1-.832 7 4.45 4.45 0 0 1-4.675 0 4.489 4.489 0 0 1-.832-7 4.484 4.484 0 0 1 6.34 0"
+      />
+      <path
+        stroke="#fff"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="m15.679 15.668.842-.843v3.372M15.682 18.199h1.68"
+      />
+    </svg>
+  ),
 };
