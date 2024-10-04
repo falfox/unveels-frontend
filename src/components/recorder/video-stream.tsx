@@ -17,7 +17,6 @@ export function VideoSteam() {
     <>
       <Webcam
         audio={false}
-        height={window.innerHeight}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         mirrored={true}
@@ -26,6 +25,9 @@ export function VideoSteam() {
           if (error instanceof Error) {
             setError(error);
           }
+        }}
+        style={{
+          height: window.innerHeight,
         }}
       />
       {error && (

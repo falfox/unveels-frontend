@@ -29,7 +29,7 @@ export function SkinToneFinder() {
   return (
     <CriteriaProvider>
       <div className="h-full min-h-dvh">
-        <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
+        <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-black">
           <div className="absolute inset-0">
             <VideoSteam />
             <div
