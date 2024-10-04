@@ -7,11 +7,16 @@ const videoConstraints = {
   facingMode: "user",
 };
 
-export function VideoSteam() {
-  const webcamRef = useRef<Webcam>(null);
-  const capture = useCallback(() => {}, [webcamRef]);
+export function VideoStream() {
+const webcamRef = useRef<Webcam>(null);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [error, setError] = useState<Error | null>(null);
 
-  const [error, setError] = useState(null as Error | null);
+  const toggleFacingMode = () => {
+    setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
+  };
+
+  const capture = useCallback(() => {}, [webcamRef]);
 
   return (
     <>
@@ -19,8 +24,8 @@ export function VideoSteam() {
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        mirrored={true}
-        videoConstraints={videoConstraints}
+        mirrored={facingMode === "user"}
+        videoConstraints={{ ...videoConstraints, facingMode }}
         onUserMediaError={(error) => {
           if (error instanceof Error) {
             setError(error);
@@ -35,6 +40,12 @@ export function VideoSteam() {
           <p>{error.message}</p>
         </div>
       )}
+      <button
+        onClick={toggleFacingMode}
+        className="absolute p-2 text-white bg-blue-500 rounded bottom-4 right-4"
+      >
+        Flip Camera
+      </button>
     </>
   );
 }

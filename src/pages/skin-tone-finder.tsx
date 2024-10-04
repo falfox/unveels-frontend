@@ -20,7 +20,7 @@ import {
   CriteriaProvider,
   useCriteria,
 } from "../components/recorder/recorder-context";
-import { VideoSteam } from "../components/recorder/video-stream";
+import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { sleep } from "../utils";
 
@@ -31,7 +31,7 @@ export function SkinToneFinder() {
       <div className="h-full min-h-dvh">
         <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-black">
           <div className="absolute inset-0">
-            <VideoSteam />
+            <VideoStream />
             <div
               className="absolute inset-0"
               style={{

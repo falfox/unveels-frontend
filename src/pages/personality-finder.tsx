@@ -14,17 +14,17 @@ import {
 } from "lucide-react";
 import { usePage } from "../App";
 import { CircularProgressRings } from "../components/circle-progress-rings";
+import { Footer } from "../components/footer";
 import { Rating } from "../components/rating";
 import { VideoScene } from "../components/recorder/recorder";
 import {
   CriteriaProvider,
   useCriteria,
 } from "../components/recorder/recorder-context";
+import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { sleep } from "../utils";
-import { VideoSteam } from "../components/recorder/video-stream";
 import { TopNavigation } from "./skin-tone-finder";
-import { Footer } from "../components/footer";
 
 export function PersonalityFinder() {
   return (
@@ -33,23 +33,6 @@ export function PersonalityFinder() {
         <MainContent />
       </div>
     </CriteriaProvider>
-    // <CriteriaProvider>
-    //   <div className="h-full min-h-dvh">
-    //     <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
-    //       <div className="absolute inset-0">
-    //         <VideoSteam />
-    //         <div
-    //           className="absolute inset-0"
-    //           style={{
-    //             background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-    //           }}
-    //         ></div>
-    //       </div>
-    //       <RecorderStatus />
-    //     </div>
-    //     <MainContent />
-    //   </div>
-    // </CriteriaProvider>
   );
 }
 
@@ -74,7 +57,7 @@ function MainContent() {
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
       <div className="absolute inset-0">
-        <VideoSteam />
+        <VideoStream />
         <div
           className="absolute inset-0"
           style={{
@@ -87,8 +70,8 @@ function MainContent() {
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         <VideoScene />
+        <Footer />
       </div>
-      <Footer />
     </div>
   );
 }
@@ -201,7 +184,7 @@ function PersonalityTab() {
           {/* Extraversion */}
           <div className="flex items-center space-x-2.5">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFC300] text-sm font-bold text-white">
-              89%
+              30%
             </div>
             <span>Extraversion</span>
           </div>
@@ -209,7 +192,7 @@ function PersonalityTab() {
           {/* Conscientiousness */}
           <div className="flex items-center space-x-2.5">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
-              54%
+              45%
             </div>
             <span>Conscientiousness</span>
           </div>
@@ -217,7 +200,7 @@ function PersonalityTab() {
           {/* Openness to Experience */}
           <div className="flex items-center space-x-2.5">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
-              78%
+              60%
             </div>
             <span>Openness to Experience</span>
           </div>
@@ -228,7 +211,7 @@ function PersonalityTab() {
           {/* Agreeableness */}
           <div className="flex items-center space-x-2.5">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5DD400] text-sm font-bold text-white">
-              58%
+              75%
             </div>
             <span>Agreeableness</span>
           </div>
@@ -236,7 +219,7 @@ function PersonalityTab() {
           {/* Neuroticism */}
           <div className="flex items-center space-x-2.5">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
-              46%
+              90%
             </div>
             <span>Neuroticism</span>
           </div>
@@ -287,7 +270,7 @@ function PersonalitySection({
   // High -> 70% - 100%
   // Moderate -> above 40% - 69%
   // low -> 0% - 39%
-  const scoreType = score < 70 ? "Low" : score < 40 ? "Moderate" : "High";
+  const scoreType = score < 40 ? "Low" : score < 70 ? "Moderate" : "High";
   return (
     <div className="py-5">
       <div className="flex items-center pb-6 space-x-2">
@@ -303,7 +286,11 @@ function PersonalitySection({
       <div
         className={clsx(
           "text-sm",
-          score < 70 ? "text-[#FAFF00]" : score < 40 ? "text-[#FF0000]" : "text-[#5ED400]",
+          score < 40
+            ? "text-[#FF0000]"
+            : score < 70
+              ? "text-[#FAFF00]"
+              : "text-[#5ED400]",
         )}
       >
         {scoreType} {score}%
