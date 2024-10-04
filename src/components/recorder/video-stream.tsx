@@ -20,7 +20,7 @@ export function VideoSteam() {
         height={window.innerHeight}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        width={430}
+        mirrored={true}
         videoConstraints={videoConstraints}
         onUserMediaError={(error) => {
           if (error instanceof Error) {

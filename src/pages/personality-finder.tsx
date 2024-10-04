@@ -284,8 +284,10 @@ function PersonalitySection({
   description: string;
   score: number;
 }) {
-  // Moderate is anything below 70 and other than that its high
-  const scoreType = score < 70 ? "Moderate" : "High";
+  // High -> 70% - 100%
+  // Moderate -> above 40% - 69%
+  // low -> 0% - 39%
+  const scoreType = score < 70 ? "Low" : score < 40 ? "Moderate" : "High";
   return (
     <div className="py-5">
       <div className="flex items-center pb-6 space-x-2">
@@ -301,7 +303,7 @@ function PersonalitySection({
       <div
         className={clsx(
           "text-sm",
-          score < 70 ? "text-[#FAFF00]" : "text-[#4CAF50]",
+          score < 70 ? "text-[#FAFF00]" : score < 40 ? "text-[#FF0000]" : "text-[#5ED400]",
         )}
       >
         {scoreType} {score}%
