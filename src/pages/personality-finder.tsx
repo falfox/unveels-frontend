@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Icons } from "../components/icons";
 
 import clsx from "clsx";
@@ -12,32 +12,88 @@ import {
   StopCircle,
   X,
 } from "lucide-react";
-import Webcam from "react-webcam";
 import { usePage } from "../App";
 import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Rating } from "../components/rating";
+import { VideoScene } from "../components/recorder/recorder";
+import {
+  CriteriaProvider,
+  useCriteria,
+} from "../components/recorder/recorder-context";
 import { useRecordingControls } from "../hooks/useRecorder";
+import { sleep } from "../utils";
+import { VideoSteam } from "../components/recorder/video-stream";
+import { TopNavigation } from "./skin-tone-finder";
+import { Footer } from "../components/footer";
 
 export function PersonalityFinder() {
   return (
-    <div className="h-full min-h-dvh">
-      <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
-        {/* <div className="absolute inset-0">
-          <VideoSteam />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-            }}
-          ></div>
-        </div> */}
-        <Component />
+    <CriteriaProvider>
+      <div className="h-full min-h-dvh">
+        <MainContent />
       </div>
+    </CriteriaProvider>
+    // <CriteriaProvider>
+    //   <div className="h-full min-h-dvh">
+    //     <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
+    //       <div className="absolute inset-0">
+    //         <VideoSteam />
+    //         <div
+    //           className="absolute inset-0"
+    //           style={{
+    //             background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+    //           }}
+    //         ></div>
+    //       </div>
+    //       <RecorderStatus />
+    //     </div>
+    //     <MainContent />
+    //   </div>
+    // </CriteriaProvider>
+  );
+}
+
+function MainContent() {
+  const { criterias, setCriterias } = useCriteria();
+
+  useEffect(() => {
+    (async () => {
+      await sleep(2000);
+      setCriterias((prev) => ({ ...prev, lighting: true }));
+      await sleep(2000);
+      setCriterias((prev) => ({ ...prev, facePosition: true }));
+      await sleep(2000);
+      setCriterias((prev) => ({ ...prev, orientation: true }));
+    })();
+  }, []);
+
+  if (criterias.facePosition && criterias.lighting && criterias.orientation) {
+    return <Result />;
+  }
+
+  return (
+    <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
+      <div className="absolute inset-0">
+        <VideoSteam />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          }}
+        ></div>
+      </div>
+      <RecorderStatus />
+      <TopNavigation />
+
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+        <VideoScene />
+      </div>
+      <Footer />
     </div>
   );
 }
 
-function Component() {
+function Result() {
   const tabs = [
     {
       title: "Personality",
@@ -55,7 +111,7 @@ function Component() {
   const { setPage } = usePage();
 
   return (
-    <div className="flex flex-col h-screen font-sans text-white">
+    <div className="flex flex-col h-screen font-sans text-white bg-black">
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2">
         <button className="size-6">
@@ -609,7 +665,7 @@ function RecorderGuide() {
   );
 }
 
-function BottomContent() {
+function Main() {
   return <RecorderGuide />;
 }
 

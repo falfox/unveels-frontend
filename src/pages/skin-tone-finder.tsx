@@ -1,4 +1,4 @@
-import { CSSProperties, useCallback, useRef, useState } from "react";
+import { CSSProperties, Fragment, useEffect, useState } from "react";
 import { Icons } from "../components/icons";
 
 import clsx from "clsx";
@@ -8,74 +8,62 @@ import {
   ChevronUp,
   CirclePlay,
   Heart,
-  Lightbulb,
   PauseCircle,
   Plus,
-  Scan,
-  ScanFace,
   StopCircle,
   X,
 } from "lucide-react";
 import { usePage } from "../App";
+import { Footer } from "../components/footer";
+import { VideoScene } from "../components/recorder/recorder";
+import {
+  CriteriaProvider,
+  useCriteria,
+} from "../components/recorder/recorder-context";
+import { VideoSteam } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
-import Webcam from "react-webcam";
-
-const videoConstraints = {
-  width: 640,
-  height: 480,
-  facingMode: "user",
-};
-
-function VideoSteam() {
-  const webcamRef = useRef<Webcam>(null);
-  const capture = useCallback(() => {}, [webcamRef]);
-
-  const [error, setError] = useState(null as Error | null);
-
-  return (
-    <>
-      <Webcam
-        audio={false}
-        height={window.innerHeight}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        width={430}
-        videoConstraints={videoConstraints}
-        onUserMediaError={(error) => {
-          if (error instanceof Error) {
-            setError(error);
-          }
-        }}
-      />
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center text-white">
-          <p>{error.message}</p>
-        </div>
-      )}
-    </>
-  );
-}
+import { sleep } from "../utils";
 
 export function SkinToneFinder() {
+  const [collapsed, setCollapsed] = useState(false);
   return (
-    <div className="h-full min-h-dvh">
-      <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
-        <div className="absolute inset-0">
-          <VideoSteam />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-            }}
-          ></div>
-        </div>
-        <RecorderStatus />
-        <TopNavigation />
+    <CriteriaProvider>
+      <div className="h-full min-h-dvh">
+        <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
+          <div className="absolute inset-0">
+            <VideoSteam />
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+              }}
+            ></div>
+          </div>
+          <RecorderStatus />
+          <TopNavigation item />
 
-        <Footer />
-        <Sidebar />
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+            {collapsed ? null : <BottomContent />}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setCollapsed(!collapsed);
+                }}
+              >
+                {collapsed ? (
+                  <ChevronUp className="text-white size-6" />
+                ) : (
+                  <ChevronDown className="text-white size-6" />
+                )}
+              </button>
+            </div>
+            <Footer />
+          </div>
+          <Sidebar />
+        </div>
       </div>
-    </div>
+    </CriteriaProvider>
   );
 }
 
@@ -92,7 +80,7 @@ function ShadesSelector() {
           {["matched", "other"].map((shadeTab) => {
             const isActive = tab === shadeTab;
             return (
-              <>
+              <Fragment key={shadeTab}>
                 <button
                   key={shadeTab}
                   className={`relative h-10 grow border-b text-lg ${
@@ -133,7 +121,7 @@ function ShadesSelector() {
                     <div className="h-full border-r border-white"></div>
                   </div>
                 )}
-              </>
+              </Fragment>
             );
           })}
         </div>
@@ -336,34 +324,25 @@ function ProductList() {
   );
 }
 
-function RecorderGuide() {
-  return (
-    <div className="px-2 pb-4 text-center text-white select-none">
-      <p className="pb-9">
-        Ensure it is a well-lit area with natural or bright artificial light
-      </p>
-
-      <div className="grid grid-cols-3 gap-5 text-xs text-white/50">
-        <div className="flex items-center justify-between rounded-lg border border-dashed border-white/50 px-2.5 py-2">
-          Face Position
-          <ScanFace className="size-6" />
-        </div>
-        <div className="flex items-center justify-between rounded-lg border border-white px-2.5 py-2 text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]">
-          Lighting
-          <Lightbulb className="size-6" />
-        </div>
-        <div className="flex items-center justify-between rounded-lg border border-dashed border-white/50 px-2.5 py-2">
-          Orientation
-          <Scan className="size-6" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function BottomContent() {
-  // return <RecorderGuide />;
-  return <ShadesSelector />;
+  const { criterias, setCriterias } = useCriteria();
+
+  useEffect(() => {
+    (async () => {
+      await sleep(2000);
+      setCriterias((prev) => ({ ...prev, lighting: true }));
+      await sleep(2000);
+      setCriterias((prev) => ({ ...prev, facePosition: true }));
+      await sleep(2000);
+      setCriterias((prev) => ({ ...prev, orientation: true }));
+    })();
+  }, []);
+
+  if (criterias.facePosition && criterias.lighting && criterias.orientation) {
+    return <ShadesSelector />;
+  }
+
+  return <VideoScene />;
 }
 
 function RecorderStatus() {
@@ -403,7 +382,13 @@ function RecorderStatus() {
   );
 }
 
-function TopNavigation() {
+export function TopNavigation({
+  item = false,
+  cart = false,
+}: {
+  item?: boolean;
+  cart?: boolean;
+}) {
   const { setPage } = usePage();
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_button]:pointer-events-auto">
@@ -412,25 +397,27 @@ function TopNavigation() {
           <ChevronLeft className="text-white size-6" />
         </button>
 
-        <div className="pt-10 space-y-2">
-          <div className="flex gap-x-4">
-            <button className="flex items-center justify-center rounded-full size-8 shrink-0 bg-black/25 backdrop-blur-3xl">
-              <Heart className="text-white size-5" />
-            </button>
-            <div>
-              <p className="font-semibold leading-4 text-white">
-                Pro Filt’r Soft Matte Longwear Liquid Found
-              </p>
-              <p className="text-white/60">Brand Name</p>
+        {item ? (
+          <div className="pt-10 space-y-2">
+            <div className="flex gap-x-4">
+              <button className="flex items-center justify-center rounded-full size-8 shrink-0 bg-black/25 backdrop-blur-3xl">
+                <Heart className="text-white size-5" />
+              </button>
+              <div>
+                <p className="font-semibold leading-4 text-white">
+                  Pro Filt’r Soft Matte Longwear Liquid Found
+                </p>
+                <p className="text-white/60">Brand Name</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-x-4">
+              <button className="flex items-center justify-center rounded-full size-8 shrink-0 bg-black/25 backdrop-blur-3xl">
+                <Plus className="text-white size-5" />
+              </button>
+              <p className="font-medium text-white">$52.00</p>
             </div>
           </div>
-          <div className="flex items-center gap-x-4">
-            <button className="flex items-center justify-center rounded-full size-8 shrink-0 bg-black/25 backdrop-blur-3xl">
-              <Plus className="text-white size-5" />
-            </button>
-            <p className="font-medium text-white">$52.00</p>
-          </div>
-        </div>
+        ) : null}
       </div>
       <div className="flex flex-col gap-4">
         <button
@@ -514,34 +501,6 @@ function Sidebar() {
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Footer() {
-  const [collapsed, setCollapsed] = useState(false);
-
-  return (
-    <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-      {collapsed ? null : <BottomContent />}
-      <div className="flex justify-center">
-        <button
-          type="button"
-          onClick={() => {
-            setCollapsed(!collapsed);
-          }}
-        >
-          {collapsed ? (
-            <ChevronUp className="text-white size-6" />
-          ) : (
-            <ChevronDown className="text-white size-6" />
-          )}
-        </button>
-      </div>
-      <footer className="flex justify-center pb-4 text-white">
-        <div className="mr-2 text-[0.5rem]">Powered by</div>
-        <Icons.logo className="w-10" />
-      </footer>
     </div>
   );
 }
