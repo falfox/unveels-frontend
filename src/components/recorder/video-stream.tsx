@@ -1,5 +1,6 @@
 import { useRef, useCallback, useState } from "react";
 import Webcam from "react-webcam";
+import { useCamera } from "./recorder-context";
 
 const videoConstraints = {
   width: 640,
@@ -8,9 +9,10 @@ const videoConstraints = {
 };
 
 export function VideoStream() {
-const webcamRef = useRef<Webcam>(null);
+  const webcamRef = useRef<Webcam>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const [error, setError] = useState<Error | null>(null);
+  const { criterias } = useCamera();
 
   const toggleFacingMode = () => {
     setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
@@ -25,7 +27,10 @@ const webcamRef = useRef<Webcam>(null);
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         mirrored={facingMode === "user"}
-        videoConstraints={{ ...videoConstraints, facingMode }}
+        videoConstraints={{
+          ...videoConstraints,
+          facingMode: criterias.flipped ? "environment" : "user",
+        }}
         onUserMediaError={(error) => {
           if (error instanceof Error) {
             setError(error);

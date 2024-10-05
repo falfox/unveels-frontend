@@ -10,6 +10,7 @@ import {
   Heart,
   PauseCircle,
   Plus,
+  Share,
   StopCircle,
   X,
 } from "lucide-react";
@@ -17,19 +18,20 @@ import { usePage } from "../App";
 import { Footer } from "../components/footer";
 import { VideoScene } from "../components/recorder/recorder";
 import {
-  CriteriaProvider,
-  useCriteria,
+  CameraProvider,
+  useCamera,
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
+import { ShareModal } from "../components/share-modal";
 import { useRecordingControls } from "../hooks/useRecorder";
+import { useScrollContainer } from "../hooks/useScrollContainer";
 import { sleep } from "../utils";
 
 export function SkinToneFinder() {
-  const [collapsed, setCollapsed] = useState(false);
   return (
-    <CriteriaProvider>
+    <CameraProvider>
       <div className="h-full min-h-dvh">
-        <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-black">
+        <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
           <div className="absolute inset-0">
             <VideoStream />
             <div
@@ -43,27 +45,61 @@ export function SkinToneFinder() {
           <TopNavigation item />
 
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-            {collapsed ? null : <BottomContent />}
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setCollapsed(!collapsed);
-                }}
-              >
-                {collapsed ? (
-                  <ChevronUp className="text-white size-6" />
-                ) : (
-                  <ChevronDown className="text-white size-6" />
-                )}
-              </button>
-            </div>
+            <MainContent />
             <Footer />
           </div>
           <Sidebar />
         </div>
       </div>
-    </CriteriaProvider>
+    </CameraProvider>
+  );
+}
+
+function MainContent() {
+  const [collapsed, setCollapsed] = useState(false);
+  const { criterias } = useCamera();
+  const [shareOpen, setShareOpen] = useState(false);
+
+  if (criterias.isFinished) {
+    return shareOpen ? (
+      <ShareModal />
+    ) : (
+      <div className="flex px-5 pb-10 space-x-5 font-serif">
+        <button
+          type="button"
+          className="h-10 w-full rounded border border-[#CA9C43] text-white"
+        >
+          Exit
+        </button>
+        <button
+          type="button"
+          className="h-10 w-full rounded bg-gradient-to-r from-[#CA9C43] to-[#92702D] text-white"
+          onClick={() => setShareOpen(true)}
+        >
+          Share <Icons.share className="inline-block ml-4 size-6" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {collapsed ? null : <BottomContent />}
+      <div className="flex justify-center">
+        <button
+          type="button"
+          onClick={() => {
+            setCollapsed(!collapsed);
+          }}
+        >
+          {collapsed ? (
+            <ChevronUp className="text-white size-6" />
+          ) : (
+            <ChevronDown className="text-white size-6" />
+          )}
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -74,58 +110,56 @@ function ShadesSelector() {
     "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text text-transparent";
 
   return (
-    <div className="p-4">
-      <div className="pb-4">
-        <div className="flex items-center justify-between w-full h-10 text-center border-b border-gray-600">
-          {["matched", "other"].map((shadeTab) => {
-            const isActive = tab === shadeTab;
-            return (
-              <Fragment key={shadeTab}>
-                <button
-                  key={shadeTab}
-                  className={`relative h-10 grow border-b text-lg ${
-                    isActive
-                      ? activeClassNames
-                      : "border-transparent text-gray-500"
-                  }`}
-                  onClick={() => setTab(shadeTab as "matched" | "other")}
-                >
-                  <span className={isActive ? "text-white/70 blur-sm" : ""}>
-                    {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                    Shades
-                  </span>
-                  {isActive ? (
-                    <>
-                      <div
-                        className={clsx(
-                          "absolute inset-0 flex items-center justify-center text-lg blur-sm",
-                          activeClassNames,
-                        )}
-                      >
-                        <span className="text-lg text-center">
-                          {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                          Shades
-                        </span>
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-lg text-center text-white/70">
-                          {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                          Shades
-                        </span>
-                      </div>
-                    </>
-                  ) : null}
-                </button>
-                {shadeTab === "matched" && (
-                  <div className="h-10 px-px py-2">
-                    <div className="h-full border-r border-white"></div>
-                  </div>
-                )}
-              </Fragment>
-            );
-          })}
-        </div>
+    <div className="px-4 space-y-2">
+      <div className="flex items-center justify-between w-full h-10 text-center border-b border-gray-600">
+        {["matched", "other"].map((shadeTab) => {
+          const isActive = tab === shadeTab;
+          return (
+            <Fragment key={shadeTab}>
+              <button
+                key={shadeTab}
+                className={`relative h-10 grow border-b text-lg ${
+                  isActive
+                    ? activeClassNames
+                    : "border-transparent text-gray-500"
+                }`}
+                onClick={() => setTab(shadeTab as "matched" | "other")}
+              >
+                <span className={isActive ? "text-white/70 blur-sm" : ""}>
+                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)} Shades
+                </span>
+                {isActive ? (
+                  <>
+                    <div
+                      className={clsx(
+                        "absolute inset-0 flex items-center justify-center text-lg blur-sm",
+                        activeClassNames,
+                      )}
+                    >
+                      <span className="text-lg text-center">
+                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
+                        Shades
+                      </span>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg text-center text-white/70">
+                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
+                        Shades
+                      </span>
+                    </div>
+                  </>
+                ) : null}
+              </button>
+              {shadeTab === "matched" && (
+                <div className="h-10 px-px py-2">
+                  <div className="h-full border-r border-white"></div>
+                </div>
+              )}
+            </Fragment>
+          );
+        })}
       </div>
+
       {tab === "matched" ? <MatchedShades /> : <OtherShades />}
     </div>
   );
@@ -159,16 +193,16 @@ function MatchedShades() {
 
   return (
     <>
-      <div className="flex flex-col items-start gap-2">
-        <div className="inline-flex items-center px-2 py-1 text-white border border-white rounded-full gap-x-2">
+      <div className="flex flex-col items-start">
+        <div className="inline-flex items-center px-2 py-1 border rounded-full gap-x-2 border-white/80 text-white/80">
           <div className="size-3 rounded-full bg-[#D18B59]"></div>
           <span className="text-sm">Medium skin</span>
         </div>
-        <div className="flex w-full min-w-0 py-2">
+        <div className="flex w-full min-w-0 pt-2">
           {shadeOptions.map((option, index) => (
             <button
               key={index}
-              className={`w-full border border-transparent px-4 py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
+              className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
               data-selected={selectedShade === option.name}
               style={{
                 background: option.color,
@@ -180,7 +214,7 @@ function MatchedShades() {
           ))}
         </div>
         <div className="w-full text-right">
-          <button className="text-[0.625rem] text-white">View all</button>
+          <button className="py-4 text-[0.625rem] text-white">View all</button>
         </div>
 
         <ProductList />
@@ -222,7 +256,7 @@ function OtherShades() {
 
   return (
     <div className="flex flex-col items-start w-full gap-2">
-      <div className="flex items-center gap-3 overflow-x-auto">
+      <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
         {tones.map((tone, index) => (
           <div
             key={index}
@@ -239,7 +273,7 @@ function OtherShades() {
           </div>
         ))}
       </div>
-      <div className="flex w-full gap-4 py-2 overflow-x-auto">
+      <div className="flex w-full gap-4 py-2 overflow-x-auto no-scrollbar">
         <button className="flex items-center justify-center size-8 shrink-0">
           <Icons.unselect className="text-white size-6" />
         </button>
@@ -256,7 +290,7 @@ function OtherShades() {
         ))}
       </div>
       <div className="w-full text-right">
-        <button className="text-[0.625rem] text-white">View all</button>
+        <button className="py-4 text-[0.625rem] text-white">View all</button>
       </div>
 
       <ProductList />
@@ -265,6 +299,7 @@ function OtherShades() {
 }
 
 function ProductList() {
+  const { scrollContainerRef, handleMouseDown } = useScrollContainer();
   const products = [
     {
       name: "Tom Ford Item name Tom Ford",
@@ -293,9 +328,13 @@ function ProductList() {
   ];
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto">
+    <div
+      className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing"
+      ref={scrollContainerRef}
+      onMouseDown={handleMouseDown}
+    >
       {products.map((product, index) => (
-        <div key={index} className="w-[110px] rounded py-4 shadow">
+        <div key={index} className="w-[110px] rounded shadow">
           <div className="relative h-[80px] w-[110px] overflow-hidden">
             <img
               src={"https://picsum.photos/id/237/200/300"}
@@ -325,16 +364,16 @@ function ProductList() {
 }
 
 function BottomContent() {
-  const { criterias, setCriterias } = useCriteria();
+  const { criterias, setCriterias } = useCamera();
 
   useEffect(() => {
     (async () => {
       await sleep(2000);
-      setCriterias((prev) => ({ ...prev, lighting: true }));
+      setCriterias({ lighting: true });
       await sleep(2000);
-      setCriterias((prev) => ({ ...prev, facePosition: true }));
+      setCriterias({ facePosition: true });
       await sleep(2000);
-      setCriterias((prev) => ({ ...prev, orientation: true }));
+      setCriterias({ orientation: true });
     })();
   }, []);
 
@@ -348,6 +387,7 @@ function BottomContent() {
 function RecorderStatus() {
   const { isRecording, formattedTime, handleStartPause, handleStop, isPaused } =
     useRecordingControls();
+  const { finish } = useCamera();
 
   return (
     <div className="absolute inset-x-0 flex items-center justify-center gap-4 top-14">
@@ -370,7 +410,14 @@ function RecorderStatus() {
       <div className="font-serif text-white">{formattedTime}</div>
       <button
         className="flex items-center justify-center size-8"
-        onClick={isRecording ? handleStop : handleStartPause}
+        onClick={
+          isRecording
+            ? () => {
+                handleStop();
+                finish();
+              }
+            : handleStartPause
+        }
       >
         {isRecording || isPaused ? (
           <StopCircle className="text-white size-6" />
@@ -390,6 +437,7 @@ export function TopNavigation({
   cart?: boolean;
 }) {
   const { setPage } = usePage();
+  const { flipCamera } = useCamera();
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_button]:pointer-events-auto">
       <div className="flex flex-col gap-4">
@@ -445,6 +493,7 @@ export function TopNavigation({
           <button
             type="button"
             className="flex items-center justify-center overflow-hidden rounded-full size-8 bg-black/25 backdrop-blur-3xl"
+            onClick={flipCamera}
           >
             <Icons.flipCamera className="text-white size-6" />
           </button>
@@ -462,7 +511,7 @@ export function TopNavigation({
 
 function Sidebar() {
   return (
-    <div className="pointer-events-none absolute inset-y-0 right-5 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
+    <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
         <div
           className="absolute inset-0 border-2 border-transparent rounded-full"

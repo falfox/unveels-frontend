@@ -1,44 +1,63 @@
 import { createContext, useContext, useState } from "react";
 
-interface CriteriaContextType {
-  criterias: {
-    facePosition: boolean;
-    lighting: boolean;
-    orientation: boolean;
-  };
-  setCriterias: React.Dispatch<
-    React.SetStateAction<{
-      facePosition: boolean;
-      lighting: boolean;
-      orientation: boolean;
-    }>
-  >;
+interface CameraState {
+  facePosition: boolean;
+  lighting: boolean;
+  orientation: boolean;
+  flipped: boolean;
+  isFinished: boolean;
 }
 
-const CriteriaContext = createContext<CriteriaContextType | undefined>(
-  undefined,
-);
+interface CameraContextType {
+  criterias: CameraState;
+  setCriterias: (newState: Partial<CameraState>) => void;
+  flipCamera: () => void;
+  finish: () => void;
+}
 
-export const CriteriaProvider: React.FC<{ children: React.ReactNode }> = ({
+const CameraContext = createContext<CameraContextType | undefined>(undefined);
+
+export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [criterias, setCriterias] = useState({
-    facePosition: false,
-    lighting: false,
-    orientation: false,
+  const [state, setState] = useState({
+    facePosition: true,
+    lighting: true,
+    orientation: true,
+    flipped: false,
+    isFinished: false,
   });
 
+  function setCriterias(newState: Partial<CameraState>) {
+    setState((prevState) => ({ ...prevState, ...newState }));
+  }
+
+  function flipCamera() {
+    setState((prevState) => ({ ...prevState, flipped: !prevState.flipped }));
+  }
+
+  function finish() {
+    setState((prevState) => ({ ...prevState, isFinished: true }));
+  }
+
   return (
-    <CriteriaContext.Provider value={{ criterias, setCriterias }}>
+    <CameraContext.Provider
+      value={{
+        criterias: state,
+        setCriterias,
+        flipCamera,
+        finish,
+      }}
+    >
       {children}
-    </CriteriaContext.Provider>
+    </CameraContext.Provider>
   );
 };
 
-export const useCriteria = () => {
-  const context = useContext(CriteriaContext);
+export const useCamera = () => {
+  const context = useContext(CameraContext);
   if (!context) {
-    throw new Error("useCriteria must be used within a CriteriaProvider");
+    throw new Error("useCamera must be used within a CameraProvider");
   }
   return context;
 };

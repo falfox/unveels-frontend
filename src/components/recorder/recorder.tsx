@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { Lightbulb, Scan, ScanFace } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useCriteria } from "./recorder-context";
+import { useCamera } from "./recorder-context";
 
 const hints = [
   "Ensure it is a well-lit area with natural or bright artificial light",
@@ -17,7 +17,7 @@ const hints = [
 function RecorderGuide() {
   const {
     criterias: { facePosition, lighting, orientation },
-  } = useCriteria();
+  } = useCamera();
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
 
   useEffect(() => {

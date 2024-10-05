@@ -18,8 +18,8 @@ import { Footer } from "../components/footer";
 import { Rating } from "../components/rating";
 import { VideoScene } from "../components/recorder/recorder";
 import {
-  CriteriaProvider,
-  useCriteria,
+  CameraProvider,
+  useCamera,
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
@@ -28,25 +28,25 @@ import { TopNavigation } from "./skin-tone-finder";
 
 export function PersonalityFinder() {
   return (
-    <CriteriaProvider>
+    <CameraProvider>
       <div className="h-full min-h-dvh">
         <MainContent />
       </div>
-    </CriteriaProvider>
+    </CameraProvider>
   );
 }
 
 function MainContent() {
-  const { criterias, setCriterias } = useCriteria();
+  const { criterias, setCriterias } = useCamera();
 
   useEffect(() => {
     (async () => {
       await sleep(2000);
-      setCriterias((prev) => ({ ...prev, lighting: true }));
+      setCriterias({ lighting: true });
       await sleep(2000);
-      setCriterias((prev) => ({ ...prev, facePosition: true }));
+      setCriterias({ facePosition: true });
       await sleep(2000);
-      setCriterias((prev) => ({ ...prev, orientation: true }));
+      setCriterias({ orientation: true });
     })();
   }, []);
 
