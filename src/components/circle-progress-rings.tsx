@@ -17,6 +17,7 @@ export const CircularProgressRings: React.FC<CircularProgressRingsProps> = ({
   const center = viewBoxSize / 2;
   const maxRadius = 45;
   const strokeWidth = 3;
+  const padding = 1.5;
 
   const calculatePath = (radius: number): string => {
     return `
@@ -29,7 +30,7 @@ export const CircularProgressRings: React.FC<CircularProgressRingsProps> = ({
     <svg viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} {...props}>
       <g style={{ transform: "rotate(-270deg)", transformOrigin: "center" }}>
         {data.map((item, index) => {
-          const radius = maxRadius - index * (strokeWidth + 2.25);
+          const radius = maxRadius - index * (strokeWidth + padding);
           const circumference = 2 * Math.PI * radius;
           const strokeDasharray = `${(circumference * item.percentage) / 100} ${circumference}`;
 

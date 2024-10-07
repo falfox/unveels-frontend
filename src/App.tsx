@@ -4,12 +4,17 @@ import { PersonalityFinder } from "./pages/personality-finder";
 
 import "./index.css";
 
-const defaultPage = "skin-tone-finder" as const;
+const defaultPage = "skin-analysis" as const;
 
-const pages = ["skin-tone-finder", "personality-finder"] as const;
+const pages = [
+  "skin-tone-finder",
+  "personality-finder",
+  "skin-analysis",
+] as const;
 
 export type Page = (typeof pages)[number] | null;
 import { createContext, useContext } from "react";
+import { SkinAnalysis } from "./pages/skin-analysis";
 
 interface PageContextType {
   page: Page;
@@ -56,10 +61,18 @@ function App() {
         >
           Personality Finder
         </button>
+        <button
+          type="button"
+          className="border border-black"
+          onClick={() => setPage("skin-analysis")}
+        >
+          Skin Analysis
+        </button>
       </div>
 
       {page === "skin-tone-finder" && <SkinToneFinder />}
       {page === "personality-finder" && <PersonalityFinder />}
+      {page === "skin-analysis" && <SkinAnalysis />}
     </>
   );
 }
