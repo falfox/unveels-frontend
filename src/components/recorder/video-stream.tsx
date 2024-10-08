@@ -87,43 +87,57 @@ export function VideoStream() {
               console.log("Detections:", detections);
 
               if (detections.length > 0) {
-                detections.forEach((detection: Detection) => {
-                  const box = detection.boundingBox;
-                  const keypoints = detection.keypoints;
-                  const ctxBox = ctx;
+                // Menemukan deteksi dengan skor kategori tertinggi
+                const highestScoreDetection = detections.reduce(
+                  (max, detection) => {
+                    return detection.categories[0].score >
+                      max.categories[0].score
+                      ? detection
+                      : max;
+                  },
+                  detections[0],
+                );
 
-                  // **Flip Bounding Box Origin X**
-                  const mirroredOriginX =
-                    facingMode === "user"
-                      ? canvas.width - (box.originX + box.width)
-                      : box.originX;
+                console.log("Highest Score Detection:", highestScoreDetection);
 
-                  // Gambar bounding box
-                  ctxBox.strokeStyle = "red";
-                  ctxBox.lineWidth = 2;
-                  ctxBox.strokeRect(
-                    mirroredOriginX,
-                    box.originY,
-                    box.width,
-                    box.height,
-                  );
+                const box = highestScoreDetection.boundingBox;
+                const keypoints = highestScoreDetection.keypoints;
+                const ctxBox = ctx;
 
-                  // Gambar keypoints
-                  keypoints.forEach((keypoint, index) => {
-                    // Konversi keypoint ke piksel
-                    let x = keypoint.x * canvas.width;
-                    let y = keypoint.y * canvas.height;
+                // **Flip Bounding Box Origin X**
+                const mirroredOriginX =
+                  facingMode === "user"
+                    ? canvas.width - (box.originX + box.width)
+                    : box.originX;
 
-                    // Jika kamera dimirror, balik koordinat x
-                    if (facingMode === "user") {
-                      x = canvas.width - x;
-                    }
+                // Gambar bounding box
+                ctxBox.strokeStyle = "red";
+                ctxBox.lineWidth = 2;
+                ctxBox.strokeRect(
+                  mirroredOriginX,
+                  box.originY,
+                  box.width,
+                  box.height,
+                );
 
-                    ctxBox.fillStyle = "red";
-                    ctxBox.beginPath();
-                    ctxBox.arc(x, y, 4, 0, 2 * Math.PI); // Radius diperbesar untuk visibilitas
-                    ctxBox.fill();
-                  });
+                // Gambar keypoints
+                keypoints.forEach((keypoint, index) => {
+                  // Konversi keypoint ke piksel
+                  let x = keypoint.x * canvas.width;
+                  let y = keypoint.y * canvas.height;
+
+                  // Jika kamera dimirror, balik koordinat x
+                  if (facingMode === "user") {
+                    x = canvas.width - x;
+                  }
+
+                  // Debugging: Log koordinat keypoint
+                  console.log(`Keypoint ${index}: (${x}, ${y})`);
+
+                  ctxBox.fillStyle = "red";
+                  ctxBox.beginPath();
+                  ctxBox.arc(x, y, 4, 0, 2 * Math.PI); // Radius diperbesar untuk visibilitas
+                  ctxBox.fill();
                 });
               }
             } catch (err) {
