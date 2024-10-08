@@ -29,7 +29,7 @@ function RecorderGuide() {
   }, []);
 
   return (
-    <div className="px-2 pb-4 text-center text-white select-none">
+    <div className="select-none px-2 pb-4 text-center text-white">
       <p className="pb-9">{hints[currentHintIndex]}</p>
 
       <div className="grid grid-cols-3 gap-5 text-xs text-white/50">

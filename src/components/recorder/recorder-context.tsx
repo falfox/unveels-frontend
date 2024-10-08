@@ -20,7 +20,7 @@ const CameraContext = createContext<CameraContextType | undefined>(undefined);
 export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [state, setState] = useState({
+  const [state, setState] = useState<CameraState>({
     facePosition: false,
     lighting: false,
     orientation: false,

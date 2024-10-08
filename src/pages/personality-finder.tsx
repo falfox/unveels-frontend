@@ -1,14 +1,10 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { Icons } from "../components/icons";
-
 import clsx from "clsx";
 import {
   ChevronLeft,
   CirclePlay,
-  Lightbulb,
   PauseCircle,
-  Scan,
-  ScanFace,
   StopCircle,
   X,
 } from "lucide-react";
@@ -37,14 +33,14 @@ export function PersonalityFinder() {
 }
 
 function MainContent() {
-  const { criterias, setCriterias } = useCamera();
+  const { criterias } = useCamera();
 
   if (criterias.facePosition && criterias.lighting && criterias.orientation) {
     return <Result />;
   }
 
   return (
-    <div className="relative mx-auto h-full min-h-dvh w-full max-w-[430px] bg-pink-950">
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
       <div className="absolute inset-0">
         <VideoStream />
         <div
@@ -617,39 +613,6 @@ function FeatureSection({
       </div>
     </div>
   );
-}
-
-function RecorderGuide() {
-  const {
-    criterias: { facePosition, lighting, orientation },
-  } = useCamera();
-
-  return (
-    <div className="select-none px-2 pb-4 text-center text-white">
-      <p className="pb-9">
-        Ensure it is a well-lit area with natural or bright artificial light
-      </p>
-
-      <div className="grid grid-cols-3 gap-5 text-xs text-white/50">
-        <div className="flex items-center justify-between rounded-lg border border-dashed border-white/50 px-2.5 py-2">
-          Face Position
-          <ScanFace className="size-6" />
-        </div>
-        <div className="flex items-center justify-between rounded-lg border border-white px-2.5 py-2 text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]">
-          Lighting
-          <Lightbulb className="size-6" />
-        </div>
-        <div className="flex items-center justify-between rounded-lg border border-dashed border-white/50 px-2.5 py-2">
-          Orientation
-          <Scan className="size-6" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Main() {
-  return <RecorderGuide />;
 }
 
 function RecorderStatus() {
