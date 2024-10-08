@@ -21,9 +21,9 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [state, setState] = useState({
-    facePosition: true,
-    lighting: true,
-    orientation: true,
+    facePosition: false,
+    lighting: false,
+    orientation: false,
     flipped: false,
     isFinished: false,
   });
