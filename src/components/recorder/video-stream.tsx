@@ -22,7 +22,7 @@ export function VideoStream() {
   const faceDetectorRef = useRef<FaceDetector | null>(null);
   const isDetectingRef = useRef<boolean>(false);
 
-  // Inisialisasi MediaPipe Face Detector
+  // Initialize MediaPipe Face Detector
   useEffect(() => {
     const initializeFaceDetector = async () => {
       try {
@@ -47,7 +47,7 @@ export function VideoStream() {
 
     initializeFaceDetector();
 
-    // Cleanup saat komponen unmount
+    // Cleanup when component unmounts
     return () => {
       if (faceDetectorRef.current) {
         faceDetectorRef.current.close();
@@ -57,9 +57,9 @@ export function VideoStream() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fungsi untuk memulai loop deteksi
+  // Function to start the detection loop
   const startDetection = useCallback(() => {
-    if (isDetectingRef.current) return; // Hindari memulai deteksi ganda
+    if (isDetectingRef.current) return; // Prevent multiple detections
     isDetectingRef.current = true;
 
     const detect = async () => {
@@ -78,13 +78,6 @@ export function VideoStream() {
           if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Flip konteks kanvas jika video di-mirror
-            if (facingMode === "user") {
-              ctx.save();
-              ctx.scale(-1, 1);
-              ctx.translate(-canvas.width, 0);
-            }
-
             const startTimeMs = performance.now();
             try {
               const detections = faceDetectorRef.current.detectForVideo(
@@ -96,34 +89,45 @@ export function VideoStream() {
               if (detections.length > 0) {
                 detections.forEach((detection: Detection) => {
                   const box = detection.boundingBox;
+                  const keypoints = detection.keypoints;
                   const ctxBox = ctx;
 
-                  // Menggambar bounding box
+                  // **Flip Bounding Box Origin X**
+                  const mirroredOriginX =
+                    facingMode === "user"
+                      ? canvas.width - (box.originX + box.width)
+                      : box.originX;
+
+                  // Gambar bounding box
                   ctxBox.strokeStyle = "red";
                   ctxBox.lineWidth = 2;
                   ctxBox.strokeRect(
-                    box.originX,
+                    mirroredOriginX,
                     box.originY,
                     box.width,
                     box.height,
                   );
 
-                  // Menggambar keypoints
-                  detection.keypoints.forEach((keypoint) => {
-                    ctxBox.fillStyle = "blue";
+                  // Gambar keypoints
+                  keypoints.forEach((keypoint, index) => {
+                    // Konversi keypoint ke piksel
+                    let x = keypoint.x * canvas.width;
+                    let y = keypoint.y * canvas.height;
+
+                    // Jika kamera dimirror, balik koordinat x
+                    if (facingMode === "user") {
+                      x = canvas.width - x;
+                    }
+
+                    ctxBox.fillStyle = "red";
                     ctxBox.beginPath();
-                    ctxBox.arc(keypoint.x, keypoint.y, 3, 0, 2 * Math.PI);
+                    ctxBox.arc(x, y, 4, 0, 2 * Math.PI); // Radius diperbesar untuk visibilitas
                     ctxBox.fill();
                   });
                 });
               }
             } catch (err) {
               console.error("Detection error:", err);
-            }
-
-            // Mengembalikan konteks kanvas jika di-mirror
-            if (facingMode === "user") {
-              ctx.restore();
             }
           }
         }
@@ -137,19 +141,19 @@ export function VideoStream() {
     detect();
   }, [facingMode]);
 
-  // Fungsi untuk menghentikan deteksi
+  // Function to stop detection
   const stopDetection = () => {
     isDetectingRef.current = false;
   };
 
-  // Cleanup saat komponen unmount
+  // Cleanup when component unmounts
   useEffect(() => {
     return () => {
       stopDetection();
     };
   }, []);
 
-  // Fungsi untuk toggle kamera
+  // Function to toggle camera
   const toggleFacingMode = () => {
     setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
   };
@@ -160,7 +164,7 @@ export function VideoStream() {
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        mirrored={facingMode === "user"} // Mirror hanya kamera depan
+        mirrored={false} // Set ke false karena akan di-mirror via CSS
         videoConstraints={{
           ...videoConstraints,
           facingMode: criterias.flipped ? "environment" : "user",
@@ -173,6 +177,7 @@ export function VideoStream() {
         style={{
           width: "100%",
           height: "auto",
+          transform: facingMode === "user" ? "scaleX(-1)" : "none", // Mirror video jika user
         }}
       />
       <canvas
