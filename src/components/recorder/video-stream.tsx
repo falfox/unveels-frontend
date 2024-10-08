@@ -37,7 +37,6 @@ export function VideoStream() {
           runningMode: "VIDEO",
         });
         faceDetectorRef.current = detector;
-        console.log("FaceDetector initialized");
         startDetection();
       } catch (err) {
         console.error("Failed to initialize FaceDetector:", err);
@@ -54,12 +53,11 @@ export function VideoStream() {
       }
       isDetectingRef.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Function to start the detection loop
   const startDetection = useCallback(() => {
-    if (isDetectingRef.current) return; // Prevent multiple detections
+    if (isDetectingRef.current) return;
     isDetectingRef.current = true;
 
     const detect = async () => {
@@ -67,7 +65,7 @@ export function VideoStream() {
         faceDetectorRef.current &&
         webcamRef.current &&
         webcamRef.current.video &&
-        webcamRef.current.video.readyState === 4 // video is ready
+        webcamRef.current.video.readyState === 4
       ) {
         const video = webcamRef.current.video;
         const canvas = canvasRef.current;
@@ -84,10 +82,8 @@ export function VideoStream() {
                 video,
                 startTimeMs,
               ).detections;
-              console.log("Detections:", detections);
 
               if (detections.length > 0) {
-                // Menemukan deteksi dengan skor kategori tertinggi
                 const highestScoreDetection = detections.reduce(
                   (max, detection) => {
                     return detection.categories[0].score >
@@ -98,45 +94,37 @@ export function VideoStream() {
                   detections[0],
                 );
 
-                console.log("Highest Score Detection:", highestScoreDetection);
-
                 const box = highestScoreDetection.boundingBox;
                 const keypoints = highestScoreDetection.keypoints;
                 const ctxBox = ctx;
 
-                // **Flip Bounding Box Origin X**
-                const mirroredOriginX =
-                  facingMode === "user"
-                    ? canvas.width - (box.originX + box.width)
-                    : box.originX;
+                if (box) {
+                  const mirroredOriginX =
+                    facingMode === "user"
+                      ? canvas.width - (box.originX + box.width)
+                      : box.originX;
 
-                // Gambar bounding box
-                ctxBox.strokeStyle = "red";
-                ctxBox.lineWidth = 2;
-                ctxBox.strokeRect(
-                  mirroredOriginX,
-                  box.originY,
-                  box.width,
-                  box.height,
-                );
+                  ctxBox.strokeStyle = "red";
+                  ctxBox.lineWidth = 2;
+                  ctxBox.strokeRect(
+                    mirroredOriginX,
+                    box.originY,
+                    box.width,
+                    box.height,
+                  );
+                }
 
-                // Gambar keypoints
-                keypoints.forEach((keypoint, index) => {
-                  // Konversi keypoint ke piksel
+                keypoints.forEach((keypoint) => {
                   let x = keypoint.x * canvas.width;
                   let y = keypoint.y * canvas.height;
 
-                  // Jika kamera dimirror, balik koordinat x
                   if (facingMode === "user") {
                     x = canvas.width - x;
                   }
 
-                  // Debugging: Log koordinat keypoint
-                  console.log(`Keypoint ${index}: (${x}, ${y})`);
-
                   ctxBox.fillStyle = "red";
                   ctxBox.beginPath();
-                  ctxBox.arc(x, y, 4, 0, 2 * Math.PI); // Radius diperbesar untuk visibilitas
+                  ctxBox.arc(x, y, 4, 0, 2 * Math.PI);
                   ctxBox.fill();
                 });
               }
