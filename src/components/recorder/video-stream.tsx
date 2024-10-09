@@ -1,30 +1,40 @@
-// video-stream.tsx
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Webcam from "react-webcam";
 import { FaceDetector, FilesetResolver } from "@mediapipe/tasks-vision";
 import { useCamera } from "./recorder-context";
+import {
+  BRIGHTNESS_THRESHOLD,
+  POSITION_THRESHOLD_X,
+  POSITION_THRESHOLD_Y,
+  ORIENTATION_THRESHOLD_YAW,
+  ORIENTATION_THRESHOLD_PITCH,
+} from "../../utils/constants";
+import { calculateLighting, cropImage } from "../../utils/imageProcessing";
+import { CountdownOverlay } from "../countdown-overlay";
+import { ErrorOverlay } from "../error-overlay";
+import { ToggleCameraButton } from "../toggle-camera-button";
+import { useCountdown } from "../../hooks/useCountdown";
+import { processBoundingBox } from "../../utils/boundingBoxUtils";
+import { drawKeypoints } from "../../utils/keypointsUtils";
+import {
+  calculateOrientation,
+  Orientation,
+} from "../../utils/orientationUtils";
 
-const BRIGHTNESS_THRESHOLD = 60; // Kecerahan > 60
-const POSITION_THRESHOLD_X = 50; // Posisi X dalam ±50 piksel dari pusat
-const POSITION_THRESHOLD_Y = 50; // Posisi Y dalam ±50 piksel dari pusat
-const ORIENTATION_THRESHOLD_YAW = 10; // Yaw antara -10° dan +10°
-const ORIENTATION_THRESHOLD_PITCH = 10; // Pitch antara -10° dan +10°
+interface VideoStreamProps {
+  debugMode?: boolean; // Optional prop for debug mode
+}
 
-const videoConstraints = {
-  width: 640,
-  height: 480,
-  facingMode: "user",
-};
-
-export function VideoStream() {
+export function VideoStream({ debugMode = false }: VideoStreamProps) {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
   const isDetectingRef = useRef<boolean>(false);
 
-  // Menggunakan CameraContext
-  const { criterias, setCriterias, flipCamera } = useCamera();
+  // Using CameraContext
+  const { criterias, setCriterias, flipCamera, captureImage, setBoundingBox } =
+    useCamera();
 
   // State Variables for Metrics
   const [lighting, setLighting] = useState<number>(0);
@@ -32,13 +42,17 @@ export function VideoStream() {
     x: 0,
     y: 0,
   });
-  const [orientation, setOrientation] = useState<{
-    yaw: number;
-    pitch: number;
-  }>({
+  const [orientation, setOrientation] = useState<Orientation>({
     yaw: 0,
     pitch: 0,
   });
+
+  // Debug Mode State
+  const [isDebugMode, setIsDebugMode] = useState<boolean>(debugMode);
+
+  const toggleDebugMode = () => {
+    setIsDebugMode((prev) => !prev);
+  };
 
   // Initialize MediaPipe Face Detector
   useEffect(() => {
@@ -70,7 +84,9 @@ export function VideoStream() {
         faceDetectorRef.current.close();
       }
       isDetectingRef.current = false;
+      // Removed countdownIntervalRef references
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Function to start the detection loop
@@ -126,100 +142,50 @@ export function VideoStream() {
                 const keypoints = highestScoreDetection.keypoints;
 
                 if (box) {
-                  // Map the bounding box to the rendered video
-                  const mappedBox = mapBoxToRenderedVideo(
+                  // Refactored: Process Bounding Box
+                  const { relativePosition } = processBoundingBox(
                     box,
                     video,
                     videoRect,
                     criterias.flipped,
+                    setBoundingBox,
+                    isDebugMode,
+                    ctx,
                   );
 
-                  // Draw the bounding box
-                  ctx.strokeStyle = "red";
-                  ctx.lineWidth = 2;
-                  ctx.strokeRect(
-                    mappedBox.x,
-                    mappedBox.y,
-                    mappedBox.width,
-                    mappedBox.height,
-                  );
-
-                  // Hitung posisi relatif wajah
-                  const faceCenter = {
-                    x: mappedBox.x + mappedBox.width / 2,
-                    y: mappedBox.y + mappedBox.height / 2,
-                  };
-                  const frameCenter = {
-                    x: videoRect.width / 2,
-                    y: videoRect.height / 2,
-                  };
-                  const relativePosition = {
-                    x: faceCenter.x - frameCenter.x,
-                    y: faceCenter.y - frameCenter.y,
-                  };
                   setPosition(relativePosition);
                 }
 
-                // Gambar keypoints
-                keypoints.forEach((keypoint, index) => {
-                  const mappedPoint = mapPointToRenderedVideo(
-                    keypoint,
+                if (isDebugMode && keypoints) {
+                  // Refactored: Draw Keypoints
+                  drawKeypoints(
+                    keypoints,
                     video,
                     videoRect,
                     criterias.flipped,
+                    canvas,
+                    ctx,
                   );
-
-                  // Pastikan keypoint berada dalam batas canvas
-                  if (
-                    mappedPoint.x >= 0 &&
-                    mappedPoint.x <= canvas.width &&
-                    mappedPoint.y >= 0 &&
-                    mappedPoint.y <= canvas.height
-                  ) {
-                    ctx.fillStyle = "blue"; // Ubah warna untuk visibilitas
-                    ctx.beginPath();
-                    ctx.arc(mappedPoint.x, mappedPoint.y, 4, 0, 2 * Math.PI);
-                    ctx.fill();
-                  } else {
-                    console.warn(
-                      `Keypoint ${index} is out of bounds:`,
-                      mappedPoint,
-                    );
-                  }
-                });
-
-                // Hitung Orientasi
-                if (keypoints.length >= 6) {
-                  // **Pastikan indeks keypoint sesuai dengan dokumentasi MediaPipe**
-                  const leftEye = keypoints[0];
-                  const rightEye = keypoints[1];
-                  const nose = keypoints[2];
-                  const leftMouth = keypoints[3];
-                  const rightMouth = keypoints[4];
-
-                  // Hitung yaw dan pitch berdasarkan posisi mata dan hidung
-                  const dx = rightEye.x - leftEye.x;
-                  const dy = rightEye.y - leftEye.y;
-                  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-                  // Estimasi pitch sederhana berdasarkan posisi hidung relatif ke mata
-                  const noseY = nose.y;
-                  const eyesY = (leftEye.y + rightEye.y) / 2;
-                  const pitchAngle = (eyesY - noseY) * 0.1; // Faktor skala
-
-                  setOrientation({
-                    yaw: angle,
-                    pitch: pitchAngle,
-                  });
                 }
+
+                // Calculate Orientation
+                const calculatedOrientation = calculateOrientation(keypoints);
+                setOrientation(calculatedOrientation);
+              } else {
+                // No detections, reset metrics
+                setPosition({ x: 0, y: 0 });
+                setOrientation({ yaw: 0, pitch: 0 });
+                setLighting(0);
               }
 
-              // Hitung Kecerahan
-              calculateLighting(video).then((avgBrightness) => {
+              // Calculate Brightness
+              if (video.readyState === 4) {
+                const avgBrightness = await calculateLighting(video);
                 setLighting(avgBrightness);
-              });
+              }
             } catch (err) {
               console.error("Detection error:", err);
+              setError(err as Error);
             }
           }
         }
@@ -231,7 +197,7 @@ export function VideoStream() {
     };
 
     detect();
-  }, [criterias.flipped]);
+  }, [isDebugMode, criterias.flipped, setBoundingBox]);
 
   // Function to stop detection
   const stopDetection = () => {
@@ -242,6 +208,7 @@ export function VideoStream() {
   useEffect(() => {
     return () => {
       stopDetection();
+      // Removed countdownIntervalRef references
     };
   }, []);
 
@@ -250,7 +217,7 @@ export function VideoStream() {
     flipCamera();
   };
 
-  // Handle responsive resizing menggunakan ResizeObserver
+  // Handle responsive resizing using ResizeObserver
   useEffect(() => {
     const video = webcamRef.current?.video;
     const canvas = canvasRef.current;
@@ -269,7 +236,7 @@ export function VideoStream() {
 
     resizeObserver.observe(video);
 
-    // Update ukuran awal
+    // Update initial size
     updateCanvasSize();
 
     return () => {
@@ -278,142 +245,8 @@ export function VideoStream() {
   }, []);
 
   /**
-   * Helper function to map bounding box coordinates dari video asli ke video yang dirender
-   */
-  const mapBoxToRenderedVideo = (
-    box: {
-      originX: number;
-      originY: number;
-      width: number;
-      height: number;
-    },
-    video: HTMLVideoElement,
-    videoRect: DOMRect,
-    flipped: boolean,
-  ) => {
-    let { originX, originY, width, height } = box;
-
-    // Dimensi video asli
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-
-    // Dimensi video yang dirender
-    const renderedWidth = videoRect.width;
-    const renderedHeight = videoRect.height;
-
-    // Hitung faktor skala dan cropping berdasarkan object-fit: cover
-    const scale = Math.max(
-      renderedWidth / videoWidth,
-      renderedHeight / videoHeight,
-    );
-    const scaledWidth = videoWidth * scale;
-    const scaledHeight = videoHeight * scale;
-
-    const cropX = (scaledWidth - renderedWidth) / 2;
-    const cropY = (scaledHeight - renderedHeight) / 2;
-
-    // Skala dan terjemahkan bounding box
-    let x = originX * scale - cropX - 80;
-    let y = originY * scale - cropY - 120;
-    let boxWidth = width * scale * 1.2;
-    let boxHeight = height * scale * 1.2;
-
-    // Tangani mirroring
-    if (flipped) {
-      x = renderedWidth - (x + boxWidth);
-    }
-
-    return { x, y, width: boxWidth, height: boxHeight };
-  };
-
-  /**
-   * Helper function to map keypoint coordinates dari video asli ke video yang dirender
-   */
-  const mapPointToRenderedVideo = (
-    keypoint: { x: number; y: number },
-    video: HTMLVideoElement,
-    videoRect: DOMRect,
-    flipped: boolean,
-  ) => {
-    let { x, y } = keypoint;
-
-    // Jika keypoints dalam koordinat normal, skala ke dimensi video asli
-    x *= video.videoWidth;
-    y *= video.videoHeight;
-
-    // Dimensi video asli
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-
-    // Dimensi video yang dirender
-    const renderedWidth = videoRect.width;
-    const renderedHeight = videoRect.height;
-
-    // Hitung faktor skala dan cropping berdasarkan object-fit: cover
-    const scale = Math.max(
-      renderedWidth / videoWidth,
-      renderedHeight / videoHeight,
-    );
-    const scaledWidth = videoWidth * scale;
-    const scaledHeight = videoHeight * scale;
-
-    const cropX = (scaledWidth - renderedWidth) / 2;
-    const cropY = (scaledHeight - renderedHeight) / 2;
-
-    // Skala dan terjemahkan keypoint
-    let mappedX = x * scale - cropX;
-    let mappedY = y * scale - cropY;
-
-    // Tangani mirroring
-    if (flipped) {
-      mappedX = renderedWidth - mappedX;
-    }
-
-    return { x: mappedX, y: mappedY };
-  };
-
-  /**
-   * Helper Function to Calculate Average Brightness (Lighting)
-   */
-  const calculateLighting = async (
-    video: HTMLVideoElement,
-  ): Promise<number> => {
-    const offscreenCanvas = document.createElement("canvas");
-    const ctx = offscreenCanvas.getContext("2d");
-    if (!ctx) return 0;
-
-    // Set canvas dimensions
-    const width = 160; // Kurangi resolusi untuk performa
-    const height = 120;
-    offscreenCanvas.width = width;
-    offscreenCanvas.height = height;
-
-    // Gambar frame video ke offscreen canvas
-    ctx.drawImage(video, 0, 0, width, height);
-
-    // Dapatkan data piksel
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-
-    // Hitung rata-rata kecerahan
-    let total = 0;
-    const numPixels = width * height;
-    for (let i = 0; i < data.length; i += 4) {
-      // Menggunakan rumus luminansi
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      total += luminance;
-    }
-
-    const avgBrightness = total / numPixels;
-    return avgBrightness;
-  };
-
-  /**
    * Evaluates whether the current metrics meet the defined criteria.
-   * Memperbarui CameraContext dengan hasil evaluasi kriteria
+   * Updates CameraContext with the evaluation results
    */
   const evaluateCriteria = useCallback(() => {
     const isBrightnessGood = lighting > BRIGHTNESS_THRESHOLD;
@@ -440,10 +273,56 @@ export function VideoStream() {
     };
   }, [lighting, position, orientation, setCriterias]);
 
-  // Menggunakan useEffect untuk memanggil evaluateCriteria setiap kali metrics berubah
+  /**
+   * Function to capture the current frame from the webcam and crop based on bounding box
+   */
+  const capture = useCallback(async () => {
+    if (webcamRef.current && criterias.lastBoundingBox) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc) {
+        try {
+          const croppedImage = await cropImage(
+            imageSrc,
+            criterias.lastBoundingBox,
+          );
+          captureImage(croppedImage);
+          stopDetection(); // Optionally stop detection after capture
+        } catch (error) {
+          console.error("Error cropping image:", error);
+        }
+      }
+    }
+  }, [captureImage, criterias.lastBoundingBox]);
+
+  // Initialize useCountdown hook
+  const {
+    count: countdown,
+    start: startCountdown,
+    cancel: cancelCountdown,
+    isActive: isCountdownActive,
+  } = useCountdown({
+    initialCount: 3,
+    onComplete: capture, // Callback when countdown finishes
+  });
+
+  // Use Effect to evaluate criteria and manage countdown
   useEffect(() => {
-    evaluateCriteria();
-  }, [evaluateCriteria]);
+    const criteria = evaluateCriteria();
+
+    if (criteria.allGood && !criterias.isCaptured && !isCountdownActive) {
+      // Start the countdown
+      startCountdown();
+    } else if (!criteria.allGood && isCountdownActive) {
+      // Criteria not met, cancel the countdown
+      cancelCountdown();
+    }
+  }, [
+    evaluateCriteria,
+    isCountdownActive,
+    criterias.isCaptured,
+    startCountdown,
+    cancelCountdown,
+  ]);
 
   return (
     <div className="relative h-full w-full">
@@ -452,16 +331,17 @@ export function VideoStream() {
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        mirrored={false} // Mirroring ditangani via CSS
+        mirrored={false} // Mirroring handled via CSS
         videoConstraints={{
-          ...videoConstraints,
-          facingMode: criterias.flipped ? "environment" : "user", // Gunakan flipped untuk menentukan facingMode
+          width: 640,
+          height: 480,
+          facingMode: criterias.flipped ? "environment" : "user",
         }}
-        onUserMediaError={(error) => {
-          if (error instanceof Error) {
-            setError(error);
-          }
-        }}
+        onUserMediaError={(err) =>
+          setError(
+            err instanceof Error ? err : new Error("Webcam error occurred."),
+          )
+        }
         className={`h-full w-full object-cover ${
           criterias.flipped ? "scale-x-[-1]" : ""
         }`}
@@ -470,26 +350,32 @@ export function VideoStream() {
       {/* Overlay Canvas */}
       <canvas
         ref={canvasRef}
-        className="pointer-events-none absolute left-0 top-0"
+        className={`pointer-events-none absolute left-0 top-0 ${
+          isDebugMode ? "block" : "hidden"
+        }`} // Hide canvas if not in debug mode
         style={{
           width: "100%",
           height: "100%",
         }}
       />
 
+      {/* Countdown Overlay */}
+      {countdown !== null && <CountdownOverlay count={countdown} />}
+
       {/* Error Display */}
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <p className="text-lg text-white">{error.message}</p>
-        </div>
-      )}
+      {error && <ErrorOverlay message={error.message} />}
 
       {/* Toggle Camera Button */}
+      <ToggleCameraButton onClick={flipCamera} />
+
+      {/* Toggle Debug Mode Button */}
       <button
-        onClick={toggleFacingMode}
-        className="absolute bottom-4 right-4 rounded bg-blue-500 p-3 text-white shadow-lg transition duration-300 hover:bg-blue-600"
+        onClick={toggleDebugMode}
+        className="absolute bottom-4 right-4 rounded bg-gray-700 px-4 py-2 text-white"
+        aria-pressed={isDebugMode}
+        aria-label="Toggle Debug Mode"
       >
-        Flip Camera
+        {isDebugMode ? "Disable" : "Enable"} Debug Mode
       </button>
     </div>
   );

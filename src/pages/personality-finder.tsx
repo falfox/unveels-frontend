@@ -19,7 +19,7 @@ import {
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
-import { sleep } from "../utils";
+
 import { TopNavigation } from "./skin-tone-finder";
 
 export function PersonalityFinder() {
@@ -35,14 +35,14 @@ export function PersonalityFinder() {
 function MainContent() {
   const { criterias } = useCamera();
 
-  if (criterias.facePosition && criterias.lighting && criterias.orientation) {
+  if (criterias.isCaptured) {
     return <Result />;
   }
 
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
       <div className="absolute inset-0">
-        <VideoStream />
+        <VideoStream debugMode={false} />
         <div
           className="absolute inset-0"
           style={{
@@ -77,6 +77,7 @@ function Result() {
   const [selectedTab, setTab] = useState(tabs[0].title);
 
   const { setPage } = usePage();
+  const { criterias } = useCamera();
 
   return (
     <div className="flex h-screen flex-col bg-black font-sans text-white">
@@ -94,11 +95,19 @@ function Result() {
       <div className="flex items-start space-x-1 px-5 py-6">
         <div className="shrink-0 px-5">
           <div className="flex items-center justify-center rounded-full bg-gradient-to-b from-[#CA9C43] to-[#644D21] p-1">
-            <img
-              className="size-24 rounded-full"
-              src="https://avatar.iran.liara.run/public/30"
-              alt="Profile"
-            />
+            {criterias.capturedImage ? (
+              <img
+                className="size-24 rounded-full object-fill"
+                src={criterias.capturedImage}
+                alt="Captured Profile"
+              />
+            ) : (
+              <img
+                className="size-24 rounded-full"
+                src="https://avatar.iran.liara.run/public/30"
+                alt="Profile"
+              />
+            )}
           </div>
 
           <div className="pt-2 text-center text-sm">Extravert</div>
@@ -521,6 +530,7 @@ function RecommendationsTab() {
     </div>
   );
 }
+
 function AttributesTab() {
   return (
     <div className="grid flex-1 grid-cols-1 gap-4 space-y-6 overflow-auto px-10 py-6 md:grid-cols-2">

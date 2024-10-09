@@ -1,4 +1,12 @@
-import { createContext, useContext, useState } from "react";
+// recorder-context.tsx
+import React, { createContext, useContext, useState, ReactNode } from "react";
+
+interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 interface CameraState {
   facePosition: boolean;
@@ -6,6 +14,9 @@ interface CameraState {
   orientation: boolean;
   flipped: boolean;
   isFinished: boolean;
+  isCaptured: boolean;
+  capturedImage: string | null;
+  lastBoundingBox: BoundingBox | null;
 }
 
 interface CameraContextType {
@@ -13,11 +24,14 @@ interface CameraContextType {
   setCriterias: (newState: Partial<CameraState>) => void;
   flipCamera: () => void;
   finish: () => void;
+  captureImage: (image: string) => void;
+  resetCapture: () => void;
+  setBoundingBox: (box: BoundingBox) => void;
 }
 
 const CameraContext = createContext<CameraContextType | undefined>(undefined);
 
-export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({
+export const CameraProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [state, setState] = useState<CameraState>({
@@ -26,6 +40,9 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({
     orientation: false,
     flipped: false,
     isFinished: false,
+    isCaptured: false,
+    capturedImage: null,
+    lastBoundingBox: null,
   });
 
   function setCriterias(newState: Partial<CameraState>) {
@@ -40,6 +57,27 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({
     setState((prevState) => ({ ...prevState, isFinished: true }));
   }
 
+  function captureImage(image: string) {
+    setState((prevState) => ({
+      ...prevState,
+      isCaptured: true,
+      capturedImage: image,
+    }));
+  }
+
+  function resetCapture() {
+    setState((prevState) => ({
+      ...prevState,
+      isCaptured: false,
+      capturedImage: null,
+      lastBoundingBox: null,
+    }));
+  }
+
+  function setBoundingBox(box: BoundingBox) {
+    setState((prevState) => ({ ...prevState, lastBoundingBox: box }));
+  }
+
   return (
     <CameraContext.Provider
       value={{
@@ -47,6 +85,9 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({
         setCriterias,
         flipCamera,
         finish,
+        captureImage,
+        resetCapture,
+        setBoundingBox,
       }}
     >
       {children}
