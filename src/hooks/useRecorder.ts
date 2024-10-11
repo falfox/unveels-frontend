@@ -75,15 +75,15 @@ export const useRecordingControls = () => {
     let interval: number | null = null;
 
     if (state.isRecording && !state.isPaused) {
-      interval = setInterval(() => {
+      interval = window.setInterval(() => {
         dispatch({ type: actionTypes.TICK, payload: new Date().getTime() });
       }, 1000);
     } else if (!state.isRecording || state.isPaused) {
-      if (interval) clearInterval(interval);
+      if (interval) window.clearInterval(interval);
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) window.clearInterval(interval);
     };
   }, [state.isRecording, state.isPaused]);
 
