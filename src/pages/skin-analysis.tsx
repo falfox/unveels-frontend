@@ -25,7 +25,6 @@ import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { useScrollContainer } from "../hooks/useScrollContainer";
-import { sleep } from "../utils/other";
 import { TopNavigation } from "./skin-tone-finder";
 import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Rating } from "../components/rating";
