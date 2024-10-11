@@ -9,7 +9,6 @@ import {
   X,
 } from "lucide-react";
 import { usePage } from "../App";
-import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Footer } from "../components/footer";
 import { Rating } from "../components/rating";
 import { VideoScene } from "../components/recorder/recorder";
@@ -22,7 +21,6 @@ import { useRecordingControls } from "../hooks/useRecorder";
 import { TopNavigation } from "./skin-tone-finder";
 import { personalityInference } from "../inference/personalityInference";
 import { Classifier } from "../types/classifier";
-import { personalityAnalysisResult } from "../utils/constants";
 
 export function FaceAnalyzer() {
   return (
