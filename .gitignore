@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#assets
+/public/models/personality-finder/*
+!/public/models/personality-finder/.gitkeep
+
