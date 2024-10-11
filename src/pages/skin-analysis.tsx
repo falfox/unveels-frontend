@@ -28,6 +28,7 @@ import { useScrollContainer } from "../hooks/useScrollContainer";
 import { TopNavigation } from "./skin-tone-finder";
 import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Rating } from "../components/rating";
+import { sleep } from "../utils/other";
 
 export function SkinAnalysis() {
   return (
