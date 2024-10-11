@@ -46,7 +46,7 @@ function App() {
 
   return (
     <>
-      <div className="absolute left-0 flex flex-col gap-4 top-4">
+      <div className="absolute left-0 top-4 flex flex-col gap-4">
         <button
           type="button"
           className="border border-black"
