@@ -14,6 +14,7 @@
     "@tensorflow/tfjs-backend-cpu": "^3.20.0",
     "@tensorflow/tfjs-backend-wasm": "^3.20.0",
     "@tensorflow/tfjs-tflite": "^0.0.1-alpha.9",
+    "@radix-ui/react-alert-dialog": "^1.1.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.446.0",
