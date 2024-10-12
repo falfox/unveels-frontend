@@ -1,20 +1,23 @@
 import { ReactNode, useState } from "react";
 import { SkinToneFinder } from "./pages/skin-tone-finder";
 import { PersonalityFinder } from "./pages/personality-finder";
+import { createContext, useContext } from "react";
+import { SkinAnalysis } from "./pages/skin-analysis";
 
 import "./index.css";
+import { VirtulAssistant } from "./pages/virtual-assistant";
+import clsx from "clsx";
 
-const defaultPage = "skin-analysis" as const;
+const defaultPage = "virtual-assistant" as const;
 
 const pages = [
   "skin-tone-finder",
   "personality-finder",
   "skin-analysis",
+  "virtual-assistant",
 ] as const;
 
 export type Page = (typeof pages)[number] | null;
-import { createContext, useContext } from "react";
-import { SkinAnalysis } from "./pages/skin-analysis";
 
 interface PageContextType {
   page: Page;
@@ -46,7 +49,11 @@ function App() {
 
   return (
     <>
-      <div className="absolute left-0 flex flex-col gap-4 top-4">
+      <div
+        className={clsx("absolute left-0 top-4 flex flex-col gap-4", {
+          hidden: page !== null,
+        })}
+      >
         <button
           type="button"
           className="border border-black"
@@ -68,11 +75,19 @@ function App() {
         >
           Skin Analysis
         </button>
+        <button
+          type="button"
+          className="border border-black"
+          onClick={() => setPage("virtual-assistant")}
+        >
+          Virtual Assistant
+        </button>
       </div>
 
       {page === "skin-tone-finder" && <SkinToneFinder />}
       {page === "personality-finder" && <PersonalityFinder />}
       {page === "skin-analysis" && <SkinAnalysis />}
+      {page === "virtual-assistant" && <VirtulAssistant />}
     </>
   );
 }

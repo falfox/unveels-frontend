@@ -47,6 +47,15 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     pitch: 0,
   });
 
+  const memoizedPosition = useCallback(
+    () => position,
+    [position.x, position.y],
+  );
+  const memoizedOrientation = useCallback(
+    () => orientation,
+    [orientation.yaw, orientation.pitch],
+  );
+
   // Debug Mode State
   const [isDebugMode, setIsDebugMode] = useState<boolean>(debugMode);
 
@@ -271,7 +280,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
       orientation: isOrientationGood,
       allGood: isBrightnessGood && isPositionGood && isOrientationGood,
     };
-  }, [lighting, position, orientation, setCriterias]);
+  }, [lighting, memoizedPosition, memoizedOrientation]);
 
   /**
    * Function to capture the current frame from the webcam and crop based on bounding box
@@ -325,7 +334,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   ]);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative w-full h-full">
       {/* Webcam Video */}
       <Webcam
         audio={false}
@@ -371,7 +380,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
       {/* Toggle Debug Mode Button */}
       <button
         onClick={toggleDebugMode}
-        className="absolute bottom-4 right-4 rounded bg-gray-700 px-4 py-2 text-white"
+        className="absolute px-4 py-2 text-white bg-gray-700 rounded bottom-4 right-4"
         aria-pressed={isDebugMode}
         aria-label="Toggle Debug Mode"
       >
