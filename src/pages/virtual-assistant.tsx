@@ -32,10 +32,8 @@ import {
 import { useRecordingControls } from "../hooks/useRecorder";
 
 export function VirtulAssistant() {
-  const [started, setStarted] = useState(true);
-  const [screen, setScreen] = useState<"vocal" | "text" | "audio" | null>(
-    "audio",
-  );
+  const [started, setStarted] = useState(false);
+  const [screen, setScreen] = useState<"vocal" | "text" | "audio" | null>(null);
 
   return (
     <CameraProvider>

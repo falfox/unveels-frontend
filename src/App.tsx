@@ -3,6 +3,7 @@ import { SkinToneFinder } from "./pages/skin-tone-finder";
 import { PersonalityFinder } from "./pages/personality-finder";
 import { createContext, useContext } from "react";
 import { SkinAnalysis } from "./pages/skin-analysis";
+import { FaceAnalyzer } from "./pages/face-analyzer";
 
 import "./index.css";
 import { VirtulAssistant } from "./pages/virtual-assistant";
@@ -14,6 +15,7 @@ const pages = [
   "skin-tone-finder",
   "personality-finder",
   "skin-analysis",
+  "face-analyzer",
   "virtual-assistant",
 ] as const;
 
@@ -71,6 +73,13 @@ function App() {
         <button
           type="button"
           className="border border-black"
+          onClick={() => setPage("face-analyzer")}
+        >
+          Face Analyzer
+        </button>
+        <button
+          type="button"
+          className="border border-black"
           onClick={() => setPage("skin-analysis")}
         >
           Skin Analysis
@@ -86,6 +95,7 @@ function App() {
 
       {page === "skin-tone-finder" && <SkinToneFinder />}
       {page === "personality-finder" && <PersonalityFinder />}
+      {page === "face-analyzer" && <FaceAnalyzer />}
       {page === "skin-analysis" && <SkinAnalysis />}
       {page === "virtual-assistant" && <VirtulAssistant />}
     </>
