@@ -4,7 +4,7 @@ import { PersonalityFinder } from "./pages/personality-finder";
 
 import "./index.css";
 
-const defaultPage = "face-analyzer" as const;
+const defaultPage = "skin-tone-finder" as const;
 
 const pages = [
   "skin-tone-finder",

@@ -22,10 +22,7 @@ import { useRecordingControls } from "../hooks/useRecorder";
 import { TopNavigation } from "./skin-tone-finder";
 import { personalityInference } from "../inference/personalityInference";
 import { Classifier } from "../types/classifier";
-import {
-  personalityAnalysisResult,
-  personalityDescription,
-} from "../utils/constants";
+import { personalityAnalysisResult } from "../utils/constants";
 
 export function PersonalityFinder() {
   return (

@@ -1,6 +1,5 @@
 import { CSSProperties, Fragment, useEffect, useState } from "react";
 import { Icons } from "../components/icons";
-
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -25,33 +24,45 @@ import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { useScrollContainer } from "../hooks/useScrollContainer";
-import { sleep } from "../utils/other";
+import { SkinToneFinderScene } from "../components/skin-tone-finder-scene";
 
 export function SkinToneFinder() {
   return (
     <CameraProvider>
       <div className="h-full min-h-dvh">
-        <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
-          <div className="absolute inset-0">
-            <VideoStream />
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-              }}
-            ></div>
-          </div>
-          <RecorderStatus />
-          <TopNavigation item />
-
-          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-            <MainContent />
-            <Footer />
-          </div>
-          <Sidebar />
-        </div>
+        <Main />
       </div>
     </CameraProvider>
+  );
+}
+
+function Main() {
+  const { criterias } = useCamera();
+  return (
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+      <div className="absolute inset-0">
+        {criterias.isCaptured ? (
+          <SkinToneFinderScene debugMode={true} />
+        ) : (
+          <VideoStream debugMode={false} />
+        )}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          }}
+        ></div>
+      </div>
+      <RecorderStatus />
+      <TopNavigation />
+
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+        {criterias.isCaptured ? "" : <VideoScene />}
+        <MainContent />
+        <Footer />
+      </div>
+      <Sidebar />
+    </div>
   );
 }
 
@@ -364,24 +375,13 @@ function ProductList() {
 }
 
 function BottomContent() {
-  const { criterias, setCriterias } = useCamera();
+  const { criterias } = useCamera();
 
-  useEffect(() => {
-    (async () => {
-      await sleep(2000);
-      setCriterias({ lighting: true });
-      await sleep(2000);
-      setCriterias({ facePosition: true });
-      await sleep(2000);
-      setCriterias({ orientation: true });
-    })();
-  }, []);
-
-  if (criterias.facePosition && criterias.lighting && criterias.orientation) {
+  if (criterias.isCaptured) {
     return <ShadesSelector />;
   }
 
-  return <VideoScene />;
+  return <div></div>;
 }
 
 function RecorderStatus() {

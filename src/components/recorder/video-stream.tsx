@@ -33,8 +33,14 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   const isDetectingRef = useRef<boolean>(false);
 
   // Using CameraContext
-  const { criterias, setCriterias, flipCamera, captureImage, setBoundingBox } =
-    useCamera();
+  const {
+    criterias,
+    setCriterias,
+    flipCamera,
+    captureImage,
+    setBoundingBox,
+    captureImageCut,
+  } = useCamera();
 
   // State Variables for Metrics
   const [lighting, setLighting] = useState<number>(0);
@@ -285,7 +291,8 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             imageSrc,
             criterias.lastBoundingBox,
           );
-          captureImage(croppedImage);
+          captureImage(imageSrc);
+          captureImageCut(croppedImage);
           stopDetection(); // Optionally stop detection after capture
         } catch (error) {
           console.error("Error cropping image:", error);
