@@ -24,28 +24,32 @@ import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { useScrollContainer } from "../hooks/useScrollContainer";
-import { SkinToneFinderScene } from "../components/skin-tone-finder-scene";
+import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-tone-finder-scene";
+import {
+  SkinColorProvider,
+  useSkinColor,
+} from "../components/skin-tone-finder-scene/skin-color-context";
 
 export function SkinToneFinder() {
   return (
     <CameraProvider>
-      <div className="h-full min-h-dvh">
-        <Main />
-      </div>
+      <SkinColorProvider>
+        <div className="h-full min-h-dvh">
+          <Main />
+        </div>
+      </SkinColorProvider>
     </CameraProvider>
   );
 }
 
 function Main() {
   const { criterias } = useCamera();
+
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
-        {criterias.isCaptured ? (
-          <SkinToneFinderScene debugMode={true} />
-        ) : (
-          <VideoStream debugMode={false} />
-        )}
+        <VideoStream debugMode={false} />
+        <SkinToneFinderScene debugMode={false} />
         <div
           className="absolute inset-0"
           style={{
@@ -201,13 +205,17 @@ function MatchedShades() {
   ];
 
   const [selectedShade, setSelectedShade] = useState(shadeOptions[0].name);
+  const { skinType, hexColor } = useSkinColor();
 
   return (
     <>
       <div className="flex flex-col items-start">
         <div className="inline-flex items-center gap-x-2 rounded-full border border-white/80 px-2 py-1 text-white/80">
-          <div className="size-3 rounded-full bg-[#D18B59]"></div>
-          <span className="text-sm">Medium skin</span>
+          <div
+            className="size-3 rounded-full"
+            style={{ backgroundColor: hexColor }}
+          ></div>
+          <span className="text-sm">{skinType}</span>
         </div>
         <div className="flex w-full min-w-0 pt-2">
           {shadeOptions.map((option, index) => (
@@ -265,6 +273,15 @@ function OtherShades() {
 
   const [selectedShade, setSelectedShade] = useState(null as string | null);
 
+  const { skinType, setSkinColor } = useSkinColor();
+
+  function setSelectedColor(option: string) {
+    setSelectedShade(option);
+    if (skinType != null) {
+      setSkinColor(option, skinType);
+    }
+  }
+
   return (
     <div className="flex w-full flex-col items-start gap-2">
       <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
@@ -296,7 +313,9 @@ function OtherShades() {
             style={{
               background: option,
             }}
-            onClick={() => setSelectedShade(option)}
+            onClick={() => {
+              setSelectedColor(option);
+            }}
           ></button>
         ))}
       </div>
@@ -376,8 +395,9 @@ function ProductList() {
 
 function BottomContent() {
   const { criterias } = useCamera();
+  const { skinType } = useSkinColor();
 
-  if (criterias.isCaptured) {
+  if (criterias.isCaptured && skinType != null) {
     return <ShadesSelector />;
   }
 

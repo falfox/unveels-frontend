@@ -1182,3 +1182,7 @@ export const faces = [
   402, 318, 311, 178, 81, 88, 310, 311, 318, 80, 88, 81, 318, 324, 310, 88, 80,
   95, 415, 310, 324, 191, 95, 80,
 ];
+
+export const flattenedPositions = positions.flat();
+export const flattenedUVs = uvs.flat();
+export const flattenedFaces = faces;
