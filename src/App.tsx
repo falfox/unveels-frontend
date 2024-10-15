@@ -4,20 +4,21 @@ import { PersonalityFinder } from "./pages/personality-finder";
 
 import "./index.css";
 
-const defaultPage = "skin-tone-finder" as const;
+const defaultPage = "personality-finder-web" as const;
 
 const pages = [
   "skin-tone-finder",
   "personality-finder",
   "skin-analysis",
   "face-analyzer",
+  "personality-finder-web",
 ] as const;
 
 export type Page = (typeof pages)[number] | null;
 import { createContext, useContext } from "react";
 import { SkinAnalysis } from "./pages/skin-analysis";
 import { FaceAnalyzer } from "./pages/face-analyzer";
-import { FaceDetector } from "@mediapipe/tasks-vision";
+import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
 
 interface PageContextType {
   page: Page;
@@ -78,12 +79,20 @@ function App() {
         >
           Skin Analysis
         </button>
+        <button
+          type="button"
+          className="border border-black"
+          onClick={() => setPage("personality-finder-web")}
+        >
+          Personality Finder Web
+        </button>
       </div>
 
       {page === "skin-tone-finder" && <SkinToneFinder />}
       {page === "personality-finder" && <PersonalityFinder />}
       {page === "face-analyzer" && <FaceAnalyzer />}
       {page === "skin-analysis" && <SkinAnalysis />}
+      {page === "personality-finder-web" && <PersonalityFinderWeb />}
     </>
   );
 }
