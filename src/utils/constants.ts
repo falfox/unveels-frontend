@@ -1183,6 +1183,22 @@ export const faces = [
   95, 415, 310, 324, 191, 95, 80,
 ];
 
-export const flattenedPositions = positions.flat();
-export const flattenedUVs = uvs.flat();
-export const flattenedFaces = faces;
+export const labels = [
+  "acne",
+  "blackhead",
+  "dark circle",
+  "droopy eyelid lower",
+  "droopy eyelid upper",
+  "dry",
+  "eyebag",
+  "firmness",
+  "moistures",
+  "oily",
+  "pore",
+  "radiance",
+  "skinredness",
+  "spots",
+  "texture",
+  "whitehead",
+  "wrinkles",
+];

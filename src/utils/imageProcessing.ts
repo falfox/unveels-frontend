@@ -69,3 +69,20 @@ export const cropImage = (
     img.src = imageSrc;
   });
 };
+
+/**
+ * Fungsi untuk mengkonversi string base64 menjadi objek Image
+ * @param {string} base64Str - String base64 gambar
+ * @returns {Promise<HTMLImageElement>} - Promise yang menghasilkan objek Image
+ */
+export const base64ToImage = async (
+  base64Str: string,
+): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = `${base64Str}`;
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = (err) => reject(new Error("Gagal memuat gambar."));
+  });
+};
