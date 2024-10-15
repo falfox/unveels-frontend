@@ -12,7 +12,6 @@ import {
 import { calculateLighting, cropImage } from "../../utils/imageProcessing";
 import { CountdownOverlay } from "../countdown-overlay";
 import { ErrorOverlay } from "../error-overlay";
-import { ToggleCameraButton } from "../toggle-camera-button";
 import { useCountdown } from "../../hooks/useCountdown";
 import { processBoundingBox } from "../../utils/boundingBoxUtils";
 import { drawKeypoints } from "../../utils/keypointsUtils";
@@ -22,7 +21,7 @@ import {
 } from "../../utils/orientationUtils";
 
 interface VideoStreamProps {
-  debugMode?: boolean; // Optional prop for debug mode
+  debugMode?: boolean;
 }
 
 export function VideoStream({ debugMode = false }: VideoStreamProps) {
@@ -33,8 +32,14 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   const isDetectingRef = useRef<boolean>(false);
 
   // Using CameraContext
-  const { criterias, setCriterias, flipCamera, captureImage, setBoundingBox } =
-    useCamera();
+  const {
+    criterias,
+    setCriterias,
+    flipCamera,
+    captureImage,
+    setBoundingBox,
+    captureImageCut,
+  } = useCamera();
 
   // State Variables for Metrics
   const [lighting, setLighting] = useState<number>(0);
@@ -53,6 +58,11 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   const toggleDebugMode = () => {
     setIsDebugMode((prev) => !prev);
   };
+
+  // State for Captured Image
+  const [capturedImageSrc, setCapturedImageSrc] = useState<string | null>(null);
+  // Optional: State for Cropped Image
+  const [croppedImageSrc, setCroppedImageSrc] = useState<string | null>(null);
 
   // Initialize MediaPipe Face Detector
   useEffect(() => {
@@ -285,7 +295,10 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             imageSrc,
             criterias.lastBoundingBox,
           );
-          captureImage(croppedImage);
+          captureImage(imageSrc);
+          captureImageCut(croppedImage);
+          setCapturedImageSrc(imageSrc); // Set the captured image
+          setCroppedImageSrc(croppedImage); // Optional: Set cropped image
           stopDetection(); // Optionally stop detection after capture
         } catch (error) {
           console.error("Error cropping image:", error);
@@ -326,57 +339,70 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
 
   return (
     <div className="relative h-full w-full">
-      {/* Webcam Video */}
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        mirrored={false} // Mirroring handled via CSS
-        videoConstraints={{
-          width: 640,
-          height: 480,
-          facingMode: criterias.flipped ? "environment" : "user",
-        }}
-        onUserMediaError={(err) =>
-          setError(
-            err instanceof Error ? err : new Error("Webcam error occurred."),
-          )
-        }
-        className={`h-full w-full object-cover ${
-          criterias.flipped ? "scale-x-[-1]" : ""
-        }`}
-      />
+      {/* Render Captured Image if available */}
+      {capturedImageSrc ? (
+        <div className="relative h-full w-full">
+          <img
+            src={capturedImageSrc}
+            alt="Captured"
+            className="h-full w-full object-cover"
+          />
+          {/* Button to Retake Photo */}
+          <button
+            onClick={() => {
+              setCapturedImageSrc(null);
+              startDetection(); // Restart detection if needed
+            }}
+            className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
+            aria-label="Retake Photo"
+          >
+            Retake Photo
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Webcam Video */}
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            mirrored={false} // Mirroring handled via CSS
+            videoConstraints={{
+              width: 640,
+              height: 480,
+              facingMode: criterias.flipped ? "environment" : "user",
+            }}
+            onUserMediaError={(err) =>
+              setError(
+                err instanceof Error
+                  ? err
+                  : new Error("Webcam error occurred."),
+              )
+            }
+            className={`h-full w-full object-cover ${
+              criterias.flipped ? "scale-x-[-1]" : ""
+            }`}
+          />
 
-      {/* Overlay Canvas */}
-      <canvas
-        ref={canvasRef}
-        className={`pointer-events-none absolute left-0 top-0 ${
-          isDebugMode ? "block" : "hidden"
-        }`} // Hide canvas if not in debug mode
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
-      />
+          {/* Overlay Canvas */}
+          <canvas
+            ref={canvasRef}
+            className={`pointer-events-none absolute left-0 top-0 ${
+              isDebugMode ? "block" : "hidden"
+            }`} // Hide canvas if not in debug mode
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          />
 
-      {/* Countdown Overlay */}
-      {countdown !== null && <CountdownOverlay count={countdown} />}
+          {/* Countdown Overlay */}
+          {countdown !== null && <CountdownOverlay count={countdown} />}
 
-      {/* Error Display */}
-      {error && <ErrorOverlay message={error.message} />}
-
-      {/* Toggle Camera Button */}
-      <ToggleCameraButton onClick={flipCamera} />
-
-      {/* Toggle Debug Mode Button */}
-      <button
-        onClick={toggleDebugMode}
-        className="absolute bottom-4 right-4 rounded bg-gray-700 px-4 py-2 text-white"
-        aria-pressed={isDebugMode}
-        aria-label="Toggle Debug Mode"
-      >
-        {isDebugMode ? "Disable" : "Enable"} Debug Mode
-      </button>
+          {/* Error Display */}
+          {error && <ErrorOverlay message={error.message} />}
+        </>
+      )}
     </div>
   );
 }

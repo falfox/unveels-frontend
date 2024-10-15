@@ -66,7 +66,7 @@ export const runTFLiteInference = async (
   preprocessedImage: Float32Array,
   w: number,
   h: number,
-): Promise<Tensor> => {
+): Promise<tf.Tensor> => {
   if (!tfliteModel) {
     throw new Error("TFLite model is not loaded");
   }

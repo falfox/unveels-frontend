@@ -19,12 +19,11 @@ import {
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
-import { TopNavigation } from "./skin-tone-finder";
 import { personalityInference } from "../inference/personalityInference";
 import { Classifier } from "../types/classifier";
 import { personalityAnalysisResult } from "../utils/constants";
 
-export function PersonalityFinder() {
+export function PersonalityFinderWeb() {
   return (
     <CameraProvider>
       <div className="h-full min-h-dvh">
@@ -37,9 +36,41 @@ export function PersonalityFinder() {
 function MainContent() {
   const { criterias } = useCamera();
 
-  if (criterias.isCaptured) {
-    return <Result />;
-  }
+  const [inferenceResult, setInferenceResult] = useState<Classifier[] | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [inferenceError, setInferenceError] = useState<string | null>(null);
+  const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
+
+  useEffect(() => {
+    const performInference = async () => {
+      if (criterias.isCaptured && criterias.capturedImage) {
+        setIsInferenceRunning(true);
+        setIsLoading(true);
+        setInferenceError(null);
+        try {
+          const personalityResult: Classifier[] = await personalityInference(
+            criterias.capturedImage,
+            224,
+            224,
+          );
+          setInferenceResult(personalityResult);
+          window.personality.postMessage(personalityResult);
+        } catch (error: any) {
+          console.error("Inference error:", error);
+          setInferenceError(
+            error.message || "An error occurred during inference.",
+          );
+        } finally {
+          setIsLoading(false);
+          setIsInferenceRunning(false);
+        }
+      }
+    };
+
+    performInference();
+  }, [criterias.isCaptured]);
 
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
@@ -52,8 +83,6 @@ function MainContent() {
           }}
         ></div>
       </div>
-      <RecorderStatus />
-      <TopNavigation />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         <VideoScene />

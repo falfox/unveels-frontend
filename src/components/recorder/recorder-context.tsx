@@ -16,6 +16,7 @@ interface CameraState {
   isFinished: boolean;
   isCaptured: boolean;
   capturedImage: string | null;
+  capturedImageCut: string | null;
   lastBoundingBox: BoundingBox | null;
 }
 
@@ -25,6 +26,7 @@ interface CameraContextType {
   flipCamera: () => void;
   finish: () => void;
   captureImage: (image: string) => void;
+  captureImageCut: (image: string) => void;
   resetCapture: () => void;
   setBoundingBox: (box: BoundingBox) => void;
 }
@@ -42,6 +44,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     isFinished: false,
     isCaptured: false,
     capturedImage: null,
+    capturedImageCut: null,
     lastBoundingBox: null,
   });
 
@@ -62,6 +65,14 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
       ...prevState,
       isCaptured: true,
       capturedImage: image,
+    }));
+  }
+
+  function captureImageCut(image: string) {
+    setState((prevState) => ({
+      ...prevState,
+      isCaptured: true,
+      capturedImageCut: image,
     }));
   }
 
@@ -86,6 +97,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
         flipCamera,
         finish,
         captureImage,
+        captureImageCut,
         resetCapture,
         setBoundingBox,
       }}
