@@ -10,6 +10,7 @@ export default {
       fontFamily: {
         sans: ["Lato", ...defaultTheme.fontFamily.sans],
         serif: ["Lora", ...defaultTheme.fontFamily.serif],
+        luxury: ["Luxurious Roman", ...defaultTheme.fontFamily.serif],
       }
     },
   },
