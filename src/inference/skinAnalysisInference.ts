@@ -4,6 +4,7 @@ import { FaceResults } from "../types/faceResults";
 import "@tensorflow/tfjs-backend-cpu";
 import * as tf from "@tensorflow/tfjs-core";
 import * as tflite from "@tensorflow/tfjs-tflite";
+import cv from "@techstark/opencv-js";
 
 class Colors {
   palette: string[];
@@ -194,8 +195,8 @@ export const skinAnalysisInference = async (
         boxes,
         scores,
         500,
-        0.45,
-        0.05,
+        0.25,
+        0.01,
       ); // do nms to filter boxes
 
       const detReady = tf.tidy(() =>
@@ -282,11 +283,18 @@ export const skinAnalysisInference = async (
         ]); // resizing proto to drawing size
 
         const mask = tf.tidy(() => {
+          console.log("Upsample Box:", upSampleBox);
+
+          const [y, x, h, w] = upSampleBox;
+
           const padded = tf.pad(upsampleProto, [
-            [upSampleBox[0], modelHeight - (upSampleBox[0] + upSampleBox[2])],
-            [upSampleBox[1], modelWidth - (upSampleBox[1] + upSampleBox[3])],
-            [0, 0],
+            [y, modelHeight - h - y],
+            [x, modelWidth - w - x],
+            [0, 0], // not padded
           ]); // padding proto to canvas size
+          console.log("Padded", padded);
+          console.log("Padded Data", padded.dataSync());
+
           return tf.less(padded, 0.5); // make boolean mask from proto to indexing overlay
         }); // final boolean mask
 
@@ -302,12 +310,75 @@ export const skinAnalysisInference = async (
           return newOverlay; // return new overlay
         }); // new overlay
 
+        // Convert tensor data to a Uint8ClampedArray (assuming overlay has 4 channels: RGBA)
+        const overlayData = await mask.data();
+
+        // Create a binary mask from the overlay
+        // Assuming you want to create a binary mask where alpha > 0
+        const binaryMask = new Uint8ClampedArray(modelWidth * modelHeight);
+        for (let i = 0; i < modelWidth * modelHeight; i++) {
+          // Assuming overlayData is in RGBA format
+          const alpha = overlayData[i * 4 + 3];
+          binaryMask[i] = alpha > 0 ? 255 : 0;
+        }
+
+        // Create an OpenCV Mat from the binary mask
+        const mat = cv.matFromArray(
+          modelHeight,
+          modelWidth,
+          cv.CV_8UC1,
+          Array.from(binaryMask),
+        );
+
+        // Optional: Apply some preprocessing (e.g., thresholding, dilation) to improve contour detection
+        cv.threshold(mat, mat, 127, 255, cv.THRESH_BINARY);
+
+        // Find contours
+        const contours = new cv.MatVector();
+        const hierarchy = new cv.Mat();
+        cv.findContours(
+          mat,
+          contours,
+          hierarchy,
+          cv.RETR_EXTERNAL,
+          cv.CHAIN_APPROX_SIMPLE,
+        );
+
+        // Approximate contours to polygons
+        const polygons: { points: cv.Point[]; color: string }[] = [];
+        for (let i = 0; i < contours.size(); i++) {
+          const contour = contours.get(i);
+          const approx = new cv.Mat();
+          cv.approxPolyDP(contour, approx, 5, true); // 5 is the approximation accuracy
+
+          // Convert approx to a list of points
+          const points: cv.Point[] = [];
+          for (let j = 0; j < approx.rows; j++) {
+            const point = new cv.Point(approx.intAt(j, 0), approx.intAt(j, 1));
+            points.push(point);
+          }
+
+          polygons.push({ points, color });
+
+          approx.delete();
+          contour.delete();
+        }
+
+        // Clean up
+        contours.delete();
+        hierarchy.delete();
+        mat.delete();
+
+        // Now `polygons` contains all detected polygons with their associated colors
+        console.log(polygons);
+
         toDraw.push({
           box: upSampleBox,
           score: score,
           class: label,
           label: labels[label],
           color: color,
+          polygon: polygons[0].points,
         }); // push box information to draw later
 
         tf.dispose([rowData, proto, upsampleProto, mask]); // dispose unused tensor to free memory
@@ -315,25 +386,22 @@ export const skinAnalysisInference = async (
 
       console.log(toDraw);
 
-      // Convert tensor data to ImageData
-      const maskImg = new ImageData(
-        new Uint8ClampedArray(await overlay.data()), // tensor to array
-        modelWidth, // width of the image
-        modelHeight, // height of the image
-      );
+      tf.engine().endScope();
 
-      // Create a canvas element
-      const canvas = document.createElement("canvas");
-      canvas.width = modelWidth;
-      canvas.height = modelHeight;
-      const ctx = canvas.getContext("2d");
-
-      // Draw the ImageData on the canvas
-      ctx?.putImageData(maskImg, 0, 0);
-
-      // Convert canvas to Base64 string (PNG format by default)
-      const base64String = canvas.toDataURL(); // This will be a Base64 encoded string
-      console.log(base64String);
+      // Dispose tensors
+      tf.dispose([
+        res,
+        segRes,
+        transRes,
+        transSegMask,
+        boxes,
+        scores,
+        classes,
+        detReady,
+        masks,
+        overlay,
+        input,
+      ]);
     }
 
     return toDraw;

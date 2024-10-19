@@ -9,7 +9,8 @@ import {
   classifySkinType,
   rgbToHex,
 } from "../../utils/colorUtils"; // Pastikan path ini benar
-import FaceMesh from "./face-mesh"; // Pastikan path ini benar
+import FaceMesh from "../three/face-mesh"; // Pastikan path ini benar
+import { Landmark } from "../../types/landmark";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -83,13 +84,6 @@ export function SkinToneFinderScene({
 
 interface SkinToneFinderInnerSceneProps {
   debugMode: boolean;
-}
-
-// Definisikan interface Landmark
-interface Landmark {
-  x: number;
-  y: number;
-  z: number;
 }
 
 function SkinToneFinderInnerScene({

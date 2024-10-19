@@ -8,6 +8,7 @@ import {
   POSITION_THRESHOLD_Y,
   ORIENTATION_THRESHOLD_YAW,
   ORIENTATION_THRESHOLD_PITCH,
+  testImage,
 } from "../../utils/constants";
 import { calculateLighting, cropImage } from "../../utils/imageProcessing";
 import { CountdownOverlay } from "../countdown-overlay";
@@ -295,7 +296,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             imageSrc,
             criterias.lastBoundingBox,
           );
-          captureImage(imageSrc);
+          captureImage(testImage);
           captureImageCut(croppedImage);
           setCapturedImageSrc(imageSrc); // Set the captured image
           setCroppedImageSrc(croppedImage); // Optional: Set cropped image

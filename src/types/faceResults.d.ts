@@ -4,5 +4,5 @@ export interface FaceResults {
   color: string;
   label: string;
   score: float;
-  polygon?: { x: number; y: number };
+  polygon?: { x: number; y: number }[];
 }

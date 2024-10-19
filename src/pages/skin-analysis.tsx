@@ -1,6 +1,5 @@
 import { CSSProperties, Fragment, useEffect, useState } from "react";
 import { Icons } from "../components/icons";
-
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -30,6 +29,8 @@ import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Rating } from "../components/rating";
 import { skinAnalysisInference } from "../inference/skinAnalysisInference";
 import { FaceResults } from "../types/faceResults";
+import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
+import { testImage } from "../utils/constants";
 
 export function SkinAnalysis() {
   return (
@@ -52,7 +53,8 @@ function Main() {
 
   useEffect(() => {
     const faceAnalyzerInference = async () => {
-      if (criterias.isCaptured && criterias.capturedImage) {
+      if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
+        // Tambahkan cek !isLoading
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
@@ -68,19 +70,23 @@ function Main() {
             error.message || "An error occurred during inference.",
           );
         } finally {
-          setIsLoading(false);
-          setIsInferenceRunning(false);
+          setIsLoading(false); // Pastikan isLoading diubah kembali
+          setIsInferenceRunning(false); // Tambahkan ini jika perlu
         }
       }
     };
 
     faceAnalyzerInference();
-  }, [criterias.isCaptured]);
+  }, [criterias.isCaptured, criterias.capturedImage]); // Hapus isLoading dari dependensi
 
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
-        <VideoStream />
+        {!isLoading && inferenceResult != null ? (
+          <SkinAnalysisScene data={inferenceResult} />
+        ) : (
+          <VideoStream />
+        )}
         <div
           className="absolute inset-0"
           style={{

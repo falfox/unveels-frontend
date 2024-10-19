@@ -55,8 +55,26 @@ function MainContent() {
             224,
             224,
           );
+
+          if (personalityResult != null) {
+            console.log("Personality Result:", personalityResult);
+
+            // Coba stringify hasilnya
+            const resultString = JSON.stringify(personalityResult);
+            console.log("Personality Result as JSON:", resultString);
+
+            // Kirim data sebagai JSON string
+            (window as any).flutter_inappwebview
+              .callHandler("detectionResult", resultString)
+              .then((result: any) => {
+                console.log("Flutter responded with:", result);
+              })
+              .catch((error: any) => {
+                console.error("Error calling Flutter handler:", error);
+              });
+          }
           setInferenceResult(personalityResult);
-          window.personality.postMessage(personalityResult);
+          console.log("new 2");
         } catch (error: any) {
           console.error("Inference error:", error);
           setInferenceError(
