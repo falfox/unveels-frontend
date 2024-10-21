@@ -59,7 +59,7 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
     () =>
       new MeshBasicMaterial({
         color: hexColor, // Gunakan hexColor dari props
-        wireframe: true,
+        wireframe: false,
         side: DoubleSide,
         transparent: true,
         opacity: 0.15,

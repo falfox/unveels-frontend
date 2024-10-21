@@ -2,15 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { useCamera } from "../recorder/recorder-context";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { Canvas, useThree } from "@react-three/fiber";
-import { Texture, TextureLoader, Vector3 } from "three";
+import { Texture, TextureLoader } from "three";
 import { useSkinColor } from "./skin-color-context"; // Pastikan path ini benar
-import {
-  calculateAverageColor,
-  classifySkinType,
-  rgbToHex,
-} from "../../utils/colorUtils"; // Pastikan path ini benar
 import FaceMesh from "../three/face-mesh"; // Pastikan path ini benar
 import { Landmark } from "../../types/landmark";
+import { extractSkinColor } from "../../utils/imageProcessing";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -97,12 +93,10 @@ function SkinToneFinderInnerScene({
   const [landmarks, setLandmarks] = useState<Landmark[]>([]); // Tipe yang diperbarui
   const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
 
-  const { setSkinColor } = useSkinColor(); // Akses setter dari konteks
+  const { setSkinColor } = useSkinColor();
 
-  // Ref untuk overlay canvas
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // State untuk melacak pemuatan tekstur
   const [isTextureLoaded, setIsTextureLoaded] = useState<boolean>(false);
 
   // Handler untuk mengatur status pemuatan tekstur
@@ -184,8 +178,18 @@ function SkinToneFinderInnerScene({
             }));
             setLandmarks(normalizedLandmarks);
 
+            const indices = [101, 50, 330, 280, 108, 69, 151, 337, 299];
             // Ekstrak warna kulit
-            extractSkinColor(imageLoaded, normalizedLandmarks);
+            const extractedSkinColor = extractSkinColor(
+              imageLoaded,
+              normalizedLandmarks,
+              indices,
+              5,
+            );
+            setSkinColor(
+              extractedSkinColor.hexColor,
+              extractedSkinColor.skinType,
+            );
           }
         } catch (error) {
           console.error("Gagal mendeteksi wajah:", error);
@@ -195,93 +199,6 @@ function SkinToneFinderInnerScene({
 
     processImage();
   }, [imageLoaded, faceLandmarker, isLandmarkerReady]);
-
-  /**
-   * Mengekstrak warna kulit dari landmark tertentu.
-   * @param image - Gambar yang dimuat.
-   * @param landmarks - Array dari koordinat {x, y, z} yang dinormalisasi.
-   */
-  const extractSkinColor = (image: HTMLImageElement, landmarks: Landmark[]) => {
-    // Definisikan indeks landmark untuk ekstraksi warna kulit
-    const targetLandmarkIndices = [101, 50, 330, 280, 108, 69, 151, 337, 299];
-
-    // Radius sekitar setiap landmark untuk sampling warna
-    const samplingRadius = 5; // piksel
-
-    // Buat canvas off-screen untuk mengakses data piksel
-    const canvas = document.createElement("canvas");
-    canvas.width = image.naturalWidth;
-    canvas.height = image.naturalHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      console.error(
-        "Gagal mendapatkan konteks canvas untuk ekstraksi warna kulit.",
-      );
-      return;
-    }
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-    const sampledColors: Array<{ r: number; g: number; b: number }> = [];
-
-    targetLandmarkIndices.forEach((index) => {
-      const landmark = landmarks[index];
-      if (!landmark) {
-        console.warn(`Indeks landmark ${index} tidak ditemukan.`);
-        return;
-      }
-
-      const { x: normX, y: normY } = landmark;
-      const x = Math.round(normX * canvas.width);
-      const y = Math.round(normY * canvas.height);
-
-      // Sampling area persegi di sekitar landmark
-      for (let dx = -samplingRadius; dx <= samplingRadius; dx++) {
-        for (let dy = -samplingRadius; dy <= samplingRadius; dy++) {
-          const sampleX = x + dx;
-          const sampleY = y + dy;
-
-          // Pastikan koordinat sampling berada dalam batas gambar
-          if (
-            sampleX < 0 ||
-            sampleX >= canvas.width ||
-            sampleY < 0 ||
-            sampleY >= canvas.height
-          ) {
-            continue;
-          }
-
-          const pixelIndex = (sampleY * canvas.width + sampleX) * 4;
-          const r = imageData[pixelIndex];
-          const g = imageData[pixelIndex + 1];
-          const b = imageData[pixelIndex + 2];
-          const a = imageData[pixelIndex + 3];
-
-          // Opsional: filter piksel transparan atau bukan kulit
-          if (a < 128) continue; // Lewati piksel semi-transparan
-
-          sampledColors.push({ r, g, b });
-        }
-      }
-    });
-
-    if (sampledColors.length === 0) {
-      console.warn(
-        "Tidak ada warna yang disampling untuk ekstraksi warna kulit.",
-      );
-      return;
-    }
-
-    // Hitung warna rata-rata
-    const avgColor = calculateAverageColor(sampledColors);
-    const hexColor = rgbToHex(avgColor.r, avgColor.g, avgColor.b);
-
-    // Klasifikasikan tipe kulit
-    const skinType = classifySkinType(avgColor);
-
-    // Perbarui konteks
-    setSkinColor(hexColor, skinType);
-  };
 
   // Jika tidak ada gambar yang ditangkap, render hanya canvas overlay
   if (!criterias.capturedImage || !imageLoaded) {

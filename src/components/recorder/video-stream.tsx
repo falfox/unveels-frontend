@@ -56,10 +56,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   // Debug Mode State
   const [isDebugMode, setIsDebugMode] = useState<boolean>(debugMode);
 
-  const toggleDebugMode = () => {
-    setIsDebugMode((prev) => !prev);
-  };
-
   // State for Captured Image
   const [capturedImageSrc, setCapturedImageSrc] = useState<string | null>(null);
   // Optional: State for Cropped Image
@@ -349,16 +345,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             className="h-full w-full object-cover"
           />
           {/* Button to Retake Photo */}
-          <button
-            onClick={() => {
-              setCapturedImageSrc(null);
-              startDetection(); // Restart detection if needed
-            }}
-            className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
-            aria-label="Retake Photo"
-          >
-            Retake Photo
-          </button>
         </div>
       ) : (
         <>
