@@ -50,7 +50,7 @@ function Main() {
     <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
       <div className="absolute inset-0">
         <VideoStream debugMode={false} />
-        <SkinToneFinderScene debugMode={false} />
+        <SkinToneFinderScene />
         <div
           className="absolute inset-0"
           style={{

@@ -7,7 +7,7 @@ import {
   MeshBasicMaterial,
   DoubleSide,
 } from "three";
-import { faces, uvs } from "../../utils/constants"; // Pastikan data faces dan uvs valid
+import { faces, uvs, positions } from "../../utils/constants"; // Pastikan data faces dan uvs valid
 
 interface Landmark {
   x: number;
@@ -32,14 +32,19 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
   // Inisialisasi geometry
   const geometry = useMemo(() => {
     const geom = new BufferGeometry();
+    const vertices = new Float32Array(positions.length * 3);
+    const uvArray = new Float32Array(uvs.length * 2);
 
-    // Atur posisi awal menggunakan UVs
-    const vertices = uvs.flatMap(([u, v]) => {
-      const x = (u - 0.5) * planeSize[0];
-      const y = -(v - 0.5) * planeSize[1]; // Invert Y-axis
-      const z = 0;
-      return [x, y, z];
-    });
+    for (let i = 0; i < positions.length; i++) {
+      vertices[i * 3] = positions[i][0];
+      vertices[i * 3 + 1] = positions[i][1];
+      vertices[i * 3 + 2] = positions[i][2];
+    }
+
+    for (let i = 0; i < uvs.length; i++) {
+      uvArray[i * 2] = uvs[i][0];
+      uvArray[i * 2 + 1] = uvs[i][1];
+    }
 
     geom.setAttribute("position", new Float32BufferAttribute(vertices, 3));
     geom.setAttribute("uv", new Float32BufferAttribute(uvs.flat(), 2));
@@ -89,7 +94,7 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
         // Skala koordinat sesuai ukuran plane
         const x = (landmark.x - 0.5) * outputWidth;
         const y = -(landmark.y - 0.5) * outputHeight;
-        const z = 0;
+        const z = -landmark.z;
 
         // Update posisi vertex
         position.setXYZ(i, x, y, z);
