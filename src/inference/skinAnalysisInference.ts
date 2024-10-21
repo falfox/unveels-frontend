@@ -310,75 +310,12 @@ export const skinAnalysisInference = async (
           return newOverlay; // return new overlay
         }); // new overlay
 
-        // Convert tensor data to a Uint8ClampedArray (assuming overlay has 4 channels: RGBA)
-        const overlayData = await mask.data();
-
-        // Create a binary mask from the overlay
-        // Assuming you want to create a binary mask where alpha > 0
-        const binaryMask = new Uint8ClampedArray(modelWidth * modelHeight);
-        for (let i = 0; i < modelWidth * modelHeight; i++) {
-          // Assuming overlayData is in RGBA format
-          const alpha = overlayData[i * 4 + 3];
-          binaryMask[i] = alpha > 0 ? 255 : 0;
-        }
-
-        // Create an OpenCV Mat from the binary mask
-        const mat = cv.matFromArray(
-          modelHeight,
-          modelWidth,
-          cv.CV_8UC1,
-          Array.from(binaryMask),
-        );
-
-        // Optional: Apply some preprocessing (e.g., thresholding, dilation) to improve contour detection
-        cv.threshold(mat, mat, 127, 255, cv.THRESH_BINARY);
-
-        // Find contours
-        const contours = new cv.MatVector();
-        const hierarchy = new cv.Mat();
-        cv.findContours(
-          mat,
-          contours,
-          hierarchy,
-          cv.RETR_EXTERNAL,
-          cv.CHAIN_APPROX_SIMPLE,
-        );
-
-        // Approximate contours to polygons
-        const polygons: { points: cv.Point[]; color: string }[] = [];
-        for (let i = 0; i < contours.size(); i++) {
-          const contour = contours.get(i);
-          const approx = new cv.Mat();
-          cv.approxPolyDP(contour, approx, 5, true); // 5 is the approximation accuracy
-
-          // Convert approx to a list of points
-          const points: cv.Point[] = [];
-          for (let j = 0; j < approx.rows; j++) {
-            const point = new cv.Point(approx.intAt(j, 0), approx.intAt(j, 1));
-            points.push(point);
-          }
-
-          polygons.push({ points, color });
-
-          approx.delete();
-          contour.delete();
-        }
-
-        // Clean up
-        contours.delete();
-        hierarchy.delete();
-        mat.delete();
-
-        // Now `polygons` contains all detected polygons with their associated colors
-        console.log(polygons);
-
         toDraw.push({
           box: upSampleBox,
           score: score,
           class: label,
           label: labels[label],
           color: color,
-          polygon: polygons[0].points,
         }); // push box information to draw later
 
         tf.dispose([rowData, proto, upsampleProto, mask]); // dispose unused tensor to free memory
