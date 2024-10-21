@@ -20,7 +20,6 @@
     "@types/d3-contour": "^3.0.6",
     "@types/three": "^0.169.0",
     "clsx": "^2.1.1",
-    "d3-contour": "^4.0.2",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.446.0",
     "react": "^18.3.1",

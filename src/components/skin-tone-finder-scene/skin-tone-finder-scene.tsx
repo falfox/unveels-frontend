@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useCamera } from "../recorder/recorder-context";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
-import { Canvas, useThree } from "@react-three/fiber";
-import { Texture, TextureLoader } from "three";
+import { Canvas } from "@react-three/fiber";
 import { useSkinColor } from "./skin-color-context"; // Pastikan path ini benar
-import FaceMesh from "../three/face-mesh"; // Pastikan path ini benar
 import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
+import SkinToneFinderThreeScene from "./skin-tone-finder-three-scene";
+import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -82,9 +82,7 @@ interface SkinToneFinderInnerSceneProps {
   debugMode: boolean;
 }
 
-function SkinToneFinderInnerScene({
-  debugMode,
-}: SkinToneFinderInnerSceneProps) {
+function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
   const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
@@ -206,125 +204,27 @@ function SkinToneFinderInnerScene({
   }
 
   return (
-    <div className="fixed inset-0">
+    <div className="fixed inset-0 flex items-center justify-center">
       {/* Render kondisional overlay canvas */}
-      {!isTextureLoaded && (
-        <>
-          {/* Canvas Overlay untuk menampilkan gambar */}
-          <canvas
-            ref={overlayCanvasRef}
-            className="pointer-events-none absolute inset-0 h-full w-full"
-            style={{ zIndex: 10 }}
-          />
-
-          {/* Komponen untuk menggambar gambar di overlay canvas */}
-          <ImageCanvas image={imageLoaded} canvasRef={overlayCanvasRef} />
-        </>
-      )}
 
       {/* 3D Canvas */}
       <Canvas
-        className="absolute inset-0 h-full w-full"
-        camera={{ position: [0, 0, 2], fov: 50 }}
-        // Aktifkan device pixel ratio untuk kejernihan lebih baik di mobile
-        dpr={[1, 2]}
+        className="absolute left-0 top-0 h-full w-full"
+        style={{ zIndex: 0 }}
+        orthographic
+        camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
+        gl={{
+          toneMapping: ACESFilmicToneMapping,
+          toneMappingExposure: 1,
+          outputColorSpace: SRGBColorSpace,
+        }}
       >
-        <Scene
-          image={imageLoaded}
+        <SkinToneFinderThreeScene
+          imageSrc={criterias.capturedImage}
           landmarks={landmarks}
-          debugMode={debugMode}
-          onTextureLoaded={handleTextureLoaded} // Kirim handler
         />
       </Canvas>
     </div>
-  );
-}
-
-interface SceneProps {
-  image: HTMLImageElement;
-  landmarks: Landmark[]; // Tipe yang diperbarui
-  debugMode: boolean;
-  onTextureLoaded: () => void; // Callback baru
-}
-
-function Scene({ image, landmarks, debugMode, onTextureLoaded }: SceneProps) {
-  const [texture, setTexture] = useState<Texture | null>(null);
-  const { camera, size } = useThree();
-
-  // State untuk menyimpan rasio aspek gambar
-  const [imageAspect, setImageAspect] = useState<number>(1);
-
-  // Memuat tekstur
-  useEffect(() => {
-    const loader = new TextureLoader();
-    loader.load(
-      image.src,
-      (tex) => {
-        tex.needsUpdate = true;
-        setTexture(tex);
-        onTextureLoaded(); // Notifikasi ke parent bahwa tekstur telah dimuat
-      },
-      undefined,
-      (err) => {
-        console.error("Gagal memuat tekstur:", err);
-      },
-    );
-  }, [image, onTextureLoaded]);
-
-  // Perbarui rasio aspek saat gambar dimuat
-  useEffect(() => {
-    if (image) {
-      const aspect = image.naturalWidth / image.naturalHeight;
-      setImageAspect(aspect);
-    }
-  }, [image]);
-
-  // Hitung ukuran plane berdasarkan rasio aspek gambar dan viewport
-  const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
-
-  useEffect(() => {
-    const calculatePlaneSize = () => {
-      const distance = camera.position.z;
-      const fov = camera.fov * (Math.PI / 180); // Konversi ke radian
-      const viewHeight = 2 * Math.tan(fov / 2) * distance;
-      const viewWidth = viewHeight * (size.width / size.height);
-
-      const imageAspectRatio = imageAspect;
-      const viewAspectRatio = size.width / size.height;
-
-      let finalWidth: number;
-      let finalHeight: number;
-
-      if (imageAspectRatio > viewAspectRatio) {
-        finalHeight = viewHeight;
-        finalWidth = viewHeight * imageAspectRatio;
-      } else {
-        finalWidth = viewWidth;
-        finalHeight = viewWidth / imageAspectRatio;
-      }
-
-      setPlaneSize([finalWidth, finalHeight]);
-    };
-
-    calculatePlaneSize();
-  }, [camera, size, imageAspect]);
-
-  const { hexColor } = useSkinColor();
-
-  return (
-    <>
-      {texture && (
-        <mesh>
-          <planeGeometry args={[planeSize[0], planeSize[1]]} />
-          <meshBasicMaterial map={texture} />
-          <FaceMesh
-            planeSize={planeSize}
-            landmarks={landmarks}
-            hexColor={hexColor}
-          />
-        </mesh>
-      )}
-    </>
   );
 }
 

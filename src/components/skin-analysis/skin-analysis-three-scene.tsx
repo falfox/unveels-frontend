@@ -151,13 +151,6 @@ const SkinAnalysisThreeScene: React.FC<SkinAnalysisThreeSceneProps> = ({
     return mask;
   }, [landmarks, texture.image, windowSize]);
 
-  useEffect(() => {
-    if (maskTexture) {
-      const link = document.createElement("img");
-      link.src = maskTexture.image.toDataURL();
-    }
-  }, [maskTexture]);
-
   // Reference to the ShaderMaterial to update uniforms dynamically
   useEffect(() => {
     if (filterRef.current) {
