@@ -407,48 +407,6 @@ function Scene({ image, landmarks, debugMode, onTextureLoaded }: SceneProps) {
           />
         </mesh>
       )}
-      {debugMode && landmarks.length > 0 && (
-        <LandmarkSpheres landmarks={landmarks} planeSize={planeSize} />
-      )}
-    </>
-  );
-}
-
-interface LandmarkSpheresProps {
-  landmarks: Landmark[]; // Tipe yang diperbarui
-  planeSize: [number, number]; // [lebar, tinggi]
-}
-
-function LandmarkSpheres({ landmarks, planeSize }: LandmarkSpheresProps) {
-  const [width, height] = planeSize;
-
-  // Konversi landmark normal ke koordinat Three.js
-  const points = landmarks.map(({ x, y, z }, index) => {
-    // Map x dari [0,1] ke [-width/2, width/2]
-    const posX = (x - 0.5) * width;
-
-    // Map y dari [0,1] ke [height/2, -height/2] (invert sumbu Y)
-    const posY = (0.5 - y) * height;
-
-    // Sedikit di depan plane untuk mencegah z-fighting
-    const posZ = 0.01;
-
-    return new Vector3(posX, posY, posZ);
-  });
-
-  return (
-    <>
-      {points.map((point, index) => (
-        <mesh
-          key={index}
-          position={[point.x, point.y, point.z]}
-          renderOrder={1}
-        >
-          <sphereGeometry args={[0.005, 16, 16]} />{" "}
-          {/* Ukuran ditingkatkan untuk visibilitas */}
-          <meshBasicMaterial color="lime" />
-        </mesh>
-      ))}
     </>
   );
 }

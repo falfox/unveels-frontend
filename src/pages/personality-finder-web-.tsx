@@ -46,6 +46,14 @@ function MainContent() {
   useEffect(() => {
     const performInference = async () => {
       if (criterias.isCaptured && criterias.capturedImage) {
+        (window as any).flutter_inappwebview
+          .callHandler("detectionRun", "Detection Running")
+          .then((result: any) => {
+            console.log("Flutter responded with:", result);
+          })
+          .catch((error: any) => {
+            console.error("Error calling Flutter handler:", error);
+          });
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
@@ -76,6 +84,14 @@ function MainContent() {
           setInferenceResult(personalityResult);
           console.log("new 2");
         } catch (error: any) {
+          (window as any).flutter_inappwebview
+            .callHandler("detectionError", error)
+            .then((result: any) => {
+              console.log("Flutter responded with:", result);
+            })
+            .catch((error: any) => {
+              console.error("Error calling Flutter handler:", error);
+            });
           console.error("Inference error:", error);
           setInferenceError(
             error.message || "An error occurred during inference.",
