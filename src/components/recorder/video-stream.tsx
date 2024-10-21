@@ -278,7 +278,14 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
       orientation: isOrientationGood,
       allGood: isBrightnessGood && isPositionGood && isOrientationGood,
     };
-  }, [lighting, position, orientation, setCriterias]);
+  }, [
+    lighting,
+    position.x,
+    position.y,
+    orientation.pitch,
+    orientation.yaw,
+    setCriterias,
+  ]);
 
   /**
    * Function to capture the current frame from the webcam and crop based on bounding box
@@ -335,16 +342,26 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   ]);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative w-full h-full">
       {/* Render Captured Image if available */}
       {capturedImageSrc ? (
-        <div className="relative h-full w-full">
+        <div className="relative w-full h-full">
           <img
             src={capturedImageSrc}
             alt="Captured"
-            className="h-full w-full object-cover"
+            className="object-cover w-full h-full"
           />
           {/* Button to Retake Photo */}
+          <button
+            onClick={() => {
+              setCapturedImageSrc(null);
+              startDetection(); // Restart detection if needed
+            }}
+            className="absolute px-4 py-2 text-white bg-gray-700 rounded bottom-4 left-4"
+            aria-label="Retake Photo"
+          >
+            Retake Photo
+          </button>
         </div>
       ) : (
         <>
