@@ -52,8 +52,6 @@ function Main() {
   useEffect(() => {
     const faceAnalyzerInference = async () => {
       if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
-        console.log("Face analysis is running");
-
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);

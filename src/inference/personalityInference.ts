@@ -378,6 +378,15 @@ export const personalityInference = async (
       outputColor: averageEyeColor,
     });
 
+    classifiers.push({
+      name: "Image Data",
+      outputName: "",
+      labels: [],
+      outputLabel: "",
+      outputColor: "",
+      imageData: imageData,
+    });
+
     console.log(classifiers);
 
     // Kembalikan hasil setelah semua classifier diproses, termasuk gambar landmark
