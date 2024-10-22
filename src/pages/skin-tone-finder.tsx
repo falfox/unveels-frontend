@@ -45,9 +45,10 @@ export function SkinToneFinder() {
 
 function Main() {
   const { criterias } = useCamera();
+  // test commit
 
   return (
-    <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
         <VideoStream debugMode={false} />
         <SkinToneFinderScene />
@@ -529,11 +530,12 @@ export function TopNavigation({
 }
 
 function Sidebar() {
+  const { flipCamera } = useCamera();
   return (
     <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
         <div
-          className="absolute inset-0 border-2 border-transparent rounded-full"
+          className="absolute inset-0 rounded-full border-2 border-transparent"
           style={
             {
               background: `linear-gradient(148deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.77) 100%) border-box`,
@@ -547,25 +549,25 @@ function Sidebar() {
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
           <button className="">
-            <Icons.camera className="text-white size-6" />
+            <Icons.camera className="size-6 text-white" />
+          </button>
+          <button className="" onClick={flipCamera}>
+            <Icons.flipCamera className="size-6 text-white" />
           </button>
           <button className="">
-            <Icons.flipCamera className="text-white size-6" />
+            <Icons.expand className="size-6 text-white" />
           </button>
           <button className="">
-            <Icons.expand className="text-white size-6" />
+            <Icons.compare className="size-6 text-white" />
           </button>
           <button className="">
-            <Icons.compare className="text-white size-6" />
-          </button>
-          <button className="">
-            <Icons.reset className="text-white size-6" />
+            <Icons.reset className="size-6 text-white" />
           </button>
           <button className="hidden">
-            <Icons.upload className="text-white size-6" />
+            <Icons.upload className="size-6 text-white" />
           </button>
           <button className="hidden">
-            <Icons.share className="text-white size-6" />
+            <Icons.share className="size-6 text-white" />
           </button>
         </div>
       </div>
