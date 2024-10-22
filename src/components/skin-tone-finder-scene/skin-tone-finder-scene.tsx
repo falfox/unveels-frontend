@@ -170,14 +170,16 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
       if (imageLoaded && faceLandmarker && isLandmarkerReady) {
         // for flutter webview comunication
         console.log("Detection Running Skin Tone Finder");
-        (window as any).flutter_inappwebview
-          .callHandler("detectionRun", "Detection Running Skin Tone Finder")
-          .then((result: any) => {
-            console.log("Flutter responded with:", result);
-          })
-          .catch((error: any) => {
-            console.error("Error calling Flutter handler:", error);
-          });
+        if ((window as any).flutter_inappwebview) {
+          (window as any).flutter_inappwebview
+            .callHandler("detectionRun", "Detection Running Skin Tone Finder")
+            .then((result: any) => {
+              console.log("Flutter responded with:", result);
+            })
+            .catch((error: any) => {
+              console.error("Error calling Flutter handler:", error);
+            });
+        }
         try {
           const results = await faceLandmarker.detect(imageLoaded);
           if (results && results.faceLandmarks.length > 0) {
@@ -217,26 +219,30 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
               const resultString = JSON.stringify(extractedSkinColor);
               console.log("Skon Tone Finder Result as JSON:", resultString);
 
-              // Kirim data sebagai JSON string
-              (window as any).flutter_inappwebview
-                .callHandler("detectionResult", resultString)
-                .then((result: any) => {
-                  console.log("Flutter responded with:", result);
-                })
-                .catch((error: any) => {
-                  console.error("Error calling Flutter handler:", error);
-                });
+              if ((window as any).flutter_inappwebview) {
+                // Kirim data sebagai JSON string
+                (window as any).flutter_inappwebview
+                  .callHandler("detectionResult", resultString)
+                  .then((result: any) => {
+                    console.log("Flutter responded with:", result);
+                  })
+                  .catch((error: any) => {
+                    console.error("Error calling Flutter handler:", error);
+                  });
+              }
             }
           }
         } catch (error) {
-          (window as any).flutter_inappwebview
-            .callHandler("detectionError", error)
-            .then((result: any) => {
-              console.log("Flutter responded with:", result);
-            })
-            .catch((error: any) => {
-              console.error("Error calling Flutter handler:", error);
-            });
+          if ((window as any).flutter_inappwebview) {
+            (window as any).flutter_inappwebview
+              .callHandler("detectionError", error)
+              .then((result: any) => {
+                console.log("Flutter responded with:", result);
+              })
+              .catch((error: any) => {
+                console.error("Error calling Flutter handler:", error);
+              });
+          }
           console.error("Inference error:", error);
           console.error("Gagal mendeteksi wajah:", error);
         }
