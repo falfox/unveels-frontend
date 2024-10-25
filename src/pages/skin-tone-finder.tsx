@@ -50,7 +50,7 @@ function Main() {
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
         <VideoStream debugMode={false} />
-        <SkinToneFinderScene debugMode={true} />
+        <SkinToneFinderScene />
         {/* <div
           className="absolute inset-0"
           style={{
@@ -529,7 +529,7 @@ export function TopNavigation({
 }
 
 function Sidebar() {
-  const { compareCapture } = useCamera();
+  const { compareCapture, resetCapture } = useCamera();
   return (
     <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
@@ -560,7 +560,7 @@ function Sidebar() {
             <Icons.compare className="size-6 text-white" />
           </button>
           <button className="">
-            <Icons.reset className="size-6 text-white" />
+            <Icons.reset onClick={resetCapture} className="size-6 text-white" />
           </button>
           <button className="hidden">
             <Icons.upload className="size-6 text-white" />
