@@ -69,7 +69,7 @@ function ShareOption({ icon, label, className }: ShareOptionProps) {
           })
         )}
       </div>
-      <span className="text-xs text-center text-white">{label}</span>
+      <span className="text-center text-xs text-white">{label}</span>
     </div>
   );
 }

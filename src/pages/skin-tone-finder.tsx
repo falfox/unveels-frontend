@@ -1,4 +1,12 @@
-import { CSSProperties, Fragment, useEffect, useState } from "react";
+import {
+  CSSProperties,
+  Dispatch,
+  FC,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { Icons } from "../components/icons";
 import clsx from "clsx";
 import {
@@ -30,6 +38,7 @@ import {
 } from "../components/skin-tone-finder-scene/skin-color-context";
 import { usePage } from "../hooks/usePage";
 import { Link } from "react-router-dom";
+import { bool } from "@techstark/opencv-js";
 
 export function SkinToneFinder() {
   return (
@@ -45,6 +54,7 @@ export function SkinToneFinder() {
 
 function Main() {
   const { criterias } = useCamera();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
@@ -63,16 +73,20 @@ function Main() {
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         {criterias.isCaptured ? "" : <VideoScene />}
-        <MainContent />
+        <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
         <Footer />
       </div>
-      <Sidebar />
+      <Sidebar setCollapsed={setCollapsed} />
     </div>
   );
 }
 
-function MainContent() {
-  const [collapsed, setCollapsed] = useState(false);
+interface MainContentProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+function MainContent({ collapsed, setCollapsed }: MainContentProps) {
   const { criterias } = useCamera();
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -528,7 +542,10 @@ export function TopNavigation({
   );
 }
 
-function Sidebar() {
+interface SidebarProps {
+  setCollapsed: Dispatch<SetStateAction<boolean>>;
+}
+function Sidebar({ setCollapsed }: SidebarProps) {
   const { compareCapture, resetCapture } = useCamera();
   return (
     <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
@@ -553,7 +570,10 @@ function Sidebar() {
           <button className="">
             <Icons.flipCamera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button
+            className=""
+            onClick={() => setCollapsed((prevState) => !prevState)}
+          >
             <Icons.expand className="size-6 text-white" />
           </button>
           <button className="" onClick={compareCapture}>
