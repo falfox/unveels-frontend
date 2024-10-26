@@ -1,35 +1,43 @@
 import { MeshProps } from "@react-three/fiber";
-import React, { useMemo } from "react";
-import { MeshBasicMaterial } from "three";
-import { useSkinColor } from "../../skin-tone-finder-scene/skin-color-context";
+import React, { useMemo, Suspense } from "react";
+import { Color, MeshBasicMaterial } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
+import { useMakeup } from "../makeup-context";
 
 interface FoundationProps extends MeshProps {
   landmarks: Landmark[];
   planeSize: [number, number];
 }
 
-const Foundation: React.FC<FoundationProps> = ({ landmarks, planeSize }) => {
-  const { hexColor } = useSkinColor(); // Warna dari context
+const FoundationInner: React.FC<FoundationProps> = React.memo(
+  ({ landmarks, planeSize }) => {
+    const { foundationColor } = useMakeup();
 
-  // Inisialisasi material dengan useMemo
-  const foundationMaterial = useMemo(
-    () =>
-      new MeshBasicMaterial({
-        color: hexColor,
+    // Membuat material dengan useMemo hanya saat foundationColor berubah
+    const foundationMaterial = useMemo(() => {
+      return new MeshBasicMaterial({
+        color: new Color(foundationColor),
         transparent: true,
         opacity: 0.15,
-      }),
-    [hexColor], // Material diperbarui jika hexColor berubah
-  );
+      });
+    }, [foundationColor]);
 
+    return (
+      <FaceMesh
+        landmarks={landmarks}
+        material={foundationMaterial}
+        planeSize={planeSize}
+      />
+    );
+  },
+);
+
+const Foundation: React.FC<FoundationProps> = (props) => {
   return (
-    <FaceMesh
-      landmarks={landmarks}
-      material={foundationMaterial}
-      planeSize={[planeSize[0], planeSize[1]]}
-    />
+    <Suspense fallback={null}>
+      <FoundationInner {...props} />
+    </Suspense>
   );
 };
 

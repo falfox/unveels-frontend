@@ -3,11 +3,12 @@ import { Icons } from "../../../../components/icons";
 
 import { ColorPalette } from "../../../../components/color-palette";
 import { BlushProvider, useBlushContext } from "./blush-context";
+import { useMakeup } from "../../../../components/three/makeup-context";
 
 export function BlushSelector() {
   return (
     <BlushProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
+      <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
         <ColorSelector />
 
         <TextureSelector />
@@ -34,24 +35,39 @@ const colors = [
 
 function ColorSelector() {
   const { selectedColor, setSelectedColor } = useBlushContext();
+  const { setBlushColor, setShowBlush, showBlush } = useMakeup();
+
+  function resetColor() {
+    if (showBlush) {
+      setShowBlush(false);
+    }
+
+    setSelectedColor(null);
+  }
+
+  function setColor(color: string) {
+    if (!showBlush) {
+      setShowBlush(true);
+    }
+
+    setSelectedColor(color);
+    setBlushColor(color);
+  }
+
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
-            setSelectedColor(null);
+            resetColor();
           }}
         >
           <Icons.empty className="size-10" />
         </button>
         {colors.map((color, index) => (
-          <button
-            type="button"
-            key={index}
-            onClick={() => setSelectedColor(color)}
-          >
+          <button type="button" key={index} onClick={() => setColor(color)}>
             <ColorPalette
               key={index}
               size="large"
@@ -71,21 +87,28 @@ const textures = ["Metallic", "Matt", "Shimmer"];
 
 function TextureSelector() {
   const { selectedTexture, setSelectedTexture } = useBlushContext();
+  const { setBlushMaterial } = useMakeup();
+
+  function setMaterial(material: number, materialName: string) {
+    setSelectedTexture(materialName);
+    setBlushMaterial(material);
+  }
+
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture}
             type="button"
             className={clsx(
-              "inline-flex items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80 shrink-0",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture,
               },
             )}
-            onClick={() => setSelectedTexture(texture)}
+            onClick={() => setMaterial(index, texture)}
           >
             <span className="text-sm">{texture}</span>
           </button>
@@ -105,9 +128,16 @@ const blushes = [
 
 function ShapeSelector() {
   const { selectedShape, setSelectedShape } = useBlushContext();
+  const { setBlushPattern } = useMakeup();
+
+  function setPattern(pattern: number, patternName: string) {
+    setBlushPattern(pattern);
+    setSelectedShape(patternName);
+  }
+
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {blushes.map((path, index) => (
           <button
             key={index}
@@ -118,9 +148,9 @@ function ShapeSelector() {
                 "border-white/80": selectedShape === index.toString(),
               },
             )}
-            onClick={() => setSelectedShape(index.toString())}
+            onClick={() => setPattern(index, index.toString())}
           >
-            <img src={path} alt="Highlighter" className="rounded size-12" />
+            <img src={path} alt="Highlighter" className="size-12 rounded" />
           </button>
         ))}
       </div>
@@ -169,14 +199,14 @@ function ProductList() {
   ];
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {products.map((product, index) => (
         <div key={index} className="w-[100px] rounded shadow">
           <div className="relative h-[70px] w-[100px] overflow-hidden">
             <img
               src={"https://picsum.photos/id/237/200/300"}
               alt="Product"
-              className="object-cover rounded"
+              className="rounded object-cover"
             />
           </div>
 
@@ -184,7 +214,7 @@ function ProductList() {
             {product.name}
           </h3>
           <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between pt-1 space-x-1">
+          <div className="flex items-end justify-between space-x-1 pt-1">
             <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
               $15
             </div>

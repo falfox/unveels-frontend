@@ -22,10 +22,8 @@ import {
   CameraProvider,
   useCamera,
 } from "../components/recorder/recorder-context";
-import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
 import { SkinColorProvider } from "../components/skin-tone-finder-scene/skin-color-context";
-import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-tone-finder-scene";
 import { usePage } from "../hooks/usePage";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { EyesMode } from "./vto/eyes/eyes-makeup";
@@ -37,14 +35,17 @@ import { LipsMode } from "./vto/lips/lips-makeup";
 import { NailsMode } from "./vto/nails/nails-makeup";
 import { NeckAccessoriesMode } from "./vto/neck-accessories/neck-accessories";
 import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
+import { MakeupProvider } from "../components/three/makeup-context";
 
 export function VirtualTryOn() {
   return (
     <CameraProvider>
       <SkinColorProvider>
-        <div className="h-full min-h-dvh">
-          <Main />
-        </div>
+        <MakeupProvider>
+          <div className="h-full min-h-dvh">
+            <Main />
+          </div>
+        </MakeupProvider>
       </SkinColorProvider>
     </CameraProvider>
   );

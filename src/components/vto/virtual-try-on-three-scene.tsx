@@ -3,25 +3,42 @@ import { MeshProps, useThree } from "@react-three/fiber";
 import { LinearFilter, RGBFormat, VideoTexture, DoubleSide } from "three";
 import { ShaderMaterial } from "three";
 import { Vector2 } from "three";
-import { FaceShader } from "../../shaders/FaceShader"; // Adjust the import path accordingly
+import { FaceShader } from "../../shaders/FaceShader";
 import Webcam from "react-webcam";
 import { Landmark } from "../../types/landmark";
-import FaceMesh from "../three/face-mesh";
 import Foundation from "../three/makeup/foundation";
+import { useMakeup } from "../three/makeup-context";
+import Blush from "../three/makeup/blush";
+import Concealer from "../three/makeup/concealer";
+import Highlighter from "../three/makeup/highlighter";
+import Contour from "../three/makeup/contour";
+import Lipliner from "../three/makeup/lipliner";
+import Lipplumper from "../three/makeup/lipplumper";
+import LipColor from "../three/makeup/lipcolor";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
-  landmakrs: Landmark[];
+  landmarks: Landmark[];
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   videoRef,
-  landmakrs,
+  landmarks,
   ...props
 }) => {
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
   const [videoTexture, setVideoTexture] = useState<VideoTexture | null>(null);
+  const {
+    showFoundation,
+    showBlush,
+    showConcealer,
+    showHighlighter,
+    showContour,
+    showLipliner,
+    showLipplumper,
+    showLipColor,
+  } = useMakeup();
 
   const filterRef = useRef<ShaderMaterial>(null);
 
@@ -127,7 +144,54 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
               }}
             />
           </mesh>
-          <Foundation planeSize={planeSize} landmarks={landmakrs} />
+
+          {showFoundation ? (
+            <Foundation planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showBlush ? (
+            <Blush planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showConcealer ? (
+            <Concealer planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showHighlighter ? (
+            <Highlighter planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showContour ? (
+            <Contour planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showLipliner ? (
+            <Lipliner planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showLipplumper ? (
+            <Lipplumper planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showLipColor ? (
+            <LipColor planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
         </>
       )}
     </>

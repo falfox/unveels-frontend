@@ -30,7 +30,7 @@ export function VirtualTryOnScene() {
     const initializeFaceLandmarker = async () => {
       try {
         const filesetResolver = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm",
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17/wasm",
         );
         const landmarker = await FaceLandmarker.createFromOptions(
           filesetResolver,
@@ -38,7 +38,7 @@ export function VirtualTryOnScene() {
             baseOptions: {
               modelAssetPath:
                 "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-              delegate: "GPU", // Opsional: gunakan "GPU" jika didukung
+              delegate: "GPU",
             },
             outputFaceBlendshapes: true,
             runningMode: "VIDEO",
@@ -152,7 +152,7 @@ export function VirtualTryOnScene() {
           outputColorSpace: SRGBColorSpace,
         }}
       >
-        <VirtualTryOnThreeScene videoRef={webcamRef} landmakrs={landmarks} />
+        <VirtualTryOnThreeScene videoRef={webcamRef} landmarks={landmarks} />
       </Canvas>
 
       <Webcam
@@ -165,6 +165,7 @@ export function VirtualTryOnScene() {
           width: VIDEO_WIDTH,
           height: VIDEO_HEIGHT,
           facingMode: criterias.flipped ? "environment" : "user",
+          frameRate: { exact: 25, ideal: 25, max: 25 },
         }}
         onUserMediaError={(err) =>
           setError(
