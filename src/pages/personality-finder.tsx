@@ -23,6 +23,13 @@ import { personalityInference } from "../inference/personalityInference";
 import { Classifier } from "../types/classifier";
 import { personalityAnalysisResult } from "../utils/constants";
 import { usePage } from "../hooks/usePage";
+import { useFragrancesProductQuery } from "../api/fragrances";
+import { LoadingProducts } from "../components/loading";
+import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
+import { BrandName } from "../components/product/brand";
+import { useNavigate } from "react-router-dom";
+import { useLipsProductQuery } from "../api/lips";
+import { useLookbookProductQuery } from "../api/lookbook";
 
 export function PersonalityFinder() {
   return (
@@ -46,7 +53,7 @@ function MainContent() {
       <div className="absolute inset-0">
         <VideoStream debugMode={false} />
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
           }}
@@ -116,6 +123,8 @@ function Result() {
     performInference();
   }, []);
 
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col h-screen font-sans text-white bg-black">
       {/* Navigation */}
@@ -123,7 +132,13 @@ function Result() {
         <button className="size-6">
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <button type="button" className="size-6" onClick={() => setPage(null)}>
+        <button
+          type="button"
+          className="size-6"
+          onClick={() => {
+            navigate("/");
+          }}
+        >
           <X className="w-6 h-6" />
         </button>
       </div>
@@ -192,7 +207,11 @@ function Result() {
       {selectedTab === "Attributes" ? (
         <AttributesTab data={inferenceResult} />
       ) : null}
-      {selectedTab === "Recommendations" ? <RecommendationsTab /> : null}
+      {selectedTab === "Recommendations" ? (
+        <RecommendationsTab
+          personality={inferenceResult?.[15]?.outputLabel ?? ""}
+        />
+      ) : null}
     </div>
   );
 }
@@ -379,7 +398,7 @@ function PersonalitySection({
   );
 }
 
-function RecommendationsTab() {
+function RecommendationsTab({ personality }: { personality: string }) {
   const products = [
     {
       name: "Tom Ford Item name Tom Ford",
@@ -407,56 +426,79 @@ function RecommendationsTab() {
     },
   ];
 
+  const { data: fragrances } = useFragrancesProductQuery({
+    personality,
+  });
+  const { data: lips } = useLipsProductQuery({
+    personality,
+  });
+
+  const { data: items } = useLookbookProductQuery({
+    personality,
+  });
+
   return (
     <div className="w-full px-4 py-8 overflow-auto">
       <div className="pb-14">
         <h2 className="pb-4 text-xl font-bold">Perfumes Recommendations</h2>
-        <div className="flex w-full gap-4 overflow-x-auto">
-          {products.map((product, index) => (
-            <div key={index} className="w-[150px] rounded">
-              <div className="relative h-[150px] w-[150px] overflow-hidden">
-                <img
-                  src={"https://picsum.photos/id/237/200/300"}
-                  alt="Product"
-                  className="object-cover rounded"
-                />
-              </div>
+        {fragrances ? (
+          <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
+            {fragrances.items.map((product, index) => {
+              const imageUrl =
+                mediaUrl(product.media_gallery_entries[0].file) ??
+                "https://picsum.photos/id/237/200/300";
 
-              <div className="flex items-start justify-between py-2">
-                <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-[0.625rem] text-white/60">
-                    {product.brand}
-                  </p>
+              return (
+                <div key={product.id} className="w-[150px] rounded">
+                  <div className="relative h-[150px] w-[150px] overflow-hidden">
+                    <img
+                      src={imageUrl}
+                      alt="Product"
+                      className="object-cover rounded"
+                    />
+                  </div>
+
+                  <div className="flex items-start justify-between py-2">
+                    <div className="w-full">
+                      <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-[0.625rem] text-white/60">
+                        <BrandName
+                          brandId={getProductAttributes(product, "brand")}
+                        />
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                      <span className="text-sm font-bold text-white">
+                        ${product.price}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Rating rating={4} />
+
+                  <div className="flex space-x-1">
+                    <button
+                      type="button"
+                      className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
+                    >
+                      ADD TO CART
+                    </button>
+                    <button
+                      type="button"
+                      className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
+                    >
+                      SEE IMPROVEMENT
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-x-1">
-                  <span className="text-sm font-bold text-white">
-                    ${product.price.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-
-              <Rating rating={4} />
-
-              <div className="flex space-x-1">
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
-                >
-                  ADD TO CART
-                </button>
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
-                >
-                  SEE IMPROVEMENT
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <LoadingProducts />
+        )}
       </div>
       <div className="pb-14">
         <h2 className="text-xl font-bold">Look Recommendations</h2>
@@ -464,153 +506,128 @@ function RecommendationsTab() {
           A bold red lipstick and defined brows, mirror your strong, vibrant
           personality
         </p>
-        <div className="flex w-full gap-4 overflow-x-auto">
-          {products.map((product, index) => (
-            <div key={index} className="w-[150px] rounded">
-              <div className="relative h-[150px] w-[150px] overflow-hidden">
-                <img
-                  src={"https://picsum.photos/id/237/200/300"}
-                  alt="Product"
-                  className="object-cover rounded"
-                />
-              </div>
+        {items ? (
+          <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
+            {items.items.map((product, index) => {
+              const imageUrl =
+                mediaUrl(product.media_gallery_entries[0].file) ??
+                "https://picsum.photos/id/237/200/300";
 
-              <div className="flex items-start justify-between py-2">
-                <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-[0.625rem] text-white/60">
-                    {product.brand}
-                  </p>
+              return (
+                <div key={product.id} className="w-[150px] rounded">
+                  <div className="relative h-[150px] w-[150px] overflow-hidden">
+                    <img
+                      src={imageUrl}
+                      alt="Product"
+                      className="object-cover rounded"
+                    />
+                  </div>
+
+                  <div className="flex items-start justify-between py-2">
+                    <div className="w-full">
+                      <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-[0.625rem] text-white/60">
+                        <BrandName
+                          brandId={getProductAttributes(product, "brand")}
+                        />
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                      <span className="text-sm font-bold text-white">
+                        ${product.price}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Rating rating={4} />
+
+                  <div className="flex space-x-1">
+                    <button
+                      type="button"
+                      className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
+                    >
+                      ADD TO CART
+                    </button>
+                    <button
+                      type="button"
+                      className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
+                    >
+                      SEE IMPROVEMENT
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-x-1">
-                  <span className="text-sm font-bold text-white">
-                    ${product.price.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <Rating rating={4} />
-
-              <div className="flex space-x-1">
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
-                >
-                  ADD TO CART
-                </button>
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
-                >
-                  SEE IMPROVEMENT
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <LoadingProducts />
+        )}
       </div>
       <div className="pb-14">
         <h2 className="text-xl font-bold">Lip Color Recommendations</h2>
         <p className="pb-4 text-sm font-bold">
           The best lip color for you are orange shades
         </p>
-        <div className="flex w-full gap-4 overflow-x-auto">
-          {products.map((product, index) => (
-            <div key={index} className="w-[150px] rounded">
-              <div className="relative h-[150px] w-[150px] overflow-hidden">
-                <img
-                  src={"https://picsum.photos/id/237/200/300"}
-                  alt="Product"
-                  className="object-cover rounded"
-                />
-              </div>
+        {lips ? (
+          <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
+            {lips.items.map((product, index) => {
+              const imageUrl =
+                mediaUrl(product.media_gallery_entries[0].file) ??
+                "https://picsum.photos/id/237/200/300";
 
-              <div className="flex items-start justify-between py-2">
-                <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-[0.625rem] text-white/60">
-                    {product.brand}
-                  </p>
+              return (
+                <div key={product.id} className="w-[150px] rounded">
+                  <div className="relative h-[150px] w-[150px] overflow-hidden">
+                    <img
+                      src={imageUrl}
+                      alt="Product"
+                      className="object-cover rounded"
+                    />
+                  </div>
+
+                  <div className="flex items-start justify-between py-2">
+                    <div className="w-full">
+                      <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-[0.625rem] text-white/60">
+                        <BrandName
+                          brandId={getProductAttributes(product, "brand")}
+                        />
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                      <span className="text-sm font-bold text-white">
+                        ${product.price}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Rating rating={4} />
+
+                  <div className="flex space-x-1">
+                    <button
+                      type="button"
+                      className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
+                    >
+                      ADD TO CART
+                    </button>
+                    <button
+                      type="button"
+                      className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
+                    >
+                      SEE IMPROVEMENT
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-x-1">
-                  <span className="text-sm font-bold text-white">
-                    ${product.price.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <Rating rating={4} />
-
-              <div className="flex space-x-1">
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
-                >
-                  ADD TO CART
-                </button>
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
-                >
-                  SEE IMPROVEMENT
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="pb-14">
-        <h2 className="pb-4 text-xl font-bold">Accessories Recommendations</h2>
-        <div className="flex w-full gap-4 overflow-x-auto">
-          {products.map((product, index) => (
-            <div key={index} className="w-[150px] rounded">
-              <div className="relative h-[150px] w-[150px] overflow-hidden">
-                <img
-                  src={"https://picsum.photos/id/237/200/300"}
-                  alt="Product"
-                  className="object-cover rounded"
-                />
-              </div>
-
-              <div className="flex items-start justify-between py-2">
-                <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-[0.625rem] text-white/60">
-                    {product.brand}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center justify-end gap-x-1">
-                  <span className="text-sm font-bold text-white">
-                    ${product.price.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <Rating rating={4} />
-
-              <div className="flex space-x-1">
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
-                >
-                  ADD TO CART
-                </button>
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
-                >
-                  SEE IMPROVEMENT
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <LoadingProducts />
+        )}
       </div>
     </div>
   );

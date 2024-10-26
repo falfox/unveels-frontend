@@ -1,5 +1,3 @@
-import { CSSProperties, Fragment, useEffect, useState } from "react";
-import { Icons } from "../components/icons";
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -9,11 +7,18 @@ import {
   Heart,
   PauseCircle,
   Plus,
-  Share,
   StopCircle,
-  X,
+  X
 } from "lucide-react";
+import { CSSProperties, Fragment, Suspense, useState } from "react";
+import { Link } from "react-router-dom";
+import { skin_tones, tone_types } from "../api/attributes/skin_tone";
+import { getBrandName, useBrandsQuerySuspense } from "../api/brands";
+import { Product } from "../api/shared";
+import { useSkinToneProductQuery } from "../api/skin-tone";
 import { Footer } from "../components/footer";
+import { Icons } from "../components/icons";
+import { LoadingProducts } from "../components/loading";
 import { VideoScene } from "../components/recorder/recorder";
 import {
   CameraProvider,
@@ -21,15 +26,19 @@ import {
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
-import { useRecordingControls } from "../hooks/useRecorder";
-import { useScrollContainer } from "../hooks/useScrollContainer";
-import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-tone-finder-scene";
 import {
   SkinColorProvider,
   useSkinColor,
 } from "../components/skin-tone-finder-scene/skin-color-context";
+import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-tone-finder-scene";
 import { usePage } from "../hooks/usePage";
-import { Link } from "react-router-dom";
+import { useRecordingControls } from "../hooks/useRecorder";
+import { useScrollContainer } from "../hooks/useScrollContainer";
+import {
+  extractUniqueCustomAttributes,
+  getProductAttributes,
+  mediaUrl
+} from "../utils/apiUtils";
 
 export function SkinToneFinder() {
   return (
@@ -52,7 +61,7 @@ function Main() {
         <VideoStream debugMode={false} />
         <SkinToneFinderScene />
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
           }}
@@ -181,32 +190,21 @@ function ShadesSelector() {
   );
 }
 
-function MatchedShades() {
-  const shadeOptions = [
-    {
-      name: "Cooler",
-      color: "#A37772",
-    },
-    {
-      name: "Lighter",
-      color: "#DF9F86",
-    },
-    {
-      name: "Perfect Fit",
-      color: "#B7775E",
-    },
-    {
-      name: "Warmer",
-      color: "#CB8B5E",
-    },
-    {
-      name: "Darker",
-      color: "#8F4F36",
-    },
-  ];
+const isShadeSelected = (product: Product, selectedShade: string) =>
+  getProductAttributes(product, "hexacodes")?.value.includes(
+    selectedShade ?? "",
+  );
 
-  const [selectedShade, setSelectedShade] = useState(shadeOptions[0].name);
+function MatchedShades() {
+  const [selectedTne, setSelectedTone] = useState(tone_types[0]);
   const { skinType, hexColor } = useSkinColor();
+
+  const skinToneId = skin_tones.find((tone) => tone.name === skinType)?.id;
+
+  const { data } = useSkinToneProductQuery({
+    skintone: skinToneId,
+    tonetype: selectedTne.id,
+  });
 
   return (
     <>
@@ -219,62 +217,59 @@ function MatchedShades() {
           <span className="text-sm">{skinType}</span>
         </div>
         <div className="flex w-full min-w-0 pt-2">
-          {shadeOptions.map((option, index) => (
+          {tone_types.map((option, index) => (
             <button
               key={index}
               className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
-              data-selected={selectedShade === option.name}
+              data-selected={selectedTne.name === option.name}
               style={{
                 background: option.color,
               }}
-              onClick={() => setSelectedShade(option.name)}
+              onClick={() => setSelectedTone(option)}
             >
               {option.name}
             </button>
           ))}
         </div>
         <div className="w-full text-right">
-          <button className="py-4 text-[0.625rem] text-white">View all</button>
+          <button className="py-2 text-[0.625rem] text-white">View all</button>
         </div>
 
-        <ProductList />
+        {data ? (
+          <Suspense fallback={<LoadingProducts />}>
+            <ProductList products={data.items} />
+          </Suspense>
+        ) : (
+          <LoadingProducts />
+        )}
       </div>
     </>
   );
 }
 
 function OtherShades() {
-  const shadeOptions = [
-    "#342112",
-    "#3D2B1F",
-    "#483C32",
-    "#4A2912",
-    "#4F300D",
-    "#5C4033",
-    "#6A4B3A",
-    "#7B3F00",
-    "#8B4513",
-  ];
-
-  const tones = [
-    {
-      name: "Light Tones",
-      color: "#FAD4B4",
-    },
-    {
-      name: "Medium Tones",
-      color: "#D18B59",
-    },
-    {
-      name: "Dark Tones",
-      color: "#4B2F1B",
-    },
-  ];
-  const [selectedTone, setSelectedTone] = useState(tones[0].name);
+  const [selectedTone, setSelectedTone] = useState(skin_tones[0]);
 
   const [selectedShade, setSelectedShade] = useState(null as string | null);
 
   const { skinType, setSkinColor } = useSkinColor();
+
+  const { data } = useSkinToneProductQuery({
+    skintone: selectedTone.id,
+  });
+
+  const hexCodes = data
+    ? extractUniqueCustomAttributes(data.items, "hexacode")
+    : [];
+
+  const shadesOptions = hexCodes
+    .filter(Boolean)
+    .map((hexes: string) => hexes.split(","))
+    .flat();
+
+  const filteredProducts = selectedShade
+    ? (data?.items.filter((i) => isShadeSelected(i, selectedShade)) ?? [])
+    : (data?.items ?? []);
 
   function setSelectedColor(option: string) {
     setSelectedShade(option);
@@ -285,14 +280,17 @@ function OtherShades() {
 
   return (
     <div className="flex flex-col items-start w-full gap-2">
-      <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-        {tones.map((tone, index) => (
+      <div className="flex items-center w-full gap-3 overflow-x-auto no-scrollbar">
+        {skin_tones.map((tone, index) => (
           <div
             key={index}
-            className={`inline-flex grow items-center gap-x-2 rounded-full border px-2 py-1 text-white ${
-              selectedTone === tone.name ? "border-white" : "border-transparent"
-            }`}
-            onClick={() => setSelectedTone(tone.name)}
+            className={clsx(
+              "inline-flex shrink-0 grow items-center gap-x-2 rounded-full border px-2 py-1 text-white",
+              selectedTone.name === tone.name
+                ? "border-white"
+                : "border-transparent",
+            )}
+            onClick={() => setSelectedTone(tone)}
           >
             <div
               className="rounded-full size-3"
@@ -303,10 +301,15 @@ function OtherShades() {
         ))}
       </div>
       <div className="flex w-full gap-4 py-2 overflow-x-auto no-scrollbar">
-        <button className="flex items-center justify-center size-8 shrink-0">
-          <Icons.unselect className="text-white size-6" />
+        <button
+          type="button"
+          className="flex size-8 shrink-0 items-center justify-center transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white"
+          data-selected={selectedShade === null}
+          onClick={() => setSelectedShade(null)}
+        >
+          <Icons.unselect className="text-white size-7" />
         </button>
-        {shadeOptions.map((option, index) => (
+        {shadesOptions.map((option, index) => (
           <button
             key={index}
             className={`size-8 shrink-0 rounded-full border border-transparent transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
@@ -321,42 +324,23 @@ function OtherShades() {
         ))}
       </div>
       <div className="w-full text-right">
-        <button className="py-4 text-[0.625rem] text-white">View all</button>
+        <button className="py-2 text-[0.625rem] text-white">View all</button>
       </div>
 
-      <ProductList />
+      {data ? (
+        <Suspense fallback={<LoadingProducts />}>
+          <ProductList products={filteredProducts} />
+        </Suspense>
+      ) : (
+        <LoadingProducts />
+      )}
     </div>
   );
 }
 
-function ProductList() {
+function ProductList({ products }: { products: Array<Product> }) {
   const { scrollContainerRef, handleMouseDown } = useScrollContainer();
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
+  const { data } = useBrandsQuerySuspense();
 
   return (
     <div
@@ -364,32 +348,47 @@ function ProductList() {
       ref={scrollContainerRef}
       onMouseDown={handleMouseDown}
     >
-      {products.map((product, index) => (
-        <div key={index} className="w-[110px] rounded shadow">
-          <div className="relative h-[80px] w-[110px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="object-cover rounded"
-            />
-          </div>
+      {products.map((product, index) => {
+        const imageUrl =
+          mediaUrl(product.media_gallery_entries[0].file) ??
+          "https://picsum.photos/id/237/200/300";
 
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <div className="flex items-center justify-between">
-            <p className="text-[0.5rem] text-white/60">{product.brand}</p>
-            <div className="flex flex-wrap items-center justify-end gap-x-1">
-              <span className="text-[0.625rem] font-bold text-white">
-                ${product.price.toFixed(2)}
-              </span>
-              <span className="text-[0.5rem] text-white/50 line-through">
-                ${product.originalPrice.toFixed(2)}
-              </span>
+        const brand = getBrandName(
+          data.options,
+          product.custom_attributes.find(
+            (attr) => attr.attribute_code === "brand",
+          )?.value as string,
+        );
+
+        return (
+          <a
+            key={index}
+            className="block w-[110px] rounded shadow"
+            target="_blank"
+            href={product.sku}
+          >
+            <div className="relative h-[80px] w-[110px] overflow-hidden">
+              <img
+                src={imageUrl}
+                alt="Product"
+                className="object-cover rounded"
+              />
             </div>
-          </div>
-        </div>
-      ))}
+
+            <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+              {product.name}
+            </h3>
+            <div className="flex items-center justify-between">
+              <p className="text-[0.5rem] text-white/60">{brand}</p>
+              <div className="flex flex-wrap items-center justify-end gap-x-1">
+                <span className="text-[0.625rem] font-bold text-white">
+                  ${product.price.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </a>
+        );
+      })}
     </div>
   );
 }
@@ -460,7 +459,7 @@ export function TopNavigation({
   const { setPage } = usePage();
   const { flipCamera } = useCamera();
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_button]:pointer-events-auto [&_a]:pointer-events-auto">
+    <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
       <div className="flex flex-col gap-4">
         <button className="flex items-center justify-center overflow-hidden rounded-full size-8 bg-black/25 backdrop-blur-3xl">
           <ChevronLeft className="text-white size-6" />

@@ -38,10 +38,20 @@ import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
 import { HandwearSelector } from "./pages/vto/hand-accessories/handwear/handwear";
 import { WatchesSelector } from "./pages/vto/hand-accessories/watches/watches";
+import { useCategoriesQuerySuspense } from "./api/categories";
+import { Suspense } from "react";
+import { useBrandsQuerySuspense } from "./api/brands";
 
 // Define routes using object syntax
 const routes = [
-  { path: "/", element: <Home /> },
+  {
+    path: "/",
+    element: (
+      <Suspense fallback={<>Loading...</>}>
+        <Home />
+      </Suspense>
+    ),
+  },
   { path: "/skin-tone-finder", element: <SkinToneFinder /> },
   { path: "/personality-finder", element: <PersonalityFinder /> },
   { path: "/face-analyzer", element: <FaceAnalyzer /> },
@@ -109,6 +119,9 @@ const router = createBrowserRouter(routes, {
 });
 
 function Home() {
+  useCategoriesQuerySuspense();
+  useBrandsQuerySuspense();
+
   return (
     <div className="absolute left-0 flex flex-col gap-4 top-4">
       <LinkButton to="/skin-tone-finder">Skin Tone Finder</LinkButton>
