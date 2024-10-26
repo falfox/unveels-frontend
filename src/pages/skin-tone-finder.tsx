@@ -54,13 +54,13 @@ function Main() {
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
         <VideoStream debugMode={false} />
-        <SkinToneFinderScene />
-        <div
+        <SkinToneFinderScene debugMode={true} />
+        {/* <div
           className="absolute inset-0"
           style={{
             background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
           }}
-        ></div>
+        ></div> */}
       </div>
       <RecorderStatus />
       <TopNavigation />
@@ -534,7 +534,7 @@ export function TopNavigation({
 }
 
 function Sidebar() {
-  const { flipCamera } = useCamera();
+  const { flipCamera, compareCapture } = useCamera();
   return (
     <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
@@ -561,7 +561,7 @@ function Sidebar() {
           <button className="">
             <Icons.expand className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={compareCapture}>
             <Icons.compare className="size-6 text-white" />
           </button>
           <button className="">

@@ -17,6 +17,7 @@ interface CameraState {
   isCaptured: boolean;
   capturedImage: string | null;
   capturedImageCut: string | null;
+  isCompare: boolean;
   lastBoundingBox: BoundingBox | null;
 }
 
@@ -27,6 +28,7 @@ interface CameraContextType {
   finish: () => void;
   captureImage: (image: string) => void;
   captureImageCut: (image: string) => void;
+  compareCapture: () => void;
   resetCapture: () => void;
   setBoundingBox: (box: BoundingBox) => void;
 }
@@ -45,6 +47,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     isCaptured: false,
     capturedImage: null,
     capturedImageCut: null,
+    isCompare: false,
     lastBoundingBox: null,
   });
 
@@ -76,6 +79,13 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     }));
   }
 
+  function compareCapture() {
+    setState((prevState) => ({
+      ...prevState,
+      isCompare: !state.isCompare,
+    }));
+  }
+
   function resetCapture() {
     setState((prevState) => ({
       ...prevState,
@@ -98,6 +108,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
         finish,
         captureImage,
         captureImageCut,
+        compareCapture,
         resetCapture,
         setBoundingBox,
       }}

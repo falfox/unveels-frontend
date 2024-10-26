@@ -8,6 +8,7 @@ import { extractSkinColor } from "../../utils/imageProcessing";
 import SkinToneFinderThreeScene from "./skin-tone-finder-three-scene";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { useMakeup } from "../three/makeup-context";
+import { Rnd } from "react-rnd";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -261,8 +262,52 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="fixed inset-0 flex">
       {/* Render kondisional overlay canvas */}
+      {/* Overlay Canvas */}
+      <Rnd
+        style={{
+          display: criterias.isCompare ? "flex" : "none",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#f0f0f0",
+          zIndex: 9999,
+          position: "absolute",
+          left: 0,
+          top: 0,
+          height: "100%",
+          width: "50%",
+          overflow: "hidden",
+          borderRight: "2px solid black",
+        }}
+        default={{
+          x: 0,
+          y: 0,
+          width: "50%",
+          height: "100%",
+        }}
+        enableResizing={{
+          top: false,
+          right: true,
+          bottom: false,
+          left: false,
+        }}
+        disableDragging={true}
+      >
+        <canvas
+          ref={overlayCanvasRef}
+          className="pointer-events-none absolute left-0 top-0 h-full w-screen"
+          style={{ zIndex: 50 }}
+        >
+          {/* Komponen untuk menggambar gambar di overlay canvas */}
+          <ImageCanvas
+            image={imageLoaded}
+            canvasRef={overlayCanvasRef}
+            // data={data}
+            // landmarks={landmarks}
+          />
+        </canvas>
+      </Rnd>
 
       {/* 3D Canvas */}
       <Canvas
