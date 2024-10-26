@@ -6,25 +6,21 @@ import {
   Uint16BufferAttribute,
   MeshBasicMaterial,
   DoubleSide,
+  Material,
 } from "three";
 import { faces, uvs, positions } from "../../utils/constants"; // Pastikan data faces dan uvs valid
-
-interface Landmark {
-  x: number;
-  y: number;
-  z: number;
-}
+import { Landmark } from "../../types/landmark";
 
 interface FaceMeshProps {
   planeSize: [number, number];
   landmarks: Landmark[];
-  hexColor: string; // Tambahkan prop hexColor
+  material: Material;
 }
 
 const FaceMesh: React.FC<FaceMeshProps> = ({
   planeSize,
   landmarks,
-  hexColor,
+  material,
 }) => {
   const geometryRef = useRef<BufferGeometry | null>(null);
   const materialRef = useRef<MeshBasicMaterial | null>(null);
@@ -53,26 +49,6 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
 
     return geom;
   }, [planeSize]);
-
-  // Inisialisasi material dengan warna dari hexColor
-  const material = useMemo(
-    () =>
-      new MeshBasicMaterial({
-        color: hexColor, // Gunakan hexColor dari props
-        wireframe: false,
-        side: DoubleSide,
-        transparent: true,
-        opacity: 0.15,
-      }),
-    [hexColor], // Tambahkan hexColor sebagai dependency
-  );
-
-  // Update warna material saat hexColor berubah
-  useEffect(() => {
-    if (materialRef.current) {
-      materialRef.current.color.set(hexColor);
-    }
-  }, [hexColor]);
 
   // Update posisi vertex berdasarkan landmarks
   useEffect(() => {
@@ -112,7 +88,6 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
       ref={(mesh) => {
         if (mesh) {
           geometryRef.current = mesh.geometry;
-          materialRef.current = mesh.material as MeshBasicMaterial;
         }
       }}
     />

@@ -5,6 +5,7 @@ import { PersonalityFinder } from "./pages/personality-finder";
 import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
 import { SkinAnalysis } from "./pages/skin-analysis";
 import { SkinToneFinder } from "./pages/skin-tone-finder";
+import { SkinToneFinderWeb } from "./pages/skin-tone-finder-web";
 import { TryOnSelector, VirtualTryOn } from "./pages/virtual-try-on";
 import { EyeLinerSelector } from "./pages/vto/eyes/eye-liners/eye-liner";
 import { EyeShadowSelector } from "./pages/vto/eyes/eye-shadow/eye-shadow";
@@ -38,6 +39,8 @@ import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
 import { HandwearSelector } from "./pages/vto/hand-accessories/handwear/handwear";
 import { WatchesSelector } from "./pages/vto/hand-accessories/watches/watches";
+import { Path } from "three";
+import { element } from "three/webgpu";
 
 // Define routes using object syntax
 const routes = [
@@ -47,6 +50,7 @@ const routes = [
   { path: "/face-analyzer", element: <FaceAnalyzer /> },
   { path: "/skin-analysis", element: <SkinAnalysis /> },
   { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
+  { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   {
     path: "/virtual-try-on",
     element: <VirtualTryOn />,
@@ -110,7 +114,7 @@ const router = createBrowserRouter(routes, {
 
 function Home() {
   return (
-    <div className="absolute left-0 flex flex-col gap-4 top-4">
+    <div className="absolute left-0 top-4 flex flex-col gap-4">
       <LinkButton to="/skin-tone-finder">Skin Tone Finder</LinkButton>
       <LinkButton to="/personality-finder">Personality Finder</LinkButton>
       <LinkButton to="/face-analyzer">Face Analyzer</LinkButton>
@@ -118,6 +122,7 @@ function Home() {
       <LinkButton to="/personality-finder-web">
         Personality Finder Web
       </LinkButton>
+      <LinkButton to="/skin-tone-finder-web">Skin Tone Finder Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
     </div>
   );

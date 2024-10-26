@@ -112,7 +112,7 @@ export const skinAnalysisInference = async (
     const colors = new Colors();
 
     const model = await tflite.loadTFLiteModel(
-      `${window.location.href}models/skin-analysis/best_skin_float16.tflite`,
+      `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/skin-analysis/best_skin_float16.tflite`,
     );
 
     console.log("load model");
@@ -342,7 +342,9 @@ export const skinAnalysisInference = async (
     }
 
     return toDraw;
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Error occured durring inference : " + e);
+  }
 
   return [];
 };

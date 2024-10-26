@@ -299,7 +299,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             imageSrc,
             criterias.lastBoundingBox,
           );
-          captureImage(testImage);
+          captureImage(imageSrc);
           captureImageCut(croppedImage);
           setCapturedImageSrc(imageSrc); // Set the captured image
           setCroppedImageSrc(croppedImage); // Optional: Set cropped image
@@ -342,14 +342,14 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   ]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative h-full w-full">
       {/* Render Captured Image if available */}
       {capturedImageSrc ? (
-        <div className="relative w-full h-full">
+        <div className="relative h-full w-full">
           <img
             src={capturedImageSrc}
             alt="Captured"
-            className="object-cover w-full h-full"
+            className="h-full w-full object-cover"
           />
           {/* Button to Retake Photo */}
           <button
@@ -357,7 +357,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
               setCapturedImageSrc(null);
               startDetection(); // Restart detection if needed
             }}
-            className="absolute px-4 py-2 text-white bg-gray-700 rounded bottom-4 left-4"
+            className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
             aria-label="Retake Photo"
           >
             Retake Photo

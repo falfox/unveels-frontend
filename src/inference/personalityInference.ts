@@ -240,7 +240,7 @@ export const personalityInference = async (
 
   // face analyzer
   await loadTFLiteModel(
-    `${window.location.href}models/personality-finder/face-analyzer.tflite`,
+    `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/personality-finder/face-analyzer.tflite`,
   );
 
   const pred = await runTFLiteInference(preprocessedImage, w, h);
@@ -254,7 +254,7 @@ export const personalityInference = async (
 
   // personality finder
   await loadTFLiteModel(
-    `${window.location.href}models/personality-finder/personality_finder.tflite`,
+    `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/personality-finder/personality_finder.tflite`,
   );
 
   const predPersonality = await runTFLiteInference(preprocessedImage, w, h);
@@ -376,6 +376,15 @@ export const personalityInference = async (
       labels: [],
       outputLabel: "",
       outputColor: averageEyeColor,
+    });
+
+    classifiers.push({
+      name: "Image Data",
+      outputName: "",
+      labels: [],
+      outputLabel: "",
+      outputColor: "",
+      imageData: imageData,
     });
 
     console.log(classifiers);
