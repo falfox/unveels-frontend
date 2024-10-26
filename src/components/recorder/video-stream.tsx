@@ -40,6 +40,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     captureImage,
     setBoundingBox,
     captureImageCut,
+    resetCapture,
   } = useCamera();
 
   // State Variables for Metrics
@@ -309,7 +310,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
           captureImageCut(croppedImage);
           setCapturedImageSrc(imageSrc); // Set the captured image
           setCroppedImageSrc(croppedImage); // Optional: Set cropped image
-          stopDetection(); // Optionally stop detection after capture
+          // stopDetection(); // Optionally stop detection after capture
         } catch (error) {
           console.error("Error cropping image:", error);
         }
@@ -331,6 +332,9 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   // Use Effect to evaluate criteria and manage countdown
   useEffect(() => {
     const criteria = evaluateCriteria();
+    console.log("criteria.allGood ===> ", criteria.allGood);
+    console.log("criterias.isCaptured", criterias.isCaptured);
+    console.log("isCountdownActive ===> ", isCountdownActive);
 
     if (criteria.allGood && !criterias.isCaptured && !isCountdownActive) {
       // Start the countdown
@@ -347,6 +351,15 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     cancelCountdown,
   ]);
 
+  // Reset Capture state when new image is loaded
+  useEffect(() => {
+    if (!criterias.isCaptured) {
+      setCapturedImageSrc(null);
+      startDetection();
+      resetCapture();
+    }
+  }, [criterias.isCaptured]);
+
   return (
     <div className="relative h-full w-full">
       {/* Render Captured Image if available */}
@@ -361,7 +374,8 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
           <button
             onClick={() => {
               setCapturedImageSrc(null);
-              startDetection(); // Restart detection if needed
+              startDetection();
+              resetCapture(); // Restart detection if needed
             }}
             className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
             aria-label="Retake Photo"
