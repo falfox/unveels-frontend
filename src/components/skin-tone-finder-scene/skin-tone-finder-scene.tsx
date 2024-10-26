@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useCamera } from "../recorder/recorder-context";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { Canvas } from "@react-three/fiber";
@@ -9,6 +9,7 @@ import SkinToneFinderThreeScene from "./skin-tone-finder-three-scene";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { useMakeup } from "../three/makeup-context";
 import { Rnd } from "react-rnd";
+import html2canvas from "html2canvas";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -97,6 +98,7 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
   const { setFoundationColor } = useMakeup();
 
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+  const divRef = useRef<HTMLCanvasElement>(null);
 
   const [isTextureLoaded, setIsTextureLoaded] = useState<boolean>(false);
 
@@ -312,6 +314,7 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
       {/* 3D Canvas */}
       <Canvas
         className="absolute left-0 top-0 h-full w-full"
+        ref={divRef}
         style={{ zIndex: 0 }}
         orthographic
         camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}

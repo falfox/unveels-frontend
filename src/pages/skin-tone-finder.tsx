@@ -550,7 +550,7 @@ interface SidebarProps {
   setCollapsed: Dispatch<SetStateAction<boolean>>;
 }
 function Sidebar({ setCollapsed }: SidebarProps) {
-  const { flipCamera, compareCapture, resetCapture } = useCamera();
+  const { flipCamera, compareCapture, resetCapture, screenShoot } = useCamera();
   return (
     <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
@@ -568,7 +568,7 @@ function Sidebar({ setCollapsed }: SidebarProps) {
         />
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
-          <button className="">
+          <button className="" onClick={screenShoot}>
             <Icons.camera className="size-6 text-white" />
           </button>
           <button className="" onClick={flipCamera}>

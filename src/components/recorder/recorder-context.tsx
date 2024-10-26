@@ -1,5 +1,12 @@
 // recorder-context.tsx
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useRef,
+  MutableRefObject,
+} from "react";
 
 interface BoundingBox {
   x: number;
@@ -21,7 +28,12 @@ interface CameraState {
   lastBoundingBox: BoundingBox | null;
 }
 
+interface SkinToneThreeSceneRef {
+  callFunction: () => void;
+}
+
 interface CameraContextType {
+  skinToneThreeSceneRef: MutableRefObject<SkinToneThreeSceneRef | null>;
   criterias: CameraState;
   setCriterias: (newState: Partial<CameraState>) => void;
   flipCamera: () => void;
@@ -31,6 +43,7 @@ interface CameraContextType {
   compareCapture: () => void;
   resetCapture: () => void;
   setBoundingBox: (box: BoundingBox) => void;
+  screenShoot: () => void;
 }
 
 const CameraContext = createContext<CameraContextType | undefined>(undefined);
@@ -38,6 +51,8 @@ const CameraContext = createContext<CameraContextType | undefined>(undefined);
 export const CameraProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const skinToneThreeSceneRef = useRef<{ callFunction: () => void }>(null);
+
   const [state, setState] = useState<CameraState>({
     facePosition: false,
     lighting: false,
@@ -99,9 +114,16 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     setState((prevState) => ({ ...prevState, lastBoundingBox: box }));
   }
 
+  function screenShoot() {
+    if (skinToneThreeSceneRef.current) {
+      skinToneThreeSceneRef.current.callFunction();
+    }
+  }
+
   return (
     <CameraContext.Provider
       value={{
+        skinToneThreeSceneRef,
         criterias: state,
         setCriterias,
         flipCamera,
@@ -111,6 +133,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
         compareCapture,
         resetCapture,
         setBoundingBox,
+        screenShoot,
       }}
     >
       {children}

@@ -310,7 +310,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
           captureImageCut(croppedImage);
           setCapturedImageSrc(imageSrc); // Set the captured image
           setCroppedImageSrc(croppedImage); // Optional: Set cropped image
-          // stopDetection(); // Optionally stop detection after capture
+          stopDetection(); // Optionally stop detection after capture
         } catch (error) {
           console.error("Error cropping image:", error);
         }
@@ -332,9 +332,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   // Use Effect to evaluate criteria and manage countdown
   useEffect(() => {
     const criteria = evaluateCriteria();
-    console.log("criteria.allGood ===> ", criteria.allGood);
-    console.log("criterias.isCaptured", criterias.isCaptured);
-    console.log("isCountdownActive ===> ", isCountdownActive);
 
     if (criteria.allGood && !criterias.isCaptured && !isCountdownActive) {
       // Start the countdown

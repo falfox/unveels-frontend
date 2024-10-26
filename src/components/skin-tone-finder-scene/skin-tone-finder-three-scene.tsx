@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useImperativeHandle, useState } from "react";
 import { MeshProps, useThree } from "@react-three/fiber";
 import { Landmark } from "../../types/landmark";
 import { useTexture } from "@react-three/drei";
 import Foundation from "../three/makeup/foundation";
 import { LinearFilter, RGBFormat } from "three";
+import { useCamera } from "../recorder/recorder-context";
 
 interface SkinToneFinderThreeSceneProps extends MeshProps {
   imageSrc: string;
@@ -15,6 +16,8 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
   landmarks,
   ...props
 }) => {
+  const { gl } = useThree();
+  const { skinToneThreeSceneRef } = useCamera();
   const texture = useTexture(imageSrc);
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
@@ -70,6 +73,27 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
     setPlaneSize([planeWidth, planeHeight]);
   }, [texture, viewport]);
   1;
+
+  const handleScreenshot = () => {
+    requestAnimationFrame(() => {
+      const canvas = gl.domElement as HTMLCanvasElement;
+      console.log(canvas);
+      if (canvas) {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "screenshot.png";
+            link.click();
+          }
+        });
+      }
+    });
+  };
+
+  useImperativeHandle(skinToneThreeSceneRef, () => ({
+    callFunction: handleScreenshot,
+  }));
 
   return (
     <>
