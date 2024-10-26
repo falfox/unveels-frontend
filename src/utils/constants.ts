@@ -48,11 +48,11 @@ export const eyeangleLabels = ["Downturned", "Neutral", "Upturned"];
 export const cheeksbonesLabels = ["High Cheeks", "Low Cheeks", "Round Cheeks"];
 export const shortnessLabels = ["Long", "Normal", "Short"];
 export const personalityLabels = [
-  "Extraversion",
-  "Neuroticism",
-  "Aggreeableness",
-  "Conscientiousness",
-  "Opennes to Experience",
+  "Extravert",
+  "Neurotic",
+  "Agreable",
+  "Conscientious",
+  "Open",
 ];
 
 // personality labels
