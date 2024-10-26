@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { MeshProps, useThree } from "@react-three/fiber";
 import { Landmark } from "../../types/landmark";
 import { useTexture } from "@react-three/drei";
-import { useSkinColor } from "./skin-color-context";
-import FaceMesh from "../three/face-mesh";
+import Foundation from "../three/makeup/foundation";
+import { LinearFilter, RGBFormat } from "three";
 
 interface SkinToneFinderThreeSceneProps extends MeshProps {
   imageSrc: string;
@@ -18,7 +18,6 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
   const texture = useTexture(imageSrc);
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
-  const { hexColor } = useSkinColor();
 
   // State for window size and DPR
   const [windowSize, setWindowSize] = useState<{
@@ -65,8 +64,12 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
       planeHeight = viewport.width / imageAspect;
     }
 
+    texture.format = RGBFormat;
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
     setPlaneSize([planeWidth, planeHeight]);
   }, [texture, viewport]);
+  1;
 
   return (
     <>
@@ -74,13 +77,7 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
         <planeGeometry args={[planeSize[0], planeSize[1]]} />
         <meshBasicMaterial map={texture} />
       </mesh>
-      <mesh>
-        <FaceMesh
-          hexColor={hexColor}
-          landmarks={landmarks}
-          planeSize={planeSize}
-        />
-      </mesh>
+      <Foundation planeSize={planeSize} landmarks={landmarks} />
     </>
   );
 };

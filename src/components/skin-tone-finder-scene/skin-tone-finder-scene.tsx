@@ -7,6 +7,7 @@ import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
 import SkinToneFinderThreeScene from "./skin-tone-finder-three-scene";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
+import { useMakeup } from "../three/makeup-context";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -91,7 +92,8 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
   const [landmarks, setLandmarks] = useState<Landmark[]>([]); // Tipe yang diperbarui
   const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
 
-  const { setSkinColor } = useSkinColor();
+  const { setSkinColor, setHexColor } = useSkinColor();
+  const { setFoundationColor } = useMakeup();
 
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -159,10 +161,28 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
     };
   }, []);
 
+  // for flutter webView
+  function changeHex(data: string) {
+    setHexColor(data);
+    setFoundationColor(data);
+  }
+
   // Memproses gambar dan mendeteksi landmark
   useEffect(() => {
     const processImage = async () => {
       if (imageLoaded && faceLandmarker && isLandmarkerReady) {
+        // for flutter webview comunication
+        console.log("Detection Running Skin Tone Finder");
+        if ((window as any).flutter_inappwebview) {
+          (window as any).flutter_inappwebview
+            .callHandler("detectionRun", "Detection Running Skin Tone Finder")
+            .then((result: any) => {
+              console.log("Flutter responded with:", result);
+            })
+            .catch((error: any) => {
+              console.error("Error calling Flutter handler:", error);
+            });
+        }
         try {
           const results = await faceLandmarker.detect(imageLoaded);
           if (results && results.faceLandmarks.length > 0) {
@@ -184,12 +204,49 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
               indices,
               5,
             );
+
+            // set skin color and type
             setSkinColor(
               extractedSkinColor.hexColor,
               extractedSkinColor.skinType,
             );
+
+            // set skin hex to show on three scene
+            setHexColor(extractedSkinColor.hexColor);
+
+            // for flutter webView
+            if (extractedSkinColor) {
+              console.log("Skin Tone Finder Result:", extractedSkinColor);
+
+              // Coba stringify hasilnya
+              const resultString = JSON.stringify(extractedSkinColor);
+              console.log("Skon Tone Finder Result as JSON:", resultString);
+
+              if ((window as any).flutter_inappwebview) {
+                // Kirim data sebagai JSON string
+                (window as any).flutter_inappwebview
+                  .callHandler("detectionResult", resultString)
+                  .then((result: any) => {
+                    console.log("Flutter responded with:", result);
+                  })
+                  .catch((error: any) => {
+                    console.error("Error calling Flutter handler:", error);
+                  });
+              }
+            }
           }
         } catch (error) {
+          if ((window as any).flutter_inappwebview) {
+            (window as any).flutter_inappwebview
+              .callHandler("detectionError", error)
+              .then((result: any) => {
+                console.log("Flutter responded with:", result);
+              })
+              .catch((error: any) => {
+                console.error("Error calling Flutter handler:", error);
+              });
+          }
+          console.error("Inference error:", error);
           console.error("Gagal mendeteksi wajah:", error);
         }
       }

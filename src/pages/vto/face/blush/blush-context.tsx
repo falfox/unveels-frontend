@@ -3,8 +3,8 @@ import React, { createContext, useState, useContext } from "react";
 interface BlushContextType {
   selectedColor: string | null;
   setSelectedColor: (color: string | null) => void;
-  selectedShape: string | null;
-  setSelectedShape: (shape: string | null) => void;
+  selectedShape: string;
+  setSelectedShape: (shape: string) => void;
   selectedTexture: string | null;
   setSelectedTexture: (mode: string | null) => void;
 }
@@ -15,7 +15,7 @@ const BlushContext = createContext<BlushContextType | undefined>(undefined);
 // Create a provider component
 export function BlushProvider({ children }: { children: React.ReactNode }) {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedShape, setSelectedShape] = useState<string | null>(null);
+  const [selectedShape, setSelectedShape] = useState<string>("0");
   const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
 
   return (

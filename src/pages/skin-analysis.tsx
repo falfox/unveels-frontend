@@ -29,7 +29,6 @@ import { Rating } from "../components/rating";
 import { skinAnalysisInference } from "../inference/skinAnalysisInference";
 import { FaceResults } from "../types/faceResults";
 import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
-import { testImage } from "../utils/constants";
 
 export function SkinAnalysis() {
   return (
@@ -53,16 +52,15 @@ function Main() {
   useEffect(() => {
     const faceAnalyzerInference = async () => {
       if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
-        // Tambahkan cek !isLoading
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
         try {
-          const personalityResult: FaceResults[] = await skinAnalysisInference(
+          const skinAnalysisResult: FaceResults[] = await skinAnalysisInference(
             criterias.capturedImage,
           );
 
-          setInferenceResult(personalityResult);
+          setInferenceResult(skinAnalysisResult);
         } catch (error: any) {
           console.error("Inference error:", error);
           setInferenceError(
@@ -76,10 +74,10 @@ function Main() {
     };
 
     faceAnalyzerInference();
-  }, [criterias.isCaptured, criterias.capturedImage]); // Hapus isLoading dari dependensi
+  }, [criterias.isCaptured, criterias.capturedImage]);
 
   return (
-    <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
         {!isLoading && inferenceResult != null ? (
           <SkinAnalysisScene data={inferenceResult} />
@@ -112,7 +110,7 @@ function MainContent() {
     return shareOpen ? (
       <ShareModal />
     ) : (
-      <div className="flex px-5 pb-10 space-x-5 font-serif">
+      <div className="flex space-x-5 px-5 pb-10 font-serif">
         <button
           type="button"
           className="h-10 w-full rounded border border-[#CA9C43] text-white"
@@ -124,7 +122,7 @@ function MainContent() {
           className="h-10 w-full rounded bg-gradient-to-r from-[#CA9C43] to-[#92702D] text-white"
           onClick={() => setShareOpen(true)}
         >
-          Share <Icons.share className="inline-block ml-4 size-6" />
+          Share <Icons.share className="ml-4 inline-block size-6" />
         </button>
       </div>
     );
@@ -156,12 +154,12 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
   return (
     <>
       <div
-        className="fixed inset-0 w-full h-full"
+        className="fixed inset-0 h-full w-full"
         onClick={() => {
           onClose();
         }}
       ></div>
-      <div className="relative px-4 pb-4 space-y-2">
+      <div className="relative space-y-2 px-4 pb-4">
         <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
           {tabs.map((problemTab) => {
             const isActive = tab === problemTab;
@@ -284,7 +282,7 @@ function ProductList() {
             <img
               src={"https://picsum.photos/id/237/200/300"}
               alt="Product"
-              className="object-cover rounded"
+              className="rounded object-cover"
             />
           </div>
 
@@ -302,7 +300,7 @@ function ProductList() {
               </span>
             </div>
           </div>
-          <div className="flex pt-1 space-x-1">
+          <div className="flex space-x-1 pt-1">
             <button
               type="button"
               className="flex h-7 w-full items-center justify-center border border-white text-[0.375rem] font-semibold text-white"
@@ -372,15 +370,15 @@ function ProblemResults({
   return (
     <>
       <div
-        className="fixed inset-0 w-full h-full"
+        className="fixed inset-0 h-full w-full"
         onClick={() => {
           onFaceClick?.();
         }}
       ></div>
-      <div className="absolute inset-x-0 flex items-center justify-center bottom-32">
+      <div className="absolute inset-x-0 bottom-32 flex items-center justify-center">
         <button
           type="button"
-          className="px-10 py-3 text-sm text-white bg-black"
+          className="bg-black px-10 py-3 text-sm text-white"
           onClick={() => {
             onResultClick?.();
           }}
@@ -402,10 +400,10 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2">
         <button className="size-6">
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="h-6 w-6" />
         </button>
         <button type="button" className="size-6" onClick={() => onClose()}>
-          <X className="w-6 h-6" />
+          <X className="h-6 w-6" />
         </button>
       </div>
 
@@ -421,11 +419,11 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Profile Section */}
-      <div className="flex items-center px-5 py-2 space-x-1">
-        <div className="px-5 shrink-0">
+      <div className="flex items-center space-x-1 px-5 py-2">
+        <div className="shrink-0 px-5">
           <div className="flex items-center justify-center rounded-full bg-gradient-to-b from-[#CA9C43] to-[#644D21] p-1">
             <img
-              className="rounded-full size-24"
+              className="size-24 rounded-full"
               src="https://avatar.iran.liara.run/public/30"
               alt="Profile"
             />
@@ -443,8 +441,8 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      <div className="flex-1 py-6 overflow-y-auto">
-        <h2 className="text-xl font-medium text-center">
+      <div className="flex-1 overflow-y-auto py-6">
+        <h2 className="text-center text-xl font-medium">
           Detected Skin Problems
         </h2>
 
@@ -468,7 +466,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex items-start justify-between px-10 space-x-4 text-white bg-black">
+        <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
           {/* Left Column */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2.5">
@@ -524,7 +522,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <h2 className="pt-12 text-xl font-medium text-center">
+        <h2 className="pt-12 text-center text-xl font-medium">
           Detected Skin Condition
         </h2>
 
@@ -556,7 +554,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex items-start justify-between px-10 space-x-4 text-white bg-black">
+        <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
           {/* Left Column */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2.5">
@@ -612,7 +610,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="px-2 py-10 text-white divide-y divide-white/50">
+        <div className="divide-y divide-white/50 px-2 py-10 text-white">
           <ProblemSection
             title="Wrinkles"
             detected="Forehead: Mild spots observed, likely due to sun exposure.Cheeks: A few dark spots noted on both cheeks, possibly post-inflammatory hyperpigmentation"
@@ -747,16 +745,16 @@ function ProblemSection({
   const scoreType = score < 40 ? "Low" : score < 70 ? "Moderate" : "High";
   return (
     <div className="py-5">
-      <div className="flex items-center pb-6 space-x-2">
+      <div className="flex items-center space-x-2 pb-6">
         <Icons.personalityTriangle className="size-8 shrink-0" />
 
         <h2 className="text-3xl font-bold text-white">{title}</h2>
       </div>
       <span className="text-xl font-bold">Detected</span>
-      <p className="pt-1 pb-6 text-sm">{detected}</p>
+      <p className="pb-6 pt-1 text-sm">{detected}</p>
       <div className="pt-6"></div>
       <span className="text-xl font-bold">Description</span>
-      <p className="pt-1 pb-6 text-sm">{description}</p>
+      <p className="pb-6 pt-1 text-sm">{description}</p>
       <span className="text-xl font-bold">Score</span>
       <div
         className={clsx(
@@ -780,13 +778,13 @@ function ProblemSection({
                 <img
                   src={"https://picsum.photos/id/237/200/300"}
                   alt="Product"
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
 
               <div className="flex items-start justify-between py-2">
                 <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                  <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
                     {product.name}
                   </h3>
                   <p className="text-[0.625rem] text-white/60">
@@ -830,26 +828,26 @@ function RecorderStatus() {
   const { finish } = useCamera();
 
   return (
-    <div className="absolute inset-x-0 flex items-center justify-center gap-4 top-14">
+    <div className="absolute inset-x-0 top-14 flex items-center justify-center gap-4">
       <button
-        className="flex items-center justify-center size-8"
+        className="flex size-8 items-center justify-center"
         onClick={handleStartPause}
       >
         {isPaused ? (
-          <CirclePlay className="text-white size-6" />
+          <CirclePlay className="size-6 text-white" />
         ) : isRecording ? (
-          <PauseCircle className="text-white size-6" />
+          <PauseCircle className="size-6 text-white" />
         ) : null}
       </button>
       <span className="relative flex size-4">
         {isRecording ? (
-          <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
         ) : null}
-        <span className="relative inline-flex bg-red-500 rounded-full size-4"></span>
+        <span className="relative inline-flex size-4 rounded-full bg-red-500"></span>
       </span>
       <div className="font-serif text-white">{formattedTime}</div>
       <button
-        className="flex items-center justify-center size-8"
+        className="flex size-8 items-center justify-center"
         onClick={
           isRecording
             ? () => {
@@ -860,9 +858,9 @@ function RecorderStatus() {
         }
       >
         {isRecording || isPaused ? (
-          <StopCircle className="text-white size-6" />
+          <StopCircle className="size-6 text-white" />
         ) : (
-          <CirclePlay className="text-white size-6" />
+          <CirclePlay className="size-6 text-white" />
         )}
       </button>
     </div>

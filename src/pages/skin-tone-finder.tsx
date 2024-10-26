@@ -39,14 +39,17 @@ import {
   getProductAttributes,
   mediaUrl
 } from "../utils/apiUtils";
+import { MakeupProvider, useMakeup } from "../components/three/makeup-context";
 
 export function SkinToneFinder() {
   return (
     <CameraProvider>
       <SkinColorProvider>
-        <div className="h-full min-h-dvh">
-          <Main />
-        </div>
+        <MakeupProvider>
+          <div className="h-full min-h-dvh">
+            <Main />
+          </div>
+        </MakeupProvider>
       </SkinColorProvider>
     </CameraProvider>
   );
@@ -197,7 +200,7 @@ const isShadeSelected = (product: Product, selectedShade: string) =>
 
 function MatchedShades() {
   const [selectedTne, setSelectedTone] = useState(tone_types[0]);
-  const { skinType, hexColor } = useSkinColor();
+  const { skinType, hexSkin } = useSkinColor();
 
   const skinToneId = skin_tones.find((tone) => tone.name === skinType)?.id;
 
@@ -212,7 +215,7 @@ function MatchedShades() {
         <div className="inline-flex items-center px-2 py-1 border rounded-full gap-x-2 border-white/80 text-white/80">
           <div
             className="rounded-full size-3"
-            style={{ backgroundColor: hexColor }}
+            style={{ backgroundColor: hexSkin }}
           ></div>
           <span className="text-sm">{skinType}</span>
         </div>
@@ -252,7 +255,9 @@ function OtherShades() {
 
   const [selectedShade, setSelectedShade] = useState(null as string | null);
 
-  const { skinType, setSkinColor } = useSkinColor();
+  const { setHexColor } = useSkinColor();
+
+  const { setFoundationColor } = useMakeup();
 
   const { data } = useSkinToneProductQuery({
     skintone: selectedTone.id,
@@ -273,9 +278,8 @@ function OtherShades() {
 
   function setSelectedColor(option: string) {
     setSelectedShade(option);
-    if (skinType != null) {
-      setSkinColor(option, skinType);
-    }
+    setHexColor(option);
+    setFoundationColor(option);
   }
 
   return (

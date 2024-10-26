@@ -5,8 +5,8 @@ interface LipLinerContextType {
   setColorFamily: (color: string | null) => void;
   selectedColor: string | null;
   setSelectedColor: (color: string | null) => void;
-  selectedSize: string | null;
-  setSelectedSize: (shade: string | null) => void;
+  selectedSize: string;
+  setSelectedSize: (shade: string) => void;
 }
 
 // Create the context
@@ -18,7 +18,7 @@ const LipLinerContext = createContext<LipLinerContextType | undefined>(
 export function LipLinerProvider({ children }: { children: React.ReactNode }) {
   const [colorFamily, setColorFamily] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string>("0");
 
   return (
     <LipLinerContext.Provider
@@ -41,7 +41,7 @@ export function useLipLinerContext() {
   const context = useContext(LipLinerContext);
   if (context === undefined) {
     throw new Error(
-      "useLipLinerContext must be used within a LipLinerProvider"
+      "useLipLinerContext must be used within a LipLinerProvider",
     );
   }
   return context;

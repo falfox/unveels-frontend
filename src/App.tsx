@@ -1,10 +1,14 @@
+import { Suspense } from "react";
 import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
+import { useBrandsQuerySuspense } from "./api/brands";
+import { useCategoriesQuerySuspense } from "./api/categories";
 import "./index.css";
 import { FaceAnalyzer } from "./pages/face-analyzer";
 import { PersonalityFinder } from "./pages/personality-finder";
 import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
 import { SkinAnalysis } from "./pages/skin-analysis";
 import { SkinToneFinder } from "./pages/skin-tone-finder";
+import { SkinToneFinderWeb } from "./pages/skin-tone-finder-web";
 import { TryOnSelector, VirtualTryOn } from "./pages/virtual-try-on";
 import { EyeLinerSelector } from "./pages/vto/eyes/eye-liners/eye-liner";
 import { EyeShadowSelector } from "./pages/vto/eyes/eye-shadow/eye-shadow";
@@ -22,6 +26,13 @@ import { FoundationSelector } from "./pages/vto/face/foundation/foundation";
 import { HighlighterSelector } from "./pages/vto/face/highlighter/highlighter";
 import { HairColorSelector } from "./pages/vto/hair/hair-color/hair-color";
 import { HairMode } from "./pages/vto/hair/hair-makeup";
+import { HandwearSelector } from "./pages/vto/hand-accessories/handwear/handwear";
+import { WatchesSelector } from "./pages/vto/hand-accessories/watches/watches";
+import { EarringsSelector } from "./pages/vto/head-accesories/earrings/earrings";
+import { GlassesSelector } from "./pages/vto/head-accesories/glasses/glasses";
+import { HatsSelector } from "./pages/vto/head-accesories/hats/hats";
+import { HeadbandSelector } from "./pages/vto/head-accesories/headband/headband";
+import { TiaraSelector } from "./pages/vto/head-accesories/tiaras/tiaras";
 import { LipColorSelector } from "./pages/vto/lips/lip-color/lip-color";
 import { LipLinerSelector } from "./pages/vto/lips/lip-liner/lip-liner";
 import { LipPlumperSelector } from "./pages/vto/lips/lip-plumper/lip-plumper";
@@ -29,18 +40,8 @@ import { LipsMode } from "./pages/vto/lips/lips-makeup";
 import { NailPolishSelector } from "./pages/vto/nails/nail-polish/nail-polish";
 import { NailsMode } from "./pages/vto/nails/nails-makeup";
 import { PressOnNailsSelector } from "./pages/vto/nails/press-on-nails/press-on-nails";
-import { GlassesSelector } from "./pages/vto/head-accesories/glasses/glasses";
-import { EarringsSelector } from "./pages/vto/head-accesories/earrings/earrings";
-import { HeadbandSelector } from "./pages/vto/head-accesories/headband/headband";
-import { HatsSelector } from "./pages/vto/head-accesories/hats/hats";
-import { TiaraSelector } from "./pages/vto/head-accesories/tiaras/tiaras";
 import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear";
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
-import { HandwearSelector } from "./pages/vto/hand-accessories/handwear/handwear";
-import { WatchesSelector } from "./pages/vto/hand-accessories/watches/watches";
-import { useCategoriesQuerySuspense } from "./api/categories";
-import { Suspense } from "react";
-import { useBrandsQuerySuspense } from "./api/brands";
 
 // Define routes using object syntax
 const routes = [
@@ -57,6 +58,7 @@ const routes = [
   { path: "/face-analyzer", element: <FaceAnalyzer /> },
   { path: "/skin-analysis", element: <SkinAnalysis /> },
   { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
+  { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   {
     path: "/virtual-try-on",
     element: <VirtualTryOn />,
@@ -131,6 +133,7 @@ function Home() {
       <LinkButton to="/personality-finder-web">
         Personality Finder Web
       </LinkButton>
+      <LinkButton to="/skin-tone-finder-web">Skin Tone Finder Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
     </div>
   );
