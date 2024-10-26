@@ -48,6 +48,7 @@ export function SkinToneFinder() {
 
 function Main() {
   const { criterias } = useCamera();
+  // test commit
 
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
@@ -533,6 +534,7 @@ export function TopNavigation({
 }
 
 function Sidebar() {
+  const { flipCamera } = useCamera();
   return (
     <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
@@ -553,7 +555,7 @@ function Sidebar() {
           <button className="">
             <Icons.camera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={flipCamera}>
             <Icons.flipCamera className="size-6 text-white" />
           </button>
           <button className="">
