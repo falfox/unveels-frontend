@@ -1,12 +1,14 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 
 interface ContourContextType {
-  selectedColor: string | null;
-  setSelectedColor: (color: string | null) => void;
-  selectedShape: string | null;
-  setSelectedShape: (shape: string | null) => void;
-  selectedMode: string | null;
-  setSelectedMode: (mode: string | null) => void;
+  selectedColors: string[];
+  setSelectedColors: (colors: string[]) => void;
+  selectedShape: string;
+  setSelectedShape: (shape: string) => void;
+  selectedMode: string;
+  setSelectedMode: (mode: string) => void;
+  replaceIndex: number;
+  setReplaceIndex: (index: number) => void;
 }
 
 // Create the context
@@ -14,19 +16,37 @@ const ContourContext = createContext<ContourContextType | undefined>(undefined);
 
 // Create a provider component
 export function ContourProvider({ children }: { children: React.ReactNode }) {
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedShape, setSelectedShape] = useState<string | null>(null);
-  const [selectedMode, setSelectedMode] = useState<string | null>(null);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedShape, setSelectedShape] = useState<string>("0");
+  const [selectedMode, setSelectedMode] = useState<string>("One");
+  const [replaceIndex, setReplaceIndex] = useState<number>(0);
+
+  // Ensure that when mode changes to "One", only one color is selected
+  useEffect(() => {
+    if (selectedMode === "One" && selectedColors.length > 1) {
+      setSelectedColors([selectedColors[0]]);
+      setReplaceIndex(0); // Reset replaceIndex when mode changes
+    }
+  }, [selectedMode, selectedColors]);
+
+  // Ensure that when mode changes to "Dual" and less than two colors are selected, reset replaceIndex
+  useEffect(() => {
+    if (selectedMode === "Dual" && selectedColors.length < 2) {
+      setReplaceIndex(selectedColors.length % 2); // Set replaceIndex based on current selection
+    }
+  }, [selectedMode, selectedColors]);
 
   return (
     <ContourContext.Provider
       value={{
-        selectedColor,
-        setSelectedColor,
+        selectedColors,
+        setSelectedColors,
         selectedShape,
         setSelectedShape,
         selectedMode,
         setSelectedMode,
+        replaceIndex,
+        setReplaceIndex,
       }}
     >
       {children}

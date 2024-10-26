@@ -7,6 +7,7 @@ import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
 import SkinToneFinderThreeScene from "./skin-tone-finder-three-scene";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
+import { useMakeup } from "../three/makeup-context";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -92,6 +93,7 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
   const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
 
   const { setSkinColor, setHexColor } = useSkinColor();
+  const { setFoundationColor } = useMakeup();
 
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -162,6 +164,7 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
   // for flutter webView
   function changeHex(data: string) {
     setHexColor(data);
+    setFoundationColor(data);
   }
 
   // Memproses gambar dan mendeteksi landmark

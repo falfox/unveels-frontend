@@ -4,18 +4,24 @@ interface HighlighterContextType {
   selectedColor: string | null;
   setSelectedColor: (color: string | null) => void;
   selectedShape: string | null;
-  setSelectedShape: (shape: string | null) => void;
+  setSelectedShape: (shape: string) => void;
   selectedTexture: string | null;
   setSelectedTexture: (mode: string | null) => void;
 }
 
 // Create the context
-const HighlighterContext = createContext<HighlighterContextType | undefined>(undefined);
+const HighlighterContext = createContext<HighlighterContextType | undefined>(
+  undefined,
+);
 
 // Create a provider component
-export function HighlighterProvider({ children }: { children: React.ReactNode }) {
+export function HighlighterProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedShape, setSelectedShape] = useState<string | null>(null);
+  const [selectedShape, setSelectedShape] = useState<string>("0");
   const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
 
   return (
@@ -38,7 +44,9 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
 export function useHighlighterContext() {
   const context = useContext(HighlighterContext);
   if (context === undefined) {
-    throw new Error("useHighlighterContext must be used within a HighlighterProvider");
+    throw new Error(
+      "useHighlighterContext must be used within a HighlighterProvider",
+    );
   }
   return context;
 }

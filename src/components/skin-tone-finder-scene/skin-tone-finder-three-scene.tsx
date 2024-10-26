@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { MeshProps, useThree } from "@react-three/fiber";
 import { Landmark } from "../../types/landmark";
 import { useTexture } from "@react-three/drei";
-import { useSkinColor } from "./skin-color-context";
 import Foundation from "../three/makeup/foundation";
 import { LinearFilter, RGBFormat } from "three";
 
@@ -19,7 +18,6 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
   const texture = useTexture(imageSrc);
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
-  const { hexColor } = useSkinColor();
 
   // State for window size and DPR
   const [windowSize, setWindowSize] = useState<{

@@ -1,7 +1,9 @@
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Icons } from "../../../../components/icons";
 import { LipColorProvider, useLipColorContext } from "./lip-color-context";
+import { useMakeup } from "../../../../components/three/makeup-context";
+import { ColorPalette } from "../../../../components/color-palette";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },
@@ -37,7 +39,7 @@ const colorFamilies = [
 export function LipColorSelector() {
   return (
     <LipColorProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
+      <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
         <div>
           <FamilyColorSelector />
 
@@ -58,7 +60,7 @@ function FamilyColorSelector() {
   const { colorFamily, setColorFamily } = useLipColorContext();
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colorFamilies.map((item, index) => (
@@ -98,52 +100,111 @@ const colors = [
 ];
 
 function ColorSelector() {
-  const { selectedColor, setSelectedColor } = useLipColorContext();
+  const {
+    setLipColors,
+    setLipColorMode,
+    setShowLipColor,
+    showLipColor,
+    lipColors,
+  } = useMakeup();
+  const { selectedColors, setSelectedColors, selectedMode } =
+    useLipColorContext();
+  const replaceIndexRef = useRef(0); // To track which color to replace next
+
+  const handleColorClick = (color: string) => {
+    if (!showLipColor) {
+      setShowLipColor(true);
+    }
+    if (selectedColors.includes(color)) {
+      // Deselect the color if it's already selected
+      setSelectedColors(selectedColors.filter((c) => c !== color));
+      setLipColors(selectedColors.filter((c) => c !== color));
+    } else if (selectedMode === "One") {
+      setLipColorMode("One");
+      // In "One" mode, only one color can be selected
+      setSelectedColors([color]);
+      setLipColors([color]);
+    } else if (selectedMode === "Dual") {
+      setLipColorMode("Dual");
+      if (selectedColors.length < 2) {
+        // Add the color if less than two are selected
+        setSelectedColors([...selectedColors, color]);
+        setLipColors([...selectedColors, color]);
+      } else {
+        // Replace the color based on replaceIndexRef
+        const newSelectedColors = [...selectedColors];
+        newSelectedColors[replaceIndexRef.current] = color;
+        setSelectedColors(newSelectedColors);
+        setLipColors(newSelectedColors);
+        // Update replaceIndexRef to alternate between 0 and 1
+        replaceIndexRef.current = (replaceIndexRef.current + 1) % 2;
+      }
+    } else if (selectedMode === "Ombre") {
+      setLipColorMode("Dual");
+      if (selectedColors.length < 2) {
+        // Add the color if less than two are selected
+        setSelectedColors([...selectedColors, color]);
+        setLipColors([...selectedColors, color]);
+      } else {
+        // Replace the color based on replaceIndexRef
+        const newSelectedColors = [...selectedColors];
+        newSelectedColors[replaceIndexRef.current] = color;
+        setSelectedColors(newSelectedColors);
+        setLipColors(newSelectedColors);
+        // Update replaceIndexRef to alternate between 0 and 1
+        replaceIndexRef.current = (replaceIndexRef.current + 1) % 2;
+      }
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedColors([]);
+    replaceIndexRef.current = 0;
+    setShowLipColor(false);
+  };
+
   return (
-    <div className="w-full py-2 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
-          onClick={() => {
-            setSelectedColor(null);
-          }}
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          onClick={handleClearSelection}
         >
           <Icons.empty className="size-10" />
         </button>
-
         {colors.map((color, index) => (
           <button
-            key={color}
             type="button"
-            className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
-              {
-                "border-white/80": selectedColor === color,
-              },
-            )}
-            style={{ background: color }}
-            onClick={() => setSelectedColor(color)}
-          ></button>
+            key={index}
+            onClick={() => handleColorClick(color)}
+            className={clsx("cursor-pointer")}
+          >
+            <ColorPalette
+              size="large"
+              palette={{ color }}
+              selected={selectedColors.includes(color)}
+            />
+          </button>
         ))}
       </div>
+      {/* Removed the error message since all buttons are enabled */}
     </div>
   );
 }
-
 const textures = ["Sheer", "Matt", "Gloss", "Shimmer", "Satin", "Stain"];
 
 function TextureSelector() {
   const { selectedTexture, setSelectedTexture } = useLipColorContext();
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture}
             type="button"
             className={clsx(
-              "inline-flex items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80 shrink-0",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture,
@@ -162,10 +223,30 @@ function TextureSelector() {
 const shades = ["One", "Dual", "Ombre"];
 
 function ShadesSelector() {
-  const [selectedShade, setSelectedShade] = useState<string | null>(null);
+  const { setSelectedMode, selectedMode, setSelectedColors, setReplaceIndex } =
+    useLipColorContext();
+  const { setLipColorMode, lipColors, setLipColors } = useMakeup();
+
+  function setMode(mode: string) {
+    setSelectedMode(mode);
+    if (mode == "Dual") {
+      setLipColorMode(mode);
+    }
+    if (mode == "Ombre") {
+      setLipColorMode(mode);
+    }
+
+    if (mode === "One" && lipColors.length > 1) {
+      const newColors = [lipColors[0]];
+      setSelectedColors(newColors);
+      setLipColors(newColors);
+      setReplaceIndex(0);
+    }
+  }
+
   return (
-    <div className="w-full py-2 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {shades.map((shade, index) => (
           <button
             key={shade}
@@ -173,13 +254,13 @@ function ShadesSelector() {
             className={clsx(
               "relative inline-flex items-center gap-x-2 rounded-full px-3 py-1 text-center text-sm transition-transform",
               {
-                "text-white -translate-y-0.5": selectedShade === shade,
-                "text-white/80": selectedShade !== shade,
+                "-translate-y-0.5 text-white": selectedMode === shade,
+                "text-white/80": selectedMode !== shade,
               },
             )}
-            onClick={() => setSelectedShade(shade)}
+            onClick={() => setMode(shade)}
           >
-            {selectedShade === shade ? (
+            {selectedMode === shade ? (
               <div className="absolute inset-0 flex items-center justify-center text-white blur-sm backdrop-blur-sm">
                 {shade}
               </div>
@@ -237,14 +318,14 @@ function ProductList() {
   const { colorFamily, selectedTexture, selectedShade } = useLipColorContext();
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {products.map((product, index) => (
         <div key={index} className="w-[100px] rounded shadow">
           <div className="relative h-[70px] w-[100px] overflow-hidden">
             <img
               src={"https://picsum.photos/id/237/200/300"}
               alt="Product"
-              className="object-cover rounded"
+              className="rounded object-cover"
             />
           </div>
 
@@ -252,7 +333,7 @@ function ProductList() {
             {product.name}
           </h3>
           <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between pt-1 space-x-1">
+          <div className="flex items-end justify-between space-x-1 pt-1">
             <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
               $15
             </div>
