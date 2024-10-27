@@ -73,6 +73,15 @@ interface MakeupContextProps {
 
   lipColors: string[];
   setLipColors: (colors: string[]) => void;
+
+  showBronzer: boolean;
+  setShowBronzer: (show: boolean) => void;
+
+  bronzerColor: string;
+  setBronzerColor: (color: string) => void;
+
+  bronzerPattern: number;
+  setBronzerPattern: (shape: number) => void;
 }
 
 const MakeupContext = createContext<MakeupContextProps | undefined>(undefined);
@@ -115,6 +124,10 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({ children }) => {
     "One",
   );
   const [lipColors, setLipColors] = useState<string[]>([]);
+
+  const [showBronzer, setShowBronzer] = useState(false);
+  const [bronzerColor, setBronzerColor] = useState("#FFFF");
+  const [bronzerPattern, setBronzerPattern] = useState(0);
 
   return (
     <MakeupContext.Provider
@@ -190,6 +203,15 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({ children }) => {
 
         lipColors,
         setLipColors,
+
+        showBronzer,
+        setShowBronzer,
+
+        bronzerColor,
+        setBronzerColor,
+
+        bronzerPattern,
+        setBronzerPattern,
       }}
     >
       {children}

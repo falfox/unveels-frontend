@@ -15,6 +15,7 @@ import Contour from "../three/makeup/contour";
 import Lipliner from "../three/makeup/lipliner";
 import Lipplumper from "../three/makeup/lipplumper";
 import LipColor from "../three/makeup/lipcolor";
+import Bronzer from "../three/makeup/bronzer";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
@@ -38,6 +39,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     showLipliner,
     showLipplumper,
     showLipColor,
+    showBronzer,
   } = useMakeup();
 
   const filterRef = useRef<ShaderMaterial>(null);
@@ -189,6 +191,12 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showLipColor ? (
             <LipColor planeSize={planeSize} landmarks={landmarks} />
+          ) : (
+            <></>
+          )}
+
+          {showBronzer ? (
+            <Bronzer planeSize={planeSize} landmarks={landmarks} />
           ) : (
             <></>
           )}
