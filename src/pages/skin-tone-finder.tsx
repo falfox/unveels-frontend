@@ -90,15 +90,20 @@ interface MainContentProps {
 }
 
 function MainContent({ collapsed, setCollapsed }: MainContentProps) {
-  const { criterias } = useCamera();
+  const { criterias, exit } = useCamera();
   const [shareOpen, setShareOpen] = useState(false);
+
+  const onClose = () => {
+    setShareOpen(false);
+  };
 
   if (criterias.isFinished) {
     return shareOpen ? (
-      <ShareModal />
+      <ShareModal onClose={onClose} />
     ) : (
       <div className="flex space-x-5 px-5 pb-10 font-serif">
         <button
+          onClick={exit}
           type="button"
           className="h-10 w-full rounded border border-[#CA9C43] text-white"
         >
@@ -424,6 +429,7 @@ function BottomContent() {
 }
 
 function RecorderStatus() {
+  const { startRecording, stopRecording } = useCamera();
   const { isRecording, formattedTime, handleStartPause, handleStop, isPaused } =
     useRecordingControls();
   const { finish } = useCamera();

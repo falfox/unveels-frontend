@@ -20,13 +20,14 @@ import {
   calculateOrientation,
   Orientation,
 } from "../../utils/orientationUtils";
+import RecordRTC, { RecordRTCPromisesHandler } from "recordrtc";
+import { useRecordingControls } from "../../hooks/useRecorder";
 
 interface VideoStreamProps {
   debugMode?: boolean;
 }
 
 export function VideoStream({ debugMode = false }: VideoStreamProps) {
-  const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
@@ -34,6 +35,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
 
   // Using CameraContext
   const {
+    webcamRef,
     criterias,
     setCriterias,
     flipCamera,
@@ -114,7 +116,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
         if (canvas) {
           // Get the rendered size and position of the video
           const videoRect = video.getBoundingClientRect();
-          console.log("videoRect", videoRect);
           if (video && video.videoWidth > 0 && video.videoHeight > 0) {
             // Lanjutkan deteksi wajah
 
