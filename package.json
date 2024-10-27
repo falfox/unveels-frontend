@@ -23,11 +23,14 @@
     "@types/three": "^0.169.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.446.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-rnd": "^10.4.13",
     "react-router-dom": "^6.27.0",
     "react-webcam": "^7.2.0",
+    "recordrtc": "^5.6.2",
     "three": "^0.169.0"
   },
   "devDependencies": {
@@ -36,6 +39,7 @@
     "@tailwindcss/forms": "^0.5.9",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@types/recordrtc": "^5.6.14",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.9.0",
