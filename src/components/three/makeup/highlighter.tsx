@@ -17,7 +17,7 @@ import {
 } from "../../../utils/constants";
 
 interface HighlighterProps extends MeshProps {
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 

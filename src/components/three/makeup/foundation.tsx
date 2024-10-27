@@ -6,7 +6,7 @@ import { Landmark } from "../../../types/landmark";
 import { useMakeup } from "../makeup-context";
 
 interface FoundationProps extends MeshProps {
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 

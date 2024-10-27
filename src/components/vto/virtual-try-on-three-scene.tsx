@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MeshProps, useThree } from "@react-three/fiber";
+import { MeshProps, useFrame, useThree } from "@react-three/fiber";
 import { LinearFilter, RGBFormat, VideoTexture, DoubleSide } from "three";
-import { ShaderMaterial } from "three";
-import { Vector2 } from "three";
+import { ShaderMaterial, Vector2 } from "three";
 import { FaceShader } from "../../shaders/FaceShader";
 import Webcam from "react-webcam";
 import { Landmark } from "../../types/landmark";
@@ -16,10 +15,12 @@ import Lipliner from "../three/makeup/lipliner";
 import Lipplumper from "../three/makeup/lipplumper";
 import LipColor from "../three/makeup/lipcolor";
 import Bronzer from "../three/makeup/bronzer";
+import ContactLens from "../three/makeup/contact-lens";
+import Eyebrows from "../three/makeup/eyebrows";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
@@ -40,9 +41,17 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     showLipplumper,
     showLipColor,
     showBronzer,
+    showLens,
+    showEyebrows,
   } = useMakeup();
 
   const filterRef = useRef<ShaderMaterial>(null);
+
+  // State for slider-controlled factors
+  const [archFactor, setArchFactor] = useState(0.1);
+  const [pinchFactor, setPinchFactor] = useState(0.1);
+  const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(0);
+  const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
 
   // Handle video readiness and create texture
   useEffect(() => {
@@ -94,7 +103,6 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
       }
 
       setPlaneSize([planeWidth, planeHeight]);
-      console.log(`Plane size set to ${planeWidth} x ${planeHeight}`);
     }
   }, [videoTexture, viewport, videoRef]);
 
@@ -107,6 +115,43 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
       }
     };
   }, [videoTexture]);
+
+  useFrame(() => {
+    if (filterRef.current && landmarks.current) {
+      const uniforms = filterRef.current.uniforms;
+
+      // Update factor uniforms
+      uniforms.archFactor.value = archFactor;
+      uniforms.pinchFactor.value = pinchFactor;
+      uniforms.horizontalShiftFactor.value = horizontalShiftFactor;
+      uniforms.verticalShiftFactor.value = verticalShiftFactor;
+
+      const faceLandmarks = landmarks.current;
+
+      const leftEyebrowIndices = [63, 105, 66, 107];
+      const rightEyebrowIndices = [296, 334, 293, 300];
+
+      for (let i = 0; i < 4; i++) {
+        const leftLandmark = faceLandmarks[leftEyebrowIndices[i]];
+        const rightLandmark = faceLandmarks[rightEyebrowIndices[i]];
+
+        if (leftLandmark && rightLandmark) {
+          uniforms.leftEyebrow.value[i].set(
+            leftLandmark.x,
+            1.0 - leftLandmark.y,
+          );
+
+          uniforms.rightEyebrow.value[i].set(
+            rightLandmark.x,
+            1.0 - rightLandmark.y,
+          );
+        }
+      }
+
+      // Mark the material as needing an update
+      filterRef.current.needsUpdate = true;
+    }
+  });
 
   return (
     <>
@@ -127,7 +172,6 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
                     new Vector2(),
                     new Vector2(),
                     new Vector2(),
-                    new Vector2(),
                   ],
                 },
                 rightEyebrow: {
@@ -136,69 +180,56 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
                     new Vector2(),
                     new Vector2(),
                     new Vector2(),
-                    new Vector2(),
                   ],
                 },
-                archFactor: { value: 0.1 },
-                pinchFactor: { value: 0.1 },
-                horizontalShiftFactor: { value: 0 },
-                verticalShiftFactor: { value: 0 },
+                archFactor: { value: archFactor },
+                pinchFactor: { value: pinchFactor },
+                horizontalShiftFactor: { value: horizontalShiftFactor },
+                verticalShiftFactor: { value: verticalShiftFactor },
               }}
             />
           </mesh>
 
-          {showFoundation ? (
+          {showFoundation && (
             <Foundation planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showBlush ? (
-            <Blush planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
-          )}
+          {showBlush && <Blush planeSize={planeSize} landmarks={landmarks} />}
 
-          {showConcealer ? (
+          {showConcealer && (
             <Concealer planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showHighlighter ? (
+          {showHighlighter && (
             <Highlighter planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showContour ? (
+          {showContour && (
             <Contour planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showLipliner ? (
+          {showLipliner && (
             <Lipliner planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showLipplumper ? (
+          {showLipplumper && (
             <Lipplumper planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showLipColor ? (
+          {showLipColor && (
             <LipColor planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showBronzer ? (
+          {showBronzer && (
             <Bronzer planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
+          )}
+
+          {showLens && (
+            <ContactLens planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showEyebrows && (
+            <Eyebrows planeSize={planeSize} landmarks={landmarks} />
           )}
         </>
       )}

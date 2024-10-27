@@ -4,16 +4,15 @@ import {
   BufferGeometry,
   Float32BufferAttribute,
   Uint16BufferAttribute,
-  MeshBasicMaterial,
-  DoubleSide,
   Material,
 } from "three";
+import { useFrame } from "@react-three/fiber"; // Import useFrame
 import { faces, uvs, positions } from "../../utils/constants"; // Pastikan data faces dan uvs valid
 import { Landmark } from "../../types/landmark";
 
 interface FaceMeshProps {
   planeSize: [number, number];
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
   material: Material;
 }
 
@@ -23,7 +22,6 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
   material,
 }) => {
   const geometryRef = useRef<BufferGeometry | null>(null);
-  const materialRef = useRef<MeshBasicMaterial | null>(null);
 
   // Inisialisasi geometry
   const geometry = useMemo(() => {
@@ -43,29 +41,42 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
     }
 
     geom.setAttribute("position", new Float32BufferAttribute(vertices, 3));
-    geom.setAttribute("uv", new Float32BufferAttribute(uvs.flat(), 2));
+    geom.setAttribute("uv", new Float32BufferAttribute(uvArray, 2));
     geom.setIndex(new Uint16BufferAttribute(faces, 1));
     geom.computeVertexNormals();
 
     return geom;
   }, [planeSize]);
 
-  // Update posisi vertex berdasarkan landmarks
+  // Assign geometry to mesh
   useEffect(() => {
+    if (geometryRef.current) {
+      geometryRef.current.setAttribute(
+        "position",
+        geometry.getAttribute("position"),
+      );
+      geometryRef.current.setAttribute("uv", geometry.getAttribute("uv"));
+      geometryRef.current.setIndex(geometry.getIndex());
+    }
+  }, [geometry]);
+
+  // Update posisi vertex berdasarkan landmarks menggunakan useFrame
+  useFrame(() => {
     if (
       geometryRef.current &&
       geometryRef.current.attributes.position &&
-      landmarks.length > 0
+      landmarks.current &&
+      landmarks.current.length > 0
     ) {
       const position = geometryRef.current.attributes
         .position as Float32BufferAttribute;
 
       const outputWidth = planeSize[0];
       const outputHeight = planeSize[1];
-      const minCount = Math.min(landmarks.length, position.count);
+      const minCount = Math.min(landmarks.current.length, position.count);
 
       for (let i = 0; i < minCount; i++) {
-        const landmark = landmarks[i];
+        const landmark = landmarks.current[i];
 
         // Skala koordinat sesuai ukuran plane
         const x = (landmark.x - 0.5) * outputWidth;
@@ -79,7 +90,7 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
       position.needsUpdate = true;
       geometryRef.current.computeVertexNormals();
     }
-  }, [landmarks, planeSize]);
+  });
 
   return (
     <mesh

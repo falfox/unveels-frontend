@@ -20,7 +20,7 @@ import {
 import { Landmark } from "../../../types/landmark";
 
 interface ContourProps extends MeshProps {
-  landmarks: Landmark[]; // Replace with your actual Landmark type
+  landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 

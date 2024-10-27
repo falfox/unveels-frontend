@@ -19,7 +19,7 @@ import {
 } from "../../../utils/constants";
 
 interface LiplinerProps extends MeshProps {
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 

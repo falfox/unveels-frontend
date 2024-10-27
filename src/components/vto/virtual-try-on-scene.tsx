@@ -4,22 +4,18 @@ import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { useCamera } from "../recorder/recorder-context";
 import { VIDEO_WIDTH, VIDEO_HEIGHT } from "../../utils/constants";
 import { ErrorOverlay } from "../error-overlay";
-import { Landmark } from "../../types/landmark";
 import { Canvas } from "@react-three/fiber";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import VirtualTryOnThreeScene from "./virtual-try-on-three-scene";
+import { Landmark } from "../../types/landmark";
 
 export function VirtualTryOnScene() {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
-    null,
-  );
-  const [landmarks, setLandmarks] = useState<Landmark[]>([]); // Tipe yang diperbarui
-  const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
-  const isDetectingRef = useRef<boolean>(false);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+  const landmarksRef = useRef<Landmark[]>([]); // Menggunakan useRef untuk landmarks
+  const isDetectingRef = useRef<boolean>(false);
 
   // Using CameraContext
   const { criterias, flipCamera } = useCamera();
@@ -40,19 +36,20 @@ export function VirtualTryOnScene() {
                 "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
               delegate: "GPU",
             },
-            outputFaceBlendshapes: true,
             runningMode: "VIDEO",
             numFaces: 1,
+            minFaceDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+            minFacePresenceConfidence: 0.5,
           },
         );
         if (isMounted) {
           faceLandmarkerRef.current = landmarker;
-          setFaceLandmarker(landmarker);
-          setIsLandmarkerReady(true);
           startDetection();
         }
       } catch (error) {
         console.error("Gagal menginisialisasi FaceLandmarker:", error);
+        if (isMounted) setError(error as Error);
       }
     };
 
@@ -61,9 +58,10 @@ export function VirtualTryOnScene() {
     // Cleanup pada unmount
     return () => {
       isMounted = false;
-      if (faceLandmarker) {
-        faceLandmarker.close();
+      if (faceLandmarkerRef.current) {
+        faceLandmarkerRef.current.close();
       }
+      isDetectingRef.current = false;
     };
   }, []);
 
@@ -115,13 +113,15 @@ export function VirtualTryOnScene() {
 
             const startTimeMs = performance.now();
             try {
-              const detections = faceLandmarkerRef.current.detectForVideo(
+              const results = faceLandmarkerRef.current.detectForVideo(
                 video,
                 startTimeMs,
-              ).faceLandmarks[0];
+              );
 
-              // set landmark
-              setLandmarks(detections);
+              if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+                landmarksRef.current = results.faceLandmarks[0];
+                // Jika Anda perlu memberi tahu Three.js untuk memperbarui scene, gunakan callback atau event emitter
+              }
             } catch (err) {
               console.error("Detection error:", err);
               setError(err as Error);
@@ -152,7 +152,7 @@ export function VirtualTryOnScene() {
           outputColorSpace: SRGBColorSpace,
         }}
       >
-        <VirtualTryOnThreeScene videoRef={webcamRef} landmarks={landmarks} />
+        <VirtualTryOnThreeScene videoRef={webcamRef} landmarks={landmarksRef} />
       </Canvas>
 
       <Webcam

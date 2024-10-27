@@ -4,6 +4,7 @@ import { Icons } from "../../../../components/icons";
 
 import { ColorPalette } from "../../../../components/color-palette";
 import { LenseProvider, useLenseContext } from "./lense-context";
+import { useMakeup } from "../../../../components/three/makeup-context";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },
@@ -39,7 +40,7 @@ const colorFamilies = [
 export function LenseSelector() {
   return (
     <LenseProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
+      <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
         <FamilyColorSelector />
 
         <ColorSelector />
@@ -55,7 +56,7 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colorFamilies.map((item, index) => (
@@ -92,14 +93,29 @@ const lenses = [
 
 function ColorSelector() {
   const { selectedColor, setSelectedColor } = useLenseContext();
+  const { showLens, setShowLens, setLensPattern } = useMakeup();
+
+  function setPattern(pattern: number, patternName: string) {
+    if (!showLens) {
+      setShowLens(true);
+    }
+    setSelectedColor(patternName);
+    setLensPattern(pattern);
+  }
+
+  function reset() {
+    setShowLens(false);
+    setSelectedColor(null);
+  }
+
   return (
-    <div className="w-full pt-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full pt-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
-            setSelectedColor(null);
+            reset();
           }}
         >
           <Icons.empty className="size-10" />
@@ -114,9 +130,9 @@ function ColorSelector() {
                 "border-white/80": selectedColor === index.toString(),
               },
             )}
-            onClick={() => setSelectedColor(index.toString())}
+            onClick={() => setPattern(index, index.toString())}
           >
-            <img src={path} alt="Eyebrow" className="rounded size-12" />
+            <img src={path} alt="Eyebrow" className="size-12 rounded" />
           </button>
         ))}
       </div>
@@ -174,7 +190,7 @@ function ProductList() {
             <img
               src={"https://picsum.photos/id/237/200/300"}
               alt="Product"
-              className="object-cover rounded"
+              className="rounded object-cover"
             />
           </div>
 
@@ -182,7 +198,7 @@ function ProductList() {
             {product.name}
           </h3>
           <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between pt-1 space-x-1">
+          <div className="flex items-end justify-between space-x-1 pt-1">
             <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
               $15
             </div>

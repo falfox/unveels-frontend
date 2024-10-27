@@ -15,34 +15,44 @@ import {
   BLUSH_TEXTURE_ONE,
   BLUSH_TEXTURE_THREE,
   BLUSH_TEXTURE_TWO,
+  EYEBROW_TEXTURE_EIGHT,
+  EYEBROW_TEXTURE_FIVE,
+  EYEBROW_TEXTURE_FOUR,
+  EYEBROW_TEXTURE_ONE,
+  EYEBROW_TEXTURE_SEVEN,
+  EYEBROW_TEXTURE_SIX,
+  EYEBROW_TEXTURE_THREE,
+  EYEBROW_TEXTURE_TWO,
 } from "../../../utils/constants";
 
-interface BlushProps extends MeshProps {
+interface EyebrowsProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 
-const BlushInner: React.FC<BlushProps> = ({ landmarks, planeSize }) => {
-  const { blushColor, blushPattern } = useMakeup();
+const EyebrowsInner: React.FC<EyebrowsProps> = ({ landmarks, planeSize }) => {
+  const { eyebrowsVisibility, eyebrowsPattern, eyebrowsColor } = useMakeup();
 
   // Memuat semua tekstur sekaligus
-  const blushTextures = useLoader(TextureLoader, [
-    BLUSH_TEXTURE_ONE,
-    BLUSH_TEXTURE_TWO,
-    BLUSH_TEXTURE_THREE,
-    BLUSH_TEXTURE_FOUR,
-    BLUSH_TEXTURE_FIVE,
+  const eyebrowsTextures = useLoader(TextureLoader, [
+    EYEBROW_TEXTURE_ONE,
+    EYEBROW_TEXTURE_TWO,
+    EYEBROW_TEXTURE_THREE,
+    EYEBROW_TEXTURE_FOUR,
+    EYEBROW_TEXTURE_FIVE,
+    EYEBROW_TEXTURE_SIX,
+    EYEBROW_TEXTURE_SEVEN,
+    EYEBROW_TEXTURE_EIGHT,
   ]);
 
   // Memilih tekstur yang sesuai berdasarkan blushPattern
-  const alphaMap = blushTextures[blushPattern] || null;
+  const alphaMap = eyebrowsTextures[eyebrowsPattern] || null;
 
   // Inisialisasi material dengan useMemo
-  const blushMaterial = useMemo(() => {
+  const eyebrowsMaterial = useMemo(() => {
     const materialOptions: Partial<MeshBasicMaterialParameters> = {
-      color: new Color(blushColor),
+      color: new Color(eyebrowsColor),
       transparent: !!alphaMap, // Menjadikan transparan jika alphaMap digunakan
-      opacity: 1,
     };
 
     if (alphaMap) {
@@ -50,24 +60,27 @@ const BlushInner: React.FC<BlushProps> = ({ landmarks, planeSize }) => {
       materialOptions.alphaTest = 0; // Sesuaikan alphaTest jika diperlukan
     }
 
+    materialOptions.opacity = eyebrowsVisibility;
+    console.log(eyebrowsVisibility);
+
     return new MeshBasicMaterial(materialOptions);
-  }, [blushColor, alphaMap]);
+  }, [eyebrowsVisibility, alphaMap, eyebrowsColor]);
 
   return (
     <FaceMesh
       landmarks={landmarks}
-      material={blushMaterial}
+      material={eyebrowsMaterial}
       planeSize={planeSize}
     />
   );
 };
 
-const Blush: React.FC<BlushProps> = (props) => {
+const Eyebrows: React.FC<EyebrowsProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <BlushInner {...props} />
+      <EyebrowsInner {...props} />
     </Suspense>
   );
 };
 
-export default Blush;
+export default Eyebrows;
