@@ -16,7 +16,7 @@ interface ShareModalProps {
 }
 
 export function ShareModal({ onClose }: ShareModalProps) {
-  const { downloadVideo } = useCamera();
+  const { downloadVideo, exit } = useCamera();
   return (
     <div className="absolute inset-x-0 bottom-0 flex items-center justify-center bg-black/20 backdrop-blur-3xl">
       <div className="w-full rounded-xl bg-[#1c1c1e]">
@@ -30,7 +30,7 @@ export function ShareModal({ onClose }: ShareModalProps) {
           <ShareOption
             onClick={() => {
               downloadVideo();
-              onClose();
+              exit();
             }}
             icon={<Download />}
             label="Save to gallery"
