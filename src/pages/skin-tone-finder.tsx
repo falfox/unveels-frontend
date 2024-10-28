@@ -48,6 +48,7 @@ import {
 } from "../utils/apiUtils";
 import { MakeupProvider, useMakeup } from "../components/three/makeup-context";
 import { bool } from "@techstark/opencv-js";
+import { useReactMediaRecorder } from "react-media-recorder";
 
 export function SkinToneFinder() {
   return (
@@ -64,7 +65,7 @@ export function SkinToneFinder() {
 }
 
 function Main() {
-  const { criterias } = useCamera();
+  const { criterias, status } = useCamera();
   const [collapsed, setCollapsed] = useState(false);
 
   return (

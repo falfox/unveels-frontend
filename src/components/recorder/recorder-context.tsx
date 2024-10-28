@@ -1,4 +1,5 @@
 // recorder-context.tsx
+import html2canvas from "html2canvas";
 import React, {
   createContext,
   useContext,
@@ -7,7 +8,9 @@ import React, {
   useRef,
   MutableRefObject,
   useCallback,
+  useEffect,
 } from "react";
+import { useReactMediaRecorder } from "react-media-recorder";
 import Webcam from "react-webcam";
 import { RecordRTCPromisesHandler } from "recordrtc";
 
@@ -38,7 +41,6 @@ interface SkinToneThreeSceneRef {
 interface CameraContextType {
   skinToneThreeSceneRef: MutableRefObject<SkinToneThreeSceneRef | null>;
   webcamRef: MutableRefObject<Webcam | null>;
-  recorderRef: MutableRefObject<RecordRTCPromisesHandler | null>;
   criterias: CameraState;
   setCriterias: (newState: Partial<CameraState>) => void;
   flipCamera: () => void;
@@ -55,6 +57,8 @@ interface CameraContextType {
   stopRecording: () => void;
   downloadVideo: () => void;
   exit: () => void;
+  status: string;
+  mediaBlobUrl: string | undefined;
 }
 
 const CameraContext = createContext<CameraContextType | undefined>(undefined);
@@ -65,6 +69,17 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
   const skinToneThreeSceneRef = useRef<{ callFunction: () => void }>(null);
   const webcamRef = useRef<Webcam>(null);
   const recorderRef = useRef<RecordRTCPromisesHandler | null>(null);
+
+  const {
+    status,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    mediaBlobUrl,
+  } = useReactMediaRecorder({
+    screen: true,
+  });
 
   const [state, setState] = useState<CameraState>({
     facePosition: false,
@@ -133,56 +148,17 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     }
   }
 
-  // start recording
-  const startRecording = useCallback(async () => {
-    if (webcamRef.current && webcamRef.current.stream) {
-      const mixedStream = new MediaStream([
-        ...webcamRef.current.stream.getVideoTracks(),
-        ...webcamRef.current.stream.getAudioTracks(),
-      ]);
-
-      recorderRef.current = new RecordRTCPromisesHandler(mixedStream, {
-        type: "video",
-        mimeType: "video/webm",
-      });
-      await recorderRef.current.startRecording();
-    }
-  }, []);
-
-  const pauseRecording = async () => {
-    if (recorderRef.current) {
-      await recorderRef.current.pauseRecording();
-    }
-  };
-
-  const resumeRecording = async () => {
-    if (recorderRef.current) {
-      await recorderRef.current.resumeRecording();
-    }
-  };
-
-  //  stop  recording
-  const stopRecording = async () => {
-    if (recorderRef.current) {
-      await recorderRef.current.stopRecording();
-    }
-  };
-
   const downloadVideo = async () => {
-    if (recorderRef.current) {
-      const blob = await recorderRef.current.getBlob();
-
-      // Unduh file video
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "recorded_video.webm";
-      a.click();
-      URL.revokeObjectURL(url);
-
-      recorderRef.current = null;
+    if (mediaBlobUrl) {
+      const link = document.createElement("a");
+      link.href = mediaBlobUrl;
+      link.download = "recorded_video.mp4";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      console.error("No video available for download");
     }
-    setState((prevState) => ({ ...prevState, isFinished: false }));
   };
 
   function exit() {
@@ -197,7 +173,6 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
       value={{
         skinToneThreeSceneRef,
         webcamRef,
-        recorderRef,
         criterias: state,
         setCriterias,
         flipCamera,
@@ -214,6 +189,8 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
         stopRecording,
         downloadVideo,
         exit,
+        status,
+        mediaBlobUrl,
       }}
     >
       {children}
