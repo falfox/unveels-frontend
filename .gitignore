@@ -23,4 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-
+#assets
+/public/models/skin-analysis/*
+!/public/models/skin-analysis/.gitkeep
