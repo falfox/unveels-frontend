@@ -173,6 +173,7 @@ function BrightnessSlider() {
         onChange={(e) => {
           setEyebrowsVisibility(parseFloat(e.currentTarget.value));
         }}
+        value={eyebrowsVisibility}
       />
       <div className="flex justify-between text-[0.5rem]">
         <label htmlFor="minmax-range" className="text-white/80">

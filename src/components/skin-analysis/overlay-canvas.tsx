@@ -86,7 +86,13 @@ function OverlayCanvas({
             // Gambar hanya fitur spesifik
             adjustedResults.forEach((bbox) => {
               // Filter for desired skin features
-              const validLabels = ["spots", "acne", "blackhead"];
+              const validLabels = [
+                "spots",
+                "acne",
+                "blackhead",
+                "wrinkles",
+                "oily",
+              ];
               if (!validLabels.includes(bbox.label)) {
                 return; // Skip jika label tidak diinginkan
               }

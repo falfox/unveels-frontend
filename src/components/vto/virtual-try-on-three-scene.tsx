@@ -17,6 +17,7 @@ import LipColor from "../three/makeup/lipcolor";
 import Bronzer from "../three/makeup/bronzer";
 import ContactLens from "../three/makeup/contact-lens";
 import Eyebrows from "../three/makeup/eyebrows";
+import HeadOccluder from "../three/accesories/head-occluder";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
@@ -157,7 +158,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     <>
       {videoTexture && (
         <>
-          <mesh position={[0, 0, -5]} {...props}>
+          <mesh position={[0, 0, -500]} {...props}>
             <planeGeometry args={[planeSize[0], planeSize[1]]} />
             <shaderMaterial
               ref={filterRef}
@@ -231,6 +232,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           {showEyebrows && (
             <Eyebrows planeSize={planeSize} landmarks={landmarks} />
           )}
+
+          <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
         </>
       )}
     </>

@@ -13,7 +13,6 @@ import { useMakeup } from "../makeup-context";
 interface ContactLensProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
-  lensPattern?: number; // Indeks pola tekstur lensa
 }
 
 // Fungsi untuk menghitung skala dan rotasi lensa kontak
