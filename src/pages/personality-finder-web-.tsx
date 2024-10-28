@@ -87,7 +87,7 @@ function MainContent() {
           setInferenceResult(personalityResult);
         } catch (error: any) {
           (window as any).flutter_inappwebview
-            .callHandler("detectionError", error)
+            .callHandler("detectionRun", error)
             .then((result: any) => {
               console.log("Flutter responded with:", result);
             })
