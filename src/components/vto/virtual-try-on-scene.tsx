@@ -152,7 +152,7 @@ export function VirtualTryOnScene() {
         className="absolute left-0 top-0 h-full w-full"
         style={{ zIndex: 50 }}
         orthographic
-        camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
+        camera={{ zoom: 1, position: [0, 0, 0], near: -1000, far: 1000 }}
         gl={{
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1,

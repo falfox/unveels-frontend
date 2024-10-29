@@ -52,7 +52,7 @@ const EyebrowsInner: React.FC<EyebrowsProps> = ({ landmarks, planeSize }) => {
   const eyebrowsMaterial = useMemo(() => {
     const materialOptions: Partial<MeshBasicMaterialParameters> = {
       color: new Color(eyebrowsColor),
-      transparent: !!alphaMap, // Menjadikan transparan jika alphaMap digunakan
+      transparent: !!alphaMap,
     };
 
     if (alphaMap) {

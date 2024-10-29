@@ -11,7 +11,6 @@ import {
   Vector3,
 } from "three";
 import { Landmark } from "../../../types/landmark";
-import { useGLTF } from "@react-three/drei";
 import { HEAD_OCCLUDER } from "../../../utils/constants";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
@@ -46,10 +45,10 @@ const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
             if ((child as Mesh).isMesh) {
               const mesh = child as Mesh;
               mesh.material = new MeshBasicMaterial({
-                // colorWrite: false,
-                // depthWrite: true,
+                colorWrite: false,
+                depthWrite: true,
               });
-              mesh.renderOrder = 1;
+              mesh.renderOrder = 2;
             }
           });
 
@@ -93,14 +92,19 @@ const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
         landmarks.current[389],
       );
 
-      const scaleFactor = faceSize * Math.min(scaleX, scaleY) * 80;
+      let scaleMultiplier = 90;
+      if (viewport.width > 1200) {
+        scaleMultiplier = 300;
+      } else if (viewport.width > 800) {
+        scaleMultiplier = 90;
+      } else {
+        scaleMultiplier = 90;
+      }
+
+      const scaleFactor = faceSize * Math.min(scaleX, scaleY) * scaleMultiplier;
 
       if (centerHead) {
-        occluderRef.current.position.set(
-          -centerHeadX,
-          centerHeadY,
-          centerHeadZ,
-        );
+        occluderRef.current.position.set(centerHeadX, centerHeadY, centerHeadZ);
         occluderRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
       }
 
@@ -124,39 +128,23 @@ const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
         (leftEar.z + rightEar.z) / 2,
       );
 
-      // Vektor forward dan up
       const forward = new Vector3().subVectors(nose, earMid).normalize();
       const up = new Vector3().subVectors(chin, eyeMid).normalize();
 
-      // Vektor right
       const right = new Vector3().crossVectors(up, forward).normalize();
 
-      // Buat matriks rotasi
+      // Create rotation matrix
       const rotationMatrix = new Matrix4();
       rotationMatrix.makeBasis(right, up, forward);
 
-      const horizontal = new Vector3(forward.x, 0, forward.z).normalize();
-      const pitchAngle = -Math.acos(forward.dot(horizontal)); // Sudut antara forward dan horizontal
+      // Convert to quaternion
+      const quaternion = new Quaternion().setFromRotationMatrix(rotationMatrix);
 
-      // Tentukan arah pitch (positif ke atas, negatif ke bawah)
-      const pitchDirection = forward.y > 0 ? -1 : 1;
-      const pitch = pitchAngle * pitchDirection;
-
-      // Buat rotasi Euler dengan pitch, yaw, dan roll
-      const deltaX = nose.x - earMid.x;
-      const deltaZ = nose.z - earMid.z;
-      const yaw = Math.atan2(deltaX, deltaZ);
-
-      const deltaY = rightEye.y - leftEye.y;
-      const deltaX_roll = rightEye.x - leftEye.x;
-      const roll = Math.atan2(deltaY, deltaX_roll);
-
-      const euler = new Euler(pitch, yaw, roll, "YXZ");
-
-      // Konversi Euler ke kuaternion
-      const finalQuaternion = new Quaternion().setFromEuler(euler);
-
-      occluderRef.current.quaternion.copy(finalQuaternion);
+      // Correct the quaternion if needed
+      quaternion.multiply(
+        new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI),
+      );
+      occluderRef.current.setRotationFromQuaternion(quaternion);
     });
 
     return null;

@@ -50,7 +50,7 @@ const HatInner: React.FC<Hatrops> = React.memo(({ landmarks, planeSize }) => {
               mesh.material.envMap = envMapAccesories;
               mesh.material.needsUpdate = true;
             }
-            child.renderOrder = 2; // Pastikan render urutannya benar
+            child.renderOrder = 2;
           }
         });
 
@@ -90,9 +90,33 @@ const HatInner: React.FC<Hatrops> = React.memo(({ landmarks, planeSize }) => {
       landmarks.current[389],
     );
 
+    let scaleYPosition = 1.5;
+    if (viewport.width > 1200) {
+      scaleYPosition = 5;
+    } else if (viewport.width > 800) {
+      scaleYPosition = 1.5;
+    } else {
+      scaleYPosition = 1.5;
+    }
+
     // Set position and scale
-    hatRef.current.position.set(-topHeadX, topHeadY * scaleY * 1.5, topHeadZ);
-    const scaleFactor = faceSize * Math.min(scaleX, scaleY) * 200;
+    hatRef.current.position.set(
+      topHeadX,
+      topHeadY * scaleY * scaleYPosition,
+      topHeadZ,
+    );
+
+    let scaleMultiplier = 200;
+    if (viewport.width > 1200) {
+      scaleMultiplier = 800;
+    } else if (viewport.width > 800) {
+      scaleMultiplier = 200;
+    } else {
+      scaleMultiplier = 200;
+    }
+
+    const scaleFactor = faceSize * Math.min(scaleX, scaleY) * scaleMultiplier;
+
     hatRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
     // Key landmarks for face orientation
@@ -114,41 +138,25 @@ const HatInner: React.FC<Hatrops> = React.memo(({ landmarks, planeSize }) => {
       (leftEar.y + rightEar.y) / 2,
       (leftEar.z + rightEar.z) / 2,
     );
-
-    // Vektor forward dan up
     const forward = new Vector3().subVectors(nose, earMid).normalize();
     const up = new Vector3().subVectors(chin, eyeMid).normalize();
 
-    // Vektor right
     const right = new Vector3().crossVectors(up, forward).normalize();
 
-    // Buat matriks rotasi
+    // Create rotation matrix
     const rotationMatrix = new Matrix4();
     rotationMatrix.makeBasis(right, up, forward);
 
-    const horizontal = new Vector3(forward.x, 0, forward.z).normalize();
-    const pitchAngle = Math.acos(forward.dot(horizontal)); // Sudut antara forward dan horizontal
+    // Convert to quaternion
+    const quaternion = new Quaternion().setFromRotationMatrix(rotationMatrix);
 
-    // Tentukan arah pitch (positif ke atas, negatif ke bawah)
-    const pitchDirection = forward.y > 0 ? -1 : 1;
-    const pitch = pitchAngle * pitchDirection;
+    // Correct the quaternion if needed
+    quaternion.multiply(
+      new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI),
+    );
 
-    // Buat rotasi Euler dengan pitch, yaw, dan roll
-    const deltaX = nose.x - earMid.x;
-    const deltaZ = nose.z - earMid.z;
-    const yaw = -Math.atan2(deltaX, deltaZ); // Membalikkan tanda yaw
-
-    const deltaY = rightEye.y - leftEye.y;
-    const deltaX_roll = rightEye.x - leftEye.x;
-    const roll = Math.atan2(deltaY, deltaX_roll);
-
-    const euler = new Euler(pitch, yaw, roll, "YXZ");
-
-    // Konversi Euler ke kuaternion
-    const finalQuaternion = new Quaternion().setFromEuler(euler);
-
-    // Set rotasi dari kuaternion
-    hatRef.current.setRotationFromQuaternion(finalQuaternion);
+    // Set the rotation of the hat object from the final quaternion
+    hatRef.current.setRotationFromQuaternion(quaternion);
   });
 
   return null;

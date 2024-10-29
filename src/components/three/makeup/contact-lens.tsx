@@ -26,9 +26,9 @@ const getEyeTransform = (
   const outputHeight = planeSize[1];
 
   const position = new Vector3(
-    (center.x - 0.5) * outputWidth,
+    -(center.x - 0.5) * outputWidth,
     -(center.y - 0.5) * outputHeight,
-    -center.z,
+    -center.z + 10,
   );
 
   const horizontalVector = new Vector3(

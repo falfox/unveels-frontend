@@ -52,8 +52,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   // State for slider-controlled factors
   const [archFactor, setArchFactor] = useState(0.1);
   const [pinchFactor, setPinchFactor] = useState(0.1);
-  const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(0);
-  const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
+  const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(2);
+  const [verticalShiftFactor, setVerticalShiftFactor] = useState(2);
 
   // Handle video readiness and create texture
   useEffect(() => {
@@ -150,7 +150,6 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
         }
       }
 
-      // Mark the material as needing an update
       filterRef.current.needsUpdate = true;
     }
   });
@@ -159,7 +158,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     <>
       {videoTexture && (
         <>
-          <mesh position={[0, 0, -500]} {...props}>
+          <mesh position={[0, 0, -500]} {...props} renderOrder={2}>
             <planeGeometry args={[planeSize[0], planeSize[1]]} />
             <shaderMaterial
               ref={filterRef}
@@ -234,8 +233,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             <Eyebrows planeSize={planeSize} landmarks={landmarks} />
           )}
 
-          <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
-          <Hat planeSize={planeSize} landmarks={landmarks} />
+          {/* <HeadOccluder planeSize={planeSize} landmarks={landmarks} /> */}
+          {/* <Hat planeSize={planeSize} landmarks={landmarks} /> */}
         </>
       )}
     </>

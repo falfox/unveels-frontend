@@ -1299,7 +1299,7 @@ export const EYEBROW_TEXTURE_EIGHT = "/assets/texture/eyebrow/eyebrow-8.png";
 export const HEAD_OCCLUDER = "/assets/occluder/headOccluder.glb";
 
 // hat
-export const HAT = "/assets/hat/hat9.glb";
+export const HAT = "/assets/hat/hat6.glb";
 
 // hdr acc
 export const HDR_ACCESORIES = "/assets/light/hotel_room_1k.hdr";
