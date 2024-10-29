@@ -2,12 +2,18 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import Webcam from "react-webcam";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { useCamera } from "../recorder/recorder-context";
-import { VIDEO_WIDTH, VIDEO_HEIGHT } from "../../utils/constants";
+import {
+  VIDEO_WIDTH,
+  VIDEO_HEIGHT,
+  HDR_ACCESORIES,
+} from "../../utils/constants";
 import { ErrorOverlay } from "../error-overlay";
 import { Canvas } from "@react-three/fiber";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import VirtualTryOnThreeScene from "./virtual-try-on-three-scene";
 import { Landmark } from "../../types/landmark";
+import { useAccesories } from "../three/accesories-context";
+import HDREnvironment from "../three/hdr-environment";
 
 export function VirtualTryOnScene() {
   const webcamRef = useRef<Webcam>(null);
@@ -19,6 +25,7 @@ export function VirtualTryOnScene() {
 
   // Using CameraContext
   const { criterias, flipCamera } = useCamera();
+  const { envMapAccesories, setEnvMapAccesories } = useAccesories();
 
   useEffect(() => {
     let isMounted = true; // Untuk mencegah pembaruan state setelah unmount
@@ -152,6 +159,11 @@ export function VirtualTryOnScene() {
           outputColorSpace: SRGBColorSpace,
         }}
       >
+        <HDREnvironment
+          hdrPath={HDR_ACCESORIES}
+          onLoaded={setEnvMapAccesories}
+        />
+
         <VirtualTryOnThreeScene videoRef={webcamRef} landmarks={landmarksRef} />
       </Canvas>
 

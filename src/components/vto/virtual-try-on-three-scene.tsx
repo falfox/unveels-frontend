@@ -18,6 +18,7 @@ import Bronzer from "../three/makeup/bronzer";
 import ContactLens from "../three/makeup/contact-lens";
 import Eyebrows from "../three/makeup/eyebrows";
 import HeadOccluder from "../three/accesories/head-occluder";
+import Hat from "../three/accesories/hat";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
@@ -234,6 +235,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           )}
 
           <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
+          <Hat planeSize={planeSize} landmarks={landmarks} />
         </>
       )}
     </>

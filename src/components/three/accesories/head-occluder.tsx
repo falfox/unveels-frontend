@@ -11,6 +11,7 @@ import {
   Vector3,
 } from "three";
 import { Landmark } from "../../../types/landmark";
+import { useGLTF } from "@react-three/drei";
 import { HEAD_OCCLUDER } from "../../../utils/constants";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
@@ -30,7 +31,7 @@ interface HeadOccludeProps extends MeshProps {
 const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
   ({ landmarks, planeSize }) => {
     const occluderRef = useRef<Object3D | null>(null);
-    const { scene } = useThree();
+    const { scene, size, viewport } = useThree();
 
     const outputWidth = planeSize[0];
     const outputHeight = planeSize[1];
@@ -45,8 +46,8 @@ const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
             if ((child as Mesh).isMesh) {
               const mesh = child as Mesh;
               mesh.material = new MeshBasicMaterial({
-                colorWrite: false,
-                depthWrite: true,
+                // colorWrite: false,
+                // depthWrite: true,
               });
               mesh.renderOrder = 1;
             }
@@ -77,22 +78,30 @@ const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
 
       const centerHead = landmarks.current[1];
 
-      const centerHeadX = (centerHead.x - 0.5) * outputWidth;
-      const centerHeadY = -(centerHead.y - 0.5) * outputHeight;
-      const centerHeadZ = -centerHead.z;
+      // Scale coordinates proportionally with the viewport
+      const scaleX = viewport.width / outputWidth;
+      const scaleY = viewport.height / outputHeight;
+
+      const centerHeadX =
+        (1 - centerHead.x) * outputWidth * scaleX - viewport.width / 2;
+      const centerHeadY =
+        -centerHead.y * outputHeight * scaleY + viewport.height / 2;
+      const centerHeadZ = -centerHead.z * 100;
 
       const faceSize = calculateDistance(
         landmarks.current[162],
         landmarks.current[389],
       );
 
+      const scaleFactor = faceSize * Math.min(scaleX, scaleY) * 80;
+
       if (centerHead) {
-        occluderRef.current.position.set(centerHeadX, centerHeadY, centerHeadZ);
-        occluderRef.current.scale.set(
-          faceSize * 80,
-          faceSize * 80,
-          faceSize * 50,
+        occluderRef.current.position.set(
+          -centerHeadX,
+          centerHeadY,
+          centerHeadZ,
         );
+        occluderRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
       }
 
       // Extract necessary landmarks
@@ -115,6 +124,25 @@ const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
         (leftEar.z + rightEar.z) / 2,
       );
 
+      // Vektor forward dan up
+      const forward = new Vector3().subVectors(nose, earMid).normalize();
+      const up = new Vector3().subVectors(chin, eyeMid).normalize();
+
+      // Vektor right
+      const right = new Vector3().crossVectors(up, forward).normalize();
+
+      // Buat matriks rotasi
+      const rotationMatrix = new Matrix4();
+      rotationMatrix.makeBasis(right, up, forward);
+
+      const horizontal = new Vector3(forward.x, 0, forward.z).normalize();
+      const pitchAngle = -Math.acos(forward.dot(horizontal)); // Sudut antara forward dan horizontal
+
+      // Tentukan arah pitch (positif ke atas, negatif ke bawah)
+      const pitchDirection = forward.y > 0 ? -1 : 1;
+      const pitch = pitchAngle * pitchDirection;
+
+      // Buat rotasi Euler dengan pitch, yaw, dan roll
       const deltaX = nose.x - earMid.x;
       const deltaZ = nose.z - earMid.z;
       const yaw = Math.atan2(deltaX, deltaZ);
@@ -123,11 +151,12 @@ const HeadOccluderInner: React.FC<HeadOccludeProps> = React.memo(
       const deltaX_roll = rightEye.x - leftEye.x;
       const roll = Math.atan2(deltaY, deltaX_roll);
 
-      const euler = new Euler(0, yaw, roll, "YXZ");
+      const euler = new Euler(pitch, yaw, roll, "YXZ");
 
-      const quaternion = new Quaternion().setFromEuler(euler);
+      // Konversi Euler ke kuaternion
+      const finalQuaternion = new Quaternion().setFromEuler(euler);
 
-      occluderRef.current.quaternion.copy(quaternion);
+      occluderRef.current.quaternion.copy(finalQuaternion);
     });
 
     return null;
