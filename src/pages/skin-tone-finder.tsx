@@ -57,11 +57,14 @@ export function SkinToneFinder() {
 }
 
 function Main() {
-  const { criterias, status } = useCamera();
+  const { criterias, targetRef } = useCamera();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+    <div
+      className="relative mx-auto h-full min-h-dvh w-full bg-black"
+      ref={targetRef}
+    >
       <div className="absolute inset-0">
         <VideoStream debugMode={false} />
         <SkinToneFinderScene />

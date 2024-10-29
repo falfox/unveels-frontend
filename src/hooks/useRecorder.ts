@@ -71,13 +71,8 @@ function reducer(state: State, action: Action): State {
 // Custom hook for recording logic
 export const useRecordingControls = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const {
-    startRecording,
-    stopRecording,
-    pauseRecording,
-    resumeRecording,
-    status,
-  } = useCamera();
+  const { startRecording, stopRecording, pauseRecording, resumeRecording } =
+    useCamera();
   // Timer effect for updating elapsed time
   useEffect(() => {
     let interval: number | null = null;
@@ -95,21 +90,14 @@ export const useRecordingControls = () => {
     };
   }, [state.isRecording, state.isPaused]);
 
-  useEffect(() => {
-    if (!state.isRecording) {
-      if (status === "recording") {
-        dispatch({
-          type: actionTypes.START,
-          payload: new Date().getTime(),
-        });
-      }
-    }
-  }, [status]);
-
   // Start or pause the recording
   const handleStartPause = () => {
+    startRecording();
     if (!state.isRecording) {
-      startRecording();
+      dispatch({
+        type: actionTypes.START,
+        payload: new Date().getTime(),
+      });
     } else if (state.isPaused) {
       resumeRecording();
       dispatch({ type: actionTypes.RESUME, payload: new Date().getTime() });

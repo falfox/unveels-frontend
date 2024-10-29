@@ -41,6 +41,7 @@ interface SkinToneThreeSceneRef {
 interface CameraContextType {
   skinToneThreeSceneRef: MutableRefObject<SkinToneThreeSceneRef | null>;
   webcamRef: MutableRefObject<Webcam | null>;
+  targetRef: MutableRefObject<HTMLDivElement | null>;
   criterias: CameraState;
   setCriterias: (newState: Partial<CameraState>) => void;
   flipCamera: () => void;
@@ -57,8 +58,6 @@ interface CameraContextType {
   stopRecording: () => void;
   downloadVideo: () => void;
   exit: () => void;
-  status: string;
-  mediaBlobUrl: string | undefined;
 }
 
 const CameraContext = createContext<CameraContextType | undefined>(undefined);
@@ -69,17 +68,13 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
   const skinToneThreeSceneRef = useRef<{ callFunction: () => void }>(null);
   const webcamRef = useRef<Webcam>(null);
   const recorderRef = useRef<RecordRTCPromisesHandler | null>(null);
-
-  const {
-    status,
-    startRecording,
-    stopRecording,
-    pauseRecording,
-    resumeRecording,
-    mediaBlobUrl,
-  } = useReactMediaRecorder({
-    screen: true,
-  });
+  const [chunks, setChunks] = useState<Blob[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null,
+  );
+  const targetRef = useRef<HTMLDivElement | null>(null);
+  const animationRef = useRef<number | null>(null);
 
   const [state, setState] = useState<CameraState>({
     facePosition: false,
@@ -148,17 +143,68 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     }
   }
 
-  const downloadVideo = async () => {
-    if (mediaBlobUrl) {
-      const link = document.createElement("a");
-      link.href = mediaBlobUrl;
-      link.download = "recorded_video.mp4";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      console.error("No video available for download");
+  const startRecording = async () => {
+    if (!targetRef.current) {
+      console.error("No target element found");
+      return;
     }
+
+    const canvas = await html2canvas(targetRef.current);
+    const stream = canvas.captureStream(100);
+
+    const recorder = new MediaRecorder(stream, {
+      mimeType: "video/webm",
+    });
+
+    recorder.ondataavailable = (e: BlobEvent) => {
+      if (e.data && e.data.size > 0) {
+        setChunks((prev) => [...prev, e.data]);
+      }
+    };
+
+    const updateCanvas = async () => {
+      const updatedCanvas = await html2canvas(
+        targetRef.current as HTMLDivElement,
+      );
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(updatedCanvas, 0, 0);
+      }
+      animationRef.current = requestAnimationFrame(updateCanvas);
+    };
+
+    animationRef.current = requestAnimationFrame(updateCanvas);
+
+    recorder.start();
+    setMediaRecorder(recorder);
+    setIsRecording(true);
+  };
+
+  const pauseRecording = () => {};
+
+  const resumeRecording = () => {};
+
+  const stopRecording = () => {
+    mediaRecorder?.stop();
+    setIsRecording(false);
+    if (animationRef.current !== null) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null; // Reset reference
+    }
+  };
+
+  const downloadVideo = async () => {
+    console.log("downloadVideo", chunks);
+    const blob = new Blob(chunks, { type: "video/webm" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "recording.webm";
+    a.click();
+
+    // Bersihkan chunks setelah selesai
+    setChunks([]);
   };
 
   function exit() {
@@ -173,6 +219,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
       value={{
         skinToneThreeSceneRef,
         webcamRef,
+        targetRef,
         criterias: state,
         setCriterias,
         flipCamera,
@@ -189,8 +236,6 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
         stopRecording,
         downloadVideo,
         exit,
-        status,
-        mediaBlobUrl,
       }}
     >
       {children}
