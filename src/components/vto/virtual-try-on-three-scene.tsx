@@ -19,6 +19,9 @@ import ContactLens from "../three/makeup/contact-lens";
 import Eyebrows from "../three/makeup/eyebrows";
 import HeadOccluder from "../three/accesories/head-occluder";
 import Hat from "../three/accesories/hat";
+import Glasess from "../three/accesories/glasess";
+import Headband from "../three/accesories/headband";
+import Earring from "../three/accesories/earring";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
@@ -52,8 +55,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   // State for slider-controlled factors
   const [archFactor, setArchFactor] = useState(0.1);
   const [pinchFactor, setPinchFactor] = useState(0.1);
-  const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(2);
-  const [verticalShiftFactor, setVerticalShiftFactor] = useState(2);
+  const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(0);
+  const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
 
   // Handle video readiness and create texture
   useEffect(() => {
@@ -233,8 +236,11 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             <Eyebrows planeSize={planeSize} landmarks={landmarks} />
           )}
 
-          {/* <HeadOccluder planeSize={planeSize} landmarks={landmarks} /> */}
-          {/* <Hat planeSize={planeSize} landmarks={landmarks} /> */}
+          <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
+          <Hat planeSize={planeSize} landmarks={landmarks} />
+          <Glasess planeSize={planeSize} landmarks={landmarks} />
+          <Headband planeSize={planeSize} landmarks={landmarks} />
+          <Earring planeSize={planeSize} landmarks={landmarks} />
         </>
       )}
     </>

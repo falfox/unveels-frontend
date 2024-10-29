@@ -1301,6 +1301,18 @@ export const HEAD_OCCLUDER = "/assets/occluder/headOccluder.glb";
 // hat
 export const HAT = "/assets/hat/hat6.glb";
 
+// glasess
+export const GLASESS = "/assets/glasess/glasess.glb";
+
+// earring
+export const EARRING = "/assets/earring/earring1.glb";
+
+// headband
+export const HEADBAND = "/assets/headband/hb.glb";
+
+// necklace
+export const NECKLACE = "/assets/necklace/neck.glb";
+
 // hdr acc
 export const HDR_ACCESORIES = "/assets/light/hotel_room_1k.hdr";
 
