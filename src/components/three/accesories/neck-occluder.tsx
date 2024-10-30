@@ -2,17 +2,17 @@ import { MeshProps, useFrame, useThree } from "@react-three/fiber";
 import React, { useMemo, useRef, Suspense, useEffect } from "react";
 import { Mesh, MeshBasicMaterial, Object3D } from "three";
 import { Landmark } from "../../../types/landmark";
-import { HEAD_OCCLUDER } from "../../../utils/constants";
+import { NECK_OCCLUDER } from "../../../utils/constants";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { calculateDistance } from "../../../utils/calculateDistance";
 import { calculateFaceOrientation } from "../../../utils/calculateFaceOrientation";
 
-interface HeadOccluderProps extends MeshProps {
+interface NeckOccluderProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 
-const HeadOccluderInner: React.FC<HeadOccluderProps> = React.memo(
+const NeckOccluderInner: React.FC<NeckOccluderProps> = React.memo(
   ({ landmarks, planeSize }) => {
     const occluderRef = useRef<Object3D | null>(null);
     const { scene, viewport } = useThree();
@@ -20,17 +20,17 @@ const HeadOccluderInner: React.FC<HeadOccluderProps> = React.memo(
     const outputWidth = planeSize[0];
     const outputHeight = planeSize[1];
 
-    const { scaleMultiplier } = useMemo(() => {
+    const { scaleMultiplier, neckDistanceY } = useMemo(() => {
       if (viewport.width > 1200) {
-        return { scaleMultiplier: 300 };
+        return { scaleMultiplier: 250, neckDistanceY: 400 };
       }
-      return { scaleMultiplier: 90 };
+      return { scaleMultiplier: 100, neckDistanceY: 250 };
     }, [viewport.width]);
 
     useEffect(() => {
       const loader = new GLTFLoader();
       loader.load(
-        HEAD_OCCLUDER,
+        NECK_OCCLUDER,
         (gltf) => {
           const occluder = gltf.scene;
           occluder.traverse((child) => {
@@ -67,17 +67,20 @@ const HeadOccluderInner: React.FC<HeadOccluderProps> = React.memo(
     useFrame(() => {
       if (!landmarks.current || !occluderRef.current) return;
 
-      const centerHead = landmarks.current[1];
+      const neckLandmark = landmarks.current[0];
+
+      const neckDistance =
+        calculateDistance(landmarks.current[197], landmarks.current[152]) * 800;
 
       // Scale coordinates proportionally with the viewport
       const scaleX = viewport.width / outputWidth;
       const scaleY = viewport.height / outputHeight;
 
-      const centerHeadX =
-        (1 - centerHead.x) * outputWidth * scaleX - viewport.width / 2;
-      const centerHeadY =
-        -centerHead.y * outputHeight * scaleY + viewport.height / 2;
-      const centerHeadZ = -centerHead.z * 100;
+      const neckLandmarkX =
+        (1 - neckLandmark.x) * outputWidth * scaleX - viewport.width / 2;
+      const neckLandmarkY =
+        -neckLandmark.y * outputHeight * scaleY + viewport.height / 2;
+      const neckLandmarkZ = -neckLandmark.z * 100;
 
       const faceSize = calculateDistance(
         landmarks.current[162],
@@ -86,15 +89,14 @@ const HeadOccluderInner: React.FC<HeadOccluderProps> = React.memo(
 
       const scaleFactor = faceSize * Math.min(scaleX, scaleY) * scaleMultiplier;
 
-      if (centerHead) {
-        occluderRef.current.position.set(centerHeadX, centerHeadY, centerHeadZ);
+      if (neckLandmark) {
+        occluderRef.current.position.set(
+          (neckLandmarkX / 6) * 2,
+          neckLandmarkY - neckDistance + neckDistance - neckDistanceY,
+          0,
+        );
+
         occluderRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
-      }
-
-      const quaternion = calculateFaceOrientation(landmarks.current);
-
-      if (quaternion) {
-        occluderRef.current.setRotationFromQuaternion(quaternion);
       }
     });
 
@@ -102,12 +104,12 @@ const HeadOccluderInner: React.FC<HeadOccluderProps> = React.memo(
   },
 );
 
-const HeadOccluder: React.FC<HeadOccluderProps> = (props) => {
+const NeckOccluder: React.FC<NeckOccluderProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <HeadOccluderInner {...props} />
+      <NeckOccluderInner {...props} />
     </Suspense>
   );
 };
 
-export default HeadOccluder;
+export default NeckOccluder;

@@ -25,7 +25,7 @@ const HatInner: React.FC<Hatrops> = React.memo(({ landmarks, planeSize }) => {
     if (viewport.width > 1200) {
       return { scaleMultiplier: 800, scaleYPosition: 5 };
     }
-    return { scaleMultiplier: 200, scaleYPosition: 1.5 };
+    return { scaleMultiplier: 200, scaleYPosition: 1.2 };
   }, [viewport.width]);
 
   useEffect(() => {

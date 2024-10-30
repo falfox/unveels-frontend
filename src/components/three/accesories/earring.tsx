@@ -1,13 +1,6 @@
 // EarringInner.tsx
 import React, { useMemo, useEffect, useRef, Suspense } from "react";
-import {
-  Object3D,
-  Mesh,
-  MeshStandardMaterial,
-  Matrix4,
-  Quaternion,
-  Vector3,
-} from "three";
+import { Object3D, Mesh, MeshStandardMaterial } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Landmark } from "../../../types/landmark";
@@ -32,11 +25,32 @@ const EarringInner: React.FC<EarringProps> = React.memo(
     const outputHeight = planeSize[1];
 
     // Menggunakan useMemo untuk menentukan scaleMultiplier
-    const { scaleMultiplier } = useMemo(() => {
+    const { scaleMultiplier, bottomEarPosX, bottomEarPosY } = useMemo(() => {
       if (viewport.width > 1200) {
-        return { scaleMultiplier: 800 };
+        return {
+          scaleMultiplier: 800,
+          bottomEarPosX: 1.05,
+          bottomEarPosY: 3,
+        };
       }
-      return { scaleMultiplier: 200 };
+
+      if (viewport.width > 500 && viewport.width < 800) {
+        return {
+          scaleMultiplier: 200,
+          bottomEarPosX: 2,
+          bottomEarPosY: 1.3,
+        };
+      }
+
+      if (viewport.width > 800 && viewport.width < 1200) {
+        return {
+          scaleMultiplier: 200,
+          bottomEarPosX: 1.08,
+          bottomEarPosY: 1.7,
+        };
+      }
+
+      return { scaleMultiplier: 200, bottomEarPosX: 1.8, bottomEarPosY: 1.3 };
     }, [viewport.width]);
 
     useEffect(() => {
@@ -100,20 +114,11 @@ const EarringInner: React.FC<EarringProps> = React.memo(
       )
         return;
 
-      // Pastikan landmark yang diperlukan tersedia
-      const requiredIndices = [132, 361, 447, 454];
-      for (const index of requiredIndices) {
-        if (!currentLandmarks[index]) {
-          console.warn(`Landmark at index ${index} is missing.`);
-          return;
-        }
-      }
-
       // Earring kiri menggunakan landmark 132
-      const leftBottomEar = currentLandmarks[132];
+      const leftBottomEar = currentLandmarks[93];
 
       // Earring kanan menggunakan landmark 323
-      const rightBottomEar = currentLandmarks[361];
+      const rightBottomEar = currentLandmarks[323];
 
       // Skala koordinat proporsional dengan viewport
       const scaleX = viewport.width / outputWidth;
@@ -140,9 +145,9 @@ const EarringInner: React.FC<EarringProps> = React.memo(
 
       // Set posisi dan skala untuk left earring
       leftEarringRef.current.position.set(
-        leftBottomEarX + 15, // Tambahkan offset jika diperlukan
-        leftBottomEarY,
-        leftBottomEarZ - 40, // Tambahkan offset jika diperlukan
+        leftBottomEarX * bottomEarPosX,
+        leftBottomEarY * bottomEarPosY,
+        leftBottomEarZ - 40,
       );
 
       const leftScaleFactor =
@@ -155,8 +160,8 @@ const EarringInner: React.FC<EarringProps> = React.memo(
 
       // Set posisi dan skala untuk right earring
       rightEarringRef.current.position.set(
-        rightBottomEarX - 15, // Tambahkan offset jika diperlukan
-        rightBottomEarY,
+        rightBottomEarX * bottomEarPosX, // Tambahkan offset jika diperlukan
+        rightBottomEarY * bottomEarPosY,
         rightBottomEarZ - 40, // Tambahkan offset jika diperlukan
       );
 

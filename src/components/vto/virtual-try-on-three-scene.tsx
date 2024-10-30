@@ -22,6 +22,9 @@ import Hat from "../three/accesories/hat";
 import Glasess from "../three/accesories/glasess";
 import Headband from "../three/accesories/headband";
 import Earring from "../three/accesories/earring";
+import NeckOccluder from "../three/accesories/neck-occluder";
+import Necklace from "../three/accesories/necklace";
+import { useAccesories } from "../three/accesories-context";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
@@ -49,6 +52,17 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     showLens,
     showEyebrows,
   } = useMakeup();
+
+  const {
+    showHat,
+    showGlasess,
+    showHeadband,
+    showEarring,
+    showNecklace,
+    showWatch,
+    showBracelet,
+    showRing,
+  } = useAccesories();
 
   const filterRef = useRef<ShaderMaterial>(null);
 
@@ -237,10 +251,25 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           )}
 
           <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
-          <Hat planeSize={planeSize} landmarks={landmarks} />
-          <Glasess planeSize={planeSize} landmarks={landmarks} />
-          <Headband planeSize={planeSize} landmarks={landmarks} />
-          <Earring planeSize={planeSize} landmarks={landmarks} />
+          <NeckOccluder planeSize={planeSize} landmarks={landmarks} />
+
+          {showHat && <Hat planeSize={planeSize} landmarks={landmarks} />}
+
+          {showGlasess && (
+            <Glasess planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showHeadband && (
+            <Headband planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showEarring && (
+            <Earring planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showNecklace && (
+            <Necklace planeSize={planeSize} landmarks={landmarks} />
+          )}
         </>
       )}
     </>

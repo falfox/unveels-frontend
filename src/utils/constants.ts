@@ -1298,6 +1298,9 @@ export const EYEBROW_TEXTURE_EIGHT = "/assets/texture/eyebrow/eyebrow-8.png";
 // head occluder
 export const HEAD_OCCLUDER = "/assets/occluder/headOccluder.glb";
 
+// neck occluder
+export const NECK_OCCLUDER = "/assets/occluder/neckOccluder.glb";
+
 // hat
 export const HAT = "/assets/hat/hat6.glb";
 
