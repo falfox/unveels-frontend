@@ -25,15 +25,20 @@ import Earring from "../three/accesories/earring";
 import NeckOccluder from "../three/accesories/neck-occluder";
 import Necklace from "../three/accesories/necklace";
 import { useAccesories } from "../three/accesories-context";
+import HandOccluder from "../three/accesories/hand-occluder";
+import Watch from "../three/accesories/watch";
+import Ring from "../three/accesories/ring";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
   landmarks: React.RefObject<Landmark[]>;
+  handlandmarks: React.RefObject<Landmark[]>;
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   videoRef,
   landmarks,
+  handlandmarks,
   ...props
 }) => {
   const { viewport } = useThree();
@@ -252,6 +257,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
           <NeckOccluder planeSize={planeSize} landmarks={landmarks} />
+          <HandOccluder planeSize={planeSize} handLandmarks={handlandmarks} />
 
           {showHat && <Hat planeSize={planeSize} landmarks={landmarks} />}
 
@@ -269,6 +275,14 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showNecklace && (
             <Necklace planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showWatch && (
+            <Watch planeSize={planeSize} handLandmarks={handlandmarks} />
+          )}
+
+          {showRing && (
+            <Ring planeSize={planeSize} handLandmarks={handlandmarks} />
           )}
         </>
       )}

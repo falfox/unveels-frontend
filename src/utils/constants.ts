@@ -1301,6 +1301,15 @@ export const HEAD_OCCLUDER = "/assets/occluder/headOccluder.glb";
 // neck occluder
 export const NECK_OCCLUDER = "/assets/occluder/neckOccluder.glb";
 
+// hand occluder
+export const HAND_OCCLUDER = "/assets/occluder/wristOccluder.glb";
+
+// watch
+export const WATCH = "/assets/watch/watch.glb";
+
+// ring
+export const RING = "/assets/watch/gelang_5.glb";
+
 // hat
 export const HAT = "/assets/hat/hat6.glb";
 
