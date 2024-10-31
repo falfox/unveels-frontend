@@ -42,6 +42,7 @@ import { NailsMode } from "./pages/vto/nails/nails-makeup";
 import { PressOnNailsSelector } from "./pages/vto/nails/press-on-nails/press-on-nails";
 import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear";
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
+import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
 
 // Define routes using object syntax
 const routes = [
@@ -59,6 +60,10 @@ const routes = [
   { path: "/skin-analysis", element: <SkinAnalysis /> },
   { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
+  {
+    path: "/virtual-try-on-product/:sku",
+    element: <SingleVirtualTryOn />,
+  },
   {
     path: "/virtual-try-on",
     element: <VirtualTryOn />,

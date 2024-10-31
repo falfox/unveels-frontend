@@ -88,9 +88,7 @@ function Result() {
   const { setPage } = usePage();
   const { criterias } = useCamera();
 
-  const [inferenceResult, setInferenceResult] = useState<Classifier[] | null>(
-    null,
-  );
+  const [inferenceResult, setInferenceResult] = useState<Classifier[] | null>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferenceError, setInferenceError] = useState<string | null>(null);
   const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
@@ -202,10 +200,10 @@ function Result() {
 
       {/* Main Content */}
       {selectedTab === "Personality" ? (
-        <PersonalityTab data={inferenceResult} />
+        <PersonalityTab data={inferenceResult ?? null} />
       ) : null}
       {selectedTab === "Attributes" ? (
-        <AttributesTab data={inferenceResult} />
+        <AttributesTab data={inferenceResult ?? null} />
       ) : null}
       {selectedTab === "Recommendations" ? (
         <RecommendationsTab
@@ -399,33 +397,6 @@ function PersonalitySection({
 }
 
 function RecommendationsTab({ personality }: { personality: string }) {
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
-
   const { data: fragrances } = useFragrancesProductQuery({
     personality,
   });
@@ -727,7 +698,7 @@ function FeatureSection({
   }[];
 }) {
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col space-y-2">
       <div className="flex items-center pb-5 space-x-2">
         <span className="text-2xl">{icon}</span>
         <h2 className="text-3xl font-semibold">{title}</h2>
@@ -747,9 +718,7 @@ function FeatureSection({
           </div>
         ))}
       </div>
-      <div className="py-4">
-        <div className="border-b border-white/50"></div>
-      </div>
+      <div className="flex-1 py-4 border-b border-white/50"></div>
     </div>
   );
 }

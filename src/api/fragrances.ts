@@ -2,27 +2,38 @@ import { useQuery } from "@tanstack/react-query";
 import { buildSearchParams } from "../utils/apiUtils";
 import { defaultHeaders, Product } from "./shared";
 import { personalities } from "./attributes/personality";
+import { face_shapes } from "./attributes/face_shape";
 
 const fragrancesKey = {
-  products: ({ personality }: { personality: string }) => [
-    "products",
-    "fragrances",
+  products: ({
     personality,
-  ],
+    faceShape,
+  }: {
+    personality?: string;
+    faceShape?: string;
+  }) => ["products", "fragrances", { personality, faceShape }],
 };
 
 export function useFragrancesProductQuery({
   personality,
+  faceShape,
 }: {
-  personality: string;
+  personality?: string;
+  faceShape?: string;
 }) {
-  const personalityId = personalities.find(
-    (p) => p.label.toLowerCase() === personality.toLowerCase(),
-  )?.value ?? "";
+  const personalityId =
+    personalities.find(
+      (p) => p.label.toLowerCase() === personality?.toLowerCase(),
+    )?.value ?? "";
+
+  const faceShapeId =
+    face_shapes.find((p) => p.label.toLowerCase() === faceShape?.toLowerCase())
+      ?.value ?? "";
 
   return useQuery({
     queryKey: fragrancesKey.products({
-      personality: personality || "",
+      personality: personality,
+      faceShape: faceShape,
     }),
     queryFn: async () => {
       const filters = [
@@ -35,7 +46,10 @@ export function useFragrancesProductQuery({
             },
           ],
         },
-        {
+      ];
+
+      if (personalityId) {
+        filters.push({
           filters: [
             {
               field: "personality",
@@ -43,8 +57,20 @@ export function useFragrancesProductQuery({
               condition_type: "eq",
             },
           ],
-        },
-      ];
+        });
+      }
+
+      if (faceShapeId) {
+        filters.push({
+          filters: [
+            {
+              field: "face_shape",
+              value: faceShapeId,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
 
       const response = await fetch(
         "/rest/V1/products?" + buildSearchParams(filters),

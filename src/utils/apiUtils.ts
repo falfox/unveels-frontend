@@ -31,7 +31,7 @@ export function buildSearchParams(filterGroups: FilterGroup[]): string {
     group.filters.forEach((filter, filterIndex) => {
       Object.entries(filter).forEach(([key, value]) => {
         const paramName = `searchCriteria[filter_groups][${groupIndex}][filters][${filterIndex}][${key}]`;
-        params.append(paramName, encodeURIComponent(String(value)));
+        params.append(paramName, String(value));
       });
     });
   });

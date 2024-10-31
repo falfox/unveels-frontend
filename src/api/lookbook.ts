@@ -7,11 +7,19 @@ export type CustomAttributeValue = {
   value: string;
 };
 
+type LookbookFilters =
+  | {
+      personality: string;
+    }
+  | {
+      faceShape: string;
+    };
+
 const lookbookKey = {
-  products: (personality: string) => ["products", "lookbook", personality],
+  products: (filters: LookbookFilters) => ["products", "lookbook", filters],
 };
 
-async function fetchLookbookProducts({ personality }: { personality: string }) {
+async function fetchLookbookProducts(options: LookbookFilters) {
   let response = await fetch("/rest/V1/lookbook/categories", {
     headers: defaultHeaders,
   });
@@ -24,9 +32,19 @@ async function fetchLookbookProducts({ personality }: { personality: string }) {
   const filteredData = data
     .map((category) => category.profiles)
     .flat()
-    .filter((profile) =>
-      profile.try_on_url.includes(`Personality=${personality}`),
-    );
+    .filter((profile) => {
+      if ("personality" in options) {
+        return profile.try_on_url.includes(
+          `Personality=${options.personality}`,
+        );
+      }
+
+      if ("faceShape" in options) {
+        return profile.try_on_url.includes(`Face Shape=${options.faceShape}`);
+      }
+
+      return false;
+    });
 
   const skus = filteredData
     .map((profile) => {
@@ -36,11 +54,6 @@ async function fetchLookbookProducts({ personality }: { personality: string }) {
       return markers.map((marker) => marker.sku);
     })
     .flat();
-
-  console.log({
-    skus,
-    filteredData,
-  });
 
   const filters = [
     {
@@ -67,13 +80,9 @@ async function fetchLookbookProducts({ personality }: { personality: string }) {
   }>;
 }
 
-export function useLookbookProductQuery({
-  personality,
-}: {
-  personality: string;
-}) {
+export function useLookbookProductQuery(filters: LookbookFilters) {
   return useQuery({
-    queryKey: lookbookKey.products(personality),
-    queryFn: () => fetchLookbookProducts({ personality }),
+    queryKey: lookbookKey.products(filters),
+    queryFn: () => fetchLookbookProducts(filters),
   });
 }

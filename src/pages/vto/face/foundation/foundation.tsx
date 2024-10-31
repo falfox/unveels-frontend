@@ -2,12 +2,12 @@ import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 
 import { ColorPalette } from "../../../../components/color-palette";
+import { useMakeup } from "../../../../components/three/makeup-context";
 import { FoundationProvider, useFoundationContext } from "./foundation-context";
-import {
-  MakeupProvider,
-  useMakeup,
-} from "../../../../components/three/makeup-context";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { buildSearchParams } from "../../../../utils/apiUtils";
+import { defaultHeaders, Product } from "../../../../api/shared";
+import { faceMakeupProductTypesMap } from "../../../../api/attributes/makeups";
 
 const colorFamilies = [
   { name: "Light Skin", value: "#FAD4B4" },
@@ -16,9 +16,52 @@ const colorFamilies = [
 ];
 
 export function FoundationSelector() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["products", "foundations"],
+    queryFn: async () => {
+      const filters = [
+        {
+          filters: [
+            {
+              field: "type_id",
+              value: "simple",
+              condition_type: "eq",
+            },
+          ],
+        },
+        {
+          filters: [
+            {
+              field: "face_makeup_product_type",
+              value: faceMakeupProductTypesMap["Foundations"],
+              condition_type: "eq",
+            },
+          ],
+        },
+      ];
+
+      const response = await fetch(
+        "/rest/V1/products?" + buildSearchParams(filters),
+        {
+          headers: defaultHeaders,
+        },
+      );
+
+      const results = (await response.json()) as {
+        items: Array<Product>;
+      };
+
+      return results;
+    },
+  });
+
+  console.log({
+    data,
+  });
+
   return (
     <FoundationProvider>
-      <div className="mx-auto w-full px-4 lg:max-w-xl">
+      <div className="w-full px-4 mx-auto lg:max-w-xl">
         <FamilyColorSelector />
 
         <ColorSelector />
@@ -34,7 +77,7 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
+      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colorFamilies.map((item, index) => (
@@ -91,11 +134,11 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
           onClick={() => {
             resetFoundation();
           }}
@@ -162,14 +205,14 @@ function ProductList() {
   const { colorFamily } = useFoundationContext();
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto border-t border-white pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto border-t border-white no-scrollbar active:cursor-grabbing">
       {products.map((product, index) => (
         <div key={index} className="w-[100px] rounded shadow">
           <div className="relative h-[70px] w-[100px] overflow-hidden">
             <img
               src={"https://picsum.photos/id/237/200/300"}
               alt="Product"
-              className="rounded object-cover"
+              className="object-cover rounded"
             />
           </div>
 
@@ -177,7 +220,7 @@ function ProductList() {
             {product.name}
           </h3>
           <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between space-x-1 pt-1">
+          <div className="flex items-end justify-between pt-1 space-x-1">
             <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
               $15
             </div>
