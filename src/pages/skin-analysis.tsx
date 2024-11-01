@@ -1,19 +1,19 @@
-import { CSSProperties, Fragment, useEffect, useState } from "react";
-import { Icons } from "../components/icons";
 import clsx from "clsx";
 import {
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   CirclePlay,
   Heart,
   PauseCircle,
-  Plus,
-  Share,
   StopCircle,
-  X,
+  X
 } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
+import { useSkincareProductQuery } from "../api/skin-care";
+import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Footer } from "../components/footer";
+import { Icons } from "../components/icons";
+import { LoadingProducts } from "../components/loading";
+import { BrandName } from "../components/product/brand";
 import { VideoScene } from "../components/recorder/recorder";
 import {
   CameraProvider,
@@ -21,14 +21,12 @@ import {
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
+import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
 import { useRecordingControls } from "../hooks/useRecorder";
-import { useScrollContainer } from "../hooks/useScrollContainer";
-import { TopNavigation } from "./skin-tone-finder";
-import { CircularProgressRings } from "../components/circle-progress-rings";
-import { Rating } from "../components/rating";
 import { skinAnalysisInference } from "../inference/skinAnalysisInference";
 import { FaceResults } from "../types/faceResults";
-import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
+import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
+import { TopNavigation } from "./skin-tone-finder";
 
 export function SkinAnalysis() {
   return (
@@ -202,7 +200,7 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
           <DescriptionText text="Hey there! As much as we embrace aging gracefully, those detected creases and lines can sneak up on us sooner than we'd like. To fend off those pesky wrinkles, remember to stay hydrated and wear sunscreen daily. Adding a skin-nourishing routine can work wonders. Embrace your lines, but there's no harm in giving them a little extra tender loving care by checking our recommendations to keep them at bay for as long as possible. Your future self will thank you and us for the care!  Less" />
         </div>
 
-        <ProductList />
+        <ProductList skinConcern={tab} />
       </div>
     </>
   );
@@ -233,93 +231,65 @@ function DescriptionText({ text }: { text: string }) {
   );
 }
 
-function ProductList() {
-  const { scrollContainerRef, handleMouseDown } = useScrollContainer();
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
+function ProductList({ skinConcern }: { skinConcern: string }) {
+  const { data } = useSkincareProductQuery({
+    skinConcern,
+  });
 
   return (
-    <div
-      className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing"
-      ref={scrollContainerRef}
-      onMouseDown={handleMouseDown}
-    >
-      {products.map((product, index) => (
-        <div key={index} className="w-[115px] rounded shadow">
-          <div className="relative h-[80px] w-[115px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="object-cover rounded"
-            />
-          </div>
+    <div className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing">
+      {data ? (
+        data.items.map((product, index) => {
+          const imageUrl =
+            mediaUrl(product.media_gallery_entries[0].file) ??
+            "https://picsum.photos/id/237/200/300";
 
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <div className="flex items-center justify-between">
-            <p className="text-[0.5rem] text-white/60">{product.brand}</p>
-            <div className="flex flex-wrap items-center justify-end gap-x-1">
-              <span className="text-[0.625rem] font-bold text-white">
-                ${product.price.toFixed(2)}
-              </span>
-              <span className="text-[0.5rem] text-white/50 line-through">
-                ${product.originalPrice.toFixed(2)}
-              </span>
+          return (
+            <div key={product.id} className="w-[115px] rounded shadow">
+              <div className="relative h-[80px] w-[115px] overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt="Product"
+                  className="object-cover rounded"
+                />
+              </div>
+
+              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+                {product.name}
+              </h3>
+              <div className="flex items-center justify-between">
+                <p className="text-[0.5rem] text-white/60">
+                  <BrandName brandId={getProductAttributes(product, "brand")} />
+                </p>
+                <div className="flex flex-wrap items-center justify-end gap-x-1">
+                  <span className="text-[0.625rem] font-bold text-white">
+                    ${product.price.toFixed(2)}
+                  </span>
+                  {/* <span className="text-[0.5rem] text-white/50 line-through">
+              ${product.originalPrice.toFixed(2)}
+            </span> */}
+                </div>
+              </div>
+              <div className="flex pt-1 space-x-1">
+                <button
+                  type="button"
+                  className="flex h-7 w-full items-center justify-center border border-white text-[0.375rem] font-semibold text-white"
+                >
+                  ADD TO CART
+                </button>
+                <button
+                  type="button"
+                  className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.45rem] font-semibold text-black"
+                >
+                  SEE IMPROVEMENT
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex pt-1 space-x-1">
-            <button
-              type="button"
-              className="flex h-7 w-full items-center justify-center border border-white text-[0.375rem] font-semibold text-white"
-            >
-              ADD TO CART
-            </button>
-            <button
-              type="button"
-              className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.45rem] font-semibold text-black"
-            >
-              SEE IMPROVEMENT
-            </button>
-          </div>
-        </div>
-      ))}
+          );
+        })
+      ) : (
+        <LoadingProducts />
+      )}
     </div>
   );
 }
@@ -634,7 +604,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             score={30}
           />
           <ProblemSection
-            title="Dark circles"
+            title="Dark Circles"
             detected="Detected"
             description="Dark circles can be caused by lack of sleep, dehydration, and genetics. They can be treated with eye creams, fillers, and laser therapy."
             score={45}
@@ -775,52 +745,8 @@ function ProblemSection({
 
       <div className="py-8">
         <h2 className="pb-4 text-xl font-bold">Recommended products</h2>
-        <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
-          {products.map((product, index) => (
-            <div key={index} className="w-[150px] rounded">
-              <div className="relative h-[150px] w-[150px] overflow-hidden">
-                <img
-                  src={"https://picsum.photos/id/237/200/300"}
-                  alt="Product"
-                  className="object-cover rounded"
-                />
-              </div>
 
-              <div className="flex items-start justify-between py-2">
-                <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-[0.625rem] text-white/60">
-                    {product.brand}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center justify-end gap-x-1">
-                  <span className="text-sm font-bold text-white">
-                    ${product.price.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <Rating rating={4} />
-
-              <div className="flex space-x-1">
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
-                >
-                  ADD TO CART
-                </button>
-                <button
-                  type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
-                >
-                  SEE IMPROVEMENT
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ProductList skinConcern={title} />
       </div>
     </div>
   );
