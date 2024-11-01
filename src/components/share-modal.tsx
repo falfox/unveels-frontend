@@ -1,30 +1,40 @@
 import clsx from "clsx";
 import { Download, X } from "lucide-react";
-import React from "react";
+import React, { HTMLAttributes } from "react";
 import { Icons } from "./icons";
+import { useCamera } from "./recorder/recorder-context";
 
-interface ShareOptionProps {
+interface ShareOptionProps extends HTMLAttributes<HTMLDivElement> {
   icon: React.ReactNode | string;
   label: string;
   className: string;
   textColor?: string;
 }
 
-export function ShareModal() {
+interface ShareModalProps {
+  onClose: () => void;
+}
+
+export function ShareModal({ onClose }: ShareModalProps) {
+  const { downloadVideo, exit } = useCamera();
   return (
     <div className="absolute inset-x-0 bottom-0 flex items-center justify-center bg-black/20 backdrop-blur-3xl">
       <div className="w-full rounded-xl bg-[#1c1c1e]">
         <div className="flex items-center justify-between px-6 py-4">
           <h2 className="text-sm text-white">Send to</h2>
-          <button type="button" className="text-white">
+          <button type="button" className="text-white" onClick={onClose}>
             <X className="size-6" />
           </button>
         </div>
         <div className="grid grid-cols-5 gap-4 px-6 py-4">
           <ShareOption
+            onClick={() => {
+              downloadVideo();
+              exit();
+            }}
             icon={<Download />}
             label="Save to gallery"
-            className="text-black bg-white"
+            className="bg-white text-black"
           />
           <ShareOption
             icon={<Icons.facebook />}
@@ -52,14 +62,20 @@ export function ShareModal() {
   );
 }
 
-function ShareOption({ icon, label, className }: ShareOptionProps) {
+function ShareOption({
+  icon,
+  label,
+  className,
+  ...divProps
+}: ShareOptionProps) {
   return (
     <div className="flex flex-col items-center">
       <div
         className={clsx(
           className,
-          "mb-2 flex size-14 items-center justify-center rounded-full",
+          "mb-2 flex size-14 cursor-pointer items-center justify-center rounded-full",
         )}
+        {...divProps}
       >
         {typeof icon === "string" ? (
           <span className={`size-8 text-2xl font-bold`}>{icon}</span>
@@ -69,7 +85,7 @@ function ShareOption({ icon, label, className }: ShareOptionProps) {
           })
         )}
       </div>
-      <span className="text-xs text-center text-white">{label}</span>
+      <span className="text-center text-xs text-white">{label}</span>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { CSSProperties, Fragment, useEffect, useState } from "react";
 import { Icons } from "../components/icons";
-
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -14,7 +13,6 @@ import {
   StopCircle,
   X,
 } from "lucide-react";
-import { usePage } from "../App";
 import { Footer } from "../components/footer";
 import { VideoScene } from "../components/recorder/recorder";
 import {
@@ -28,32 +26,79 @@ import { useScrollContainer } from "../hooks/useScrollContainer";
 import { TopNavigation } from "./skin-tone-finder";
 import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Rating } from "../components/rating";
-import { sleep } from "../utils/other";
+import { skinAnalysisInference } from "../inference/skinAnalysisInference";
+import { FaceResults } from "../types/faceResults";
+import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
 
 export function SkinAnalysis() {
   return (
     <CameraProvider>
       <div className="h-full min-h-dvh">
-        <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
-          <div className="absolute inset-0">
-            <VideoStream />
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-              }}
-            ></div>
-          </div>
-          <RecorderStatus />
-          <TopNavigation item={false} />
-
-          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-            <MainContent />
-            <Footer />
-          </div>
-        </div>
+        <Main />
       </div>
     </CameraProvider>
+  );
+}
+
+function Main() {
+  const { criterias } = useCamera();
+  const [inferenceResult, setInferenceResult] = useState<FaceResults[] | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [inferenceError, setInferenceError] = useState<string | null>(null);
+  const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
+
+  useEffect(() => {
+    const faceAnalyzerInference = async () => {
+      if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
+        setIsInferenceRunning(true);
+        setIsLoading(true);
+        setInferenceError(null);
+        try {
+          const skinAnalysisResult: FaceResults[] = await skinAnalysisInference(
+            criterias.capturedImage,
+          );
+
+          setInferenceResult(skinAnalysisResult);
+        } catch (error: any) {
+          console.error("Inference error:", error);
+          setInferenceError(
+            error.message || "An error occurred during inference.",
+          );
+        } finally {
+          setIsLoading(false); // Pastikan isLoading diubah kembali
+          setIsInferenceRunning(false); // Tambahkan ini jika perlu
+        }
+      }
+    };
+
+    faceAnalyzerInference();
+  }, [criterias.isCaptured, criterias.capturedImage]);
+
+  return (
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+      <div className="absolute inset-0">
+        {!isLoading && inferenceResult != null ? (
+          <SkinAnalysisScene data={inferenceResult} />
+        ) : (
+          <VideoStream />
+        )}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          }}
+        ></div>
+      </div>
+      <RecorderStatus />
+      <TopNavigation item={false} />
+
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+        <MainContent />
+        <Footer />
+      </div>
+    </div>
   );
 }
 
@@ -277,26 +322,9 @@ function ProductList() {
 
 function BottomContent() {
   const { criterias, setCriterias } = useCamera();
-  const [view, setView] = useState<"face" | "problems" | "results">("results");
+  const [view, setView] = useState<"face" | "problems" | "results">("face");
 
-  useEffect(() => {
-    (async () => {
-      await sleep(2000);
-      setCriterias({ lighting: true });
-      await sleep(2000);
-      setCriterias({ facePosition: true });
-      await sleep(2000);
-      setCriterias({ orientation: true });
-    })();
-  }, []);
-
-  if (criterias.facePosition && criterias.lighting && criterias.orientation) {
-    console.log({
-      facePosition: criterias.facePosition,
-      lighting: criterias.lighting,
-      orientation: criterias.orientation,
-    });
-
+  if (criterias.isCaptured) {
     if (view === "face") {
       return (
         <ProblemResults

@@ -8,11 +8,11 @@ import {
   POSITION_THRESHOLD_Y,
   ORIENTATION_THRESHOLD_YAW,
   ORIENTATION_THRESHOLD_PITCH,
+  testImage,
 } from "../../utils/constants";
 import { calculateLighting, cropImage } from "../../utils/imageProcessing";
 import { CountdownOverlay } from "../countdown-overlay";
 import { ErrorOverlay } from "../error-overlay";
-import { ToggleCameraButton } from "../toggle-camera-button";
 import { useCountdown } from "../../hooks/useCountdown";
 import { processBoundingBox } from "../../utils/boundingBoxUtils";
 import { drawKeypoints } from "../../utils/keypointsUtils";
@@ -20,21 +20,30 @@ import {
   calculateOrientation,
   Orientation,
 } from "../../utils/orientationUtils";
+import RecordRTC, { RecordRTCPromisesHandler } from "recordrtc";
+import { useRecordingControls } from "../../hooks/useRecorder";
 
 interface VideoStreamProps {
-  debugMode?: boolean; // Optional prop for debug mode
+  debugMode?: boolean;
 }
 
 export function VideoStream({ debugMode = false }: VideoStreamProps) {
-  const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
   const isDetectingRef = useRef<boolean>(false);
 
   // Using CameraContext
-  const { criterias, setCriterias, flipCamera, captureImage, setBoundingBox } =
-    useCamera();
+  const {
+    webcamRef,
+    criterias,
+    setCriterias,
+    flipCamera,
+    captureImage,
+    setBoundingBox,
+    captureImageCut,
+    resetCapture,
+  } = useCamera();
 
   // State Variables for Metrics
   const [lighting, setLighting] = useState<number>(0);
@@ -59,9 +68,10 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   // Debug Mode State
   const [isDebugMode, setIsDebugMode] = useState<boolean>(debugMode);
 
-  const toggleDebugMode = () => {
-    setIsDebugMode((prev) => !prev);
-  };
+  // State for Captured Image
+  const [capturedImageSrc, setCapturedImageSrc] = useState<string | null>(null);
+  // Optional: State for Cropped Image
+  const [croppedImageSrc, setCroppedImageSrc] = useState<string | null>(null);
 
   // Initialize MediaPipe Face Detector
   useEffect(() => {
@@ -115,88 +125,93 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
         if (canvas) {
           // Get the rendered size and position of the video
           const videoRect = video.getBoundingClientRect();
+          if (video && video.videoWidth > 0 && video.videoHeight > 0) {
+            // Lanjutkan deteksi wajah
 
-          // Update canvas size and position to match the video
-          if (
-            canvas.width !== videoRect.width ||
-            canvas.height !== videoRect.height
-          ) {
-            canvas.width = videoRect.width;
-            canvas.height = videoRect.height;
-          }
+            // Update canvas size and position to match the video
+            if (
+              canvas.width !== videoRect.width ||
+              canvas.height !== videoRect.height
+            ) {
+              canvas.width = videoRect.width;
+              canvas.height = videoRect.height;
+            }
 
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const startTimeMs = performance.now();
-            try {
-              const detections = faceDetectorRef.current.detectForVideo(
-                video,
-                startTimeMs,
-              ).detections;
+              const startTimeMs = performance.now();
+              try {
+                const detections = faceDetectorRef.current.detectForVideo(
+                  video,
+                  startTimeMs,
+                ).detections;
 
-              if (detections.length > 0) {
-                const highestScoreDetection = detections.reduce(
-                  (max, detection) => {
-                    return detection.categories[0].score >
-                      max.categories[0].score
-                      ? detection
-                      : max;
-                  },
-                  detections[0],
-                );
-
-                const box = highestScoreDetection.boundingBox;
-                const keypoints = highestScoreDetection.keypoints;
-
-                if (box) {
-                  // Refactored: Process Bounding Box
-                  const { relativePosition } = processBoundingBox(
-                    box,
-                    video,
-                    videoRect,
-                    criterias.flipped,
-                    setBoundingBox,
-                    isDebugMode,
-                    ctx,
+                if (detections.length > 0) {
+                  const highestScoreDetection = detections.reduce(
+                    (max, detection) => {
+                      return detection.categories[0].score >
+                        max.categories[0].score
+                        ? detection
+                        : max;
+                    },
+                    detections[0],
                   );
 
-                  setPosition(relativePosition);
+                  const box = highestScoreDetection.boundingBox;
+                  const keypoints = highestScoreDetection.keypoints;
+
+                  if (box) {
+                    // Refactored: Process Bounding Box
+                    const { relativePosition } = processBoundingBox(
+                      box,
+                      video,
+                      videoRect,
+                      criterias.flipped,
+                      setBoundingBox,
+                      isDebugMode,
+                      ctx,
+                    );
+
+                    setPosition(relativePosition);
+                  }
+
+                  if (isDebugMode && keypoints) {
+                    // Refactored: Draw Keypoints
+                    drawKeypoints(
+                      keypoints,
+                      video,
+                      videoRect,
+                      criterias.flipped,
+                      canvas,
+                      ctx,
+                    );
+                  }
+
+                  // Calculate Orientation
+                  const calculatedOrientation = calculateOrientation(keypoints);
+                  setOrientation(calculatedOrientation);
+                } else {
+                  // No detections, reset metrics
+                  setPosition({ x: 0, y: 0 });
+                  setOrientation({ yaw: 0, pitch: 0 });
+                  setLighting(0);
                 }
 
-                if (isDebugMode && keypoints) {
-                  // Refactored: Draw Keypoints
-                  drawKeypoints(
-                    keypoints,
-                    video,
-                    videoRect,
-                    criterias.flipped,
-                    canvas,
-                    ctx,
-                  );
+                // Calculate Brightness
+                if (video.readyState === 4) {
+                  const avgBrightness = await calculateLighting(video);
+                  setLighting(avgBrightness);
                 }
-
-                // Calculate Orientation
-                const calculatedOrientation = calculateOrientation(keypoints);
-                setOrientation(calculatedOrientation);
-              } else {
-                // No detections, reset metrics
-                setPosition({ x: 0, y: 0 });
-                setOrientation({ yaw: 0, pitch: 0 });
-                setLighting(0);
+              } catch (err) {
+                console.error("Detection error:", err);
+                setError(err as Error);
               }
-
-              // Calculate Brightness
-              if (video.readyState === 4) {
-                const avgBrightness = await calculateLighting(video);
-                setLighting(avgBrightness);
-              }
-            } catch (err) {
-              console.error("Detection error:", err);
-              setError(err as Error);
             }
           }
+        } else {
+          console.error("Video element is not properly initialized");
         }
       }
 
@@ -280,7 +295,14 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
       orientation: isOrientationGood,
       allGood: isBrightnessGood && isPositionGood && isOrientationGood,
     };
-  }, [lighting, memoizedPosition, memoizedOrientation]);
+  }, [
+    lighting,
+    position.x,
+    position.y,
+    orientation.pitch,
+    orientation.yaw,
+    setCriterias,
+  ]);
 
   /**
    * Function to capture the current frame from the webcam and crop based on bounding box
@@ -294,7 +316,10 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             imageSrc,
             criterias.lastBoundingBox,
           );
-          captureImage(croppedImage);
+          captureImage(imageSrc);
+          captureImageCut(croppedImage);
+          setCapturedImageSrc(imageSrc); // Set the captured image
+          setCroppedImageSrc(croppedImage); // Optional: Set cropped image
           stopDetection(); // Optionally stop detection after capture
         } catch (error) {
           console.error("Error cropping image:", error);
@@ -333,59 +358,82 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     cancelCountdown,
   ]);
 
+  // Reset Capture state when new image is loaded
+  useEffect(() => {
+    if (!criterias.isCaptured) {
+      setCapturedImageSrc(null);
+      startDetection();
+      resetCapture();
+    }
+  }, [criterias.isCaptured]);
+
   return (
-    <div className="relative w-full h-full">
-      {/* Webcam Video */}
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        mirrored={false} // Mirroring handled via CSS
-        videoConstraints={{
-          width: 640,
-          height: 480,
-          facingMode: criterias.flipped ? "environment" : "user",
-        }}
-        onUserMediaError={(err) =>
-          setError(
-            err instanceof Error ? err : new Error("Webcam error occurred."),
-          )
-        }
-        className={`h-full w-full object-cover ${
-          criterias.flipped ? "scale-x-[-1]" : ""
-        }`}
-      />
+    <div className="relative h-full w-full">
+      {/* Render Captured Image if available */}
+      {capturedImageSrc ? (
+        <div className="relative h-full w-full">
+          <img
+            src={capturedImageSrc}
+            alt="Captured"
+            className="h-full w-full object-cover"
+          />
+          {/* Button to Retake Photo */}
+          <button
+            onClick={() => {
+              setCapturedImageSrc(null);
+              startDetection();
+              resetCapture(); // Restart detection if needed
+            }}
+            className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
+            aria-label="Retake Photo"
+          >
+            Retake Photo
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Webcam Video */}
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            mirrored={false} // Mirroring handled via CSS
+            videoConstraints={{
+              width: 640,
+              height: 480,
+              facingMode: criterias.flipped ? "environment" : "user",
+            }}
+            onUserMediaError={(err) =>
+              setError(
+                err instanceof Error
+                  ? err
+                  : new Error("Webcam error occurred."),
+              )
+            }
+            className={`h-full w-full object-cover ${
+              criterias.flipped ? "scale-x-[-1]" : ""
+            }`}
+          />
 
-      {/* Overlay Canvas */}
-      <canvas
-        ref={canvasRef}
-        className={`pointer-events-none absolute left-0 top-0 ${
-          isDebugMode ? "block" : "hidden"
-        }`} // Hide canvas if not in debug mode
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
-      />
+          {/* Overlay Canvas */}
+          <canvas
+            ref={canvasRef}
+            className={`pointer-events-none absolute left-0 top-0 ${
+              isDebugMode ? "block" : "hidden"
+            }`} // Hide canvas if not in debug mode
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          />
 
-      {/* Countdown Overlay */}
-      {countdown !== null && <CountdownOverlay count={countdown} />}
+          {/* Countdown Overlay */}
+          {countdown !== null && <CountdownOverlay count={countdown} />}
 
-      {/* Error Display */}
-      {error && <ErrorOverlay message={error.message} />}
-
-      {/* Toggle Camera Button */}
-      <ToggleCameraButton onClick={flipCamera} />
-
-      {/* Toggle Debug Mode Button */}
-      <button
-        onClick={toggleDebugMode}
-        className="absolute px-4 py-2 text-white bg-gray-700 rounded bottom-4 right-4"
-        aria-pressed={isDebugMode}
-        aria-label="Toggle Debug Mode"
-      >
-        {isDebugMode ? "Disable" : "Enable"} Debug Mode
-      </button>
+          {/* Error Display */}
+          {error && <ErrorOverlay message={error.message} />}
+        </>
+      )}
     </div>
   );
 }

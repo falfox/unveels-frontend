@@ -1,6 +1,3 @@
-import { CSSProperties, Fragment, useEffect, useState } from "react";
-import { Icons } from "../components/icons";
-
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -10,12 +7,25 @@ import {
   Heart,
   PauseCircle,
   Plus,
-  Share,
   StopCircle,
   X,
 } from "lucide-react";
-import { usePage } from "../App";
+import {
+  CSSProperties,
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  Suspense,
+  useState,
+} from "react";
+import { Link } from "react-router-dom";
+import { skin_tones, tone_types } from "../api/attributes/skin_tone";
+import { getBrandName, useBrandsQuerySuspense } from "../api/brands";
+import { Product } from "../api/shared";
+import { useSkinToneProductQuery } from "../api/skin-tone";
 import { Footer } from "../components/footer";
+import { Icons } from "../components/icons";
+import { LoadingProducts } from "../components/loading";
 import { VideoScene } from "../components/recorder/recorder";
 import {
   CameraProvider,
@@ -23,49 +33,86 @@ import {
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
+import {
+  SkinColorProvider,
+  useSkinColor,
+} from "../components/skin-tone-finder-scene/skin-color-context";
+import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-tone-finder-scene";
+import { usePage } from "../hooks/usePage";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { useScrollContainer } from "../hooks/useScrollContainer";
-import { sleep } from "../utils/other";
+import {
+  extractUniqueCustomAttributes,
+  getProductAttributes,
+  mediaUrl,
+} from "../utils/apiUtils";
+import { MakeupProvider, useMakeup } from "../components/three/makeup-context";
+import { bool } from "@techstark/opencv-js";
+import { useReactMediaRecorder } from "react-media-recorder";
 
 export function SkinToneFinder() {
   return (
     <CameraProvider>
-      <div className="h-full min-h-dvh">
-        <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
-          <div className="absolute inset-0">
-            <VideoStream />
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-              }}
-            ></div>
+      <SkinColorProvider>
+        <MakeupProvider>
+          <div className="h-full min-h-dvh">
+            <Main />
           </div>
-          <RecorderStatus />
-          <TopNavigation item />
-
-          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-            <MainContent />
-            <Footer />
-          </div>
-          <Sidebar />
-        </div>
-      </div>
+        </MakeupProvider>
+      </SkinColorProvider>
     </CameraProvider>
   );
 }
 
-function MainContent() {
+function Main() {
+  const { criterias, status } = useCamera();
   const [collapsed, setCollapsed] = useState(false);
-  const { criterias } = useCamera();
+
+  return (
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+      <div className="absolute inset-0">
+        <VideoStream debugMode={false} />
+        <SkinToneFinderScene />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          }}
+        ></div>
+      </div>
+      <RecorderStatus />
+      <TopNavigation />
+
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+        {criterias.isCaptured ? "" : <VideoScene />}
+        <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
+        <Footer />
+      </div>
+      <Sidebar setCollapsed={setCollapsed} />
+    </div>
+  );
+}
+
+interface MainContentProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+function MainContent({ collapsed, setCollapsed }: MainContentProps) {
+  const { criterias, exit } = useCamera();
   const [shareOpen, setShareOpen] = useState(false);
+
+  const onClose = () => {
+    setShareOpen(false);
+  };
 
   if (criterias.isFinished) {
     return shareOpen ? (
-      <ShareModal />
+      <ShareModal onClose={onClose} />
     ) : (
       <div className="flex space-x-5 px-5 pb-10 font-serif">
         <button
+          onClick={exit}
           type="button"
           className="h-10 w-full rounded border border-[#CA9C43] text-white"
         >
@@ -165,105 +212,109 @@ function ShadesSelector() {
   );
 }
 
-function MatchedShades() {
-  const shadeOptions = [
-    {
-      name: "Cooler",
-      color: "#A37772",
-    },
-    {
-      name: "Lighter",
-      color: "#DF9F86",
-    },
-    {
-      name: "Perfect Fit",
-      color: "#B7775E",
-    },
-    {
-      name: "Warmer",
-      color: "#CB8B5E",
-    },
-    {
-      name: "Darker",
-      color: "#8F4F36",
-    },
-  ];
+const isShadeSelected = (product: Product, selectedShade: string) =>
+  getProductAttributes(product, "hexacodes")?.value.includes(
+    selectedShade ?? "",
+  );
 
-  const [selectedShade, setSelectedShade] = useState(shadeOptions[0].name);
+function MatchedShades() {
+  const [selectedTne, setSelectedTone] = useState(tone_types[0]);
+  const { skinType, hexSkin } = useSkinColor();
+
+  const skinToneId = skin_tones.find((tone) => tone.name === skinType)?.id;
+
+  const { data } = useSkinToneProductQuery({
+    skintone: skinToneId,
+    tonetype: selectedTne.id,
+  });
 
   return (
     <>
       <div className="flex flex-col items-start">
         <div className="inline-flex items-center gap-x-2 rounded-full border border-white/80 px-2 py-1 text-white/80">
-          <div className="size-3 rounded-full bg-[#D18B59]"></div>
-          <span className="text-sm">Medium skin</span>
+          <div
+            className="size-3 rounded-full"
+            style={{ backgroundColor: hexSkin }}
+          ></div>
+          <span className="text-sm">{skinType}</span>
         </div>
         <div className="flex w-full min-w-0 pt-2">
-          {shadeOptions.map((option, index) => (
+          {tone_types.map((option, index) => (
             <button
               key={index}
               className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
-              data-selected={selectedShade === option.name}
+              data-selected={selectedTne.name === option.name}
               style={{
                 background: option.color,
               }}
-              onClick={() => setSelectedShade(option.name)}
+              onClick={() => setSelectedTone(option)}
             >
               {option.name}
             </button>
           ))}
         </div>
         <div className="w-full text-right">
-          <button className="py-4 text-[0.625rem] text-white">View all</button>
+          <button className="py-2 text-[0.625rem] text-white">View all</button>
         </div>
 
-        <ProductList />
+        {data ? (
+          <Suspense fallback={<LoadingProducts />}>
+            <ProductList products={data.items} />
+          </Suspense>
+        ) : (
+          <LoadingProducts />
+        )}
       </div>
     </>
   );
 }
 
 function OtherShades() {
-  const shadeOptions = [
-    "#342112",
-    "#3D2B1F",
-    "#483C32",
-    "#4A2912",
-    "#4F300D",
-    "#5C4033",
-    "#6A4B3A",
-    "#7B3F00",
-    "#8B4513",
-  ];
-
-  const tones = [
-    {
-      name: "Light Tones",
-      color: "#FAD4B4",
-    },
-    {
-      name: "Medium Tones",
-      color: "#D18B59",
-    },
-    {
-      name: "Dark Tones",
-      color: "#4B2F1B",
-    },
-  ];
-  const [selectedTone, setSelectedTone] = useState(tones[0].name);
+  const [selectedTone, setSelectedTone] = useState(skin_tones[0]);
 
   const [selectedShade, setSelectedShade] = useState(null as string | null);
 
+  const { setHexColor } = useSkinColor();
+
+  const { setFoundationColor } = useMakeup();
+
+  const { data } = useSkinToneProductQuery({
+    skintone: selectedTone.id,
+  });
+
+  const hexCodes = data
+    ? extractUniqueCustomAttributes(data.items, "hexacode")
+    : [];
+
+  const shadesOptions = hexCodes
+    .filter(Boolean)
+    .map((hexes: string) => hexes.split(","))
+    .flat();
+
+  const filteredProducts = selectedShade
+    ? (data?.items.filter((i: Product) => isShadeSelected(i, selectedShade)) ??
+      [])
+    : (data?.items ?? []);
+
+  function setSelectedColor(option: string) {
+    setSelectedShade(option);
+    setHexColor(option);
+    setFoundationColor(option);
+  }
+
   return (
     <div className="flex w-full flex-col items-start gap-2">
-      <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-        {tones.map((tone, index) => (
+      <div className="flex w-full items-center gap-3 overflow-x-auto no-scrollbar">
+        {skin_tones.map((tone, index) => (
           <div
             key={index}
-            className={`inline-flex grow items-center gap-x-2 rounded-full border px-2 py-1 text-white ${
-              selectedTone === tone.name ? "border-white" : "border-transparent"
-            }`}
-            onClick={() => setSelectedTone(tone.name)}
+            className={clsx(
+              "inline-flex shrink-0 grow items-center gap-x-2 rounded-full border px-2 py-1 text-white",
+              selectedTone.name === tone.name
+                ? "border-white"
+                : "border-transparent",
+            )}
+            onClick={() => setSelectedTone(tone)}
           >
             <div
               className="size-3 rounded-full"
@@ -274,10 +325,15 @@ function OtherShades() {
         ))}
       </div>
       <div className="flex w-full gap-4 overflow-x-auto py-2 no-scrollbar">
-        <button className="flex size-8 shrink-0 items-center justify-center">
-          <Icons.unselect className="size-6 text-white" />
+        <button
+          type="button"
+          className="flex size-8 shrink-0 items-center justify-center transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white"
+          data-selected={selectedShade === null}
+          onClick={() => setSelectedShade(null)}
+        >
+          <Icons.unselect className="size-7 text-white" />
         </button>
-        {shadeOptions.map((option, index) => (
+        {shadesOptions.map((option, index) => (
           <button
             key={index}
             className={`size-8 shrink-0 rounded-full border border-transparent transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
@@ -285,47 +341,30 @@ function OtherShades() {
             style={{
               background: option,
             }}
-            onClick={() => setSelectedShade(option)}
+            onClick={() => {
+              setSelectedColor(option);
+            }}
           ></button>
         ))}
       </div>
       <div className="w-full text-right">
-        <button className="py-4 text-[0.625rem] text-white">View all</button>
+        <button className="py-2 text-[0.625rem] text-white">View all</button>
       </div>
 
-      <ProductList />
+      {data ? (
+        <Suspense fallback={<LoadingProducts />}>
+          <ProductList products={filteredProducts} />
+        </Suspense>
+      ) : (
+        <LoadingProducts />
+      )}
     </div>
   );
 }
 
-function ProductList() {
+function ProductList({ products }: { products: Array<Product> }) {
   const { scrollContainerRef, handleMouseDown } = useScrollContainer();
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
+  const { data } = useBrandsQuerySuspense();
 
   return (
     <div
@@ -333,58 +372,64 @@ function ProductList() {
       ref={scrollContainerRef}
       onMouseDown={handleMouseDown}
     >
-      {products.map((product, index) => (
-        <div key={index} className="w-[110px] rounded shadow">
-          <div className="relative h-[80px] w-[110px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="rounded object-cover"
-            />
-          </div>
+      {products.map((product, index) => {
+        const imageUrl =
+          mediaUrl(product.media_gallery_entries[0].file) ??
+          "https://picsum.photos/id/237/200/300";
 
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <div className="flex items-center justify-between">
-            <p className="text-[0.5rem] text-white/60">{product.brand}</p>
-            <div className="flex flex-wrap items-center justify-end gap-x-1">
-              <span className="text-[0.625rem] font-bold text-white">
-                ${product.price.toFixed(2)}
-              </span>
-              <span className="text-[0.5rem] text-white/50 line-through">
-                ${product.originalPrice.toFixed(2)}
-              </span>
+        const brand = getBrandName(
+          data.options,
+          product.custom_attributes.find(
+            (attr) => attr.attribute_code === "brand",
+          )?.value as string,
+        );
+
+        return (
+          <a
+            key={index}
+            className="block w-[110px] rounded shadow"
+            target="_blank"
+            href={product.sku}
+          >
+            <div className="relative h-[80px] w-[110px] overflow-hidden">
+              <img
+                src={imageUrl}
+                alt="Product"
+                className="rounded object-cover"
+              />
             </div>
-          </div>
-        </div>
-      ))}
+
+            <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+              {product.name}
+            </h3>
+            <div className="flex items-center justify-between">
+              <p className="text-[0.5rem] text-white/60">{brand}</p>
+              <div className="flex flex-wrap items-center justify-end gap-x-1">
+                <span className="text-[0.625rem] font-bold text-white">
+                  ${product.price.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </a>
+        );
+      })}
     </div>
   );
 }
 
 function BottomContent() {
-  const { criterias, setCriterias } = useCamera();
+  const { criterias } = useCamera();
+  const { skinType } = useSkinColor();
 
-  useEffect(() => {
-    (async () => {
-      await sleep(2000);
-      setCriterias({ lighting: true });
-      await sleep(2000);
-      setCriterias({ facePosition: true });
-      await sleep(2000);
-      setCriterias({ orientation: true });
-    })();
-  }, []);
-
-  if (criterias.facePosition && criterias.lighting && criterias.orientation) {
+  if (criterias.isCaptured && skinType != null) {
     return <ShadesSelector />;
   }
 
-  return <VideoScene />;
+  return <div></div>;
 }
 
 function RecorderStatus() {
+  const { startRecording, stopRecording } = useCamera();
   const { isRecording, formattedTime, handleStartPause, handleStop, isPaused } =
     useRecordingControls();
   const { finish } = useCamera();
@@ -439,7 +484,7 @@ export function TopNavigation({
   const { setPage } = usePage();
   const { flipCamera } = useCamera();
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_button]:pointer-events-auto">
+    <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
       <div className="flex flex-col gap-4">
         <button className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl">
           <ChevronLeft className="size-6 text-white" />
@@ -468,15 +513,13 @@ export function TopNavigation({
         ) : null}
       </div>
       <div className="flex flex-col gap-4">
-        <button
+        <Link
           type="button"
           className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-          onClick={() => {
-            setPage(null);
-          }}
+          to="/"
         >
           <X className="size-6 text-white" />
-        </button>
+        </Link>
         <div className="relative -m-0.5 p-0.5">
           <div
             className="absolute inset-0 rounded-full border-2 border-transparent"
@@ -509,7 +552,11 @@ export function TopNavigation({
   );
 }
 
-function Sidebar() {
+interface SidebarProps {
+  setCollapsed: Dispatch<SetStateAction<boolean>>;
+}
+function Sidebar({ setCollapsed }: SidebarProps) {
+  const { flipCamera, compareCapture, resetCapture, screenShoot } = useCamera();
   return (
     <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
@@ -527,20 +574,23 @@ function Sidebar() {
         />
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
-          <button className="">
+          <button className="" onClick={screenShoot}>
             <Icons.camera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={flipCamera}>
             <Icons.flipCamera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button
+            className=""
+            onClick={() => setCollapsed((prevState) => !prevState)}
+          >
             <Icons.expand className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={compareCapture}>
             <Icons.compare className="size-6 text-white" />
           </button>
           <button className="">
-            <Icons.reset className="size-6 text-white" />
+            <Icons.reset onClick={resetCapture} className="size-6 text-white" />
           </button>
           <button className="hidden">
             <Icons.upload className="size-6 text-white" />

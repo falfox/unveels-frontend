@@ -22,6 +22,7 @@ import {
   thinnessLabels,
   shortnessLabels,
 } from "../utils/constants";
+import { base64ToImage } from "../utils/imageProcessing";
 import { Classifier } from "../types/classifier";
 
 const classifiers: Classifier[] = [
@@ -145,21 +146,6 @@ const findMaxIndex = (detect: number[]) => {
 };
 
 /**
- * Fungsi untuk mengkonversi string base64 menjadi objek Image
- * @param {string} base64Str - String base64 gambar
- * @returns {Promise<HTMLImageElement>} - Promise yang menghasilkan objek Image
- */
-function base64ToImage(base64Str: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.src = `${base64Str}`;
-    img.crossOrigin = "anonymous"; // Penting untuk menghindari masalah CORS
-    img.onload = () => resolve(img);
-    img.onerror = (err) => reject(new Error("Gagal memuat gambar."));
-  });
-}
-
-/**
  * Fungsi untuk mengonversi nilai RGB ke format hex.
  * @param r - Nilai merah (0-255)
  * @param g - Nilai hijau (0-255)
@@ -254,7 +240,7 @@ export const personalityInference = async (
 
   // face analyzer
   await loadTFLiteModel(
-    `${window.location.href}models/personality-finder/face-analyzer.tflite`,
+    `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/personality-finder/face-analyzer.tflite`,
   );
 
   const pred = await runTFLiteInference(preprocessedImage, w, h);
@@ -268,7 +254,7 @@ export const personalityInference = async (
 
   // personality finder
   await loadTFLiteModel(
-    `${window.location.href}models/personality-finder/personality_finder.tflite`,
+    `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/personality-finder/personality_finder.tflite`,
   );
 
   const predPersonality = await runTFLiteInference(preprocessedImage, w, h);
@@ -277,10 +263,13 @@ export const personalityInference = async (
   const classifierPersonalityData = await predPersonality.data();
   const labelPersonality =
     classifiers[15].labels[findMaxIndex(classifierPersonalityData)];
+
   classifiers[15].outputLabel = labelPersonality;
   classifiers[15].outputData = classifierPersonalityData;
+
   classifiers[15].outputScore =
     classifierPersonalityData[findMaxIndex(classifierPersonalityData)];
+
   classifiers[15].outputIndex = findMaxIndex(classifierPersonalityData);
 
   // skin
@@ -387,6 +376,15 @@ export const personalityInference = async (
       labels: [],
       outputLabel: "",
       outputColor: averageEyeColor,
+    });
+
+    classifiers.push({
+      name: "Image Data",
+      outputName: "",
+      labels: [],
+      outputLabel: "",
+      outputColor: "",
+      imageData: imageData,
     });
 
     console.log(classifiers);

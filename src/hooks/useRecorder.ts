@@ -1,5 +1,7 @@
 import { useReducer, useEffect } from "react";
 import { format } from "date-fns";
+import { useCamera } from "../components/recorder/recorder-context";
+import { useReactMediaRecorder } from "react-media-recorder";
 
 // Define action types
 const actionTypes = {
@@ -69,7 +71,13 @@ function reducer(state: State, action: Action): State {
 // Custom hook for recording logic
 export const useRecordingControls = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  const {
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    status,
+  } = useCamera();
   // Timer effect for updating elapsed time
   useEffect(() => {
     let interval: number | null = null;
@@ -87,13 +95,26 @@ export const useRecordingControls = () => {
     };
   }, [state.isRecording, state.isPaused]);
 
+  useEffect(() => {
+    if (!state.isRecording) {
+      if (status === "recording") {
+        dispatch({
+          type: actionTypes.START,
+          payload: new Date().getTime(),
+        });
+      }
+    }
+  }, [status]);
+
   // Start or pause the recording
   const handleStartPause = () => {
     if (!state.isRecording) {
-      dispatch({ type: actionTypes.START, payload: new Date().getTime() });
+      startRecording();
     } else if (state.isPaused) {
+      resumeRecording();
       dispatch({ type: actionTypes.RESUME, payload: new Date().getTime() });
     } else {
+      pauseRecording();
       dispatch({ type: actionTypes.PAUSE });
     }
   };
@@ -101,6 +122,7 @@ export const useRecordingControls = () => {
   // Stop the recording
   const handleStop = () => {
     dispatch({ type: actionTypes.STOP });
+    stopRecording();
   };
 
   // Return the state and control functions
