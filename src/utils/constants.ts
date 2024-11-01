@@ -1,3 +1,5 @@
+import { SkinAnalysisItem } from "../types/skinAnalysisItem";
+
 export const BRIGHTNESS_THRESHOLD = 60; // Brightness > 60
 export const POSITION_THRESHOLD_X = 40; // X position within ±50 pixels from center
 export const POSITION_THRESHOLD_Y = 40; // Y position within ±50 pixels from center
@@ -1201,6 +1203,159 @@ export const labels = [
   "texture",
   "whitehead",
   "wrinkles",
+];
+
+export const skinAnalysisDataItem: SkinAnalysisItem[] = [
+  {
+    label: "whitehead",
+    class: 15,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 456,
+  },
+  {
+    label: "blackhead",
+    class: 1,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 51,
+  },
+  {
+    label: "acne",
+    class: 0,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 266,
+  },
+  {
+    label: "acne",
+    class: 0,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 266,
+  },
+  {
+    label: "spots",
+    class: 13,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 193,
+  },
+  {
+    label: "pore",
+    class: 10,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 100,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 8,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 9,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 151,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 108,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 299,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 226,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 446,
+  },
+  {
+    label: "droopy eyelid upper",
+    class: 4,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 27,
+  },
+  {
+    label: "droopy eyelid upper",
+    class: 4,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 386,
+  },
+  {
+    label: "droopy eyelid lower",
+    class: 3,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 23,
+  },
+  {
+    label: "droopy eyelid lower",
+    class: 6,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 253,
+  },
+  {
+    label: "eyebag",
+    class: 6,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 229,
+  },
+  {
+    label: "skinredness",
+    class: 12,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 101,
+  },
+  {
+    label: "skinredness",
+    class: 12,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 330,
+  },
+  {
+    label: "oily",
+    class: 9,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 195,
+  },
+  {
+    label: "firmness",
+    class: 7,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 206,
+  },
+  {
+    label: "firmness",
+    class: 7,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 436,
+  },
+  {
+    label: "dark circle",
+    class: 2,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 229,
+  },
+  {
+    label: "dark circle",
+    class: 2,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 450,
+  },
 ];
 
 // lips

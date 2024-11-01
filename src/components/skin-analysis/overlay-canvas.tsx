@@ -1,14 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Landmark } from "../../types/landmark";
 import { BboxLandmark } from "../../types/bboxLandmark";
 import { adjustBoundingBoxes } from "../../utils/boundingBoxUtils";
+import { skinAnalysisDataItem } from "../../utils/constants";
 
-// Komponen Canvas untuk menggambar gambar di atas
 interface OverlayCanvasProps {
   image: HTMLImageElement;
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  data: BboxLandmark[]; // Pastikan data yang diterima adalah BboxLandmark[]
+  data: BboxLandmark[];
   landmarks: Landmark[];
+  onLabelClick?: (label: string | null) => void; // Diperbarui
+}
+
+interface LabelBoundingBox {
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 function OverlayCanvas({
@@ -16,183 +25,288 @@ function OverlayCanvas({
   canvasRef,
   data,
   landmarks,
+  onLabelClick,
 }: OverlayCanvasProps) {
-  // Define feature colors
   const featureColors: { [key: string]: string } = {
-    spots: "255, 0, 0", // Red
-    acne: "9, 183, 26", // Green
-    blackhead: "0, 0, 0", // Black
-    pore: "0, 0, 255", // Blue
+    spots: "255, 0, 0", // Merah
+    acne: "9, 183, 26", // Hijau
+    blackhead: "0, 0, 0", // Hitam
+    pore: "0, 0, 255", // Biru
   };
 
-  // Define gradient radii
-  const innerRadius = 0; // Start at the center
-  const outerRadius = 20; // Adjust as needed
+  const innerRadius = 0;
+  const outerRadius = 20;
+
+  const labelBoundingBoxesRef = useRef<LabelBoundingBox[]>([]);
 
   useEffect(() => {
-    // Fungsi untuk menggambar gambar dengan skala "cover"
-    const drawImage = async () => {
-      if (landmarks.length > 0) {
-        try {
-          const canvas = canvasRef.current;
-          if (!canvas) return;
+    const drawImage = () => {
+      console.log(skinAnalysisDataItem);
 
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            console.error("Gagal mendapatkan konteks 2D untuk overlay canvas.");
+      if (landmarks.length === 0) return;
+
+      try {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+          console.error("Canvas tidak ditemukan.");
+          return;
+        }
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          console.error("Gagal mendapatkan konteks 2D untuk overlay canvas.");
+          return;
+        }
+
+        const { innerWidth: width, innerHeight: height } = window;
+        const dpr = window.devicePixelRatio || 1;
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const imgAspect = image.naturalWidth / image.naturalHeight;
+        const canvasAspect = width / height;
+
+        let drawWidth: number;
+        let drawHeight: number;
+        let offsetX: number;
+        let offsetY: number;
+
+        if (imgAspect < canvasAspect) {
+          drawWidth = width;
+          drawHeight = width / imgAspect;
+          offsetX = 0;
+          offsetY = (height - drawHeight) / 2;
+        } else {
+          drawWidth = height * imgAspect;
+          drawHeight = height;
+          offsetX = (width - drawWidth) / 2;
+          offsetY = 0;
+        }
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+
+        labelBoundingBoxesRef.current = [];
+
+        const adjustedResults: BboxLandmark[] = adjustBoundingBoxes(
+          data,
+          landmarks as Landmark[],
+          640,
+          640,
+          50, // Threshold diperbesar menjadi 50
+        );
+
+        const validLabels = ["spots", "acne", "blackhead", "whitehead"];
+
+        adjustedResults.forEach((bbox) => {
+          if (!validLabels.includes(bbox.label)) {
             return;
           }
-          const { innerWidth: width, innerHeight: height } = window;
-          const dpr = window.devicePixelRatio || 1;
-          canvas.width = width * dpr;
-          canvas.height = height * dpr;
-          ctx.scale(dpr, dpr);
 
-          const imgAspect = image.naturalWidth / image.naturalHeight;
-          const canvasAspect = width / height;
+          const [leftIndex, topIndex, rightIndex, bottomIndex] = bbox.box;
 
-          let drawWidth: number;
-          let drawHeight: number;
-          let offsetX: number;
-          let offsetY: number;
-
-          if (imgAspect < canvasAspect) {
-            drawWidth = width;
-            drawHeight = width / imgAspect;
-            offsetX = 0;
-            offsetY = (height - drawHeight) / 2;
-          } else {
-            drawWidth = height * imgAspect;
-            drawHeight = height;
-            offsetX = (width - drawWidth) / 2;
-            offsetY = 0;
+          if (
+            leftIndex === null ||
+            topIndex === null ||
+            rightIndex === null ||
+            bottomIndex === null
+          ) {
+            return;
           }
 
-          ctx.clearRect(0, 0, width, height);
-          // Gambar landmark
-          if (landmarks) {
-            console.log("Landmarks:", landmarks);
+          const centerX =
+            ((landmarks[leftIndex].x + landmarks[rightIndex].x) / 2) *
+              drawWidth +
+            offsetX;
+          const centerY =
+            ((landmarks[topIndex].y + landmarks[bottomIndex].y) / 2) *
+              drawHeight +
+            offsetY;
 
-            // Mendapatkan adjustedResults berdasarkan bounding boxes
-            const adjustedResults: BboxLandmark[] = adjustBoundingBoxes(
-              data, // BboxLandmark[]
-              landmarks as Landmark[], // Pastikan ini sesuai tipe
-              640,
-              640,
-              50, // Threshold diperbesar menjadi 50
-            );
+          const rgbColor = featureColors[bbox.label] || "255, 255, 255";
 
-            // Menggambar bounding box yang disesuaikan berdasarkan indeks landmark
-            // Gambar hanya fitur spesifik
-            adjustedResults.forEach((bbox) => {
-              // Filter for desired skin features
-              const validLabels = [
-                "spots",
-                "acne",
-                "blackhead",
-                "wrinkles",
-                "oily",
-              ];
-              if (!validLabels.includes(bbox.label)) {
-                return; // Skip jika label tidak diinginkan
-              }
+          const gradient = ctx.createRadialGradient(
+            centerX,
+            centerY,
+            innerRadius,
+            centerX,
+            centerY,
+            outerRadius,
+          );
+          gradient.addColorStop(0, `rgba(${rgbColor}, 0.8)`);
+          gradient.addColorStop(1, `rgba(${rgbColor}, 0)`);
 
-              const [leftIndex, topIndex, rightIndex, bottomIndex] = bbox.box;
+          ctx.fillStyle = gradient;
 
-              // Pastikan indeks valid
-              if (
-                leftIndex === null ||
-                topIndex === null ||
-                rightIndex === null ||
-                bottomIndex === null
-              ) {
-                return; // Skip jika ada indeks yang invalid
-              }
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.closePath();
 
-              // Hitung posisi tengah dari bounding box
-              const centerX =
-                ((landmarks[leftIndex].x + landmarks[rightIndex].x) / 2) *
-                  drawWidth +
-                offsetX;
-              const centerY =
-                ((landmarks[topIndex].y + landmarks[bottomIndex].y) / 2) *
-                  drawHeight +
-                offsetY;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = "white";
+          ctx.fill();
+          ctx.closePath();
 
-              // Dapatkan string warna RGB untuk fitur
-              const rgbColor = featureColors[bbox.label] || "255, 255, 255"; // Default ke putih jika tidak didefinisikan
+          const labelX = centerX + 50;
+          const labelY = centerY + 50;
 
-              // Buat radial gradient
-              const gradient = ctx.createRadialGradient(
-                centerX,
-                centerY,
-                innerRadius,
-                centerX,
-                centerY,
-                outerRadius,
-              );
-              gradient.addColorStop(0, `rgba(${rgbColor}, 0.8)`); // Center sedikit transparan
-              gradient.addColorStop(1, `rgba(${rgbColor}, 0)`); // Edge sepenuhnya transparan
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(labelX, labelY);
+          ctx.strokeStyle = "white";
+          ctx.stroke();
 
-              // Set gradient sebagai fill style
-              ctx.fillStyle = gradient;
+          ctx.font = "12px Arial";
+          ctx.fillStyle = "white";
+          ctx.fillText(bbox.label, labelX, labelY - 5);
 
-              // Gambar lingkaran gradient
-              ctx.beginPath();
-              ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-              ctx.fill();
-              ctx.closePath();
+          const textWidth = ctx.measureText(bbox.label).width;
+          const underlineEndX = labelX + textWidth;
+          const underlineY = labelY + 5;
 
-              // Gambar lingkaran kecil di posisi landmark
-              ctx.beginPath();
-              ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI); // Sesuaikan radius jika perlu
-              ctx.fillStyle = "white"; // Warna lingkaran putih
-              ctx.fill();
-              ctx.closePath();
+          ctx.beginPath();
+          ctx.moveTo(labelX, labelY);
+          ctx.lineTo(underlineEndX, underlineY);
+          ctx.strokeStyle = "white";
+          ctx.stroke();
 
-              // Gambar garis dari landmark ke teks label
-              const labelX = centerX + 50; // Sesuaikan posisi teks
-              const labelY = centerY + 50; // Sesuaikan posisi teks
+          labelBoundingBoxesRef.current.push({
+            label: bbox.label,
+            x: labelX,
+            y: labelY - 20,
+            width: textWidth,
+            height: 20,
+          });
+        });
 
-              ctx.beginPath();
-              ctx.moveTo(centerX, centerY);
-              ctx.lineTo(labelX, labelY); // Garis miring ke teks
-              ctx.strokeStyle = "white"; // Set warna garis
-              ctx.stroke();
+        skinAnalysisDataItem.forEach((dataItem) => {
+          const rgbColor = featureColors[dataItem.label] || "255, 255, 255";
 
-              // Tambahkan label
-              ctx.font = "18px Arial"; // Set font dan ukuran
-              ctx.fillStyle = "white"; // Set warna teks
-              ctx.fillText(bbox.label, labelX, labelY - 5); // Gambar teks dekat label
+          const centerX = landmarks[dataItem.point].x * drawWidth + offsetX;
+          const centerY = landmarks[dataItem.point].y * drawHeight + offsetY;
 
-              // Gambar underline yang terhubung dengan garis miring
-              const textWidth = ctx.measureText(bbox.label).width; // Ukur lebar teks
-              const underlineEndX = labelX + textWidth; // Akhir underline
-              const underlineY = labelY + 5; // Posisi Y underline
+          const gradient = ctx.createRadialGradient(
+            centerX,
+            centerY,
+            innerRadius,
+            centerX,
+            centerY,
+            outerRadius,
+          );
 
-              // Hubungkan garis miring dengan underline
-              ctx.beginPath();
-              ctx.moveTo(labelX, labelY); // Mulai dari garis miring
-              ctx.lineTo(underlineEndX, labelY); // Underline sejajar dengan teks
-              ctx.strokeStyle = "white"; // Set warna underline
-              ctx.stroke();
-            });
+          gradient.addColorStop(0, `rgba(${rgbColor}, 0.8)`);
+          gradient.addColorStop(1, `rgba(${rgbColor}, 0)`);
 
-            console.log("Adjusted Results:", adjustedResults);
-          }
-        } catch (error) {
-          console.error("Failed Detect Landmark: ", error);
-        }
+          ctx.fillStyle = gradient;
+
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.closePath();
+
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = "white";
+          ctx.fill();
+          ctx.closePath();
+
+          const labelX = centerX + 50;
+          const labelY = centerY + 50;
+
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(labelX, labelY);
+          ctx.strokeStyle = "white";
+          ctx.stroke();
+
+          ctx.font = "12px Arial";
+          ctx.fillStyle = "white";
+          ctx.fillText(dataItem.label, labelX, labelY - 5);
+
+          const textWidth = ctx.measureText(dataItem.label).width;
+          const underlineEndX = labelX + textWidth;
+          const underlineY = labelY + 5;
+
+          ctx.beginPath();
+          ctx.moveTo(labelX, labelY);
+          ctx.lineTo(underlineEndX, underlineY);
+          ctx.strokeStyle = "white";
+          ctx.stroke();
+
+          labelBoundingBoxesRef.current.push({
+            label: dataItem.label,
+            x: labelX,
+            y: labelY - 20,
+            width: textWidth,
+            height: 20,
+          });
+        });
+
+        console.log("Adjusted Results:", adjustedResults);
+        console.log("Label Bounding Boxes:", labelBoundingBoxesRef.current);
+      } catch (error) {
+        console.error("Failed Detect Landmark: ", error);
       }
     };
 
     drawImage();
-    window.addEventListener("resize", drawImage);
+    const resizeListener = () => drawImage();
+    window.addEventListener("resize", resizeListener);
 
     return () => {
-      window.removeEventListener("resize", drawImage);
+      window.removeEventListener("resize", resizeListener);
     };
-  }, [image, canvasRef, data, landmarks]);
+  }, [image, data, landmarks]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.error("Canvas tidak ditemukan untuk menambahkan event listener.");
+      return;
+    }
+
+    const handleClick = (event: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const x = ((event.clientX - rect.left) * scaleX) / dpr;
+      const y = ((event.clientY - rect.top) * scaleY) / dpr;
+
+      let labelClicked: string | null = null;
+
+      for (const bbox of labelBoundingBoxesRef.current) {
+        if (
+          x >= bbox.x &&
+          x <= bbox.x + bbox.width &&
+          y >= bbox.y &&
+          y <= bbox.y + bbox.height
+        ) {
+          labelClicked = bbox.label;
+          break;
+        }
+      }
+
+      if (onLabelClick) {
+        onLabelClick(labelClicked);
+      }
+    };
+
+    canvas.addEventListener("click", handleClick);
+    console.log("Event listener untuk klik telah ditambahkan.");
+
+    return () => {
+      canvas.removeEventListener("click", handleClick);
+      console.log("Event listener untuk klik telah dihapus.");
+    };
+  }, [onLabelClick]);
 
   return null;
 }

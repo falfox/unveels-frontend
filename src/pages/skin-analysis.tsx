@@ -29,13 +29,19 @@ import { Rating } from "../components/rating";
 import { skinAnalysisInference } from "../inference/skinAnalysisInference";
 import { FaceResults } from "../types/faceResults";
 import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
+import {
+  SkinAnalysisProvider,
+  useSkinAnalysis,
+} from "../components/skin-analysis/skin-analysis-context";
 
 export function SkinAnalysis() {
   return (
     <CameraProvider>
-      <div className="h-full min-h-dvh">
-        <Main />
-      </div>
+      <SkinAnalysisProvider>
+        <div className="h-full min-h-dvh">
+          <Main />
+        </div>
+      </SkinAnalysisProvider>
     </CameraProvider>
   );
 }
@@ -67,8 +73,8 @@ function Main() {
             error.message || "An error occurred during inference.",
           );
         } finally {
-          setIsLoading(false); // Pastikan isLoading diubah kembali
-          setIsInferenceRunning(false); // Tambahkan ini jika perlu
+          setIsLoading(false);
+          setIsInferenceRunning(false);
         }
       }
     };
@@ -82,14 +88,17 @@ function Main() {
         {!isLoading && inferenceResult != null ? (
           <SkinAnalysisScene data={inferenceResult} />
         ) : (
-          <VideoStream />
+          <>
+            <VideoStream />
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                zIndex: 0,
+              }}
+            ></div>
+          </>
         )}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          }}
-        ></div>
       </div>
       <RecorderStatus />
       <TopNavigation item={false} />
@@ -132,24 +141,27 @@ function MainContent() {
 }
 
 const tabs = [
-  "Wrinkles",
-  "Spots",
-  "Texture",
-  "Dark circles",
-  "Redness",
-  "Oiliness",
-  "Moisture",
-  "Pores",
-  "Eye Bags",
-  "Radiance",
-  "Firminess",
-  "Droopy Upper Eyelid",
-  "Droopy Lower Eyelid",
-  "Acne",
+  "acne",
+  "blackhead",
+  "dark circle",
+  "droopy eyelid lower",
+  "droopy eyelid upper",
+  "dry",
+  "eyebag",
+  "firmness",
+  "moistures",
+  "oily",
+  "pore",
+  "radiance",
+  "skinredness",
+  "spots",
+  "texture",
+  "whitehead",
+  "wrinkles",
 ] as const;
 
 function SkinProblems({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<(typeof tabs)[number]>("Wrinkles");
+  const { tab, setTab, getTotalScoreByLabel } = useSkinAnalysis();
 
   return (
     <>
@@ -186,7 +198,7 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
                       },
                     )}
                   >
-                    60%
+                    {tab ? `${getTotalScoreByLabel(tab)}%` : "0%"}
                   </div>
                 </button>
               </Fragment>
@@ -322,20 +334,11 @@ function ProductList() {
 
 function BottomContent() {
   const { criterias, setCriterias } = useCamera();
-  const [view, setView] = useState<"face" | "problems" | "results">("face");
+  const { view, setView } = useSkinAnalysis();
 
   if (criterias.isCaptured) {
     if (view === "face") {
-      return (
-        <ProblemResults
-          onFaceClick={() => {
-            setView("problems");
-          }}
-          onResultClick={() => {
-            setView("results");
-          }}
-        />
-      );
+      return <ProblemResults />;
     }
 
     if (view === "problems") {
@@ -360,27 +363,16 @@ function BottomContent() {
   return <VideoScene />;
 }
 
-function ProblemResults({
-  onFaceClick,
-  onResultClick,
-}: {
-  onFaceClick?: () => void;
-  onResultClick?: () => void;
-}) {
+function ProblemResults() {
+  const { view, setView } = useSkinAnalysis();
   return (
     <>
-      <div
-        className="fixed inset-0 h-full w-full"
-        onClick={() => {
-          onFaceClick?.();
-        }}
-      ></div>
       <div className="absolute inset-x-0 bottom-32 flex items-center justify-center">
         <button
           type="button"
           className="bg-black px-10 py-3 text-sm text-white"
           onClick={() => {
-            onResultClick?.();
+            setView("results");
           }}
         >
           ANALYSIS RESULT
@@ -391,6 +383,15 @@ function ProblemResults({
 }
 
 function AnalysisResults({ onClose }: { onClose: () => void }) {
+  const {
+    calculateSkinHealthScore,
+    calculateAverageSkinConditionScore,
+    calculateAverageSkinProblemsScore,
+    getTotalScoreByLabel,
+  } = useSkinAnalysis();
+
+  const { criterias } = useCamera();
+
   return (
     <div
       className={clsx(
@@ -422,17 +423,27 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
       <div className="flex items-center space-x-1 px-5 py-2">
         <div className="shrink-0 px-5">
           <div className="flex items-center justify-center rounded-full bg-gradient-to-b from-[#CA9C43] to-[#644D21] p-1">
-            <img
-              className="size-24 rounded-full"
-              src="https://avatar.iran.liara.run/public/30"
-              alt="Profile"
-            />
+            {criterias.capturedImage ? (
+              <img
+                className="size-24 rounded-full object-fill"
+                src={criterias.capturedImage}
+                alt="Captured Profile"
+              />
+            ) : (
+              <img
+                className="size-24 rounded-full"
+                src="https://avatar.iran.liara.run/public/30"
+                alt="Profile"
+              />
+            )}
           </div>
         </div>
         <div>
           <div className="flex items-center gap-x-2">
             <Icons.chart className="size-5" />
-            <div className="text-lg">Skin Health Score : 72%</div>
+            <div className="text-lg">
+              Skin Health Score : {calculateSkinHealthScore()}%
+            </div>
           </div>
           <div className="flex items-center gap-x-2">
             <Icons.hashtagCircle className="size-5" />
@@ -450,18 +461,26 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <CircularProgressRings
             className="mx-auto size-96"
             data={[
-              { percentage: 90, color: "#F72585" },
+              { percentage: getTotalScoreByLabel("acne"), color: "#F72585" },
               { percentage: 80, color: "#E9A0DD" },
-              { percentage: 60, color: "#F4EB24" },
-              { percentage: 40, color: "#0F38CC" },
-              { percentage: 20, color: "#00E0FF" },
-              { percentage: 10, color: "#6B13B1" },
-              { percentage: 5, color: "#00FF38" },
+              { percentage: getTotalScoreByLabel("pore"), color: "#F4EB24" },
+              { percentage: getTotalScoreByLabel("spots"), color: "#0F38CC" },
+              { percentage: getTotalScoreByLabel("eyebag"), color: "#00E0FF" },
+              {
+                percentage: getTotalScoreByLabel("dark circle"),
+                color: "#6B13B1",
+              },
+              {
+                percentage: getTotalScoreByLabel("wrinkles"),
+                color: "#00FF38",
+              },
             ]}
           />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
-            <div className="text-xl font-bold">80%</div>
+            <div className="text-xl font-bold">
+              {calculateAverageSkinProblemsScore()}%
+            </div>
             <div className="">Skin Problems</div>
           </div>
         </div>
@@ -478,14 +497,14 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#6B13B1] text-sm font-bold text-white">
-                45%
+                {getTotalScoreByLabel("dark circle")}%
               </div>
               <span>Dark Circles</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00E0FF] text-sm font-bold text-white">
-                60%
+                {getTotalScoreByLabel("eyebag")}%
               </div>
               <span>Eyebags</span>
             </div>
@@ -494,28 +513,28 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <div className="space-y-4">
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#0F38CC] text-sm font-bold text-white">
-                75%
+                {getTotalScoreByLabel("wrinkles")}%
               </div>
               <span>Wrinkles</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F4EB24] text-sm font-bold text-white">
-                90%
+                {getTotalScoreByLabel("pore")}%
               </div>
               <span>Pores</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#E9A0DD] text-sm font-bold text-white">
-                90%
+                {getTotalScoreByLabel("spots")}%
               </div>
               <span>Spots</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
-                90%
+                {getTotalScoreByLabel("acne")}%
               </div>
               <span>Acne</span>
             </div>
@@ -530,26 +549,29 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <CircularProgressRings
             className="mx-auto size-96"
             data={[
-              // background: #4CC9F0;
-              // background: #BD8EFF;
-              // background: #B5179E;
-              // background: #5DD400;
-              // background: #14A086;
-              // background: #F72585;
-              // background: #F1B902;
-
               { percentage: 90, color: "#4CC9F0" },
-              { percentage: 80, color: "#BD8EFF" },
-              { percentage: 60, color: "#B5179E" },
+              { percentage: getTotalScoreByLabel("redness"), color: "#BD8EFF" },
+              { percentage: getTotalScoreByLabel("oily"), color: "#B5179E" },
               { percentage: 40, color: "#5DD400" },
-              { percentage: 20, color: "#14A086" },
-              { percentage: 10, color: "#F72585" },
-              { percentage: 5, color: "#F1B902" },
+              {
+                percentage: getTotalScoreByLabel("dropy lower eyelid"),
+                color: "#14A086",
+              },
+              {
+                percentage: getTotalScoreByLabel("dropy upper eyelid"),
+                color: "#F72585",
+              },
+              {
+                percentage: getTotalScoreByLabel("firmness"),
+                color: "#F1B902",
+              },
             ]}
           />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
-            <div className="text-xl font-bold">80%</div>
+            <div className="text-xl font-bold">
+              {calculateAverageSkinConditionScore()}%
+            </div>
             <div className="">Skin Problems</div>
           </div>
         </div>
@@ -559,21 +581,21 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <div className="space-y-4">
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F1B902] text-sm font-bold text-white">
-                30%
+                {getTotalScoreByLabel("firmness")}%
               </div>
               <span>Firmness</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
-                45%
+                {getTotalScoreByLabel("dropy upper eyelid")}%
               </div>
               <span>Droopy Upper Eyelid</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#14A086] text-sm font-bold text-white">
-                60%
+                {getTotalScoreByLabel("dropy lower eyelid")}%
               </div>
               <span>Droopy Lower Eyelid</span>
             </div>
@@ -589,14 +611,14 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
-                90%
+                {getTotalScoreByLabel("oily")}%
               </div>
               <span>Oiliness</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#BD8EFF] text-sm font-bold text-white">
-                90%
+                {getTotalScoreByLabel("redness")}%
               </div>
               <span>Redness</span>
             </div>
@@ -615,13 +637,13 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             title="Wrinkles"
             detected="Forehead: Mild spots observed, likely due to sun exposure.Cheeks: A few dark spots noted on both cheeks, possibly post-inflammatory hyperpigmentation"
             description="Wrinkles are a natural part of aging, but they can also develop as a result of sun exposure, dehydration, and smoking. They can be treated with topical creams, botox, and fillers."
-            score={75}
+            score={getTotalScoreByLabel("wrinkles")}
           />
           <ProblemSection
             title="Spots"
             detected="Forehead: Mild spots observed, likely due to sun exposure.Cheeks: A few dark spots noted on both cheeks, possibly post-inflammatory hyperpigmentation"
             description="Spots can be caused by sun exposure, hormonal changes, and skin inflammation. They can be treated with topical creams, laser therapy, and chemical peels."
-            score={90}
+            score={getTotalScoreByLabel("spots")}
           />
           <ProblemSection
             title="Texture"
@@ -633,19 +655,19 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             title="Dark circles"
             detected="Detected"
             description="Dark circles can be caused by lack of sleep, dehydration, and genetics. They can be treated with eye creams, fillers, and laser therapy."
-            score={45}
+            score={getTotalScoreByLabel("dark circle")}
           />
           <ProblemSection
             title="Redness"
             detected="Detected"
             description="Redness can be caused by rosacea, sunburn, and skin sensitivity. It can be treated with topical creams, laser therapy, and lifestyle changes."
-            score={90}
+            score={getTotalScoreByLabel("redness")}
           />
           <ProblemSection
             title="Oiliness"
             detected="Detected"
             description="Oiliness can be caused by hormonal changes, stress, and genetics. It can be treated with oil-free skincare products, medication, and lifestyle changes."
-            score={90}
+            score={getTotalScoreByLabel("oily")}
           />
           <ProblemSection
             title="Moisture"
@@ -657,13 +679,13 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             title="Pores"
             detected="Detected"
             description="Large pores can be caused by genetics, oily skin, and aging. They can be treated with topical creams, laser therapy, and microneedling."
-            score={90}
+            score={getTotalScoreByLabel("pore")}
           />
           <ProblemSection
             title="Eye Bags"
             detected="Detected"
             description="Eye bags can be caused by lack of sleep, allergies, and aging. They can be treated with eye creams, fillers, and surgery."
-            score={60}
+            score={getTotalScoreByLabel("eyebag")}
           />
           <ProblemSection
             title="Radiance"
@@ -675,25 +697,25 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             title="Firminess"
             detected="Detected"
             description="Loss of firmness can be caused by aging, sun exposure, and smoking. It can be treated with topical creams, botox, and fillers."
-            score={30}
+            score={getTotalScoreByLabel("firmness")}
           />
           <ProblemSection
             title="Droopy Upper Eyelid"
             detected="Detected"
             description="Droopy eyelids can be caused by aging, genetics, and sun exposure. They can be treated with eyelid surgery, botox, and fillers."
-            score={45}
+            score={getTotalScoreByLabel("dropy upper eyelid")}
           />
           <ProblemSection
             title="Droopy Lower Eyelid"
             detected="Detected"
             description="Droopy eyelids can be caused by aging, genetics, and sun exposure. They can be treated with eyelid surgery, botox, and fillers."
-            score={60}
+            score={getTotalScoreByLabel("dropy lower eyelid")}
           />
           <ProblemSection
             title="Acne"
             detected="Detected"
             description="Acne can be caused by hormonal changes, stress, and genetics. It can be treated with topical creams, medication, and lifestyle changes."
-            score={90}
+            score={getTotalScoreByLabel("acne")}
           />
         </div>
       </div>

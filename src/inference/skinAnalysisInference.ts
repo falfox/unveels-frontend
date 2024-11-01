@@ -196,7 +196,7 @@ export const skinAnalysisInference = async (
         scores,
         500,
         0.25,
-        0.01,
+        0.001,
       ); // do nms to filter boxes
 
       const detReady = tf.tidy(() =>
