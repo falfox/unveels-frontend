@@ -1,28 +1,37 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Webcam from "react-webcam";
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import {
+  FaceLandmarker,
+  FilesetResolver,
+  HandLandmarker,
+} from "@mediapipe/tasks-vision";
 import { useCamera } from "../recorder/recorder-context";
-import { VIDEO_WIDTH, VIDEO_HEIGHT } from "../../utils/constants";
+import {
+  VIDEO_WIDTH,
+  VIDEO_HEIGHT,
+  HDR_ACCESORIES,
+} from "../../utils/constants";
 import { ErrorOverlay } from "../error-overlay";
-import { Landmark } from "../../types/landmark";
 import { Canvas } from "@react-three/fiber";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import VirtualTryOnThreeScene from "./virtual-try-on-three-scene";
+import { Landmark } from "../../types/landmark";
+import { useAccesories } from "../three/accesories-context";
+import HDREnvironment from "../three/hdr-environment";
 
 export function VirtualTryOnScene() {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
-    null,
-  );
-  const [landmarks, setLandmarks] = useState<Landmark[]>([]); // Tipe yang diperbarui
-  const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
-  const isDetectingRef = useRef<boolean>(false);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+  const handLandmarkerRef = useRef<HandLandmarker | null>(null);
+  const landmarksRef = useRef<Landmark[]>([]);
+  const handLandmarksRef = useRef<Landmark[]>([]);
+  const isDetectingRef = useRef<boolean>(false);
 
   // Using CameraContext
   const { criterias, flipCamera } = useCamera();
+  const { envMapAccesories, setEnvMapAccesories } = useAccesories();
 
   useEffect(() => {
     let isMounted = true; // Untuk mencegah pembaruan state setelah unmount
@@ -40,19 +49,37 @@ export function VirtualTryOnScene() {
                 "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
               delegate: "GPU",
             },
-            outputFaceBlendshapes: true,
             runningMode: "VIDEO",
             numFaces: 1,
+            minFaceDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+            minFacePresenceConfidence: 0.5,
           },
         );
+
+        const handLandmarker = await HandLandmarker.createFromOptions(
+          filesetResolver,
+          {
+            baseOptions: {
+              modelAssetPath:
+                "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+              delegate: "GPU",
+            },
+            runningMode: "VIDEO",
+            numHands: 1,
+            minHandDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+          },
+        );
+
         if (isMounted) {
           faceLandmarkerRef.current = landmarker;
-          setFaceLandmarker(landmarker);
-          setIsLandmarkerReady(true);
+          handLandmarkerRef.current = handLandmarker;
           startDetection();
         }
       } catch (error) {
         console.error("Gagal menginisialisasi FaceLandmarker:", error);
+        if (isMounted) setError(error as Error);
       }
     };
 
@@ -61,9 +88,14 @@ export function VirtualTryOnScene() {
     // Cleanup pada unmount
     return () => {
       isMounted = false;
-      if (faceLandmarker) {
-        faceLandmarker.close();
+      if (faceLandmarkerRef.current) {
+        faceLandmarkerRef.current.close();
       }
+      if (handLandmarkerRef.current) {
+        handLandmarkerRef.current.close();
+      }
+
+      isDetectingRef.current = false;
     };
   }, []);
 
@@ -75,6 +107,7 @@ export function VirtualTryOnScene() {
     const detect = async () => {
       if (
         faceLandmarkerRef.current &&
+        handLandmarkerRef.current &&
         webcamRef.current &&
         webcamRef.current.video &&
         webcamRef.current.video.readyState === 4
@@ -115,13 +148,23 @@ export function VirtualTryOnScene() {
 
             const startTimeMs = performance.now();
             try {
-              const detections = faceLandmarkerRef.current.detectForVideo(
+              const results = faceLandmarkerRef.current.detectForVideo(
                 video,
                 startTimeMs,
-              ).faceLandmarks[0];
+              );
 
-              // set landmark
-              setLandmarks(detections);
+              const handResults = handLandmarkerRef.current.detectForVideo(
+                video,
+                startTimeMs,
+              );
+
+              if (handResults.landmarks && handResults.landmarks.length > 0) {
+                handLandmarksRef.current = handResults.landmarks[0];
+              }
+              if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+                landmarksRef.current = results.faceLandmarks[0];
+                // Jika Anda perlu memberi tahu Three.js untuk memperbarui scene, gunakan callback atau event emitter
+              }
             } catch (err) {
               console.error("Detection error:", err);
               setError(err as Error);
@@ -145,14 +188,23 @@ export function VirtualTryOnScene() {
         className="absolute left-0 top-0 h-full w-full"
         style={{ zIndex: 50 }}
         orthographic
-        camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
+        camera={{ zoom: 1, position: [0, 0, 0], near: -1000, far: 1000 }}
         gl={{
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1,
           outputColorSpace: SRGBColorSpace,
         }}
       >
-        <VirtualTryOnThreeScene videoRef={webcamRef} landmarks={landmarks} />
+        <HDREnvironment
+          hdrPath={HDR_ACCESORIES}
+          onLoaded={setEnvMapAccesories}
+        />
+
+        <VirtualTryOnThreeScene
+          videoRef={webcamRef}
+          landmarks={landmarksRef}
+          handlandmarks={handLandmarksRef}
+        />
       </Canvas>
 
       <Webcam

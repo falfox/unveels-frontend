@@ -7,7 +7,7 @@ import { useMakeup } from "../makeup-context";
 import { CONCEALER_TEXTURE } from "../../../utils/constants";
 
 interface ConcealerProps extends MeshProps {
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 

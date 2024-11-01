@@ -4,13 +4,10 @@ import { MeshBasicMaterial, TextureLoader } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
 import { useMakeup } from "../makeup-context";
-import {
-  CONCEALER_TEXTURE,
-  LIP_PLUMPER_TEXTURE_ONE,
-} from "../../../utils/constants";
+import { LIP_PLUMPER_TEXTURE_ONE } from "../../../utils/constants";
 
 interface LipplumperProps extends MeshProps {
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 
