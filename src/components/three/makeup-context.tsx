@@ -73,6 +73,33 @@ interface MakeupContextProps {
 
   lipColors: string[];
   setLipColors: (colors: string[]) => void;
+
+  showBronzer: boolean;
+  setShowBronzer: (show: boolean) => void;
+
+  bronzerColor: string;
+  setBronzerColor: (color: string) => void;
+
+  bronzerPattern: number;
+  setBronzerPattern: (shape: number) => void;
+
+  showLens: boolean;
+  setShowLens: (show: boolean) => void;
+
+  lensPattern: number;
+  setLensPattern: (number: number) => void;
+
+  showEyebrows: boolean;
+  setShowEyebrows: (show: boolean) => void;
+
+  eyebrowsPattern: number;
+  setEyebrowsPattern: (pattern: number) => void;
+
+  eyebrowsVisibility: number;
+  setEyebrowsVisibility: (visibility: number) => void;
+
+  eyebrowsColor: string;
+  setEyebrowsColor: (color: string) => void;
 }
 
 const MakeupContext = createContext<MakeupContextProps | undefined>(undefined);
@@ -198,6 +225,18 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
     initialValues?.lipColors ?? [],
   );
 
+  const [showBronzer, setShowBronzer] = useState(false);
+  const [bronzerColor, setBronzerColor] = useState("#FFFF");
+  const [bronzerPattern, setBronzerPattern] = useState(0);
+
+  const [showLens, setShowLens] = useState(false);
+  const [lensPattern, setLensPattern] = useState(0);
+
+  const [showEyebrows, setShowEyebrows] = useState(false);
+  const [eyebrowsPattern, setEyebrowsPattern] = useState(0);
+  const [eyebrowsVisibility, setEyebrowsVisibility] = useState(0.5);
+  const [eyebrowsColor, setEyebrowsColor] = useState("#FFFF");
+
   return (
     <MakeupContext.Provider
       value={{
@@ -272,6 +311,33 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
 
         lipColors,
         setLipColors,
+
+        showBronzer,
+        setShowBronzer,
+
+        bronzerColor,
+        setBronzerColor,
+
+        bronzerPattern,
+        setBronzerPattern,
+
+        showLens,
+        setShowLens,
+
+        lensPattern,
+        setLensPattern,
+
+        showEyebrows,
+        setShowEyebrows,
+
+        eyebrowsPattern,
+        setEyebrowsPattern,
+
+        eyebrowsVisibility,
+        setEyebrowsVisibility,
+
+        eyebrowsColor,
+        setEyebrowsColor,
       }}
     >
       {children}

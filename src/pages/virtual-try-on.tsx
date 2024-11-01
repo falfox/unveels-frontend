@@ -36,15 +36,18 @@ import { NailsMode } from "./vto/nails/nails-makeup";
 import { NeckAccessoriesMode } from "./vto/neck-accessories/neck-accessories";
 import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
 import { MakeupProvider } from "../components/three/makeup-context";
+import { AccesoriesProvider } from "../components/three/accesories-context";
 
 export function VirtualTryOn() {
   return (
     <CameraProvider>
       <SkinColorProvider>
         <MakeupProvider>
-          <div className="h-full min-h-dvh">
-            <Main />
-          </div>
+          <AccesoriesProvider>
+            <div className="h-full min-h-dvh">
+              <Main />
+            </div>
+          </AccesoriesProvider>
         </MakeupProvider>
       </SkinColorProvider>
     </CameraProvider>

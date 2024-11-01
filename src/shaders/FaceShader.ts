@@ -2,10 +2,9 @@ export const FaceShader = {
   vertexShader: `
         varying vec2 vUv;
         void main() {
-            vUv = uv;
+            vUv = vec2(1.0 - uv.x, uv.y);
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
-    
     `,
   fragmentShader: `
             varying vec2 vUv;

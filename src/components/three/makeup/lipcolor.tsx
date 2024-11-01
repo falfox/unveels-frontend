@@ -14,7 +14,7 @@ import {
 import { Landmark } from "../../../types/landmark";
 
 interface LipColorProps extends MeshProps {
-  landmarks: Landmark[]; // Ganti dengan tipe Landmark yang sesuai
+  landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 

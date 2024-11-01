@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MeshProps, useThree } from "@react-three/fiber";
+import { MeshProps, useFrame, useThree } from "@react-three/fiber";
 import { LinearFilter, RGBFormat, VideoTexture, DoubleSide } from "three";
-import { ShaderMaterial } from "three";
-import { Vector2 } from "three";
+import { ShaderMaterial, Vector2 } from "three";
 import { FaceShader } from "../../shaders/FaceShader";
 import Webcam from "react-webcam";
 import { Landmark } from "../../types/landmark";
@@ -15,15 +14,31 @@ import Contour from "../three/makeup/contour";
 import Lipliner from "../three/makeup/lipliner";
 import Lipplumper from "../three/makeup/lipplumper";
 import LipColor from "../three/makeup/lipcolor";
+import Bronzer from "../three/makeup/bronzer";
+import ContactLens from "../three/makeup/contact-lens";
+import Eyebrows from "../three/makeup/eyebrows";
+import HeadOccluder from "../three/accesories/head-occluder";
+import Hat from "../three/accesories/hat";
+import Glasess from "../three/accesories/glasess";
+import Headband from "../three/accesories/headband";
+import Earring from "../three/accesories/earring";
+import NeckOccluder from "../three/accesories/neck-occluder";
+import Necklace from "../three/accesories/necklace";
+import { useAccesories } from "../three/accesories-context";
+import HandOccluder from "../three/accesories/hand-occluder";
+import Watch from "../three/accesories/watch";
+import Ring from "../three/accesories/ring";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
+  handlandmarks: React.RefObject<Landmark[]>;
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   videoRef,
   landmarks,
+  handlandmarks,
   ...props
 }) => {
   const { viewport } = useThree();
@@ -38,9 +53,29 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     showLipliner,
     showLipplumper,
     showLipColor,
+    showBronzer,
+    showLens,
+    showEyebrows,
   } = useMakeup();
 
+  const {
+    showHat,
+    showGlasess,
+    showHeadband,
+    showEarring,
+    showNecklace,
+    showWatch,
+    showBracelet,
+    showRing,
+  } = useAccesories();
+
   const filterRef = useRef<ShaderMaterial>(null);
+
+  // State for slider-controlled factors
+  const [archFactor, setArchFactor] = useState(0.1);
+  const [pinchFactor, setPinchFactor] = useState(0.1);
+  const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(0);
+  const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
 
   // Handle video readiness and create texture
   useEffect(() => {
@@ -92,7 +127,6 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
       }
 
       setPlaneSize([planeWidth, planeHeight]);
-      console.log(`Plane size set to ${planeWidth} x ${planeHeight}`);
     }
   }, [videoTexture, viewport, videoRef]);
 
@@ -106,11 +140,47 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     };
   }, [videoTexture]);
 
+  useFrame(() => {
+    if (filterRef.current && landmarks.current) {
+      const uniforms = filterRef.current.uniforms;
+
+      // Update factor uniforms
+      uniforms.archFactor.value = archFactor;
+      uniforms.pinchFactor.value = pinchFactor;
+      uniforms.horizontalShiftFactor.value = horizontalShiftFactor;
+      uniforms.verticalShiftFactor.value = verticalShiftFactor;
+
+      const faceLandmarks = landmarks.current;
+
+      const leftEyebrowIndices = [63, 105, 66, 107];
+      const rightEyebrowIndices = [296, 334, 293, 300];
+
+      for (let i = 0; i < 4; i++) {
+        const leftLandmark = faceLandmarks[leftEyebrowIndices[i]];
+        const rightLandmark = faceLandmarks[rightEyebrowIndices[i]];
+
+        if (leftLandmark && rightLandmark) {
+          uniforms.leftEyebrow.value[i].set(
+            leftLandmark.x,
+            1.0 - leftLandmark.y,
+          );
+
+          uniforms.rightEyebrow.value[i].set(
+            rightLandmark.x,
+            1.0 - rightLandmark.y,
+          );
+        }
+      }
+
+      filterRef.current.needsUpdate = true;
+    }
+  });
+
   return (
     <>
       {videoTexture && (
         <>
-          <mesh position={[0, 0, -5]} {...props}>
+          <mesh position={[0, 0, -500]} {...props} renderOrder={2}>
             <planeGeometry args={[planeSize[0], planeSize[1]]} />
             <shaderMaterial
               ref={filterRef}
@@ -125,7 +195,6 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
                     new Vector2(),
                     new Vector2(),
                     new Vector2(),
-                    new Vector2(),
                   ],
                 },
                 rightEyebrow: {
@@ -134,63 +203,86 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
                     new Vector2(),
                     new Vector2(),
                     new Vector2(),
-                    new Vector2(),
                   ],
                 },
-                archFactor: { value: 0.1 },
-                pinchFactor: { value: 0.1 },
-                horizontalShiftFactor: { value: 0 },
-                verticalShiftFactor: { value: 0 },
+                archFactor: { value: archFactor },
+                pinchFactor: { value: pinchFactor },
+                horizontalShiftFactor: { value: horizontalShiftFactor },
+                verticalShiftFactor: { value: verticalShiftFactor },
               }}
             />
           </mesh>
 
-          {showFoundation ? (
+          {showFoundation && (
             <Foundation planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showBlush ? (
-            <Blush planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
-          )}
+          {showBlush && <Blush planeSize={planeSize} landmarks={landmarks} />}
 
-          {showConcealer ? (
+          {showConcealer && (
             <Concealer planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showHighlighter ? (
+          {showHighlighter && (
             <Highlighter planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showContour ? (
+          {showContour && (
             <Contour planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showLipliner ? (
+          {showLipliner && (
             <Lipliner planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showLipplumper ? (
+          {showLipplumper && (
             <Lipplumper planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
           )}
 
-          {showLipColor ? (
+          {showLipColor && (
             <LipColor planeSize={planeSize} landmarks={landmarks} />
-          ) : (
-            <></>
+          )}
+
+          {showBronzer && (
+            <Bronzer planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showLens && (
+            <ContactLens planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showEyebrows && (
+            <Eyebrows planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
+          <NeckOccluder planeSize={planeSize} landmarks={landmarks} />
+          <HandOccluder planeSize={planeSize} handLandmarks={handlandmarks} />
+
+          {showHat && <Hat planeSize={planeSize} landmarks={landmarks} />}
+
+          {showGlasess && (
+            <Glasess planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showHeadband && (
+            <Headband planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showEarring && (
+            <Earring planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showNecklace && (
+            <Necklace planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showWatch && (
+            <Watch planeSize={planeSize} handLandmarks={handlandmarks} />
+          )}
+
+          {showRing && (
+            <Ring planeSize={planeSize} handLandmarks={handlandmarks} />
           )}
         </>
       )}

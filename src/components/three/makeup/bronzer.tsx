@@ -10,40 +10,39 @@ import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
 import { useMakeup } from "../makeup-context";
 import {
-  HIGHLIGHTER_TEXTURE_FOUR,
-  HIGHLIGHTER_TEXTURE_ONE,
-  HIGHLIGHTER_TEXTURE_THREE,
-  HIGHLIGHTER_TEXTURE_TWO,
+  BRONZER_TEXTURE_ONE,
+  BRONZER_TEXTURE_TWO,
+  BRONZER_TEXTURE_THREE,
+  BRONZER_TEXTURE_FOUR,
+  BRONZER_TEXTURE_FIVE,
 } from "../../../utils/constants";
 
-interface HighlighterProps extends MeshProps {
+interface BronzerProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 
-const HighlighterInner: React.FC<HighlighterProps> = ({
-  landmarks,
-  planeSize,
-}) => {
-  const { highlighterColor, highlighterPattern } = useMakeup();
+const BronzerInner: React.FC<BronzerProps> = ({ landmarks, planeSize }) => {
+  const { bronzerColor, bronzerPattern } = useMakeup();
 
   // Memuat semua tekstur sekaligus
-  const highlighterTextures = useLoader(TextureLoader, [
-    HIGHLIGHTER_TEXTURE_ONE,
-    HIGHLIGHTER_TEXTURE_TWO,
-    HIGHLIGHTER_TEXTURE_THREE,
-    HIGHLIGHTER_TEXTURE_FOUR,
+  const bronzerTextures = useLoader(TextureLoader, [
+    BRONZER_TEXTURE_ONE,
+    BRONZER_TEXTURE_TWO,
+    BRONZER_TEXTURE_THREE,
+    BRONZER_TEXTURE_FOUR,
+    BRONZER_TEXTURE_FIVE,
   ]);
 
   // Memilih tekstur yang sesuai berdasarkan HighlighterPattern
-  const alphaMap = highlighterTextures[highlighterPattern] || null;
+  const alphaMap = bronzerTextures[bronzerPattern] || null;
 
   // Inisialisasi material dengan useMemo
-  const HighlighterMaterial = useMemo(() => {
+  const bronzerMaterial = useMemo(() => {
     const materialOptions: Partial<MeshBasicMaterialParameters> = {
-      color: new Color(highlighterColor),
+      color: new Color(bronzerColor),
       transparent: !!alphaMap, // Menjadikan transparan jika alphaMap digunakan
-      opacity: 1,
+      opacity: 2,
     };
 
     if (alphaMap) {
@@ -52,23 +51,23 @@ const HighlighterInner: React.FC<HighlighterProps> = ({
     }
 
     return new MeshBasicMaterial(materialOptions);
-  }, [highlighterColor, alphaMap]);
+  }, [bronzerColor, alphaMap]);
 
   return (
     <FaceMesh
       landmarks={landmarks}
-      material={HighlighterMaterial}
+      material={bronzerMaterial}
       planeSize={planeSize}
     />
   );
 };
 
-const Highlighter: React.FC<HighlighterProps> = (props) => {
+const Bronzer: React.FC<BronzerProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <HighlighterInner {...props} />
+      <BronzerInner {...props} />
     </Suspense>
   );
 };
 
-export default Highlighter;
+export default Bronzer;
