@@ -88,7 +88,6 @@ function OverlayCanvas({
         }
 
         ctx.clearRect(0, 0, width, height);
-        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
         labelBoundingBoxesRef.current = [];
 

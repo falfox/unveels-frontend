@@ -24,6 +24,7 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
   );
   const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
   const [landmarks, setLandmarks] = useState<Landmark[]>([]); // Tipe yang diperbarui
+  const landmarkRef = useRef<Landmark[]>([]); // Initialize landmarkRef with an empty array
 
   // Memuat gambar ketika capturedImage berubah
   useEffect(() => {
@@ -100,6 +101,7 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
               z: landmark.z,
             }));
             setLandmarks(normalizedLandmarks);
+            landmarkRef.current = normalizedLandmarks; // Update the ref with the latest landmarks
           }
         } catch (error) {
           console.error("Gagal mendeteksi wajah:", error);
@@ -131,13 +133,14 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
       {/* Three.js Canvas */}
       <Canvas
         className="absolute left-0 top-0 h-full w-full"
-        style={{ zIndex: 0 }}
+        style={{ zIndex: 99 }}
         orthographic
         camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
       >
         <SkinAnalysisThreeScene
           imageSrc={criterias.capturedImage}
           landmarks={landmarks}
+          landmarksRef={landmarkRef}
         />
       </Canvas>
 

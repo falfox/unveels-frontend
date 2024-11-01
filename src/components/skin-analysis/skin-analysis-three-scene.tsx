@@ -14,16 +14,22 @@ import {
   RedFormat,
 } from "three";
 import { computeConvexHull } from "../../utils/imageProcessing";
+import Wrinkles from "../three/face/wrinkles";
+import Eyebag from "../three/face/eyebag";
+import Droppy from "../three/face/droppy";
+import DarkCircle from "../three/face/dark-circle";
 
 // Komponen untuk menampilkan gambar menggunakan React Three Fiber
 interface SkinAnalysisThreeSceneProps extends MeshProps {
   imageSrc: string;
   landmarks: Landmark[];
+  landmarksRef: React.RefObject<Landmark[]>;
 }
 
 const SkinAnalysisThreeScene: React.FC<SkinAnalysisThreeSceneProps> = ({
   imageSrc,
   landmarks,
+  landmarksRef,
   ...props
 }) => {
   const texture = useTexture(imageSrc);
@@ -197,6 +203,23 @@ const SkinAnalysisThreeScene: React.FC<SkinAnalysisThreeSceneProps> = ({
           />
         </mesh>
       )}
+
+      <Wrinkles
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Eyebag
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Droppy
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <DarkCircle
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
     </>
   );
 };

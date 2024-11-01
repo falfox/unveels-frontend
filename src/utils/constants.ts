@@ -1312,7 +1312,13 @@ export const skinAnalysisDataItem: SkinAnalysisItem[] = [
     label: "eyebag",
     class: 6,
     score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 229,
+    point: 31,
+  },
+  {
+    label: "eyebag",
+    class: 6,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 261,
   },
   {
     label: "skinredness",
@@ -1357,6 +1363,20 @@ export const skinAnalysisDataItem: SkinAnalysisItem[] = [
     point: 450,
   },
 ];
+
+// face problem alpha
+export const WRINKLE_ALPHA = "/assets/texture/face-problem/wrinkles_alpha.jpg";
+export const DARK_CIRCLE_ALPHA =
+  "/assets/texture/face-problem/dark_circle_alpha.png";
+export const DROPY_ALPHA =
+  "/assets/texture/face-problem/dropy_upper_lower_alpha.jpg";
+export const EYEBAG_ALPHA = "/assets/texture/face-problem/eyebag_alpha.jpg";
+export const OILY_ALPHA = "/assets/texture/face-problem/oilness_alpha.jpg";
+export const MOISTURES_ALPHA =
+  "/assets/texture/face-problem/moistures_alpha.jpg";
+export const FIRMNESS_ALPHA = "/assets/texture/face-problem/firmness_alpha.jpg";
+export const REDNESS_ALPHA = "/assets/texture/face-problem/redness_alpha.jpg";
+export const DRY_ALPHA = "/assets/texture/face-problem/dry_alpha.jpg";
 
 // lips
 export const LIPS_TEXTURE_ONE = "/assets/texture/lipstick/one/lipstick_one.png";
