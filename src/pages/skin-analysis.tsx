@@ -543,7 +543,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
                 color: "#14A086",
               },
               {
-                percentage: getTotalScoreByLabel("droppy eyelid upper"),
+                percentage: getTotalScoreByLabel("droopy eyelid upper"),
                 color: "#F72585",
               },
               {
