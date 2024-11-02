@@ -104,44 +104,126 @@ interface MakeupContextProps {
 
 const MakeupContext = createContext<MakeupContextProps | undefined>(undefined);
 
+type MakeupSelectables =
+  // Foundation
+  | "foundationColor"
+  | "showFoundation"
+  // Blush
+  | "blushColor"
+  | "blushPattern"
+  | "blushMaterial"
+  // Concealer
+  | "showBlush"
+  | "showConcealer"
+  | "concealerColor"
+  // Highlighter
+  | "showHighlighter"
+  | "highlighterPattern"
+  | "highlighterColor"
+  | "highlighterMaterial"
+  // Contour
+  | "showContour"
+  | "contourMode"
+  | "contourColors"
+  | "contourShape"
+  // Lipliner
+  | "showLipliner"
+  | "liplinerColor"
+  | "liplinerPattern"
+  // Lipplumper
+  | "showLipplumper"
+  | "lipplumperColor"
+  // Lip Color
+  | "showLipColor"
+  | "lipColorMode"
+  | "lipColors";
+
 interface MakeupProviderProps {
+  initialValues?: Partial<Pick<MakeupContextProps, MakeupSelectables>>;
   children: ReactNode;
 }
 
-export const MakeupProvider: React.FC<MakeupProviderProps> = ({ children }) => {
-  const [foundationColor, setFoundationColor] = useState("");
-  const [showFoundation, setShowFoundation] = useState(false); // Menambahkan state untuk visibilitas foundation
-
-  const [blushColor, setBlushColor] = useState("#FFFF");
-  const [showBlush, setShowBlush] = useState(false);
-  const [blushPattern, setBlushPattern] = useState(0);
-  const [blushMaterial, setBlushMaterial] = useState(0);
-
-  const [showConcealer, setShowConcealer] = useState(false);
-  const [concealerColor, setConcealerColor] = useState("#FFFF");
-
-  const [showHighlighter, setShowHighlighter] = useState(false);
-  const [highlighterPattern, setHighlighterPattern] = useState(0);
-  const [highlighterColor, setHighlighterColor] = useState("#FFFF");
-  const [highlighterMaterial, setHighlighterMaterial] = useState(0);
-
-  const [showContour, setShowContour] = useState(false);
-  const [contourMode, setContourMode] = useState<"One" | "Dual">("One");
-  const [contourColors, setContourColors] = useState<string[]>([]);
-  const [contourShape, setContourShape] = useState<string>("0");
-
-  const [showLipliner, setShowLipliner] = useState(false);
-  const [liplinerColor, setLiplinerColor] = useState("#FFFF");
-  const [liplinerPattern, setLiplinerPattern] = useState(0);
-
-  const [showLipplumper, setShowLipplumper] = useState(false);
-  const [lipplumperColor, setLipplumperColor] = useState("#FFFF");
-
-  const [showLipColor, setShowLipColor] = useState(false);
-  const [lipColorMode, setLipColorMode] = useState<"One" | "Dual" | "Ombre">(
-    "One",
+export const MakeupProvider: React.FC<MakeupProviderProps> = ({
+  children,
+  initialValues,
+}) => {
+  const [foundationColor, setFoundationColor] = useState(
+    initialValues?.foundationColor ?? "",
   );
-  const [lipColors, setLipColors] = useState<string[]>([]);
+  const [showFoundation, setShowFoundation] = useState(
+    initialValues?.showFoundation ?? false,
+  );
+
+  const [blushColor, setBlushColor] = useState(
+    initialValues?.blushColor ?? "#FFFF",
+  );
+  const [showBlush, setShowBlush] = useState(initialValues?.showBlush ?? false);
+  const [blushPattern, setBlushPattern] = useState(
+    initialValues?.blushPattern ?? 0,
+  );
+  const [blushMaterial, setBlushMaterial] = useState(
+    initialValues?.blushMaterial ?? 0,
+  );
+
+  const [showConcealer, setShowConcealer] = useState(
+    initialValues?.showConcealer ?? false,
+  );
+  const [concealerColor, setConcealerColor] = useState(
+    initialValues?.concealerColor ?? "#FFFF",
+  );
+
+  const [showHighlighter, setShowHighlighter] = useState(
+    initialValues?.showHighlighter ?? false,
+  );
+  const [highlighterPattern, setHighlighterPattern] = useState(
+    initialValues?.highlighterPattern ?? 0,
+  );
+  const [highlighterColor, setHighlighterColor] = useState(
+    initialValues?.highlighterColor ?? "#FFFF",
+  );
+  const [highlighterMaterial, setHighlighterMaterial] = useState(
+    initialValues?.highlighterMaterial ?? 0,
+  );
+
+  const [showContour, setShowContour] = useState(
+    initialValues?.showContour ?? false,
+  );
+  const [contourMode, setContourMode] = useState<"One" | "Dual">(
+    initialValues?.contourMode ?? "One",
+  );
+  const [contourColors, setContourColors] = useState<string[]>(
+    initialValues?.contourColors ?? [],
+  );
+  const [contourShape, setContourShape] = useState<string>(
+    initialValues?.contourShape ?? "0",
+  );
+
+  const [showLipliner, setShowLipliner] = useState(
+    initialValues?.showLipliner ?? false,
+  );
+  const [liplinerColor, setLiplinerColor] = useState(
+    initialValues?.liplinerColor ?? "#FFFF",
+  );
+  const [liplinerPattern, setLiplinerPattern] = useState(
+    initialValues?.liplinerPattern ?? 0,
+  );
+
+  const [showLipplumper, setShowLipplumper] = useState(
+    initialValues?.showLipplumper ?? false,
+  );
+  const [lipplumperColor, setLipplumperColor] = useState(
+    initialValues?.lipplumperColor ?? "#FFFF",
+  );
+
+  const [showLipColor, setShowLipColor] = useState(
+    initialValues?.showLipColor ?? false,
+  );
+  const [lipColorMode, setLipColorMode] = useState<"One" | "Dual" | "Ombre">(
+    initialValues?.lipColorMode ?? "One",
+  );
+  const [lipColors, setLipColors] = useState<string[]>(
+    initialValues?.lipColors ?? [],
+  );
 
   const [showBronzer, setShowBronzer] = useState(false);
   const [bronzerColor, setBronzerColor] = useState("#FFFF");

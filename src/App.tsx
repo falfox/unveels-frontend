@@ -43,6 +43,8 @@ import { NailsMode } from "./pages/vto/nails/nails-makeup";
 import { PressOnNailsSelector } from "./pages/vto/nails/press-on-nails/press-on-nails";
 import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear";
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
+import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
+import { FindTheLook } from "./pages/find-the-look";
 
 // Define routes using object syntax
 const routes = [
@@ -58,9 +60,14 @@ const routes = [
   { path: "/personality-finder", element: <PersonalityFinder /> },
   { path: "/face-analyzer", element: <FaceAnalyzer /> },
   { path: "/skin-analysis", element: <SkinAnalysis /> },
+  { path: "/find-the-look", element: <FindTheLook /> },
   { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
+  {
+    path: "/virtual-try-on-product/:sku",
+    element: <SingleVirtualTryOn />,
+  },
   {
     path: "/virtual-try-on",
     element: <VirtualTryOn />,
@@ -132,6 +139,7 @@ function Home() {
       <LinkButton to="/personality-finder">Personality Finder</LinkButton>
       <LinkButton to="/face-analyzer">Face Analyzer</LinkButton>
       <LinkButton to="/skin-analysis">Skin Analysis</LinkButton>
+      <LinkButton to="/find-the-look">Find The Look</LinkButton>
       <LinkButton to="/personality-finder-web">
         Personality Finder Web
       </LinkButton>

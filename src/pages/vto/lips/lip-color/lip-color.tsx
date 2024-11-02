@@ -4,6 +4,21 @@ import { Icons } from "../../../../components/icons";
 import { LipColorProvider, useLipColorContext } from "./lip-color-context";
 import { useMakeup } from "../../../../components/three/makeup-context";
 import { ColorPalette } from "../../../../components/color-palette";
+import {
+  lips_makeup_product_types,
+  lipsMakeupProductTypesMap,
+} from "../../../../api/attributes/makeups";
+import { useQuery } from "@tanstack/react-query";
+import {
+  buildSearchParams,
+  getProductAttributes,
+  mediaUrl,
+} from "../../../../utils/apiUtils";
+import { defaultHeaders, Product } from "../../../../api/shared";
+import { colors } from "../../../../api/attributes/color";
+import { LoadingProducts } from "../../../../components/loading";
+import { BrandName } from "../../../../components/product/brand";
+import { textures } from "../../../../api/attributes/texture";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },
@@ -36,10 +51,96 @@ const colorFamilies = [
   { name: "Nude", value: "#E1E1A3" },
 ];
 
+function useLipColorQuery({
+  color,
+  sub_color,
+  texture,
+}: {
+  color: string | null;
+  sub_color: string | null;
+  texture: string | null;
+}) {
+  return useQuery({
+    queryKey: ["products", "lipcolor", color, sub_color, texture],
+    queryFn: async () => {
+      const filters = [
+        {
+          filters: [
+            {
+              field: "type_id",
+              value: "simple",
+              condition_type: "eq",
+            },
+          ],
+        },
+        {
+          filters: [
+            {
+              field: "lips_makeup_product_type",
+              value: lips_makeup_product_types
+                .map((item) => item.value)
+                .join(","),
+              condition_type: "in",
+            },
+          ],
+        },
+      ];
+
+      if (color) {
+        filters.push({
+          filters: [
+            {
+              field: "color",
+              value: color,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      if (sub_color) {
+        filters.push({
+          filters: [
+            {
+              field: "sub_color",
+              value: sub_color,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      if (texture) {
+        filters.push({
+          filters: [
+            {
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      const response = await fetch(
+        "/rest/V1/products?" + buildSearchParams(filters),
+        {
+          headers: defaultHeaders,
+        },
+      );
+
+      const results = (await response.json()) as {
+        items: Array<Product>;
+      };
+
+      return results;
+    },
+  });
+}
 export function LipColorSelector() {
   return (
     <LipColorProvider>
-      <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
         <div>
           <FamilyColorSelector />
 
@@ -58,36 +159,37 @@ export function LipColorSelector() {
 
 function FamilyColorSelector() {
   const { colorFamily, setColorFamily } = useLipColorContext();
+
   return (
     <div
-      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
+      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
-      {colorFamilies.map((item, index) => (
+      {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
             "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
             {
-              "border-white/80": colorFamily === item.name,
+              "border-white/80": colorFamily === item.value,
             },
           )}
-          onClick={() => setColorFamily(item.name)}
+          onClick={() => setColorFamily(item.value)}
         >
           <div
             className="size-2.5 shrink-0 rounded-full"
             style={{
-              background: item.value,
+              background: item.hex,
             }}
           />
-          <span className="text-sm">{item.name}</span>
+          <span className="text-sm">{item.label}</span>
         </button>
       ))}
     </div>
   );
 }
 
-const colors = [
+const sub_color = [
   "#E0467C",
   "#740039",
   "#8D0046",
@@ -164,16 +266,16 @@ function ColorSelector() {
   };
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
           onClick={handleClearSelection}
         >
           <Icons.empty className="size-10" />
         </button>
-        {colors.map((color, index) => (
+        {sub_color.map((color, index) => (
           <button
             type="button"
             key={index}
@@ -192,27 +294,32 @@ function ColorSelector() {
     </div>
   );
 }
-const textures = ["Sheer", "Matt", "Gloss", "Shimmer", "Satin", "Stain"];
 
 function TextureSelector() {
   const { selectedTexture, setSelectedTexture } = useLipColorContext();
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
-            key={texture}
+            key={texture.label}
             type="button"
             className={clsx(
               "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
-                  selectedTexture === texture,
+                  selectedTexture === texture.value,
               },
             )}
-            onClick={() => setSelectedTexture(texture)}
+            onClick={() => {
+              if (selectedTexture === texture.value) {
+                setSelectedTexture(null);
+              } else {
+                setSelectedTexture(texture.value);
+              }
+            }}
           >
-            <span className="text-sm">{texture}</span>
+            <span className="text-sm">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -245,8 +352,8 @@ function ShadesSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-2 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {shades.map((shade, index) => (
           <button
             key={shade}
@@ -276,6 +383,14 @@ function ShadesSelector() {
 }
 
 function ProductList() {
+  const { colorFamily, selectedTexture } = useLipColorContext();
+
+  const { data, isLoading } = useLipColorQuery({
+    color: colorFamily,
+    sub_color: null,
+    texture: selectedTexture,
+  });
+
   const products = [
     {
       name: "Tom Ford Item name Tom Ford",
@@ -315,37 +430,47 @@ function ProductList() {
     },
   ];
 
-  const { colorFamily, selectedTexture, selectedShade } = useLipColorContext();
-
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
-      {products.map((product, index) => (
-        <div key={index} className="w-[100px] rounded shadow">
-          <div className="relative h-[70px] w-[100px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="rounded object-cover"
-            />
-          </div>
+    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+      {isLoading ? (
+        <LoadingProducts />
+      ) : (
+        data?.items.map((product, index) => {
+          const imageUrl =
+            mediaUrl(product.media_gallery_entries[0].file) ??
+            "https://picsum.photos/id/237/200/300";
 
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between space-x-1 pt-1">
-            <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-              $15
+          return (
+            <div key={index} className="w-[100px] rounded shadow">
+              <div className="relative h-[70px] w-[100px] overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt="Product"
+                  className="object-cover rounded"
+                />
+              </div>
+
+              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+                {product.name}
+              </h3>
+              <p className="text-[0.625rem] text-white/60">
+                <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
+              </p>
+              <div className="flex items-end justify-between pt-1 space-x-1">
+                <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
+                  $15
+                </div>
+                <button
+                  type="button"
+                  className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
+                >
+                  Add to cart
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-            >
-              Add to cart
-            </button>
-          </div>
-        </div>
-      ))}
+          );
+        })
+      )}
     </div>
   );
 }

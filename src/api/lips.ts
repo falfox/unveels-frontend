@@ -2,20 +2,33 @@ import { useQuery } from "@tanstack/react-query";
 import { buildSearchParams } from "../utils/apiUtils";
 import { defaultHeaders, Product } from "./shared";
 import { personalities } from "./attributes/personality";
+import { face_shapes } from "./attributes/face_shape";
 
 const lipsKey = {
-  products: ({ personality }: { personality: string }) => [
-    "products",
-    "lips",
+  products: ({
     personality,
-  ],
+    faceShape,
+  }: {
+    personality?: string;
+    faceShape?: string;
+  }) => ["products", "lips", { personality, faceShape }],
 };
 
-export function useLipsProductQuery({ personality }: { personality: string }) {
+export function useLipsProductQuery({
+  personality,
+  faceShape,
+}: {
+  personality?: string;
+  faceShape?: string;
+}) {
   const personalityId =
     personalities.find(
-      (p) => p.label.toLowerCase() === personality.toLowerCase(),
+      (p) => p.label.toLowerCase() === personality?.toLowerCase(),
     )?.value ?? "";
+
+  const faceShapeId =
+    face_shapes.find((p) => p.label.toLowerCase() === faceShape?.toLowerCase())
+      ?.value ?? "";
 
   return useQuery({
     queryKey: lipsKey.products({
@@ -32,16 +45,31 @@ export function useLipsProductQuery({ personality }: { personality: string }) {
             },
           ],
         },
-        {
+      ];
+
+      if (personalityId) {
+        filters.push({
           filters: [
             {
               field: "personality",
               value: personalityId,
-              condition_type: "finset",
+              condition_type: "eq",
             },
           ],
-        },
-      ];
+        });
+      }
+
+      if (faceShapeId) {
+        filters.push({
+          filters: [
+            {
+              field: "face_shape",
+              value: faceShapeId,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
 
       const response = await fetch(
         "/rest/V1/products?" + buildSearchParams(filters),

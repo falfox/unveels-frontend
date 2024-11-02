@@ -1,15 +1,6 @@
 import { createContext, useState, ReactNode, useContext } from "react";
 import { SkinType } from "../../utils/colorUtils";
 
-// Define the types for skin color and context
-type SkinType =
-  | "Fair Skin"
-  | "Medium Skin"
-  | "Olive Skin"
-  | "Tan Skin"
-  | "Brown Skin"
-  | "Deep Skin";
-
 interface SkinColorContextType {
   hexColor: string;
   hexSkin: string;
