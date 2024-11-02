@@ -3,23 +3,23 @@ import React, { useMemo, Suspense } from "react";
 import { MeshBasicMaterial, TextureLoader } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
-import { DROPY_ALPHA } from "../../../utils/constants";
+import { FIRMNESS_ALPHA } from "../../../utils/constants";
 
-interface DroppyProps extends MeshProps {
+interface FirmnessProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 
-const DroppyInner: React.FC<DroppyProps> = ({ landmarks, planeSize }) => {
-  const droppyTexture = useLoader(TextureLoader, DROPY_ALPHA);
+const FirmnessInner: React.FC<FirmnessProps> = ({ landmarks, planeSize }) => {
+  const firmnessTexture = useLoader(TextureLoader, FIRMNESS_ALPHA);
 
-  const droppyMaterial = useMemo(
+  const firmnessMaterial = useMemo(
     () =>
       new MeshBasicMaterial({
-        color: "#383838",
+        color: "#75fff4",
         transparent: true,
-        opacity: 0.6,
-        alphaMap: droppyTexture,
+        opacity: 0.15,
+        alphaMap: firmnessTexture,
         alphaTest: 0,
       }),
     [],
@@ -28,18 +28,18 @@ const DroppyInner: React.FC<DroppyProps> = ({ landmarks, planeSize }) => {
   return (
     <FaceMesh
       landmarks={landmarks}
-      material={droppyMaterial}
+      material={firmnessMaterial}
       planeSize={[planeSize[0], planeSize[1]]}
     />
   );
 };
 
-const Droppy: React.FC<DroppyProps> = (props) => {
+const Firmness: React.FC<FirmnessProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <DroppyInner {...props} />
+      <FirmnessInner {...props} />
     </Suspense>
   );
 };
 
-export default Droppy;
+export default Firmness;

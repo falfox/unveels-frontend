@@ -3,23 +3,23 @@ import React, { useMemo, Suspense } from "react";
 import { MeshBasicMaterial, TextureLoader } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
-import { DROPY_ALPHA } from "../../../utils/constants";
+import { OILY_ALPHA } from "../../../utils/constants";
 
-interface DroppyProps extends MeshProps {
+interface OilyProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 
-const DroppyInner: React.FC<DroppyProps> = ({ landmarks, planeSize }) => {
-  const droppyTexture = useLoader(TextureLoader, DROPY_ALPHA);
+const OilyInner: React.FC<OilyProps> = ({ landmarks, planeSize }) => {
+  const oilyTexture = useLoader(TextureLoader, OILY_ALPHA);
 
-  const droppyMaterial = useMemo(
+  const oilyMaterial = useMemo(
     () =>
       new MeshBasicMaterial({
-        color: "#383838",
+        color: "#bc5eff",
         transparent: true,
-        opacity: 0.6,
-        alphaMap: droppyTexture,
+        opacity: 0.15,
+        alphaMap: oilyTexture,
         alphaTest: 0,
       }),
     [],
@@ -28,18 +28,18 @@ const DroppyInner: React.FC<DroppyProps> = ({ landmarks, planeSize }) => {
   return (
     <FaceMesh
       landmarks={landmarks}
-      material={droppyMaterial}
+      material={oilyMaterial}
       planeSize={[planeSize[0], planeSize[1]]}
     />
   );
 };
 
-const Droppy: React.FC<DroppyProps> = (props) => {
+const Oily: React.FC<OilyProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <DroppyInner {...props} />
+      <OilyInner {...props} />
     </Suspense>
   );
 };
 
-export default Droppy;
+export default Oily;

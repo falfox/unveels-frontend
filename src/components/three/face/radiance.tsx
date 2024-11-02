@@ -3,23 +3,23 @@ import React, { useMemo, Suspense } from "react";
 import { MeshBasicMaterial, TextureLoader } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
-import { DROPY_ALPHA } from "../../../utils/constants";
+import { RADIANCE_ALPHA } from "../../../utils/constants";
 
-interface DroppyProps extends MeshProps {
+interface RadianceProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
 }
 
-const DroppyInner: React.FC<DroppyProps> = ({ landmarks, planeSize }) => {
-  const droppyTexture = useLoader(TextureLoader, DROPY_ALPHA);
+const RadianceInner: React.FC<RadianceProps> = ({ landmarks, planeSize }) => {
+  const radianceTexture = useLoader(TextureLoader, RADIANCE_ALPHA);
 
-  const droppyMaterial = useMemo(
+  const radianceMaterial = useMemo(
     () =>
       new MeshBasicMaterial({
-        color: "#383838",
+        color: "#FFFF",
         transparent: true,
-        opacity: 0.6,
-        alphaMap: droppyTexture,
+        opacity: 0.9,
+        alphaMap: radianceTexture,
         alphaTest: 0,
       }),
     [],
@@ -28,18 +28,18 @@ const DroppyInner: React.FC<DroppyProps> = ({ landmarks, planeSize }) => {
   return (
     <FaceMesh
       landmarks={landmarks}
-      material={droppyMaterial}
+      material={radianceMaterial}
       planeSize={[planeSize[0], planeSize[1]]}
     />
   );
 };
 
-const Droppy: React.FC<DroppyProps> = (props) => {
+const Radiance: React.FC<RadianceProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <DroppyInner {...props} />
+      <RadianceInner {...props} />
     </Suspense>
   );
 };
 
-export default Droppy;
+export default Radiance;

@@ -1207,6 +1207,36 @@ export const labels = [
 
 export const skinAnalysisDataItem: SkinAnalysisItem[] = [
   {
+    label: "radiance",
+    class: 12,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 67,
+  },
+  {
+    label: "texture",
+    class: 14,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 36,
+  },
+  {
+    label: "moistures",
+    class: 7,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 347,
+  },
+  {
+    label: "moistures",
+    class: 7,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 347,
+  },
+  {
+    label: "moistures",
+    class: 7,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 227,
+  },
+  {
     label: "whitehead",
     class: 15,
     score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
@@ -1246,25 +1276,7 @@ export const skinAnalysisDataItem: SkinAnalysisItem[] = [
     label: "wrinkles",
     class: 16,
     score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 8,
-  },
-  {
-    label: "wrinkles",
-    class: 16,
-    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 9,
-  },
-  {
-    label: "wrinkles",
-    class: 16,
-    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
     point: 151,
-  },
-  {
-    label: "wrinkles",
-    class: 16,
-    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 108,
   },
   {
     label: "wrinkles",
@@ -1272,29 +1284,18 @@ export const skinAnalysisDataItem: SkinAnalysisItem[] = [
     score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
     point: 299,
   },
+
   {
-    label: "wrinkles",
-    class: 16,
+    label: "droopy eyelid upper",
+    class: 4,
     score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 226,
-  },
-  {
-    label: "wrinkles",
-    class: 16,
-    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 446,
+    point: 159,
   },
   {
     label: "droopy eyelid upper",
     class: 4,
     score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 27,
-  },
-  {
-    label: "droopy eyelid upper",
-    class: 4,
-    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 386,
+    point: 257,
   },
   {
     label: "droopy eyelid lower",
@@ -1357,21 +1358,30 @@ export const skinAnalysisDataItem: SkinAnalysisItem[] = [
     point: 229,
   },
   {
-    label: "dark circle",
-    class: 2,
+    label: "dry",
+    class: 5,
     score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
-    point: 450,
+    point: 147,
+  },
+  {
+    label: "dry",
+    class: 5,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 411,
   },
 ];
 
 // face problem alpha
-export const WRINKLE_ALPHA = "/assets/texture/face-problem/wrinkles_alpha.jpg";
+export const WRINKLE_ALPHA =
+  "/assets/texture/face-problem/wrinkles_alpha(1).jpg";
+export const RADIANCE_ALPHA =
+  "/assets/texture/face-problem/radiance_alpha(1).jpg";
 export const DARK_CIRCLE_ALPHA =
   "/assets/texture/face-problem/dark_circle_alpha.png";
 export const DROPY_ALPHA =
   "/assets/texture/face-problem/dropy_upper_lower_alpha.jpg";
 export const EYEBAG_ALPHA = "/assets/texture/face-problem/eyebag_alpha.jpg";
-export const OILY_ALPHA = "/assets/texture/face-problem/oilness_alpha.jpg";
+export const OILY_ALPHA = "/assets/texture/face-problem/oilness_alpha.png";
 export const MOISTURES_ALPHA =
   "/assets/texture/face-problem/moistures_alpha.jpg";
 export const FIRMNESS_ALPHA = "/assets/texture/face-problem/firmness_alpha.jpg";

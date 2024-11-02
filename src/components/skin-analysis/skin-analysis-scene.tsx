@@ -7,6 +7,8 @@ import { BboxLandmark } from "../../types/bboxLandmark";
 import SkinAnalysisThreeScene from "./skin-analysis-three-scene";
 import OverlayCanvas from "./overlay-canvas";
 import { useSkinAnalysis } from "./skin-analysis-context";
+import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
+import { SRGBColorSpace } from "three";
 
 // Komponen utama SkinAnalysisScene yang menggabungkan Three.js Canvas dan OverlayCanvas
 interface SkinAnalysisSceneProps {
@@ -136,6 +138,7 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
         style={{ zIndex: 99 }}
         orthographic
         camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
+        gl={{ toneMapping: 1, outputColorSpace: SRGBColorSpace }}
       >
         <SkinAnalysisThreeScene
           imageSrc={criterias.capturedImage}

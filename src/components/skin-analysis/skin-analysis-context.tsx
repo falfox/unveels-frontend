@@ -1,6 +1,7 @@
 // MakeupContext.tsx
 import React, { createContext, ReactNode, useContext, useState } from "react";
 import { SkinAnalysisItem } from "../../types/skinAnalysisItem";
+import { SkinAnalysisResult } from "../../types/skinAnalysisResult";
 import { skinAnalysisDataItem } from "../../utils/constants";
 
 interface SkinAnalysisContextProps {
@@ -12,6 +13,11 @@ interface SkinAnalysisContextProps {
 
   skinAnalysisData: SkinAnalysisItem[];
   setSkinAnalysisData: React.Dispatch<React.SetStateAction<SkinAnalysisItem[]>>;
+
+  skinAnalysisResult: SkinAnalysisResult[];
+  setSkinAnalysisResult: React.Dispatch<
+    React.SetStateAction<SkinAnalysisResult[]>
+  >;
 
   getScoresByLabel: (label: string) => number[];
 
@@ -39,6 +45,10 @@ export const SkinAnalysisProvider: React.FC<SkinAnalysisProviderProps> = ({
   const [skinAnalysisData, setSkinAnalysisData] =
     useState<SkinAnalysisItem[]>(skinAnalysisDataItem);
 
+  const [skinAnalysisResult, setSkinAnalysisResult] = useState<
+    SkinAnalysisResult[]
+  >([]);
+
   const calculateAverageSkinProblemsScore = (): number => {
     const skinProblemsLabels = [
       "texture",
@@ -50,7 +60,7 @@ export const SkinAnalysisProvider: React.FC<SkinAnalysisProviderProps> = ({
       "acne",
     ];
     const scores = skinProblemsLabels.map((label) => {
-      const labelScores = skinAnalysisData
+      const labelScores = skinAnalysisResult
         .filter((item) => item.label.toLowerCase() === label)
         .map((item) => item.score);
       return labelScores.length > 0
@@ -69,15 +79,15 @@ export const SkinAnalysisProvider: React.FC<SkinAnalysisProviderProps> = ({
   const calculateAverageSkinConditionScore = (): number => {
     const skinConditionLabels = [
       "firmness",
-      "droopy upper eyelid",
-      "droopy lower eyelid",
+      "droopy eyelid upper",
+      "droopy eyelid lower",
       "moistures",
       "oily",
       "redness",
       "radiance",
     ];
     const scores = skinConditionLabels.map((label) => {
-      const labelScores = skinAnalysisData
+      const labelScores = skinAnalysisResult
         .filter((item) => item.label.toLowerCase() === label)
         .map((item) => item.score);
       return labelScores.length > 0
@@ -93,13 +103,13 @@ export const SkinAnalysisProvider: React.FC<SkinAnalysisProviderProps> = ({
   };
 
   const getScoresByLabel = (label: string): number[] => {
-    return skinAnalysisData
+    return skinAnalysisResult
       .filter((item) => item.label.toLowerCase() === label.toLowerCase())
       .map((item) => item.score);
   };
 
   const getTotalScoreByLabel = (label: string): number => {
-    const scores = skinAnalysisData
+    const scores = skinAnalysisResult
       .filter((item) => item.label.toLowerCase() === label.toLowerCase())
       .map((item) => item.score);
 
@@ -112,7 +122,7 @@ export const SkinAnalysisProvider: React.FC<SkinAnalysisProviderProps> = ({
   };
 
   const calculateSkinHealthScore = (): number => {
-    const scores = skinAnalysisData.map((item) => item.score);
+    const scores = skinAnalysisResult.map((item) => item.score);
     if (scores.length === 0) return 0;
 
     const averageScore =
@@ -140,6 +150,9 @@ export const SkinAnalysisProvider: React.FC<SkinAnalysisProviderProps> = ({
 
         calculateAverageSkinConditionScore,
         calculateAverageSkinProblemsScore,
+
+        skinAnalysisResult,
+        setSkinAnalysisResult,
       }}
     >
       {children}

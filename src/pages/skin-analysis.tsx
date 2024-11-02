@@ -2,14 +2,10 @@ import { CSSProperties, Fragment, useEffect, useState } from "react";
 import { Icons } from "../components/icons";
 import clsx from "clsx";
 import {
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   CirclePlay,
   Heart,
   PauseCircle,
-  Plus,
-  Share,
   StopCircle,
   X,
 } from "lucide-react";
@@ -33,6 +29,7 @@ import {
   SkinAnalysisProvider,
   useSkinAnalysis,
 } from "../components/skin-analysis/skin-analysis-context";
+import { SkinAnalysisResult } from "../types/skinAnalysisResult";
 
 export function SkinAnalysis() {
   return (
@@ -54,6 +51,7 @@ function Main() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferenceError, setInferenceError] = useState<string | null>(null);
   const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
+  const { setSkinAnalysisResult } = useSkinAnalysis();
 
   useEffect(() => {
     const faceAnalyzerInference = async () => {
@@ -62,11 +60,11 @@ function Main() {
         setIsLoading(true);
         setInferenceError(null);
         try {
-          const skinAnalysisResult: FaceResults[] = await skinAnalysisInference(
-            criterias.capturedImage,
-          );
+          const skinAnalysisResult: [FaceResults[], SkinAnalysisResult[]] =
+            await skinAnalysisInference(criterias.capturedImage);
 
-          setInferenceResult(skinAnalysisResult);
+          setInferenceResult(skinAnalysisResult[0]);
+          setSkinAnalysisResult(skinAnalysisResult[1]);
         } catch (error: any) {
           console.error("Inference error:", error);
           setInferenceError(
@@ -462,7 +460,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             className="mx-auto size-96"
             data={[
               { percentage: getTotalScoreByLabel("acne"), color: "#F72585" },
-              { percentage: 80, color: "#E9A0DD" },
+              { percentage: getTotalScoreByLabel("texture"), color: "#E9A0DD" },
               { percentage: getTotalScoreByLabel("pore"), color: "#F4EB24" },
               { percentage: getTotalScoreByLabel("spots"), color: "#0F38CC" },
               { percentage: getTotalScoreByLabel("eyebag"), color: "#00E0FF" },
@@ -490,7 +488,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <div className="space-y-4">
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00FF38] text-sm font-bold text-white">
-                30%
+                {getTotalScoreByLabel("texture")}%
               </div>
               <span>Texture</span>
             </div>
@@ -549,16 +547,25 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <CircularProgressRings
             className="mx-auto size-96"
             data={[
-              { percentage: 90, color: "#4CC9F0" },
-              { percentage: getTotalScoreByLabel("redness"), color: "#BD8EFF" },
-              { percentage: getTotalScoreByLabel("oily"), color: "#B5179E" },
-              { percentage: 40, color: "#5DD400" },
               {
-                percentage: getTotalScoreByLabel("dropy lower eyelid"),
+                percentage: getTotalScoreByLabel("moistures"),
+                color: "#4CC9F0",
+              },
+              {
+                percentage: getTotalScoreByLabel("skinredness"),
+                color: "#BD8EFF",
+              },
+              { percentage: getTotalScoreByLabel("oily"), color: "#B5179E" },
+              {
+                percentage: getTotalScoreByLabel("moistures"),
+                color: "#5DD400",
+              },
+              {
+                percentage: getTotalScoreByLabel("droopy eyelid lower"),
                 color: "#14A086",
               },
               {
-                percentage: getTotalScoreByLabel("dropy upper eyelid"),
+                percentage: getTotalScoreByLabel("droppy eyelid upper"),
                 color: "#F72585",
               },
               {
@@ -588,14 +595,14 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
-                {getTotalScoreByLabel("dropy upper eyelid")}%
+                {getTotalScoreByLabel("droopy eyelid upper")}%
               </div>
               <span>Droopy Upper Eyelid</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#14A086] text-sm font-bold text-white">
-                {getTotalScoreByLabel("dropy lower eyelid")}%
+                {getTotalScoreByLabel("droopy eyelid lower")}%
               </div>
               <span>Droopy Lower Eyelid</span>
             </div>
@@ -604,7 +611,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <div className="space-y-4">
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5DD400] text-sm font-bold text-white">
-                75%
+                {getTotalScoreByLabel("moistures")}%
               </div>
               <span>Moisture Level</span>
             </div>
@@ -618,14 +625,14 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#BD8EFF] text-sm font-bold text-white">
-                {getTotalScoreByLabel("redness")}%
+                {getTotalScoreByLabel("skinredness")}%
               </div>
               <span>Redness</span>
             </div>
 
             <div className="flex items-center space-x-2.5">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
-                90%
+                {getTotalScoreByLabel("moistures")}%
               </div>
               <span>Radiance</span>
             </div>
@@ -649,7 +656,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             title="Texture"
             detected="Detected"
             description="Uneven skin texture can be caused by acne, sun damage, and aging. It can be treated with exfoliation, laser therapy, and microneedling."
-            score={30}
+            score={getTotalScoreByLabel("texture")}
           />
           <ProblemSection
             title="Dark circles"
@@ -673,7 +680,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             title="Moisture"
             detected="Detected"
             description="Dry skin can be caused by cold weather, harsh soaps, and aging. It can be treated with moisturizers, humidifiers, and lifestyle changes."
-            score={75}
+            score={getTotalScoreByLabel("moistures")}
           />
           <ProblemSection
             title="Pores"
@@ -691,7 +698,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             title="Radiance"
             detected="Detected"
             description="Dull skin can be caused by dehydration, poor diet, and lack of sleep. It can be treated with exfoliation, hydration, and lifestyle changes."
-            score={90}
+            score={getTotalScoreByLabel("radiance")}
           />
           <ProblemSection
             title="Firminess"
