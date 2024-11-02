@@ -5,7 +5,7 @@ import {
   Heart,
   PauseCircle,
   StopCircle,
-  X
+  X,
 } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
 import { useSkincareProductQuery } from "../api/skin-care";
@@ -686,33 +686,6 @@ function ProblemSection({
   description: string;
   score: number;
 }) {
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
-
   // High -> 70% - 100%
   // Moderate -> above 40% - 69%
   // low -> 0% - 39%
