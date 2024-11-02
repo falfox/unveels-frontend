@@ -28,7 +28,7 @@ function ImageCanvas({ image, canvasRef }: ImageCanvasProps) {
       return;
     }
 
-    // Fungsi untuk menggambar gambar dengan skala "cover"
+    // Fungsi untuk menggambar gambar dengan skala "cover" dan flip horizontal
     const drawImage = () => {
       const { innerWidth: width, innerHeight: height } = window;
       const dpr = window.devicePixelRatio || 1;
@@ -57,7 +57,24 @@ function ImageCanvas({ image, canvasRef }: ImageCanvasProps) {
       }
 
       ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+
+      // Simpan keadaan awal konteks
+      ctx.save();
+
+      // Terapkan flip horizontal
+      ctx.scale(-1, 1);
+
+      // Sesuaikan posisi gambar setelah flip
+      ctx.drawImage(
+        image,
+        -offsetX - drawWidth,
+        offsetY,
+        drawWidth,
+        drawHeight,
+      );
+
+      // Kembalikan keadaan awal konteks
+      ctx.restore();
     };
 
     drawImage();
@@ -85,13 +102,16 @@ interface SkinToneFinderInnerSceneProps {
   debugMode: boolean;
 }
 
-function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
+function SkinToneFinderInnerScene({
+  debugMode,
+}: SkinToneFinderInnerSceneProps) {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
   const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
     null,
   );
-  const [landmarks, setLandmarks] = useState<Landmark[]>([]); // Tipe yang diperbarui
+  // Replace useState with useRef for landmarks
+  const landmarksRef = useRef<Landmark[]>([]);
   const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
 
   const { setSkinColor, setHexColor } = useSkinColor();
@@ -197,13 +217,14 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
               y: landmark.y,
               z: landmark.z,
             }));
-            setLandmarks(normalizedLandmarks);
+            // Update landmarksRef instead of state
+            landmarksRef.current = normalizedLandmarks;
 
             const indices = [101, 50, 330, 280, 108, 69, 151, 337, 299];
             // Ekstrak warna kulit
             const extractedSkinColor = extractSkinColor(
               imageLoaded,
-              normalizedLandmarks,
+              landmarksRef.current, // Use landmarksRef.current
               indices,
               5,
             );
@@ -302,12 +323,7 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
           style={{ zIndex: 50 }}
         >
           {/* Komponen untuk menggambar gambar di overlay canvas */}
-          <ImageCanvas
-            image={imageLoaded}
-            canvasRef={overlayCanvasRef}
-            // data={data}
-            // landmarks={landmarks}
-          />
+          <ImageCanvas image={imageLoaded} canvasRef={overlayCanvasRef} />
         </canvas>
       </Rnd>
 
@@ -318,15 +334,11 @@ function SkinToneFinderInnerScene({}: SkinToneFinderInnerSceneProps) {
         style={{ zIndex: 0 }}
         orthographic
         camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
-        gl={{
-          toneMapping: ACESFilmicToneMapping,
-          toneMappingExposure: 1,
-          outputColorSpace: SRGBColorSpace,
-        }}
+        gl={{ toneMapping: 1, outputColorSpace: SRGBColorSpace }}
       >
         <SkinToneFinderThreeScene
           imageSrc={criterias.capturedImage}
-          landmarks={landmarks}
+          landmarks={landmarksRef} // Pass landmarksRef.current
         />
       </Canvas>
     </div>

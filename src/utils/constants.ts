@@ -1,3 +1,5 @@
+import { SkinAnalysisItem } from "../types/skinAnalysisItem";
+
 export const BRIGHTNESS_THRESHOLD = 60; // Brightness > 60
 export const POSITION_THRESHOLD_X = 40; // X position within ±50 pixels from center
 export const POSITION_THRESHOLD_Y = 40; // Y position within ±50 pixels from center
@@ -1202,6 +1204,189 @@ export const labels = [
   "whitehead",
   "wrinkles",
 ];
+
+export const skinAnalysisDataItem: SkinAnalysisItem[] = [
+  {
+    label: "radiance",
+    class: 12,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 67,
+  },
+  {
+    label: "texture",
+    class: 14,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 36,
+  },
+  {
+    label: "moistures",
+    class: 7,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 347,
+  },
+  {
+    label: "moistures",
+    class: 7,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 347,
+  },
+  {
+    label: "moistures",
+    class: 7,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 227,
+  },
+  {
+    label: "whitehead",
+    class: 15,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 456,
+  },
+  {
+    label: "blackhead",
+    class: 1,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 51,
+  },
+  {
+    label: "acne",
+    class: 0,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 266,
+  },
+  {
+    label: "acne",
+    class: 0,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 266,
+  },
+  {
+    label: "spots",
+    class: 13,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 193,
+  },
+  {
+    label: "pore",
+    class: 10,
+    score: Math.floor(Math.random() * (80 - 50 + 1)) + 50,
+    point: 100,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 151,
+  },
+  {
+    label: "wrinkles",
+    class: 16,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 299,
+  },
+
+  {
+    label: "droopy eyelid upper",
+    class: 4,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 159,
+  },
+  {
+    label: "droopy eyelid upper",
+    class: 4,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 257,
+  },
+  {
+    label: "droopy eyelid lower",
+    class: 3,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 23,
+  },
+  {
+    label: "droopy eyelid lower",
+    class: 6,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 253,
+  },
+  {
+    label: "eyebag",
+    class: 6,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 31,
+  },
+  {
+    label: "eyebag",
+    class: 6,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 261,
+  },
+  {
+    label: "skinredness",
+    class: 12,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 101,
+  },
+  {
+    label: "skinredness",
+    class: 12,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 330,
+  },
+  {
+    label: "oily",
+    class: 9,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 195,
+  },
+  {
+    label: "firmness",
+    class: 7,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 206,
+  },
+  {
+    label: "firmness",
+    class: 7,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 436,
+  },
+  {
+    label: "dark circle",
+    class: 2,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 229,
+  },
+  {
+    label: "dry",
+    class: 5,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 147,
+  },
+  {
+    label: "dry",
+    class: 5,
+    score: Math.floor(Math.random() * (90 - 50 + 1)) + 50,
+    point: 411,
+  },
+];
+
+// face problem alpha
+export const WRINKLE_ALPHA =
+  "/assets/texture/face-problem/wrinkles_alpha(1).jpg";
+export const RADIANCE_ALPHA =
+  "/assets/texture/face-problem/radiance_alpha(1).jpg";
+export const DARK_CIRCLE_ALPHA =
+  "/assets/texture/face-problem/dark_circle_alpha.png";
+export const DROPY_ALPHA =
+  "/assets/texture/face-problem/dropy_upper_lower_alpha.jpg";
+export const EYEBAG_ALPHA = "/assets/texture/face-problem/eyebag_alpha.jpg";
+export const OILY_ALPHA = "/assets/texture/face-problem/oilness_alpha.png";
+export const MOISTURES_ALPHA =
+  "/assets/texture/face-problem/moistures_alpha.jpg";
+export const FIRMNESS_ALPHA = "/assets/texture/face-problem/firmness_alpha.jpg";
+export const REDNESS_ALPHA = "/assets/texture/face-problem/redness_alpha.jpg";
+export const DRY_ALPHA = "/assets/texture/face-problem/dry_alpha.jpg";
 
 // lips
 export const LIPS_TEXTURE_ONE = "/assets/texture/lipstick/one/lipstick_one.png";

@@ -14,23 +14,35 @@ import {
   RedFormat,
 } from "three";
 import { computeConvexHull } from "../../utils/imageProcessing";
+import Wrinkles from "../three/face/wrinkles";
+import Eyebag from "../three/face/eyebag";
+import Droppy from "../three/face/droppy";
+import DarkCircle from "../three/face/dark-circle";
+import Dry from "../three/face/dry";
+import Firmness from "../three/face/firmness";
+import Moistures from "../three/face/moistures";
+import Oily from "../three/face/oily";
+import Redness from "../three/face/redness";
+import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
+import Radiance from "../three/face/radiance";
 
 // Komponen untuk menampilkan gambar menggunakan React Three Fiber
 interface SkinAnalysisThreeSceneProps extends MeshProps {
   imageSrc: string;
   landmarks: Landmark[];
+  landmarksRef: React.RefObject<Landmark[]>;
 }
 
 const SkinAnalysisThreeScene: React.FC<SkinAnalysisThreeSceneProps> = ({
   imageSrc,
   landmarks,
+  landmarksRef,
   ...props
 }) => {
   const texture = useTexture(imageSrc);
+
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
-
-  const filterRef = useRef<ShaderMaterial>(null);
 
   // State for window size and DPR
   const [windowSize, setWindowSize] = useState<{
@@ -80,123 +92,49 @@ const SkinAnalysisThreeScene: React.FC<SkinAnalysisThreeSceneProps> = ({
     setPlaneSize([planeWidth, planeHeight]);
   }, [texture, viewport]);
 
-  // State for shader parameters
-  const [sigmaSpatial, setSigmaSpatial] = useState<number>(500.0);
-  const [sigmaColor, setSigmaColor] = useState<number>(0.08);
-  const [smoothingStrength, setSmoothingStrength] = useState<number>(1.25);
-
-  // Create mask texture based on landmarks and window size
-  const maskTexture = useMemo(() => {
-    if (!texture.image) return null;
-
-    const { width, height, dpr } = windowSize;
-
-    // Create an off-screen canvas for the mask
-    const canvas = document.createElement("canvas");
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-
-    // Scale the context based on DPR
-    ctx.scale(dpr, dpr);
-
-    // Calculate aspect ratios
-    const imgAspect = texture.image.width / texture.image.height;
-    const canvasAspect = width / height;
-
-    let drawWidth: number;
-    let drawHeight: number;
-    let offsetX: number;
-    let offsetY: number;
-
-    if (imgAspect < canvasAspect) {
-      drawWidth = width;
-      drawHeight = width / imgAspect;
-      offsetX = 0;
-      offsetY = (height - drawHeight) / 2;
-    } else {
-      drawWidth = height * imgAspect;
-      drawHeight = height;
-      offsetX = (width - drawWidth) / 2;
-      offsetY = 0;
-    }
-
-    // Convert landmarks to pixel coordinates relative to the mask canvas
-    const points: [number, number][] = landmarks.map((landmark) => [
-      landmark.x * drawWidth + offsetX,
-      landmark.y * drawHeight + offsetY,
-    ]);
-
-    // Compute Convex Hull
-    const hull = computeConvexHull(points);
-
-    if (hull.length < 3) return null; // Not enough points to form a polygon
-
-    ctx.beginPath();
-    hull.forEach(([x, y], index) => {
-      if (index === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.closePath();
-    ctx.fillStyle = "white"; // White face area
-    ctx.fill();
-
-    // Create a Three.js texture from the canvas
-    const mask = new CanvasTexture(canvas);
-    mask.minFilter = LinearFilter;
-    mask.magFilter = LinearFilter;
-    mask.format = RedFormat;
-    mask.needsUpdate = true;
-    return mask;
-  }, [landmarks, texture.image, windowSize]);
-
-  // Reference to the ShaderMaterial to update uniforms dynamically
-  useEffect(() => {
-    if (filterRef.current) {
-      filterRef.current.uniforms.imageTexture.value = texture;
-      filterRef.current.uniforms.maskTexture.value = maskTexture;
-      filterRef.current.uniforms.resolution.value.set(
-        maskTexture?.image.width,
-        maskTexture?.image.height,
-      );
-      filterRef.current.uniforms.sigmaSpatial.value = sigmaSpatial;
-      filterRef.current.uniforms.sigmaColor.value = sigmaColor;
-      filterRef.current.uniforms.smoothingStrength.value = smoothingStrength;
-      filterRef.current.needsUpdate = true;
-    }
-  }, [texture, maskTexture, sigmaSpatial, sigmaColor, smoothingStrength]);
-
   return (
     <>
-      {maskTexture && (
-        <mesh position={[0, 0, -10]} {...props}>
+      {texture && (
+        <mesh position={[0, 0, -10]} scale={[-1, 1, 1]} {...props}>
           <planeGeometry args={[planeSize[0], planeSize[1]]} />
-          <shaderMaterial
-            ref={filterRef}
-            args={[
-              {
-                vertexShader: BilateralFilterShader.vertexShader,
-                fragmentShader: BilateralFilterShader.fragmentShader,
-                side: DoubleSide,
-                uniforms: {
-                  imageTexture: { value: texture },
-                  maskTexture: { value: maskTexture },
-                  resolution: {
-                    value: new Vector2(
-                      maskTexture.image.width,
-                      maskTexture.image.height,
-                    ),
-                  },
-                  sigmaSpatial: { value: sigmaSpatial },
-                  sigmaColor: { value: sigmaColor },
-                  smoothingStrength: { value: smoothingStrength },
-                },
-              },
-            ]}
-          />
+          <meshBasicMaterial map={texture} side={DoubleSide} />
         </mesh>
       )}
+
+      <Wrinkles
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Eyebag
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Droppy
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <DarkCircle
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Dry landmarks={landmarksRef} planeSize={[planeSize[0], planeSize[1]]} />
+      <Firmness
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Moistures
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Oily landmarks={landmarksRef} planeSize={[planeSize[0], planeSize[1]]} />
+      <Redness
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
+      <Radiance
+        landmarks={landmarksRef}
+        planeSize={[planeSize[0], planeSize[1]]}
+      />
     </>
   );
 };

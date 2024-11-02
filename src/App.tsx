@@ -9,6 +9,7 @@ import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
 import { SkinAnalysis } from "./pages/skin-analysis";
 import { SkinToneFinder } from "./pages/skin-tone-finder";
 import { SkinToneFinderWeb } from "./pages/skin-tone-finder-web";
+import { VirtulAssistant } from "./pages/assistant/virtual-assistant";
 import { TryOnSelector, VirtualTryOn } from "./pages/virtual-try-on";
 import { EyeLinerSelector } from "./pages/vto/eyes/eye-liners/eye-liner";
 import { EyeShadowSelector } from "./pages/vto/eyes/eye-shadow/eye-shadow";
@@ -62,6 +63,7 @@ const routes = [
   { path: "/find-the-look", element: <FindTheLook /> },
   { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
+  { path: "/virtual-assistant", element: <VirtulAssistant /> },
   {
     path: "/virtual-try-on-product/:sku",
     element: <SingleVirtualTryOn />,
@@ -132,7 +134,7 @@ function Home() {
   useBrandsQuerySuspense();
 
   return (
-    <div className="absolute left-0 flex flex-col gap-4 top-4">
+    <div className="absolute left-0 top-4 flex flex-col gap-4">
       <LinkButton to="/skin-tone-finder">Skin Tone Finder</LinkButton>
       <LinkButton to="/personality-finder">Personality Finder</LinkButton>
       <LinkButton to="/face-analyzer">Face Analyzer</LinkButton>
@@ -143,6 +145,7 @@ function Home() {
       </LinkButton>
       <LinkButton to="/skin-tone-finder-web">Skin Tone Finder Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
+      <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
     </div>
   );
 }

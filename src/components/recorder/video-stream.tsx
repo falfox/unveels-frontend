@@ -56,6 +56,15 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     pitch: 0,
   });
 
+  const memoizedPosition = useCallback(
+    () => position,
+    [position.x, position.y],
+  );
+  const memoizedOrientation = useCallback(
+    () => orientation,
+    [orientation.yaw, orientation.pitch],
+  );
+
   // Debug Mode State
   const [isDebugMode, setIsDebugMode] = useState<boolean>(debugMode);
 
