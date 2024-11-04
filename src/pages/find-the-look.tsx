@@ -6,14 +6,17 @@ import {
   useCamera,
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
+import { FindTheLookProvider } from "../context/find-the-look-context";
 import { TopNavigation } from "./skin-tone-finder";
 
 export function FindTheLook() {
   return (
     <CameraProvider>
-      <div className="h-full min-h-dvh">
-        <Main />
-      </div>
+      <FindTheLookProvider>
+        <div className="h-full min-h-dvh">
+          <Main />
+        </div>
+      </FindTheLookProvider>
     </CameraProvider>
   );
 }
