@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { Download, X } from "lucide-react";
 import React, { HTMLAttributes } from "react";
 import { Icons } from "./icons";
-import { useCamera } from "./recorder/recorder-context";
+import { useCamera } from "../context/recorder-context";
 
 interface ShareOptionProps extends HTMLAttributes<HTMLDivElement> {
   icon: React.ReactNode | string;

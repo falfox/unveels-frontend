@@ -4,7 +4,7 @@ import { Mesh, MeshStandardMaterial, Object3D } from "three";
 import { Landmark } from "../../../types/landmark";
 import { GLASESS, HAT } from "../../../utils/constants";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { useAccesories } from "../accesories-context";
+import { useAccesories } from "../../../context/accesories-context";
 import { calculateDistance } from "../../../utils/calculateDistance";
 import { calculateFaceOrientation } from "../../../utils/calculateFaceOrientation";
 

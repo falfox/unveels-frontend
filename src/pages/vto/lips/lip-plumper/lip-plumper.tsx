@@ -4,7 +4,7 @@ import {
   LipPlumperProvider,
   useLipPlumperContext,
 } from "./lip-plumper-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },

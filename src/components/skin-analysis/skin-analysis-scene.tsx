@@ -1,18 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useCamera } from "../recorder/recorder-context";
+import { useCamera } from "../../context/recorder-context";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { Canvas } from "@react-three/fiber";
 import { Landmark } from "../../types/landmark";
 import { BboxLandmark } from "../../types/bboxLandmark";
 import SkinAnalysisThreeScene from "./skin-analysis-three-scene";
 import OverlayCanvas from "./overlay-canvas";
-import { useSkinAnalysis } from "./skin-analysis-context";
+import { useSkinAnalysis } from "../../context/skin-analysis-context";
 import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
 import { SRGBColorSpace } from "three";
+import { FaceResults } from "../../types/faceResults";
 
 // Komponen utama SkinAnalysisScene yang menggabungkan Three.js Canvas dan OverlayCanvas
 interface SkinAnalysisSceneProps {
-  data: BboxLandmark[]; // Pastikan data yang diterima adalah BboxLandmark[]
+  data: FaceResults[];
 }
 
 export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {

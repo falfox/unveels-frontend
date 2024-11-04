@@ -1,14 +1,13 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Webcam from "react-webcam";
 import { FaceDetector, FilesetResolver } from "@mediapipe/tasks-vision";
-import { useCamera } from "./recorder-context";
+import { useCamera } from "../../context/recorder-context";
 import {
   BRIGHTNESS_THRESHOLD,
   POSITION_THRESHOLD_X,
   POSITION_THRESHOLD_Y,
   ORIENTATION_THRESHOLD_YAW,
   ORIENTATION_THRESHOLD_PITCH,
-  testImage,
 } from "../../utils/constants";
 import { calculateLighting, cropImage } from "../../utils/imageProcessing";
 import { CountdownOverlay } from "../countdown-overlay";
@@ -20,14 +19,12 @@ import {
   calculateOrientation,
   Orientation,
 } from "../../utils/orientationUtils";
-import RecordRTC, { RecordRTCPromisesHandler } from "recordrtc";
-import { useRecordingControls } from "../../hooks/useRecorder";
 
 interface VideoStreamProps {
   debugMode?: boolean;
 }
 
-export function VideoStream({ debugMode = false }: VideoStreamProps) {
+export function VideoStream({ debugMode = true }: VideoStreamProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
@@ -86,6 +83,8 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             delegate: "GPU",
           },
           runningMode: "VIDEO",
+          minDetectionConfidence: 0.9,
+          minSuppressionThreshold: 1,
         });
         faceDetectorRef.current = detector;
         startDetection();
@@ -103,9 +102,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
         faceDetectorRef.current.close();
       }
       isDetectingRef.current = false;
-      // Removed countdownIntervalRef references
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Function to start the detection loop
@@ -126,8 +123,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
           // Get the rendered size and position of the video
           const videoRect = video.getBoundingClientRect();
           if (video && video.videoWidth > 0 && video.videoHeight > 0) {
-            // Lanjutkan deteksi wajah
-
             // Update canvas size and position to match the video
             if (
               canvas.width !== videoRect.width ||

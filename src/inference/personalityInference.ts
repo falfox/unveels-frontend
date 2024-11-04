@@ -22,6 +22,7 @@ import {
   thinnessLabels,
   shortnessLabels,
 } from "../utils/constants";
+import { extractSkinColor } from "../utils/imageProcessing";
 import { base64ToImage } from "../utils/imageProcessing";
 import { Classifier } from "../types/classifier";
 
@@ -327,8 +328,11 @@ export const personalityInference = async (
       14, 15, 16, 17, 87, 86, 85, 84, 317, 316, 315, 314, 178, 179, 180, 317,
       316, 315,
     ];
+    const indices = [101, 50, 330, 280, 108, 69, 151, 337, 299];
 
     const irisIndices = [468, 473];
+
+    const extractedSkinColor = extractSkinColor(image, landmarks, indices, 5);
 
     const averageEyebrowColor = getAverageColor(
       eyebrowIndices,
@@ -353,6 +357,14 @@ export const personalityInference = async (
       canvas.width,
       canvas.height,
     );
+
+    classifiers.push({
+      name: "Skin Type",
+      outputName: "",
+      labels: [],
+      outputLabel: extractedSkinColor.skinType,
+      outputColor: extractedSkinColor.hexColor,
+    });
 
     classifiers.push({
       name: "Average Eyebrow Color",

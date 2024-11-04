@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useCamera } from "../recorder/recorder-context";
+import { useCamera } from "../../context/recorder-context";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { Canvas } from "@react-three/fiber";
 import { useSkinColor } from "./skin-color-context"; // Pastikan path ini benar
@@ -7,9 +7,10 @@ import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
 import SkinToneFinderThreeScene from "./skin-tone-finder-three-scene";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
-import { useMakeup } from "../three/makeup-context";
+import { useMakeup } from "../../context/makeup-context";
 import { Rnd } from "react-rnd";
 import html2canvas from "html2canvas";
+import { useInferenceContext } from "../../context/inference-context";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -121,6 +122,8 @@ function SkinToneFinderInnerScene({
   const divRef = useRef<HTMLCanvasElement>(null);
 
   const [isTextureLoaded, setIsTextureLoaded] = useState<boolean>(false);
+
+  const { setIsInferenceFinished } = useInferenceContext();
 
   // Handler untuk mengatur status pemuatan tekstur
   const handleTextureLoaded = () => {
@@ -238,6 +241,8 @@ function SkinToneFinderInnerScene({
             // set skin hex to show on three scene
             setHexColor(extractedSkinColor.hexColor);
 
+            setIsInferenceFinished(true);
+
             // for flutter webView
             if (extractedSkinColor) {
               console.log("Skin Tone Finder Result:", extractedSkinColor);
@@ -260,6 +265,7 @@ function SkinToneFinderInnerScene({
             }
           }
         } catch (error) {
+          setIsInferenceFinished(false);
           if ((window as any).flutter_inappwebview) {
             (window as any).flutter_inappwebview
               .callHandler("detectionError", error)

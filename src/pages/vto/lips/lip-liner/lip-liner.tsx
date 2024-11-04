@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { useState } from "react";
 import { Icons } from "../../../../components/icons";
 import { LipLinerProvider, useLipLinerContext } from "./lip-liner-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },
