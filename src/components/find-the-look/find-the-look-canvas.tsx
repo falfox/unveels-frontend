@@ -33,10 +33,10 @@ export function FindTheLookCanvas({
     null,
   );
 
-  // const [glassDetector, setGlassDetector] = useState<ObjectDetector | null>(null);
-  // const [glassResult, setGlassResult] = useState<ObjectDetectorResult | null>(
-  //   null,
-  // );
+  const [glassDetector, setGlassDetector] = useState<ObjectDetector | null>(null);
+  const [glassResult, setGlassResult] = useState<ObjectDetectorResult | null>(
+    null,
+  );
 
   const [headDetector, setHeadDetector] = useState<ObjectDetector | null>(null);
   const [headResult, setHeadResult] = useState<ObjectDetectorResult | null>(
@@ -110,18 +110,18 @@ export function FindTheLookCanvas({
         );
 
 
-        // const glassConfiguration = await ObjectDetector.createFromOptions(
-        //   filesetResolver,
-        //   {
-        //     baseOptions: {
-        //       modelAssetPath: "/models/find-the-look/glass.tflite",
-        //       delegate: "GPU",
-        //     },
-        //     runningMode: "IMAGE",
-        //     maxResults: 1,
-        //     scoreThreshold: 0.7,
-        //   },
-        // );
+        const glassConfiguration = await ObjectDetector.createFromOptions(
+          filesetResolver,
+          {
+            baseOptions: {
+              modelAssetPath: "/models/find-the-look/glass.tflite",
+              delegate: "GPU",
+            },
+            runningMode: "IMAGE",
+            maxResults: 1,
+            scoreThreshold: 0.6,
+          },
+        );
 
         const headConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
@@ -154,7 +154,7 @@ export function FindTheLookCanvas({
           setRingDetector(ringConfiguration);
           setNeckDetector(neckConfiguration);
           setEarringDetector(earringConfiguration);
-          // setGlassDetector(glassConfiguration);
+          setGlassDetector(glassConfiguration);
           setHeadDetector(headConfiguration);
           setMakeupDetector(makeupConfiguration);
         }
@@ -179,9 +179,9 @@ export function FindTheLookCanvas({
       if (earringDetector) {
         earringDetector.close();
       }
-      // if (glassDetector) {
-      //   glassDetector.close();
-      // }
+      if (glassDetector) {
+        glassDetector.close();
+      }
       if (headDetector) {
         headDetector.close();
       }
@@ -194,19 +194,19 @@ export function FindTheLookCanvas({
   // Run detection
   useEffect(() => {
     const detectHands = async () => {
-      if (handDetector && ringDetector && neckDetector && earringDetector && headDetector&& makeupDetector) {
+      if (handDetector && ringDetector && neckDetector && earringDetector && glassDetector && headDetector&& makeupDetector) {
         const resultsHand = await handDetector.detect(image);
         const resultsRing = await ringDetector?.detect(image);
         const resultsNeck = await neckDetector.detect(image);
         const resultsEarring = await earringDetector?.detect(image);
-        // const resultsGlass = await glassDetector?.detect(image);
+        const resultsGlass = await glassDetector?.detect(image);
         const resultsHead = await headDetector.detect(image);
         const resultsMakeup = await makeupDetector?.detect(image);
         setHandResult(resultsHand);
         setringResult(resultsRing);
         setNeckResult(resultsNeck);
         setEarringResult(resultsEarring);
-        // setringResult(resultsGlass);
+        setGlassResult(resultsGlass);
         setHeadResult(resultsHead);
         setMakeupResult(resultsMakeup);
 
@@ -214,21 +214,21 @@ export function FindTheLookCanvas({
         console.log("Ring Result: ", resultsRing);
         console.log("Neck Result: ", resultsNeck);
         console.log("Earring Result: ", resultsEarring);
-        // console.log("Glass Result: ", resultsGlass);
+        console.log("Glass Result: ", resultsGlass);
         console.log("Head Result: ", resultsHead);
         console.log("Makeup Result: ", resultsMakeup);
       }
     };
 
     detectHands();
-  }, [handDetector, ringDetector,neckDetector,earringDetector,headDetector,makeupDetector]);
+  }, [handDetector, ringDetector,neckDetector,earringDetector,glassDetector,headDetector,makeupDetector]);
 
   useEffect(() => {
     if (!handResult) return;
     if (!ringResult) return;
     if (!neckResult) return;
     if (!earringResult) return;
-    // if (!glassResult) return;
+    if (!glassResult) return;
     if (!headResult) return;
     if (!makeupResult) return;
 
@@ -499,58 +499,58 @@ export function FindTheLookCanvas({
         }
       });
       
-      // glassResult.detections.forEach((result) => {
-      //   const { boundingBox, categories } = result;
-      //   if (boundingBox) {
-      //     // Calculate the center of the bounding box
-      //     const centerX =
-      //       width -
-      //       (boundingBox.originX * scaleX +
-      //         offsetX +
-      //         (boundingBox.width * scaleX) / 2);
-      //     const centerY =
-      //       boundingBox.originY * scaleY +
-      //       offsetY +
-      //       (boundingBox.height * scaleY) / 2;
+      glassResult.detections.forEach((result) => {
+        const { boundingBox, categories } = result;
+        if (boundingBox) {
+          // Calculate the center of the bounding box
+          const centerX =
+            width -
+            (boundingBox.originX * scaleX +
+              offsetX +
+              (boundingBox.width * scaleX) / 2);
+          const centerY =
+            boundingBox.originY * scaleY +
+            offsetY +
+            (boundingBox.height * scaleY) / 2;
 
-      //     // Draw the landmark circle at the center
-      //     ctx.beginPath();
-      //     ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-      //     ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-      //     ctx.fill();
-      //     ctx.closePath();
+          // Draw the landmark circle at the center
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+          ctx.fill();
+          ctx.closePath();
 
-      //     // Calculate label position
-      //     const labelX = centerX + 50;
-      //     const labelY = centerY + 50;
+          // Calculate label position
+          const labelX = centerX + 50;
+          const labelY = centerY + 50;
 
-      //     // Draw a line from the center of the bounding box to the label position
-      //     ctx.beginPath();
-      //     ctx.moveTo(centerX, centerY);
-      //     ctx.lineTo(labelX, labelY);
-      //     ctx.strokeStyle = "white";
-      //     ctx.stroke();
+          // Draw a line from the center of the bounding box to the label position
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(labelX, labelY);
+          ctx.strokeStyle = "white";
+          ctx.stroke();
 
-      //     // Display the label
-      //     if (categories && categories.length > 0) {
-      //       const label = categories[0].categoryName;
-      //       ctx.font = "12px Arial";
-      //       ctx.fillStyle = "white";
-      //       ctx.fillText(label, labelX, labelY - 5);
+          // Display the label
+          if (categories && categories.length > 0) {
+            const label = categories[0].categoryName;
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText(label, labelX, labelY - 5);
 
-      //       // Draw underline for label text
-      //       const textWidth = ctx.measureText(label).width;
-      //       const underlineEndX = labelX + textWidth;
-      //       const underlineY = labelY + 5;
+            // Draw underline for label text
+            const textWidth = ctx.measureText(label).width;
+            const underlineEndX = labelX + textWidth;
+            const underlineY = labelY + 5;
 
-      //       ctx.beginPath();
-      //       ctx.moveTo(labelX, labelY);
-      //       ctx.lineTo(underlineEndX, underlineY);
-      //       ctx.strokeStyle = "white";
-      //       ctx.stroke();
-      //     }
-      //   }
-      // });
+            ctx.beginPath();
+            ctx.moveTo(labelX, labelY);
+            ctx.lineTo(underlineEndX, underlineY);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+          }
+        }
+      });
 
       headResult.detections.forEach((result) => {
         const { boundingBox, categories } = result;
@@ -665,7 +665,7 @@ export function FindTheLookCanvas({
     return () => {
       window.removeEventListener("resize", drawImage);
     };
-  }, [image, canvasRef, handResult, ringResult,neckResult,earringResult,headResult,makeupResult]);
+  }, [image, canvasRef, handResult, ringResult,neckResult,earringResult,glassResult,headResult,makeupResult]);
 
   return null;
 }
