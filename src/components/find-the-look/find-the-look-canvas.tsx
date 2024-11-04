@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef,useState } from "react";
 import {
   ObjectDetector,
   FilesetResolver,
@@ -15,15 +15,26 @@ import { extractSkinColor } from "../../utils/imageProcessing";
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
   canvasRef: React.RefObject<HTMLCanvasElement>;
+  onLabelClick?: (label: string | null) => void;
 }
 
+interface Hitbox {
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 export function FindTheLookCanvas({
   image,
   canvasRef,
+  onLabelClick,
 }: FindTheLookCanvasProps) {
   const { setFindTheLookItems } = useFindTheLook();
   const results: FindTheLookItems[] = [];
+
+  const hitboxesRef = useRef<Hitbox[]>([]);
 
   const [handDetector, setHandDetector] = useState<ObjectDetector | null>(null);
   const [handResult, setHandResult] = useState<ObjectDetectorResult | null>(
@@ -179,7 +190,7 @@ export function FindTheLookCanvas({
               delegate: "GPU",
             },
             runningMode: "IMAGE",
-            maxResults: 1,
+            maxResults: 4,
             scoreThreshold: 0.1,
           },
         );
@@ -398,6 +409,14 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
+            
+            hitboxesRef.current.push({
+              label: categories[0].categoryName,
+              x: labelX,
+              y: labelY - 20,
+              width: textWidth,
+              height: 20,
+            });
           }
         }
       });
@@ -454,6 +473,14 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: categories[0].categoryName,
+              x: labelX,
+              y: labelY - 20,
+              width: textWidth,
+              height: 20,
+            });
           }
         }
       });
@@ -510,6 +537,14 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: categories[0].categoryName,
+              x: labelX,
+              y: labelY - 20,
+              width: textWidth,
+              height: 20,
+            });
           }
         }
       });
@@ -566,6 +601,14 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: categories[0].categoryName,
+              x: labelX,
+              y: labelY - 20,
+              width: textWidth,
+              height: 20,
+            });
           }
         }
       });
@@ -622,6 +665,14 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: categories[0].categoryName,
+              x: labelX,
+              y: labelY - 20,
+              width: textWidth,
+              height: 20,
+            });
           }
         }
       });
@@ -678,6 +729,14 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: categories[0].categoryName,
+              x: labelX,
+              y: labelY - 20,
+              width: textWidth,
+              height: 20,
+            });
           }
         }
       });
@@ -967,6 +1026,50 @@ export function FindTheLookCanvas({
     headResult,
     makeupResult,
   ]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.error("Canvas tidak ditemukan untuk menambahkan event listener.");
+      return;
+    }
+
+    const handleClick = (event: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const x = ((event.clientX - rect.left) * scaleX) / dpr;
+      const y = ((event.clientY - rect.top) * scaleY) / dpr;
+
+      let labelClicked: string | null = null;
+
+      for (const bbox of hitboxesRef.current) {
+        if (
+          x >= bbox.x &&
+          x <= bbox.x + bbox.width &&
+          y >= bbox.y &&
+          y <= bbox.y + bbox.height
+        ) {
+          labelClicked = bbox.label;
+          break;
+        }
+      }
+
+      if (onLabelClick) {
+        onLabelClick(labelClicked);
+      }
+    };
+
+    canvas.addEventListener("click", handleClick);
+    console.log("Event listener untuk klik telah ditambahkan.");
+
+    return () => {
+      canvas.removeEventListener("click", handleClick);
+      console.log("Event listener untuk klik telah dihapus.");
+    };
+  }, [onLabelClick]);
 
   return null;
 }

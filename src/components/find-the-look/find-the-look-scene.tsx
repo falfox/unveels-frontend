@@ -21,28 +21,40 @@ export function FindTheLookScene() {
     }
   }, [criterias.capturedImage]);
 
+
+  const handleLabelClick = (label: string | null) => {
+    if (label != null) {
+      console.log(label);
+    }
+  };
+
   return (
     <>
       {imageLoaded && (
         <div className="fixed inset-0 flex">
+
+        <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          zIndex: 200, // Lebih rendah dari overlay canvas
+          pointerEvents: "none", // Agar tidak menghalangi klik
+        }}
+        > </div>
+
           <canvas
             ref={findTheLookCanvasRef}
-            className="pointer-events-none absolute left-0 top-0 h-full w-screen"
-            style={{ zIndex: 50 }}
+            className="absolute left-0 top-0 h-full w-screen"
+            style={{ zIndex: 100 }}
           >
             {/* Komponen untuk menggambar gambar di overlay canvas */}
             <FindTheLookCanvas
               image={imageLoaded}
               canvasRef={findTheLookCanvasRef}
+              onLabelClick={handleLabelClick}
             />
           </canvas>
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-              zIndex: 60,
-            }}
-          ></div>
+          
         </div>
       )}
     </>
