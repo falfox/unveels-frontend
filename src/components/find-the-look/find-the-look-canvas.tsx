@@ -3,8 +3,14 @@ import {
   ObjectDetector,
   FilesetResolver,
   ObjectDetectorResult,
+  FaceLandmarker,
+  FaceDetector,
 } from "@mediapipe/tasks-vision";
 import { result } from "lodash";
+import { useFindTheLook } from "../../context/find-the-look-context";
+import { FindTheLookItems } from "../../types/findTheLookItems";
+import { Landmark } from "../../types/landmark";
+import { extractSkinColor } from "../../utils/imageProcessing";
 
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
@@ -15,6 +21,9 @@ export function FindTheLookCanvas({
   image,
   canvasRef,
 }: FindTheLookCanvasProps) {
+  const { setFindTheLookItems } = useFindTheLook();
+  const results: FindTheLookItems[] = [];
+
   const [handDetector, setHandDetector] = useState<ObjectDetector | null>(null);
   const [handResult, setHandResult] = useState<ObjectDetectorResult | null>(
     null,
@@ -28,12 +37,15 @@ export function FindTheLookCanvas({
     null,
   );
 
-  const [earringDetector, setEarringDetector] = useState<ObjectDetector | null>(null);
-  const [earringResult, setEarringResult] = useState<ObjectDetectorResult | null>(
+  const [earringDetector, setEarringDetector] = useState<ObjectDetector | null>(
     null,
   );
+  const [earringResult, setEarringResult] =
+    useState<ObjectDetectorResult | null>(null);
 
-  const [glassDetector, setGlassDetector] = useState<ObjectDetector | null>(null);
+  const [glassDetector, setGlassDetector] = useState<ObjectDetector | null>(
+    null,
+  );
   const [glassResult, setGlassResult] = useState<ObjectDetectorResult | null>(
     null,
   );
@@ -43,10 +55,19 @@ export function FindTheLookCanvas({
     null,
   );
 
-  const [makeupDetector, setMakeupDetector] = useState<ObjectDetector | null>(null);
+  const [makeupDetector, setMakeupDetector] = useState<ObjectDetector | null>(
+    null,
+  );
   const [makeupResult, setMakeupResult] = useState<ObjectDetectorResult | null>(
     null,
   );
+
+  // facelandmark
+  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
+    null,
+  );
+  const [faceLandmark, setFaceLandmark] = useState<Landmark[] | null>(null);
+
   // Initialize the model
   useEffect(() => {
     let isMounted = true;
@@ -56,6 +77,20 @@ export function FindTheLookCanvas({
         const filesetResolver = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm",
         );
+
+        const faceLandmarkConfiguration =
+          await FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: {
+              modelAssetPath:
+                "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+              delegate: "GPU",
+            },
+            runningMode: "IMAGE",
+            numFaces: 1,
+            minFaceDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+            minFacePresenceConfidence: 0.5,
+          });
 
         const handConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
@@ -109,7 +144,6 @@ export function FindTheLookCanvas({
           },
         );
 
-
         const glassConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -145,7 +179,7 @@ export function FindTheLookCanvas({
             },
             runningMode: "IMAGE",
             maxResults: 1,
-            scoreThreshold: 0.8,
+            scoreThreshold: 0.1,
           },
         );
 
@@ -157,6 +191,7 @@ export function FindTheLookCanvas({
           setGlassDetector(glassConfiguration);
           setHeadDetector(headConfiguration);
           setMakeupDetector(makeupConfiguration);
+          setFaceLandmarker(faceLandmarkConfiguration);
         }
       } catch (error) {
         console.error("Failed to initialize Hand Detector: ", error);
@@ -188,13 +223,25 @@ export function FindTheLookCanvas({
       if (makeupDetector) {
         makeupDetector.close();
       }
+      if (faceLandmarker) {
+        faceLandmarker.close();
+      }
     };
   }, []);
 
   // Run detection
   useEffect(() => {
     const detectHands = async () => {
-      if (handDetector && ringDetector && neckDetector && earringDetector && glassDetector && headDetector&& makeupDetector) {
+      if (
+        handDetector &&
+        ringDetector &&
+        neckDetector &&
+        earringDetector &&
+        glassDetector &&
+        headDetector &&
+        makeupDetector &&
+        faceLandmarker
+      ) {
         const resultsHand = await handDetector.detect(image);
         const resultsRing = await ringDetector?.detect(image);
         const resultsNeck = await neckDetector.detect(image);
@@ -202,6 +249,7 @@ export function FindTheLookCanvas({
         const resultsGlass = await glassDetector?.detect(image);
         const resultsHead = await headDetector.detect(image);
         const resultsMakeup = await makeupDetector?.detect(image);
+        const resultsFaceLandmark = await faceLandmarker.detect(image);
         setHandResult(resultsHand);
         setringResult(resultsRing);
         setNeckResult(resultsNeck);
@@ -209,6 +257,7 @@ export function FindTheLookCanvas({
         setGlassResult(resultsGlass);
         setHeadResult(resultsHead);
         setMakeupResult(resultsMakeup);
+        setFaceLandmark(resultsFaceLandmark.faceLandmarks[0]);
 
         console.log("Hand Result: ", resultsHand);
         console.log("Ring Result: ", resultsRing);
@@ -217,11 +266,21 @@ export function FindTheLookCanvas({
         console.log("Glass Result: ", resultsGlass);
         console.log("Head Result: ", resultsHead);
         console.log("Makeup Result: ", resultsMakeup);
+        console.log("Landmark Result: ", faceLandmark);
       }
     };
 
     detectHands();
-  }, [handDetector, ringDetector,neckDetector,earringDetector,glassDetector,headDetector,makeupDetector]);
+  }, [
+    handDetector,
+    ringDetector,
+    neckDetector,
+    earringDetector,
+    glassDetector,
+    headDetector,
+    makeupDetector,
+    faceLandmarker,
+  ]);
 
   useEffect(() => {
     if (!handResult) return;
@@ -232,7 +291,6 @@ export function FindTheLookCanvas({
     if (!headResult) return;
     if (!makeupResult) return;
 
-    
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -289,6 +347,9 @@ export function FindTheLookCanvas({
 
       handResult.detections.forEach((result) => {
         const { boundingBox, categories } = result;
+        results.push({
+          label: result.categories[0].displayName,
+        });
         if (boundingBox) {
           // Calculate the center of the bounding box
           const centerX =
@@ -342,6 +403,9 @@ export function FindTheLookCanvas({
 
       ringResult.detections.forEach((result) => {
         const { boundingBox, categories } = result;
+        results.push({
+          label: result.categories[0].displayName,
+        });
         if (boundingBox) {
           // Calculate the center of the bounding box
           const centerX =
@@ -395,6 +459,9 @@ export function FindTheLookCanvas({
 
       neckResult.detections.forEach((result) => {
         const { boundingBox, categories } = result;
+        results.push({
+          label: result.categories[0].displayName,
+        });
         if (boundingBox) {
           // Calculate the center of the bounding box
           const centerX =
@@ -448,6 +515,9 @@ export function FindTheLookCanvas({
 
       earringResult.detections.forEach((result) => {
         const { boundingBox, categories } = result;
+        results.push({
+          label: result.categories[0].displayName,
+        });
         if (boundingBox) {
           // Calculate the center of the bounding box
           const centerX =
@@ -498,9 +568,12 @@ export function FindTheLookCanvas({
           }
         }
       });
-      
+
       glassResult.detections.forEach((result) => {
         const { boundingBox, categories } = result;
+        results.push({
+          label: result.categories[0].displayName,
+        });
         if (boundingBox) {
           // Calculate the center of the bounding box
           const centerX =
@@ -554,6 +627,9 @@ export function FindTheLookCanvas({
 
       headResult.detections.forEach((result) => {
         const { boundingBox, categories } = result;
+        results.push({
+          label: result.categories[0].displayName,
+        });
         if (boundingBox) {
           // Calculate the center of the bounding box
           const centerX =
@@ -605,57 +681,164 @@ export function FindTheLookCanvas({
         }
       });
 
+      const eyebrowIndices = [
+        70, 63, 105, 66, 46, 53, 52, 65, 296, 334, 293, 295, 282, 283,
+      ];
+      const lipIndices = [
+        14, 15, 16, 17, 87, 86, 85, 84, 317, 316, 315, 314, 178, 179, 180, 317,
+        316, 315,
+      ];
+
+      const blushIndices = [280, 80];
+
+      const eyeshadowIndices = [29, 27];
+
       makeupResult.detections.forEach((result) => {
-        const { boundingBox, categories } = result;
-        if (boundingBox) {
-          // Calculate the center of the bounding box
-          const centerX =
-            width -
-            (boundingBox.originX * scaleX +
-              offsetX +
-              (boundingBox.width * scaleX) / 2);
-          const centerY =
-            boundingBox.originY * scaleY +
-            offsetY +
-            (boundingBox.height * scaleY) / 2;
+        const { categories } = result;
 
-          // Draw the landmark circle at the center
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-          ctx.fill();
-          ctx.closePath();
+        categories.forEach((category) => {
+          let drawXLips,
+            drawYLips,
+            labelLips,
+            drawXEyebrow,
+            drawYEyebrow,
+            labelEyebrow,
+            drawXBlusher,
+            drawYBlusher,
+            labelBlusher,
+            drawXEyeshadow,
+            drawYEyeshadow,
+            labelEyeshadow;
 
-          // Calculate label position
-          const labelX = centerX + 50;
-          const labelY = centerY + 50;
+          // Define specific landmarks for each makeup category
+          if (
+            category.categoryName === "Lipstick" &&
+            faceLandmark &&
+            faceLandmark[407]
+          ) {
+            drawXLips =
+              faceLandmark[407].x * image.naturalWidth * scaleX + offsetX;
+            drawYLips =
+              faceLandmark[407].y * image.naturalHeight * scaleY + offsetY;
+            labelLips = "lipstick";
 
-          // Draw a line from the center of the bounding box to the label position
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(labelX, labelY);
-          ctx.strokeStyle = "white";
-          ctx.stroke();
+            const averageLipColor = extractSkinColor(
+              image,
+              faceLandmark,
+              lipIndices,
+              2,
+            );
 
-          // Display the label
-          if (categories && categories.length > 0) {
-            const label = categories[0].categoryName;
+            results.push({
+              label: result.categories[0].displayName,
+              color: averageLipColor.hexColor,
+            });
+
+            // Draw landmark point
+            const outerRadiusLips = 10;
+            ctx.beginPath();
+            ctx.arc(drawXLips, drawYLips, outerRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw label with line
+            const labelXLips = drawXLips + 50;
+            const labelYLips = drawYLips + 50;
+
+            // Draw a line from the center of the bounding box to the label position
+            ctx.beginPath();
+            ctx.moveTo(drawXLips, drawYLips);
+            ctx.lineTo(labelXLips, labelYLips);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+
+            // Display the label
             ctx.font = "12px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText(label, labelX, labelY - 5);
+            ctx.fillText(labelLips, labelXLips, labelYLips - 5);
 
             // Draw underline for label text
-            const textWidth = ctx.measureText(label).width;
-            const underlineEndX = labelX + textWidth;
-            const underlineY = labelY + 5;
+            const textWidth = ctx.measureText(labelLips).width;
+            const underlineEndX = labelXLips + textWidth;
+            const underlineY = labelYLips + 5;
 
             ctx.beginPath();
-            ctx.moveTo(labelX, labelY);
+            ctx.moveTo(labelXLips, labelYLips);
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
+          } else if (
+            category.categoryName === "Eyebrown" &&
+            faceLandmark &&
+            faceLandmark[225]
+          ) {
+            drawXEyebrow =
+              faceLandmark[225].x * image.naturalWidth * scaleX + offsetX;
+            drawYEyebrow =
+              faceLandmark[225].y * image.naturalHeight * scaleY + offsetY;
+
+            const averageEyebrowsColor = extractSkinColor(
+              image,
+              faceLandmark,
+              eyebrowIndices,
+              2,
+            );
+
+            labelEyebrow = "eyebrows";
+
+            results.push({
+              label: result.categories[0].displayName,
+              color: averageEyebrowsColor.hexColor,
+            });
+          } else if (
+            category.categoryName === "Blusher" &&
+            faceLandmark &&
+            faceLandmark[280]
+          ) {
+            drawXBlusher =
+              faceLandmark[280].x * image.naturalWidth * scaleX + offsetX;
+            drawYBlusher =
+              faceLandmark[280].y * image.naturalHeight * scaleY + offsetY;
+
+            const averageBlushColor = extractSkinColor(
+              image,
+              faceLandmark,
+              blushIndices,
+              2,
+            );
+
+            labelBlusher = "blushes ";
+
+            results.push({
+              label: result.categories[0].displayName,
+              color: averageBlushColor.hexColor,
+            });
+          } else if (
+            category.categoryName === "Eyeshadow" &&
+            faceLandmark &&
+            faceLandmark[257]
+          ) {
+            drawXEyeshadow =
+              faceLandmark[257].x * image.naturalWidth * scaleX + offsetX;
+            drawYEyeshadow =
+              faceLandmark[257].y * image.naturalHeight * scaleY + offsetY;
+
+            const averageEyeshadowColor = extractSkinColor(
+              image,
+              faceLandmark,
+              eyeshadowIndices,
+              2,
+            );
+
+            labelEyeshadow = "Eyeshadows";
+
+            results.push({
+              label: result.categories[0].displayName,
+              color: averageEyeshadowColor.hexColor,
+            });
           }
-        }
+        });
       });
     };
 
@@ -665,7 +848,17 @@ export function FindTheLookCanvas({
     return () => {
       window.removeEventListener("resize", drawImage);
     };
-  }, [image, canvasRef, handResult, ringResult,neckResult,earringResult,glassResult,headResult,makeupResult]);
+  }, [
+    image,
+    canvasRef,
+    handResult,
+    ringResult,
+    neckResult,
+    earringResult,
+    glassResult,
+    headResult,
+    makeupResult,
+  ]);
 
   return null;
 }
