@@ -47,6 +47,9 @@ export function FindTheLookCanvas({
   const [makeupResult, setMakeupResult] = useState<ObjectDetectorResult | null>(
     null,
   );
+
+
+  
   // Initialize the model
   useEffect(() => {
     let isMounted = true;
