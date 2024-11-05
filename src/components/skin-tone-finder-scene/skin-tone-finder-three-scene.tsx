@@ -8,7 +8,7 @@ import { useCamera } from "../recorder/recorder-context";
 
 interface SkinToneFinderThreeSceneProps extends MeshProps {
   imageSrc: string;
-  landmarks: Landmark[];
+  landmarks: React.RefObject<Landmark[]>;
 }
 
 const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
@@ -97,7 +97,7 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
 
   return (
     <>
-      <mesh position={[0, 0, -10]} {...props}>
+      <mesh position={[0, 0, -10]} scale={[-1, 1, 1]} {...props}>
         <planeGeometry args={[planeSize[0], planeSize[1]]} />
         <meshBasicMaterial map={texture} />
       </mesh>

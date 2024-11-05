@@ -6,6 +6,9 @@ import { Landmark } from "../../types/landmark";
 import { BboxLandmark } from "../../types/bboxLandmark";
 import SkinAnalysisThreeScene from "./skin-analysis-three-scene";
 import OverlayCanvas from "./overlay-canvas";
+import { useSkinAnalysis } from "./skin-analysis-context";
+import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
+import { SRGBColorSpace } from "three";
 
 // Komponen utama SkinAnalysisScene yang menggabungkan Three.js Canvas dan OverlayCanvas
 interface SkinAnalysisSceneProps {
@@ -15,6 +18,7 @@ interface SkinAnalysisSceneProps {
 export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
+  const { tab, setTab, setView, view } = useSkinAnalysis();
 
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
@@ -22,6 +26,7 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
   );
   const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
   const [landmarks, setLandmarks] = useState<Landmark[]>([]); // Tipe yang diperbarui
+  const landmarkRef = useRef<Landmark[]>([]); // Initialize landmarkRef with an empty array
 
   // Memuat gambar ketika capturedImage berubah
   useEffect(() => {
@@ -98,6 +103,7 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
               z: landmark.z,
             }));
             setLandmarks(normalizedLandmarks);
+            landmarkRef.current = normalizedLandmarks; // Update the ref with the latest landmarks
           }
         } catch (error) {
           console.error("Gagal mendeteksi wajah:", error);
@@ -113,26 +119,49 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
     return null;
   }
 
+  const handleLabelClick = (label: string | null) => {
+    if (label != null) {
+      setTab(label);
+      setView("problems");
+      console.log(label);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: 0 }}
+    >
       {/* Three.js Canvas */}
       <Canvas
         className="absolute left-0 top-0 h-full w-full"
-        style={{ zIndex: 0 }}
+        style={{ zIndex: 99 }}
         orthographic
         camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
+        gl={{ toneMapping: 1, outputColorSpace: SRGBColorSpace }}
       >
         <SkinAnalysisThreeScene
           imageSrc={criterias.capturedImage}
           landmarks={landmarks}
+          landmarksRef={landmarkRef}
         />
       </Canvas>
 
-      {/* Overlay Canvas */}
+      {/* Gradient Overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          zIndex: 200, // Lebih rendah dari overlay canvas
+          pointerEvents: "none", // Agar tidak menghalangi klik
+        }}
+      ></div>
+
+      {/* Overlay Canvas untuk Labels */}
       <canvas
         ref={overlayCanvasRef}
-        className="pointer-events-none absolute left-0 top-0 h-full w-full"
-        style={{ zIndex: 50 }}
+        className="absolute left-0 top-0 h-full w-full"
+        style={{ zIndex: 100 }} // Lebih tinggi dari gradient overlay
       />
       {/* Komponen untuk menggambar gambar di overlay canvas */}
       <OverlayCanvas
@@ -140,6 +169,7 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
         canvasRef={overlayCanvasRef}
         data={data}
         landmarks={landmarks}
+        onLabelClick={handleLabelClick}
       />
     </div>
   );

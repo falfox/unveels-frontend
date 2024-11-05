@@ -30,14 +30,17 @@ import {
 } from "../components/skin-tone-finder-scene/skin-color-context";
 import { usePage } from "../hooks/usePage";
 import { Link } from "react-router-dom";
+import { MakeupProvider } from "../components/three/makeup-context";
 
 export function SkinToneFinderWeb() {
   return (
     <CameraProvider>
       <SkinColorProvider>
-        <div className="h-full min-h-dvh">
-          <Main />
-        </div>
+        <MakeupProvider>
+          <div className="h-full min-h-dvh">
+            <Main />
+          </div>
+        </MakeupProvider>
       </SkinColorProvider>
     </CameraProvider>
   );

@@ -1,10 +1,10 @@
-import { labels } from "../utils/constants";
+import { labels, skinAnalysisDataItem } from "../utils/constants";
 import { base64ToImage } from "../utils/imageProcessing";
 import { FaceResults } from "../types/faceResults";
 import "@tensorflow/tfjs-backend-cpu";
 import * as tf from "@tensorflow/tfjs-core";
 import * as tflite from "@tensorflow/tfjs-tflite";
-import cv from "@techstark/opencv-js";
+import { SkinAnalysisResult } from "../types/skinAnalysisResult";
 
 class Colors {
   palette: string[];
@@ -57,7 +57,7 @@ const preprocess = (
   modelHeight: number,
 ): [tf.Tensor, number, number] => {
   let xRatio: number = 0;
-  let yRatio: number = 0; // ratios for boxes
+  let yRatio: number = 0;
 
   const input: tf.Tensor = tf.tidy(() => {
     let input;
@@ -88,7 +88,7 @@ const preprocess = (
 
 export const skinAnalysisInference = async (
   imageData: string,
-): Promise<FaceResults[]> => {
+): Promise<[FaceResults[], SkinAnalysisResult[]]> => {
   try {
     let inBatch: number | undefined;
     let modelHeight: number | undefined;
@@ -101,7 +101,8 @@ export const skinAnalysisInference = async (
     let input: tf.Tensor | undefined;
     let xRatio: number | undefined;
     let yRatio: number | undefined;
-    const toDraw: FaceResults[] = []; // list boxes to draw
+    const toDraw: FaceResults[] = [];
+    const results: SkinAnalysisResult[] = [];
 
     tflite.setWasmPath(
       "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/wasm/",
@@ -133,8 +134,6 @@ export const skinAnalysisInference = async (
     ) {
       [input, xRatio, yRatio] = preprocess(image, modelWidth, modelHeight);
     }
-
-    console.log(image, xRatio, yRatio);
 
     if (
       input != undefined &&
@@ -196,7 +195,7 @@ export const skinAnalysisInference = async (
         scores,
         500,
         0.25,
-        0.01,
+        0.001,
       ); // do nms to filter boxes
 
       const detReady = tf.tidy(() =>
@@ -341,10 +340,26 @@ export const skinAnalysisInference = async (
       ]);
     }
 
-    return toDraw;
+    // combine data
+    toDraw.forEach((data) => {
+      results.push({
+        class: data.class,
+        label: data.label,
+        score: data.score,
+      });
+    });
+
+    skinAnalysisDataItem.forEach((data) => {
+      results.push({
+        class: data.class,
+        label: data.label,
+        score: data.score,
+      });
+    });
+    return [toDraw, results];
   } catch (e) {
     console.warn("Error occured durring inference : " + e);
   }
 
-  return [];
+  return [[], []];
 };
