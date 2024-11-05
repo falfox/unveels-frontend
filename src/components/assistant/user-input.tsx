@@ -19,6 +19,9 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
   >("idle");
 
   const [progressMs, setProgressMs] = useState(0);
+  const transcriptRef = useRef<string>("");
+  const [voiceTranscript, setVoiceTranscript] = useState(""); // New state for voice transcript
+  const [audioURL, setAudioURL] = useState<string | null>(null); // State for audio download link
 
   const plugins = useMemo(
     () => [
@@ -29,35 +32,96 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
     ],
     [],
   );
+
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
     height: 48,
     waveColor: "rgb(255, 255, 255)",
     progressColor: "#CA9C43",
-
-    // Set a bar width
     barWidth: 2,
-    // Optionally, specify the spacing between bars
     barGap: 1,
-    // And the bar radius
     barRadius: 2,
     cursorWidth: 0,
+    plugins,
   });
 
   const record = plugins[0];
 
+  // Ref untuk SpeechRecognition
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // Inisialisasi SpeechRecognition
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "id-ID"; // Ubah sesuai bahasa yang diinginkan
+
+      // Update transcriptRef only when results are final
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            transcriptRef.current += result[0].transcript + " ";
+          }
+        }
+      };
+
+      // Capture final transcript when recognition ends
+      recognition.onend = () => {
+        setVoiceTranscript(transcriptRef.current.trim()); // Update voiceTranscript at the end
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.warn("SpeechRecognition tidak didukung di browser ini.");
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  // Mulai atau hentikan SpeechRecognition berdasarkan state rekaman
+  useEffect(() => {
+    if (recordingState === "recording" && recognitionRef.current) {
+      recognitionRef.current.start();
+    } else if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  }, [recordingState]);
+
   useEffect(() => {
     if (wavesurfer) {
       wavesurfer.registerPlugin(record);
+
       record.on("record-end", (blob) => {
         console.log("Recording ended", blob);
         setRecordingState("idle");
         setProgressMs(0);
+        setVoiceTranscript(transcriptRef.current.trim()); // Set final transcript into voiceTranscript
+
+        // Create an audio URL from the recorded blob and store it in state
+        const audioURL = URL.createObjectURL(blob);
+        setAudioURL(audioURL); // Audio URL is now stored but not displayed
       });
 
       record.on("record-start", () => {
         console.log("Recording started");
         setRecordingState("recording");
+        transcriptRef.current = ""; // Reset transcript at the start of a new recording
+        setAudioURL(null); // Reset audio URL when a new recording starts
       });
 
       record.on("record-pause", (blob) => {
@@ -72,7 +136,6 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
 
       record.on("record-progress", (time) => {
         console.log("Recording progress", time);
-
         setProgressMs(time);
       });
 
@@ -118,7 +181,7 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
           )}
           placeholder="Ask me anything..."
           type="text"
-          value={msg}
+          value={recordingState === "idle" ? msg : voiceTranscript}
           onChange={(e) => setMsg(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -163,7 +226,7 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
       </div>
       <button
         type="button"
-        onClick={() => onSendMessage(msg)}
+        onClick={() => onSendMessage(msg || voiceTranscript)} // Send voiceTranscript if in voice mode
         className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]"
       >
         <Send className="h-6 w-6 text-white" />

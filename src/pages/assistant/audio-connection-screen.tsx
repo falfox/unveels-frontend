@@ -18,7 +18,8 @@ interface Chat {
   text: string;
   sender: "user" | "agent";
   mode: "voice-connection" | "text-connection" | "audio-connection";
-  timestamp: string; // New property
+  timestamp: string;
+  audioURL?: string; // Optional audio URL
 }
 
 const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
@@ -29,9 +30,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [msg, setMsg] = useState("");
 
   const [chats, setChats] = useState<Chat[]>([]);
-
   const [text, setText] = useState("");
-
   const [loading, setLoading] = useState(false);
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
@@ -40,28 +39,14 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const getResponse = async (userMsg: string | Blob) => {
-    if (typeof userMsg === "string" && !userMsg.trim()) {
+  const getResponse = async (userMsg: string) => {
+    if (!userMsg.trim()) {
       console.error("Prompt can't be empty.");
       return;
     }
 
     const timestamp = getCurrentTimestamp();
-
-    setChats((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text: userMsg instanceof Blob ? "Audio Message" : userMsg,
-        sender: "user",
-        mode: "audio-connection",
-        timestamp,
-      },
-    ]);
-
-    if (typeof userMsg === "string") {
-      setLoading(true);
-    }
+    setLoading(true);
 
     const systemPrompt = `Anda adalah asisten virtual yang ahli dalam produk.`;
     const conversationHistory = [
@@ -89,13 +74,39 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  useEffect(() => {
-    const chatBox = document.querySelector(".chat-box");
-    if (chatBox) {
-      chatBox.scrollTop = chatBox.scrollHeight;
+  const onSendMessage = (
+    transcript: string,
+    audioURL: string | null = null,
+  ) => {
+    const timestamp = getCurrentTimestamp();
+
+    setChats((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        text: transcript,
+        sender: "user",
+        mode: audioURL ? "audio-connection" : "text-connection",
+        timestamp,
+      },
+    ]);
+
+    if (audioURL) {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: "Audio Message",
+          sender: "user",
+          mode: "audio-connection",
+          timestamp,
+          audioURL,
+        },
+      ]);
     }
-    console.log(chats);
-  }, [chats]);
+
+    getResponse(transcript);
+  };
 
   function playerEnded() {
     setAudioSource(null);
@@ -119,10 +130,13 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     ]);
   }
 
-  const onSendMessage = (message: string) => {
-    getResponse(message);
-    setMsg("");
-  };
+  useEffect(() => {
+    const chatBox = document.querySelector(".chat-box");
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    console.log(chats);
+  }, [chats]);
 
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
