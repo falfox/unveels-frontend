@@ -1,12 +1,10 @@
-import { useEffect, useRef,useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ObjectDetector,
   FilesetResolver,
   ObjectDetectorResult,
   FaceLandmarker,
-  FaceDetector,
 } from "@mediapipe/tasks-vision";
-import { result } from "lodash";
 import { useFindTheLook } from "../../context/find-the-look-context";
 import { FindTheLookItems } from "../../types/findTheLookItems";
 import { Landmark } from "../../types/landmark";
@@ -20,6 +18,7 @@ interface FindTheLookCanvasProps {
 
 interface Hitbox {
   label: string;
+  section: string;
   x: number;
   y: number;
   width: number;
@@ -271,14 +270,14 @@ export function FindTheLookCanvas({
         setMakeupResult(resultsMakeup);
         setFaceLandmark(resultsFaceLandmark.faceLandmarks[0]);
 
-        console.log("Hand Result: ", resultsHand);
-        console.log("Ring Result: ", resultsRing);
-        console.log("Neck Result: ", resultsNeck);
-        console.log("Earring Result: ", resultsEarring);
-        console.log("Glass Result: ", resultsGlass);
-        console.log("Head Result: ", resultsHead);
-        console.log("Makeup Result: ", resultsMakeup);
-        console.log("Landmark Result: ", faceLandmark);
+        // console.log("Hand Result: ", resultsHand);
+        // console.log("Ring Result: ", resultsRing);
+        // console.log("Neck Result: ", resultsNeck);
+        // console.log("Earring Result: ", resultsEarring);
+        // console.log("Glass Result: ", resultsGlass);
+        // console.log("Head Result: ", resultsHead);
+        // console.log("Makeup Result: ", resultsMakeup);
+        // console.log("Landmark Result: ", faceLandmark);
       }
     };
 
@@ -409,9 +408,10 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
-            
+
             hitboxesRef.current.push({
               label: categories[0].categoryName,
+              section: "accesories",
               x: labelX,
               y: labelY - 20,
               width: textWidth,
@@ -476,6 +476,7 @@ export function FindTheLookCanvas({
 
             hitboxesRef.current.push({
               label: categories[0].categoryName,
+              section: "accesories",
               x: labelX,
               y: labelY - 20,
               width: textWidth,
@@ -540,6 +541,7 @@ export function FindTheLookCanvas({
 
             hitboxesRef.current.push({
               label: categories[0].categoryName,
+              section: "accesories",
               x: labelX,
               y: labelY - 20,
               width: textWidth,
@@ -604,6 +606,7 @@ export function FindTheLookCanvas({
 
             hitboxesRef.current.push({
               label: categories[0].categoryName,
+              section: "accesories",
               x: labelX,
               y: labelY - 20,
               width: textWidth,
@@ -668,6 +671,7 @@ export function FindTheLookCanvas({
 
             hitboxesRef.current.push({
               label: categories[0].categoryName,
+              section: "accesories",
               x: labelX,
               y: labelY - 20,
               width: textWidth,
@@ -732,6 +736,7 @@ export function FindTheLookCanvas({
 
             hitboxesRef.current.push({
               label: categories[0].categoryName,
+              section: "accesories",
               x: labelX,
               y: labelY - 20,
               width: textWidth,
@@ -828,7 +833,17 @@ export function FindTheLookCanvas({
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
-          } if (
+
+            hitboxesRef.current.push({
+              label: labelLips,
+              section: "makeup",
+              x: labelXLips,
+              y: labelYLips - 20,
+              width: textWidth,
+              height: 20,
+            });
+          }
+          if (
             category.categoryName === "Eyebrown" &&
             faceLandmark &&
             faceLandmark[225]
@@ -837,8 +852,8 @@ export function FindTheLookCanvas({
               faceLandmark[225].x * image.naturalWidth * scaleX + offsetX;
             drawYEyebrow =
               faceLandmark[225].y * image.naturalHeight * scaleY + offsetY;
-            
-              labelEyebrow="eyebrown";
+
+            labelEyebrow = "eyebrown";
 
             const averageEyebrowsColor = extractSkinColor(
               image,
@@ -852,43 +867,51 @@ export function FindTheLookCanvas({
               color: averageEyebrowsColor.hexColor,
             });
 
-             // Draw landmark point
-             const outerRadiusEyebrow = 10;
-             ctx.beginPath();
-             ctx.arc(drawXEyebrow, drawYEyebrow, outerRadius, 0, 2 * Math.PI);
-             ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-             ctx.fill();
-             ctx.closePath();
- 
-             // Draw label with line
-             const labelXEyebrow = drawXEyebrow + 50;
-             const labelYEyebrow = drawYEyebrow + 50;
- 
-             // Draw a line from the center of the bounding box to the label position
-             ctx.beginPath();
-             ctx.moveTo(drawXEyebrow, drawYEyebrow);
-             ctx.lineTo(labelXEyebrow, labelYEyebrow);
-             ctx.strokeStyle = "white";
-             ctx.stroke();
- 
-             // Display the label
-             ctx.font = "12px Arial";
-             ctx.fillStyle = "white";
-             ctx.fillText(labelEyebrow, labelXEyebrow, labelYEyebrow - 5);
- 
-             // Draw underline for label text
-             const textWidth = ctx.measureText(labelEyebrow).width;
-             const underlineEndX = labelXEyebrow + textWidth;
-             const underlineY = labelYEyebrow + 5;
- 
-             ctx.beginPath();
-             ctx.moveTo(labelXEyebrow, labelYEyebrow);
-             ctx.lineTo(underlineEndX, underlineY);
-             ctx.strokeStyle = "white";
-             ctx.stroke();
+            // Draw landmark point
+            const outerRadiusEyebrow = 10;
+            ctx.beginPath();
+            ctx.arc(drawXEyebrow, drawYEyebrow, outerRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.fill();
+            ctx.closePath();
 
+            // Draw label with line
+            const labelXEyebrow = drawXEyebrow + 50;
+            const labelYEyebrow = drawYEyebrow + 50;
 
-          } if (
+            // Draw a line from the center of the bounding box to the label position
+            ctx.beginPath();
+            ctx.moveTo(drawXEyebrow, drawYEyebrow);
+            ctx.lineTo(labelXEyebrow, labelYEyebrow);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+
+            // Display the label
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText(labelEyebrow, labelXEyebrow, labelYEyebrow - 5);
+
+            // Draw underline for label text
+            const textWidth = ctx.measureText(labelEyebrow).width;
+            const underlineEndX = labelXEyebrow + textWidth;
+            const underlineY = labelYEyebrow + 5;
+
+            ctx.beginPath();
+            ctx.moveTo(labelXEyebrow, labelYEyebrow);
+            ctx.lineTo(underlineEndX, underlineY);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: labelEyebrow,
+              section: "makeup",
+              x: labelXEyebrow,
+              y: labelYEyebrow - 20,
+              width: textWidth,
+              height: 20,
+            });
+          }
+          if (
             category.categoryName === "Blusher" &&
             faceLandmark &&
             faceLandmark[280]
@@ -912,41 +935,51 @@ export function FindTheLookCanvas({
               color: averageBlushColor.hexColor,
             });
 
-             // Draw landmark point
-             const outerRadiusBlusher = 10;
-             ctx.beginPath();
-             ctx.arc(drawXBlusher, drawYBlusher, outerRadius, 0, 2 * Math.PI);
-             ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-             ctx.fill();
-             ctx.closePath();
- 
-             // Draw label with line
-             const labelXBlusher = drawXBlusher + 50;
-             const labelYBlusher = drawYBlusher + 50;
- 
-             // Draw a line from the center of the bounding box to the label position
-             ctx.beginPath();
-             ctx.moveTo(drawXBlusher, drawYBlusher);
-             ctx.lineTo(labelXBlusher, labelYBlusher);
-             ctx.strokeStyle = "white";
-             ctx.stroke();
- 
-             // Display the label
-             ctx.font = "12px Arial";
-             ctx.fillStyle = "white";
-             ctx.fillText(labelBlusher, labelXBlusher, labelYBlusher - 5);
- 
-             // Draw underline for label text
-             const textWidth = ctx.measureText(labelBlusher).width;
-             const underlineEndX = labelXBlusher + textWidth;
-             const underlineY = labelYBlusher + 5;
- 
-             ctx.beginPath();
-             ctx.moveTo(labelXBlusher, labelYBlusher);
-             ctx.lineTo(underlineEndX, underlineY);
-             ctx.strokeStyle = "white";
-             ctx.stroke();
-          } if (
+            // Draw landmark point
+            const outerRadiusBlusher = 10;
+            ctx.beginPath();
+            ctx.arc(drawXBlusher, drawYBlusher, outerRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw label with line
+            const labelXBlusher = drawXBlusher + 50;
+            const labelYBlusher = drawYBlusher + 50;
+
+            // Draw a line from the center of the bounding box to the label position
+            ctx.beginPath();
+            ctx.moveTo(drawXBlusher, drawYBlusher);
+            ctx.lineTo(labelXBlusher, labelYBlusher);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+
+            // Display the label
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText(labelBlusher, labelXBlusher, labelYBlusher - 5);
+
+            // Draw underline for label text
+            const textWidth = ctx.measureText(labelBlusher).width;
+            const underlineEndX = labelXBlusher + textWidth;
+            const underlineY = labelYBlusher + 5;
+
+            ctx.beginPath();
+            ctx.moveTo(labelXBlusher, labelYBlusher);
+            ctx.lineTo(underlineEndX, underlineY);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: labelBlusher,
+              section: "makeup",
+              x: labelXBlusher,
+              y: labelYBlusher - 20,
+              width: textWidth,
+              height: 20,
+            });
+          }
+          if (
             category.categoryName === "Eyeshadow" &&
             faceLandmark &&
             faceLandmark[257]
@@ -970,40 +1003,55 @@ export function FindTheLookCanvas({
               color: averageEyeshadowColor.hexColor,
             });
 
-             // Draw landmark point
-             const outerRadiusEyeshadow = 10;
-             ctx.beginPath();
-             ctx.arc(drawXEyeshadow, drawYEyeshadow, outerRadius, 0, 2 * Math.PI);
-             ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-             ctx.fill();
-             ctx.closePath();
- 
-             // Draw label with line
-             const labelXEyeshadow = drawXEyeshadow + 50;
-             const labelYEyeshadow = drawYEyeshadow + 50;
- 
-             // Draw a line from the center of the bounding box to the label position
-             ctx.beginPath();
-             ctx.moveTo(drawXEyeshadow, drawYEyeshadow);
-             ctx.lineTo(labelXEyeshadow, labelYEyeshadow);
-             ctx.strokeStyle = "white";
-             ctx.stroke();
- 
-             // Display the label
-             ctx.font = "12px Arial";
-             ctx.fillStyle = "white";
-             ctx.fillText(labelEyeshadow, labelXEyeshadow, labelYEyeshadow - 5);
- 
-             // Draw underline for label text
-             const textWidth = ctx.measureText(labelEyeshadow).width;
-             const underlineEndX = labelXEyeshadow + textWidth;
-             const underlineY = labelYEyeshadow + 5;
- 
-             ctx.beginPath();
-             ctx.moveTo(labelXEyeshadow, labelYEyeshadow);
-             ctx.lineTo(underlineEndX, underlineY);
-             ctx.strokeStyle = "white";
-             ctx.stroke();
+            // Draw landmark point
+            const outerRadiusEyeshadow = 10;
+            ctx.beginPath();
+            ctx.arc(
+              drawXEyeshadow,
+              drawYEyeshadow,
+              outerRadius,
+              0,
+              2 * Math.PI,
+            );
+            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw label with line
+            const labelXEyeshadow = drawXEyeshadow + 50;
+            const labelYEyeshadow = drawYEyeshadow + 50;
+
+            // Draw a line from the center of the bounding box to the label position
+            ctx.beginPath();
+            ctx.moveTo(drawXEyeshadow, drawYEyeshadow);
+            ctx.lineTo(labelXEyeshadow, labelYEyeshadow);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+
+            // Display the label
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText(labelEyeshadow, labelXEyeshadow, labelYEyeshadow - 5);
+
+            // Draw underline for label text
+            const textWidth = ctx.measureText(labelEyeshadow).width;
+            const underlineEndX = labelXEyeshadow + textWidth;
+            const underlineY = labelYEyeshadow + 5;
+
+            ctx.beginPath();
+            ctx.moveTo(labelXEyeshadow, labelYEyeshadow);
+            ctx.lineTo(underlineEndX, underlineY);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+
+            hitboxesRef.current.push({
+              label: labelEyeshadow,
+              section: "makeup",
+              x: labelXEyeshadow,
+              y: labelYEyeshadow - 20,
+              width: textWidth,
+              height: 20,
+            });
           }
         });
       });
@@ -1044,6 +1092,7 @@ export function FindTheLookCanvas({
       const y = ((event.clientY - rect.top) * scaleY) / dpr;
 
       let labelClicked: string | null = null;
+      let sectionClicked: string | null = null;
 
       for (const bbox of hitboxesRef.current) {
         if (
@@ -1053,12 +1102,13 @@ export function FindTheLookCanvas({
           y <= bbox.y + bbox.height
         ) {
           labelClicked = bbox.label;
+          sectionClicked = bbox.section; // Capture the section as well
           break;
         }
       }
 
       if (onLabelClick) {
-        onLabelClick(labelClicked);
+        onLabelClick(labelClicked, sectionClicked); // Pass both label and section
       }
     };
 

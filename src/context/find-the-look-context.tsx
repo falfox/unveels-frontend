@@ -16,7 +16,7 @@ interface FindTheLookContextProps {
 }
 
 const FindTheLookContext = createContext<FindTheLookContextProps | undefined>(
-  undefined
+  undefined,
 );
 
 interface FindTheLookProviderProps {

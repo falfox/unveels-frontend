@@ -21,10 +21,10 @@ export function FindTheLookScene() {
     }
   }, [criterias.capturedImage]);
 
-
-  const handleLabelClick = (label: string | null) => {
+  const handleLabelClick = (label: string | null, tab: string | null) => {
     if (label != null) {
       console.log(label);
+      console.log(tab);
     }
   };
 
@@ -32,15 +32,16 @@ export function FindTheLookScene() {
     <>
       {imageLoaded && (
         <div className="fixed inset-0 flex">
-
-        <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          zIndex: 200, // Lebih rendah dari overlay canvas
-          pointerEvents: "none", // Agar tidak menghalangi klik
-        }}
-        > </div>
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+              zIndex: 200, // Lebih rendah dari overlay canvas
+              pointerEvents: "none", // Agar tidak menghalangi klik
+            }}
+          >
+            {" "}
+          </div>
 
           <canvas
             ref={findTheLookCanvasRef}
@@ -54,7 +55,6 @@ export function FindTheLookScene() {
               onLabelClick={handleLabelClick}
             />
           </canvas>
-          
         </div>
       )}
     </>
