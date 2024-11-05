@@ -5,8 +5,8 @@ import { SkinAnalysisResult } from "../../types/skinAnalysisResult";
 import { skinAnalysisDataItem } from "../../utils/constants";
 
 interface SkinAnalysisContextProps {
-  tab: string | null;
-  setTab: (tab: string | null) => void;
+  tab: string;
+  setTab: (tab: string) => void;
 
   view: "face" | "problems" | "results";
   setView: (view: "face" | "problems" | "results") => void;
@@ -40,7 +40,7 @@ interface SkinAnalysisProviderProps {
 export const SkinAnalysisProvider: React.FC<SkinAnalysisProviderProps> = ({
   children,
 }) => {
-  const [tab, setTab] = useState<string | null>(null);
+  const [tab, setTab] = useState<string>("acne");
   const [view, setView] = useState<"face" | "problems" | "results">("face");
   const [skinAnalysisData, setSkinAnalysisData] =
     useState<SkinAnalysisItem[]>(skinAnalysisDataItem);

@@ -91,3 +91,49 @@ export const faceMakeupProductTypesMap = face_makeup_product_types.reduce(
   },
   {} as Record<string, string>,
 );
+
+const lashMakeupProductType = [
+  {
+    label: "Mascaras",
+    value: "5709",
+  },
+  {
+    label: "Lash Curlers",
+    value: "5710",
+  },
+  {
+    label: "Individual False Lashes",
+    value: "5711",
+  },
+  {
+    label: "Full Line Lashes",
+    value: "5712",
+  },
+];
+
+export const lashMakeupProductTypeMap = lashMakeupProductType.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export const lensesProductType = [
+  {
+    label: "Daily Lenses",
+    value: "5713",
+  },
+  {
+    label: "Monthly Lenses",
+    value: "5714",
+  },
+];
+
+export const lensesProductTypeMap = lensesProductType.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);

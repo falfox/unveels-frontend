@@ -33,15 +33,26 @@ import {
   FindTheLookProvider,
   useFindTheLookContext,
 } from "../components/find-the-look/find-the-look-context";
+import { SkinAnalysisProvider } from "../components/skin-analysis/skin-analysis-context";
+import { useProducts } from "../api/get-product";
+import {
+  faceMakeupProductTypesMap,
+  lashMakeupProductTypeMap,
+  lensesProductTypeMap,
+  lips_makeup_product_types,
+  lipsMakeupProductTypesMap,
+} from "../api/attributes/makeups";
 
 export function FindTheLook() {
   return (
     <CameraProvider>
-      <FindTheLookProvider>
-        <div className="h-full min-h-dvh">
-          <Main />
-        </div>
-      </FindTheLookProvider>
+      <SkinAnalysisProvider>
+        <FindTheLookProvider>
+          <div className="h-full min-h-dvh">
+            <Main />
+          </div>
+        </FindTheLookProvider>
+      </SkinAnalysisProvider>
     </CameraProvider>
   );
 }
@@ -151,6 +162,7 @@ const makeups = [
 
 function MakeupCategories() {
   const [tab, setTab] = useState<(typeof makeups)[number]>("Lipstick");
+  const { setView } = useFindTheLookContext();
 
   return (
     <>
@@ -179,7 +191,13 @@ function MakeupCategories() {
         </div>
 
         <div className="pb-2 text-right">
-          <button type="button" className="text-white">
+          <button
+            type="button"
+            className="text-white"
+            onClick={() => {
+              setView("all_categories");
+            }}
+          >
             View all
           </button>
         </div>
@@ -189,11 +207,43 @@ function MakeupCategories() {
   );
 }
 
+const makeupTypes: {
+  [key: string]: {
+    attributeName: string;
+    values: string[];
+  };
+} = {
+  Lipstick: {
+    attributeName: "lips_makeup_product_type",
+    values: ["Lipsticks", "Lip Stains", "Lip Tints", "Lip Glosses"].map(
+      (type) => lipsMakeupProductTypesMap[type],
+    ),
+  },
+  Mascara: {
+    attributeName: "lash_makeup_product_type",
+    values: ["Mascaras"].map((type) => lashMakeupProductTypeMap[type]),
+  },
+  Blusher: {
+    attributeName: "face_makeup_product_type",
+    values: ["Blushes"].map((type) => faceMakeupProductTypesMap[type]),
+  },
+  Highlighter: {
+    attributeName: "face_makeup_product_type",
+    values: ["Highlighters"].map((type) => faceMakeupProductTypesMap[type]),
+  },
+  Eyecolor: {
+    attributeName: "lenses_product_type",
+    values: ["Daily Lenses", "Monthly Lenses"].map(
+      (type) => lensesProductTypeMap[type],
+    ),
+  },
+};
+
 function ProductList({ makeup_type }: { makeup_type: string }) {
-  // const { data } = useSkincareProductQuery({
-  // skinConcern: makeup_type,
-  // });
-  const { data } = useLipsProductQuery({});
+  const { data } = useProducts({
+    product_type_key: makeupTypes[makeup_type].attributeName,
+    type_ids: makeupTypes[makeup_type].values,
+  });
 
   return (
     <div className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing">
@@ -213,7 +263,7 @@ function ProductList({ makeup_type }: { makeup_type: string }) {
                 />
               </div>
 
-              <h3 className="line-clamp-2 h-12 py-2 text-[0.625rem] font-semibold text-white">
+              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
                 {product.name}
               </h3>
 
@@ -223,7 +273,7 @@ function ProductList({ makeup_type }: { makeup_type: string }) {
 
               <div className="flex items-end justify-between pt-1 space-x-1">
                 <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-                  $15
+                  ${product.price.toFixed(2)}
                 </div>
                 <button
                   type="button"
@@ -244,9 +294,7 @@ function ProductList({ makeup_type }: { makeup_type: string }) {
 
 function BottomContent() {
   const { criterias, setCriterias } = useCamera();
-  const [view, setView] = useState<
-    "face" | "single_category" | "recommendations" | "all_categories"
-  >("face");
+  const { view, setView } = useFindTheLookContext();
 
   if (criterias.isCaptured) {
     if (view === "face") {
@@ -305,7 +353,7 @@ function InferenceResults({
   return (
     <>
       <div
-        className="fixed inset-0 w-full h-full"
+        className="fixed inset-0 w-full h-full -z-10"
         onClick={() => {
           onFaceClick?.();
         }}
@@ -389,7 +437,7 @@ function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
 
 function AllProductsPage({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<"makeup" | "accessories">("makeup");
-  const { cart, dispatch } = useFindTheLookContext();
+  const { selectedItems: cart, dispatch } = useFindTheLookContext();
 
   return (
     <div
@@ -445,7 +493,10 @@ function AllProductsPage({ onClose }: { onClose: () => void }) {
                 ? "border-white bg-white text-black"
                 : "border-white text-white",
             )}
-            onClick={() => setTab(item as "makeup" | "accessories")}
+            onClick={() => {
+              dispatch({ type: "reset" });
+              setTab(item as "makeup" | "accessories");
+            }}
           >
             Similar {item}
           </button>
@@ -475,81 +526,88 @@ function AllProductsPage({ onClose }: { onClose: () => void }) {
 }
 
 function MakeupAllView() {
-  const { data } = useLipsProductQuery({});
-
-  const { cart, dispatch } = useFindTheLookContext();
-
   return (
     <div className="flex-1 h-full px-5 overflow-y-auto">
       <div className="space-y-14">
-        {["Lipsticks", "Eye Shadows", "Blusher", "Highlighter", "Eyecolor"].map(
-          (category) => (
-            <div key={category}>
-              <div className="py-4">
-                <h2 className="text-base text-[#E6E5E3]">{category}</h2>
-              </div>
-              <div className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing">
-                {data ? (
-                  data.items.map((product, index) => {
-                    const imageUrl =
-                      mediaUrl(product.media_gallery_entries[0].file) ??
-                      "https://picsum.photos/id/237/200/300";
+        {makeups.map((category) => (
+          <ProductHorizontalList category={category} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-                    return (
-                      <div
-                        key={product.id}
-                        className="w-[calc(50%-0.5rem)] shrink-0 rounded shadow lg:w-[calc(20%-0.5rem)]"
-                      >
-                        <div className="relative w-full overflow-hidden aspect-square">
-                          <img
-                            src={imageUrl}
-                            alt="Product"
-                            className="object-cover w-full h-full rounded"
-                          />
-                        </div>
+function ProductHorizontalList({ category }: { category: string }) {
+  const { data } = useProducts({
+    product_type_key: makeupTypes[category].attributeName,
+    type_ids: makeupTypes[category].values,
+  });
 
-                        <h3 className="line-clamp-2 pt-2.5 text-xs font-semibold text-white">
-                          {product.name}
-                        </h3>
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-white/60">
-                            <BrandName
-                              brandId={getProductAttributes(product, "brand")}
-                            />
-                          </p>
-                          <div className="flex flex-wrap items-center justify-end gap-x-1">
-                            <span className="text-sm font-bold text-white">
-                              ${product.price.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                        <Rating rating={4} />
-                        <div className="flex pt-1 space-x-1">
-                          <button
-                            type="button"
-                            className="flex items-center justify-center w-full h-10 text-xs font-semibold text-white border border-white"
-                          >
-                            ADD TO CART
-                          </button>
-                          <button
-                            type="button"
-                            className="flex items-center justify-center w-full h-10 text-xs font-semibold text-black bg-white border border-white"
-                            onClick={() => {
-                              dispatch({ type: "add", payload: product });
-                            }}
-                          >
-                            SELECT
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <LoadingProducts />
-                )}
+  const { selectedItems: cart, dispatch } = useFindTheLookContext();
+
+  return (
+    <div key={category}>
+      <div className="py-4">
+        <h2 className="text-base text-[#E6E5E3]">{category}</h2>
+      </div>
+      <div className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing">
+        {data ? (
+          data.items.map((product, index) => {
+            const imageUrl =
+              mediaUrl(product.media_gallery_entries[0].file) ??
+              "https://picsum.photos/id/237/200/300";
+
+            return (
+              <div
+                key={product.id}
+                className="w-[calc(50%-0.5rem)] shrink-0 rounded shadow lg:w-[calc(20%-0.5rem)]"
+              >
+                <div className="relative w-full overflow-hidden aspect-square">
+                  <img
+                    src={imageUrl}
+                    alt="Product"
+                    className="object-cover w-full h-full rounded"
+                  />
+                </div>
+
+                <h3 className="line-clamp-2 pt-2.5 text-xs font-semibold text-white h-10">
+                  {product.name}
+                </h3>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-white/60">
+                    <BrandName
+                      brandId={getProductAttributes(product, "brand")}
+                    />
+                  </p>
+                  <div className="flex flex-wrap items-center justify-end gap-x-1">
+                    <span className="text-sm font-bold text-white">
+                      ${product.price.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                <Rating rating={4} />
+                <div className="flex pt-1 space-x-1">
+                  <button
+                    type="button"
+                    className="flex items-center justify-center w-full h-10 text-xs font-semibold text-white border border-white"
+                  >
+                    ADD TO CART
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center w-full h-10 text-xs font-semibold text-black bg-white border border-white"
+                    onClick={() => {
+                      dispatch({ type: "add", payload: product });
+                    }}
+                  >
+                    SELECT
+                  </button>
+                </div>
               </div>
-            </div>
-          ),
+            );
+          })
+        ) : (
+          <LoadingProducts />
         )}
       </div>
     </div>
