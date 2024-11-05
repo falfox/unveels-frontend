@@ -13,7 +13,7 @@ import { extractSkinColor } from "../../utils/imageProcessing";
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  onLabelClick?: (label: string | null) => void;
+  onLabelClick?: (label: string | null, section: string | null) => void;
 }
 
 interface Hitbox {
