@@ -32,6 +32,7 @@ import {
   useInferenceContext,
 } from "../context/inference-context";
 import { TopNavigation } from "./virtual-try-on";
+import { Scanner } from "../components/scanner";
 
 export function PersonalityFinder() {
   return (
@@ -93,7 +94,13 @@ function MainContent() {
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
       <div className="absolute inset-0">
-        <VideoStream debugMode={false} />
+        {criterias.isCaptured ? (
+          <Scanner />
+        ) : (
+          <>
+            <VideoStream debugMode={false} />
+          </>
+        )}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
