@@ -8,20 +8,21 @@ import { updateProgress } from "../../utils/updateProgress";
 interface UserInputProps {
   msg: string;
   setMsg: (value: string) => void;
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, audioURL?: string | null) => void;
 }
 
 const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-
   const [recordingState, setRecordingState] = useState<
     "idle" | "recording" | "paused"
   >("idle");
-
   const [progressMs, setProgressMs] = useState(0);
+  const [isSending, setIsSending] = useState(false);
+  const [isSendDisabled, setIsSendDisabled] = useState(false);
   const transcriptRef = useRef<string>("");
-  const [voiceTranscript, setVoiceTranscript] = useState(""); // New state for voice transcript
-  const [audioURL, setAudioURL] = useState<string | null>(null); // State for audio download link
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const timerRef = useRef<number | null>(null);
 
   const plugins = useMemo(
     () => [
@@ -47,103 +48,108 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
 
   const record = plugins[0];
 
-  // Ref untuk SpeechRecognition
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const startProgressTimer = () => {
+    timerRef.current = window.setInterval(() => {
+      setProgressMs((prev) => prev + 100); // Update progress every 100ms
+    }, 100);
+  };
 
-  // Inisialisasi SpeechRecognition
-  useEffect(() => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = "id-ID"; // Ubah sesuai bahasa yang diinginkan
-
-      // Update transcriptRef only when results are final
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            transcriptRef.current += result[0].transcript + " ";
-          }
-        }
-      };
-
-      // Capture final transcript when recognition ends
-      recognition.onend = () => {
-        setVoiceTranscript(transcriptRef.current.trim()); // Update voiceTranscript at the end
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
-      };
-
-      recognitionRef.current = recognition;
-    } else {
-      console.warn("SpeechRecognition tidak didukung di browser ini.");
+  const stopProgressTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, []);
-
-  // Mulai atau hentikan SpeechRecognition berdasarkan state rekaman
-  useEffect(() => {
-    if (recordingState === "recording" && recognitionRef.current) {
-      recognitionRef.current.start();
-    } else if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-  }, [recordingState]);
+  };
 
   useEffect(() => {
     if (wavesurfer) {
       wavesurfer.registerPlugin(record);
 
-      record.on("record-end", (blob) => {
-        console.log("Recording ended", blob);
-        setRecordingState("idle");
-        setProgressMs(0);
-        setVoiceTranscript(transcriptRef.current.trim()); // Set final transcript into voiceTranscript
-
-        // Create an audio URL from the recorded blob and store it in state
-        const audioURL = URL.createObjectURL(blob);
-        setAudioURL(audioURL); // Audio URL is now stored but not displayed
-      });
-
       record.on("record-start", () => {
-        console.log("Recording started");
         setRecordingState("recording");
-        transcriptRef.current = ""; // Reset transcript at the start of a new recording
-        setAudioURL(null); // Reset audio URL when a new recording starts
+        transcriptRef.current = "";
+        setAudioURL(null);
+        startProgressTimer(); // Start progress timer
       });
 
-      record.on("record-pause", (blob) => {
-        console.log("Recording paused", blob);
+      record.on("record-pause", () => {
         setRecordingState("paused");
+        stopProgressTimer(); // Stop progress timer
       });
 
       record.on("record-resume", () => {
-        console.log("Recording resumed");
         setRecordingState("recording");
+        startProgressTimer(); // Resume progress timer
       });
 
-      record.on("record-progress", (time) => {
-        console.log("Recording progress", time);
-        setProgressMs(time);
+      record.on("record-end", (blob) => {
+        const generatedAudioURL = URL.createObjectURL(blob);
+        setAudioURL(generatedAudioURL);
+        setRecordingState("idle");
+        stopProgressTimer(); // Stop timer when recording ends
+        setProgressMs(0); // Reset progress after recording ends
+        setVoiceTranscript(transcriptRef.current.trim());
+
+        if (isSending) {
+          onSendMessage(transcriptRef.current.trim(), generatedAudioURL);
+          transcriptRef.current = "";
+          setIsSending(false);
+        }
+
+        setIsSendDisabled(false);
       });
 
       return () => {
         record.destroy();
+        record.unAll();
+        stopProgressTimer();
       };
     }
-  }, [wavesurfer, record]);
+  }, [wavesurfer, record, isSending, onSendMessage]);
+
+  const handleTrashClick = () => {
+    setAudioURL(null);
+    setVoiceTranscript("");
+    transcriptRef.current = "";
+    setRecordingState("idle");
+    setProgressMs(0); // Reset progress on trash
+    setIsSendDisabled(false);
+    stopProgressTimer(); // Stop timer on trash
+
+    if (wavesurfer && record) {
+      record.destroy();
+      const newRecord = RecordPlugin.create({
+        scrollingWaveform: true,
+        renderRecordedAudio: false,
+      });
+      wavesurfer.registerPlugin(newRecord);
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (recordingState === "recording" || recordingState === "paused") {
+      setIsSending(true);
+      setIsSendDisabled(true);
+      record.stopRecording();
+    } else {
+      onSendMessage(msg, null);
+      setMsg("");
+    }
+    setRecordingState("idle");
+  };
+
+  const handleMicrophoneClick = () => {
+    if (recordingState === "idle") {
+      record.startRecording();
+      setIsSendDisabled(true);
+    } else if (recordingState === "recording") {
+      record.pauseRecording();
+      setIsSendDisabled(false);
+    } else {
+      record.resumeRecording();
+      setIsSendDisabled(true);
+    }
+  };
 
   return (
     <>
@@ -162,12 +168,7 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
         />
         {recordingState !== "idle" ? (
           <div className="mx-2 flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={() => {
-                record.stopRecording();
-              }}
-            >
+            <button type="button" onClick={handleTrashClick}>
               <Trash className="size-6 text-white" />
             </button>
 
@@ -184,8 +185,8 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
           value={recordingState === "idle" ? msg : voiceTranscript}
           onChange={(e) => setMsg(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              onSendMessage(msg);
+            if (e.key === "Enter" && !isSendDisabled) {
+              handleSendMessage();
             }
           }}
         />
@@ -202,18 +203,7 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
         </div>
 
         <div className="absolute inset-y-0 right-0 flex h-full w-12 items-center justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              if (recordingState === "idle") {
-                record.startRecording();
-              } else if (recordingState === "recording") {
-                record.pauseRecording();
-              } else {
-                record.resumeRecording();
-              }
-            }}
-          >
+          <button type="button" onClick={handleMicrophoneClick}>
             {recordingState === "idle" ? (
               <Mic className="size-6 text-gray-400" />
             ) : recordingState === "recording" ? (
@@ -226,8 +216,12 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
       </div>
       <button
         type="button"
-        onClick={() => onSendMessage(msg || voiceTranscript)} // Send voiceTranscript if in voice mode
-        className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]"
+        onClick={handleSendMessage}
+        disabled={isSendDisabled}
+        className={clsx(
+          "flex size-14 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]",
+          { "cursor-not-allowed opacity-50": isSendDisabled },
+        )}
       >
         <Send className="h-6 w-6 text-white" />
       </button>

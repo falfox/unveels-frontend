@@ -18,8 +18,9 @@ interface Chat {
   text: string;
   sender: "user" | "agent";
   mode: "voice-connection" | "text-connection" | "audio-connection";
+  type: "audio" | "chat";
   timestamp: string;
-  audioURL?: string; // Optional audio URL
+  audioURL?: string | null;
 }
 
 const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
@@ -74,38 +75,38 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  const onSendMessage = (
-    transcript: string,
-    audioURL: string | null = null,
-  ) => {
+  const onSendMessage = (message: string, audioURL: string | null = null) => {
     const timestamp = getCurrentTimestamp();
-
-    setChats((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text: transcript,
-        sender: "user",
-        mode: audioURL ? "audio-connection" : "text-connection",
-        timestamp,
-      },
-    ]);
 
     if (audioURL) {
       setChats((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
-          text: "Audio Message",
+          text: message,
+          sender: "user",
+          mode: "audio-connection",
+          type: "audio",
+          timestamp,
+          audioURL: audioURL,
+        },
+      ]);
+    } else {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: message,
+          type: "chat",
           sender: "user",
           mode: "audio-connection",
           timestamp,
-          audioURL,
+          audioURL: null,
         },
       ]);
     }
 
-    getResponse(transcript);
+    getResponse(message);
   };
 
   function playerEnded() {
@@ -126,6 +127,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         sender: "agent",
         mode: "audio-connection",
         timestamp,
+        type: "chat",
       },
     ]);
   }
