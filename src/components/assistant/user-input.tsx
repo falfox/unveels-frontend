@@ -13,16 +13,16 @@ interface UserInputProps {
 
 const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
   const [recordingState, setRecordingState] = useState<
     "idle" | "recording" | "paused"
   >("idle");
   const [progressMs, setProgressMs] = useState(0);
   const [isSending, setIsSending] = useState(false);
-  const [isSendDisabled, setIsSendDisabled] = useState(false);
+  const [isSendDisabled, setIsSendDisabled] = useState(false); // New state for disabling send button
   const transcriptRef = useRef<string>("");
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [audioURL, setAudioURL] = useState<string | null>(null);
-  const timerRef = useRef<number | null>(null);
 
   const plugins = useMemo(
     () => [
@@ -48,46 +48,83 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
 
   const record = plugins[0];
 
-  const startProgressTimer = () => {
-    timerRef.current = window.setInterval(() => {
-      setProgressMs((prev) => prev + 100); // Update progress every 100ms
-    }, 100);
-  };
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  const stopProgressTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "id-ID";
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            transcriptRef.current += result[0].transcript + " ";
+          }
+        }
+      };
+
+      recognition.onend = () => {
+        setVoiceTranscript(transcriptRef.current.trim());
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.warn("SpeechRecognition tidak didukung di browser ini.");
     }
-  };
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (recordingState === "recording" && recognitionRef.current) {
+      recognitionRef.current.start();
+    } else if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  }, [recordingState]);
+
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (wavesurfer) {
       wavesurfer.registerPlugin(record);
 
       record.on("record-start", () => {
+        console.log("Recording started");
         setRecordingState("recording");
+        setProgressMs(0); // Reset progress
         transcriptRef.current = "";
         setAudioURL(null);
-        startProgressTimer(); // Start progress timer
-      });
 
-      record.on("record-pause", () => {
-        setRecordingState("paused");
-        stopProgressTimer(); // Stop progress timer
-      });
-
-      record.on("record-resume", () => {
-        setRecordingState("recording");
-        startProgressTimer(); // Resume progress timer
+        // Start a custom timer to simulate progress updates
+        recordingIntervalRef.current = setInterval(() => {
+          setProgressMs((prev) => prev + 1000); // Increase by 1000 ms (1 second)
+        }, 1000);
       });
 
       record.on("record-end", (blob) => {
+        console.log("Recording ended");
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+        }
         const generatedAudioURL = URL.createObjectURL(blob);
         setAudioURL(generatedAudioURL);
         setRecordingState("idle");
-        stopProgressTimer(); // Stop timer when recording ends
-        setProgressMs(0); // Reset progress after recording ends
         setVoiceTranscript(transcriptRef.current.trim());
 
         if (isSending) {
@@ -99,10 +136,31 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
         setIsSendDisabled(false);
       });
 
+      record.on("record-pause", () => {
+        console.log("Recording paused");
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+        }
+        setVoiceTranscript(transcriptRef.current.trim());
+        setRecordingState("paused");
+      });
+
+      record.on("record-resume", () => {
+        console.log("Recording resumed");
+        setRecordingState("recording");
+
+        // Restart the interval for progress updates
+        recordingIntervalRef.current = setInterval(() => {
+          setProgressMs((prev) => prev + 1000); // Increase by 1000 ms (1 second)
+        }, 1000);
+      });
+
       return () => {
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current); // Clear interval on component unmount
+        }
         record.destroy();
         record.unAll();
-        stopProgressTimer();
       };
     }
   }, [wavesurfer, record, isSending, onSendMessage]);
@@ -112,10 +170,7 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
     setVoiceTranscript("");
     transcriptRef.current = "";
     setRecordingState("idle");
-    setProgressMs(0); // Reset progress on trash
     setIsSendDisabled(false);
-    stopProgressTimer(); // Stop timer on trash
-
     if (wavesurfer && record) {
       record.destroy();
       const newRecord = RecordPlugin.create({
@@ -217,7 +272,7 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
       <button
         type="button"
         onClick={handleSendMessage}
-        disabled={isSendDisabled}
+        disabled={isSendDisabled} // Disable button based on state
         className={clsx(
           "flex size-14 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]",
           { "cursor-not-allowed opacity-50": isSendDisabled },

@@ -41,8 +41,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isUser = message.sender === "user";
   const isAudioConnection =
     "mode" in message && message.mode === "audio-connection";
+  const isTextConnection =
+    "mode" in message && message.mode === "text-connection";
 
-  // Hide agent's message bubble during audio-connection
+  // Hide agent's message bubble only during audio-connection
   if (message.sender === "agent" && isAudioConnection) {
     return null;
   }

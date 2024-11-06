@@ -15,7 +15,9 @@ interface Chat {
   text: string;
   sender: "user" | "agent";
   mode: "voice-connection" | "text-connection" | "audio-connection";
+  type: "audio" | "chat";
   timestamp: string;
+  audioURL?: string | null;
 }
 
 const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
@@ -24,46 +26,35 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const [messages, setMessages] = useState<Chat[]>([
+  const [chats, setChats] = useState<Chat[]>([
     {
       id: 1,
       text: "Hello! I am Sarah. How can I assist you today?",
       sender: "agent",
+      type: "chat",
       mode: "text-connection",
       timestamp: getCurrentTimestamp(),
     },
   ]);
 
   const [loading, setLoading] = useState(false);
+  const [text, setText] = useState("");
+  const [speak, setSpeak] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const getResponse = async (userMsg: string | Blob) => {
-    if (typeof userMsg === "string" && !userMsg.trim()) {
+  const getResponse = async (userMsg: string) => {
+    if (!userMsg.trim()) {
       console.error("Prompt can't be empty.");
       return;
     }
 
     const timestamp = getCurrentTimestamp();
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text: userMsg instanceof Blob ? "Audio Message" : userMsg,
-        sender: "user",
-        mode: "text-connection",
-        timestamp,
-      },
-    ]);
-
-    if (typeof userMsg === "string") {
-      setLoading(true);
-    }
+    setLoading(true);
 
     const systemPrompt = `Anda adalah asisten virtual yang ahli dalam produk.`;
     const conversationHistory = [
       systemPrompt,
-      ...messages.map((message) =>
+      ...chats.map((message) =>
         message.sender === "user"
           ? `User: ${message.text}`
           : `Agent: ${message.text}`,
@@ -75,35 +66,68 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
       const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-      setMessages((prev) => [
-        ...prev,
+      const responseText = await result.response.text(); // Pastikan await di sini jika perlu
+
+      // Tambahkan respons ke chats
+      setChats((prevChats) => [
+        ...prevChats,
         {
           id: Date.now() + 1,
           text: responseText,
           sender: "agent",
+          type: "chat",
           mode: "text-connection",
           timestamp,
         },
       ]);
     } catch (error) {
       console.error("Error fetching AI response:", error);
-      console.error("Failed to fetch response from AI.");
     } finally {
       setLoading(false);
     }
   };
 
-  const onSendMessage = (message: string) => {
+  const onSendMessage = (message: string, audioURL: string | null = null) => {
+    const timestamp = getCurrentTimestamp();
+
+    if (audioURL) {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: message,
+          sender: "user",
+          mode: "text-connection",
+          type: "audio",
+          timestamp,
+          audioURL: audioURL,
+        },
+      ]);
+    } else {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: message,
+          type: "chat",
+          sender: "user",
+          mode: "text-connection",
+          timestamp,
+          audioURL: null,
+        },
+      ]);
+    }
+
+    console.log(chats);
+
     getResponse(message);
-    setMsg("");
   };
 
   return (
     <div className="relative mx-auto flex h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
       <main className="flex-1 space-y-4 overflow-y-auto p-4 pt-20">
-        {messages.map((message) => (
-          <MessageItem message={message} />
+        {chats.map((message) => (
+          <MessageItem key={message.id} message={message} />
         ))}
         {loading && <LoadingChat />}
       </main>
