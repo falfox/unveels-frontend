@@ -33,6 +33,14 @@ export const lips_makeup_product_types = [
   },
 ];
 
+export const lipsMakeupProductTypesFilter = (productTypes: String[]) => {
+  const filteredLipsProductTypes = lips_makeup_product_types
+    .filter((product) => productTypes.includes(product.label))
+    .map((product) => product.value)
+    .join(",");
+  return filteredLipsProductTypes;
+};
+
 export const lipsMakeupProductTypesMap = lips_makeup_product_types.reduce(
   (acc, { label, value }) => {
     acc[label] = value;

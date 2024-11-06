@@ -5,6 +5,17 @@ import {
   useLipPlumperContext,
 } from "./lip-plumper-context";
 import { useMakeup } from "../../../../components/three/makeup-context";
+import {
+  buildSearchParams,
+  getProductAttributes,
+  mediaUrl,
+} from "../../../../utils/apiUtils";
+import { defaultHeaders, Product } from "../../../../api/shared";
+import { lipsMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
+import { useQuery } from "@tanstack/react-query";
+import { textures } from "../../../../api/attributes/texture";
+import { BrandName } from "../../../../components/product/brand";
+import { LoadingProducts } from "../../../../components/loading";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },
@@ -37,17 +48,105 @@ const colorFamilies = [
   { name: "Nude", value: "#E1E1A3" },
 ];
 
+function useLipPlumperQuery({
+  color,
+  sub_color,
+  texture,
+}: {
+  color: string | null;
+  sub_color: string | null;
+  texture: string | null;
+}) {
+  return useQuery({
+    queryKey: ["products", "lipcolor", color, sub_color, texture],
+    queryFn: async () => {
+      const filters = [
+        {
+          filters: [
+            {
+              field: "type_id",
+              value: "simple",
+              condition_type: "eq",
+            },
+          ],
+        },
+        {
+          filters: [
+            {
+              field: "lips_makeup_product_type",
+              value: lipsMakeupProductTypesFilter([
+                "Lip Glosses",
+                "Lip Plumpers",
+              ]),
+              condition_type: "in",
+            },
+          ],
+        },
+      ];
+
+      if (color) {
+        filters.push({
+          filters: [
+            {
+              field: "color",
+              value: color,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      if (sub_color) {
+        filters.push({
+          filters: [
+            {
+              field: "sub_color",
+              value: sub_color,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      if (texture) {
+        filters.push({
+          filters: [
+            {
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      const response = await fetch(
+        "/rest/V1/products?" + buildSearchParams(filters),
+        {
+          headers: defaultHeaders,
+        },
+      );
+
+      const results = (await response.json()) as {
+        items: Array<Product>;
+      };
+
+      return results;
+    },
+  });
+}
+
 export function LipPlumperSelector() {
   return (
-    <LipPlumperProvider>
-      <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
-        <div>
-          <ColorSelector />
-        </div>
-
-        <ProductList />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <div>
+        <ColorSelector />
       </div>
-    </LipPlumperProvider>
+
+      <TextureSelector />
+
+      <ProductList />
+    </div>
   );
 }
 
@@ -117,7 +216,46 @@ function ColorSelector() {
   );
 }
 
+function TextureSelector() {
+  const { selectedTexture, setSelectedTexture } = useLipPlumperContext();
+  return (
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+        {textures.map((texture, index) => (
+          <button
+            key={texture.label}
+            type="button"
+            className={clsx(
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              {
+                "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
+                  selectedTexture === texture.value,
+              },
+            )}
+            onClick={() => {
+              if (selectedTexture === texture.value) {
+                setSelectedTexture(null);
+              } else {
+                setSelectedTexture(texture.value);
+              }
+            }}
+          >
+            <span className="text-sm">{texture.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ProductList() {
+  const { colorFamily, selectedTexture } = useLipPlumperContext();
+
+  const { data, isLoading } = useLipPlumperQuery({
+    color: colorFamily,
+    sub_color: null,
+    texture: selectedTexture,
+  });
   const products = [
     {
       name: "Tom Ford Item name Tom Ford",
@@ -159,33 +297,45 @@ function ProductList() {
 
   return (
     <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
-      {products.map((product, index) => (
-        <div key={index} className="w-[100px] rounded shadow">
-          <div className="relative h-[70px] w-[100px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="rounded object-cover"
-            />
-          </div>
+      {isLoading ? (
+        <LoadingProducts />
+      ) : (
+        data?.items.map((product, index) => {
+          const imageUrl =
+            mediaUrl(product.media_gallery_entries[0].file) ??
+            "https://picsum.photos/id/237/200/300";
 
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between space-x-1 pt-1">
-            <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-              $15
+          return (
+            <div key={index} className="w-[100px] rounded shadow">
+              <div className="relative h-[70px] w-[100px] overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt="Product"
+                  className="rounded object-cover"
+                />
+              </div>
+
+              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+                {product.name}
+              </h3>
+              <p className="text-[0.625rem] text-white/60">
+                <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
+              </p>
+              <div className="flex items-end justify-between space-x-1 pt-1">
+                <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
+                  $15
+                </div>
+                <button
+                  type="button"
+                  className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
+                >
+                  Add to cart
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-            >
-              Add to cart
-            </button>
-          </div>
-        </div>
-      ))}
+          );
+        })
+      )}
     </div>
   );
 }

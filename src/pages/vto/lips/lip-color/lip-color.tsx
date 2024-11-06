@@ -6,6 +6,7 @@ import { useMakeup } from "../../../../components/three/makeup-context";
 import { ColorPalette } from "../../../../components/color-palette";
 import {
   lips_makeup_product_types,
+  lipsMakeupProductTypesFilter,
   lipsMakeupProductTypesMap,
 } from "../../../../api/attributes/makeups";
 import { useQuery } from "@tanstack/react-query";
@@ -77,9 +78,12 @@ function useLipColorQuery({
           filters: [
             {
               field: "lips_makeup_product_type",
-              value: lips_makeup_product_types
-                .map((item) => item.value)
-                .join(","),
+              value: lipsMakeupProductTypesFilter([
+                "Lipsticks",
+                "Lip Stains",
+                "Lip Tints",
+                "Lip Balms",
+              ]),
               condition_type: "in",
             },
           ],
@@ -139,21 +143,19 @@ function useLipColorQuery({
 }
 export function LipColorSelector() {
   return (
-    <LipColorProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <div>
-          <FamilyColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <div>
+        <FamilyColorSelector />
 
-          <ColorSelector />
-        </div>
-
-        <TextureSelector />
-
-        <ShadesSelector />
-
-        <ProductList />
+        <ColorSelector />
       </div>
-    </LipColorProvider>
+
+      <TextureSelector />
+
+      <ShadesSelector />
+
+      <ProductList />
+    </div>
   );
 }
 
