@@ -37,6 +37,38 @@ import { NeckAccessoriesMode } from "./vto/neck-accessories/neck-accessories";
 import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
 import { MakeupProvider } from "../components/three/makeup-context";
 import { AccesoriesProvider } from "../components/three/accesories-context";
+import { LipColorProvider } from "./vto/lips/lip-color/lip-color-context";
+import { LipLinerProvider } from "./vto/lips/lip-liner/lip-liner-context";
+import { LipPlumperProvider } from "./vto/lips/lip-plumper/lip-plumper-context";
+import { BlushProvider } from "./vto/face/blush/blush-context";
+import { FoundationProvider } from "./vto/face/foundation/foundation-context";
+import { HighlighterProvider } from "./vto/face/highlighter/highlighter-context";
+import { ContourProvider } from "./vto/face/contour/contour-context";
+import { BronzerProvider } from "./vto/face/bronzer/bronzer-context";
+
+interface VirtualTryOnProvider {
+  children: React.ReactNode;
+}
+
+export function VirtualTryOnProvider({ children }: VirtualTryOnProvider) {
+  return (
+    <ContourProvider>
+      <BronzerProvider>
+        <HighlighterProvider>
+          <FoundationProvider>
+            <BlushProvider>
+              <LipColorProvider>
+                <LipLinerProvider>
+                  <LipPlumperProvider>{children}</LipPlumperProvider>
+                </LipLinerProvider>
+              </LipColorProvider>
+            </BlushProvider>
+          </FoundationProvider>
+        </HighlighterProvider>
+      </BronzerProvider>
+    </ContourProvider>
+  );
+}
 
 export function VirtualTryOn() {
   return (
@@ -44,9 +76,11 @@ export function VirtualTryOn() {
       <SkinColorProvider>
         <MakeupProvider>
           <AccesoriesProvider>
-            <div className="h-full min-h-dvh">
-              <Main />
-            </div>
+            <VirtualTryOnProvider>
+              <div className="h-full min-h-dvh">
+                <Main />
+              </div>
+            </VirtualTryOnProvider>
           </AccesoriesProvider>
         </MakeupProvider>
       </SkinColorProvider>
@@ -54,13 +88,14 @@ export function VirtualTryOn() {
   );
 }
 
+
 function Main() {
   return (
-    <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
         <VirtualTryOnScene />
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
           }}
@@ -92,7 +127,7 @@ function MainContent() {
         }}
       />
     ) : (
-      <div className="flex px-5 pb-10 space-x-5 font-serif">
+      <div className="flex space-x-5 px-5 pb-10 font-serif">
         <button
           type="button"
           className="h-10 w-full rounded border border-[#CA9C43] text-white"
@@ -104,7 +139,7 @@ function MainContent() {
           className="h-10 w-full rounded bg-gradient-to-r from-[#CA9C43] to-[#92702D] text-white"
           onClick={() => setShareOpen(true)}
         >
-          Share <Icons.share className="inline-block ml-4 size-6" />
+          Share <Icons.share className="ml-4 inline-block size-6" />
         </button>
       </div>
     );
@@ -120,7 +155,7 @@ function MainContent() {
             navigate("/virtual-try-on/makeups");
           }}
         >
-          <ChevronDown className="text-white size-6" />
+          <ChevronDown className="size-6 text-white" />
         </button>
       </div>
     </>

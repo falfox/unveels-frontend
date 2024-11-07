@@ -8,8 +8,8 @@ interface MakeupContextProps {
   showFoundation: boolean;
   setShowFoundation: (show: boolean) => void;
 
-  blushColor: string;
-  setBlushColor: (color: string) => void;
+  blushColor: string[];
+  setBlushColor: (color: string[]) => void;
 
   blushPattern: number;
   setBlushPattern: (pattern: number) => void;
@@ -19,6 +19,9 @@ interface MakeupContextProps {
 
   showBlush: boolean;
   setShowBlush: (show: boolean) => void;
+
+  blushMode: "One" | "Dual" | "Tri";
+  setBlushMode: (mode: "One" | "Dual" | "Tri") => void;
 
   showConcealer: boolean;
   setShowConcealer: (show: boolean) => void;
@@ -112,6 +115,7 @@ type MakeupSelectables =
   | "blushColor"
   | "blushPattern"
   | "blushMaterial"
+  | "blushMode"
   // Concealer
   | "showBlush"
   | "showConcealer"
@@ -154,15 +158,17 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
     initialValues?.showFoundation ?? false,
   );
 
-  const [blushColor, setBlushColor] = useState(
-    initialValues?.blushColor ?? "#FFFF",
-  );
+  const [blushColor, setBlushColor] = useState(initialValues?.blushColor ?? []);
   const [showBlush, setShowBlush] = useState(initialValues?.showBlush ?? false);
   const [blushPattern, setBlushPattern] = useState(
     initialValues?.blushPattern ?? 0,
   );
   const [blushMaterial, setBlushMaterial] = useState(
     initialValues?.blushMaterial ?? 0,
+  );
+
+  const [blushMode, setBlushMode] = useState<"One" | "Dual" | "Tri">(
+    (initialValues?.blushMode as "One" | "Dual" | "Tri") ?? "One",
   );
 
   const [showConcealer, setShowConcealer] = useState(
@@ -257,6 +263,9 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
 
         showBlush,
         setShowBlush,
+
+        blushMode,
+        setBlushMode,
 
         showConcealer,
         setShowConcealer,

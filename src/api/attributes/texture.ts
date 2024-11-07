@@ -24,3 +24,10 @@ export const textures = [
     value: "5630",
   },
 ];
+
+export function filterTextures(selectedTextures: String[]) {
+  const filteredTextures = textures.filter((texture) =>
+    selectedTextures.includes(texture.label),
+  );
+  return filteredTextures;
+};
