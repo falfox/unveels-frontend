@@ -8,12 +8,23 @@ import {
   X,
 } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
-import { useSkincareProductQuery } from "../api/skin-care";
-import { CircularProgressRings } from "../components/circle-progress-rings";
+import {
+  getFaceMakeupProductTypeIds,
+  getLashMakeupProductTypeIds,
+  getLensesProductTypeIds,
+  getLipsMakeupProductTypeIds,
+} from "../api/attributes/makeups";
+import { useProducts } from "../api/get-product";
+import { useLipsProductQuery } from "../api/lips";
+import {
+  FindTheLookProvider,
+  useFindTheLookContext,
+} from "../components/find-the-look/find-the-look-context";
 import { Footer } from "../components/footer";
 import { Icons } from "../components/icons";
 import { LoadingProducts } from "../components/loading";
 import { BrandName } from "../components/product/brand";
+import { Rating } from "../components/rating";
 import { VideoScene } from "../components/recorder/recorder";
 import {
   CameraProvider,
@@ -21,31 +32,17 @@ import {
 } from "../components/recorder/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
+import { SkinAnalysisProvider } from "../components/skin-analysis/skin-analysis-context";
 import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { skinAnalysisInference } from "../inference/skinAnalysisInference";
 import { FaceResults } from "../types/faceResults";
 import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
 import { TopNavigation } from "./skin-tone-finder";
-import { Rating } from "../components/rating";
-import { useLipsProductQuery } from "../api/lips";
 import {
-  FindTheLookProvider,
-  useFindTheLookContext,
-} from "../components/find-the-look/find-the-look-context";
-import { SkinAnalysisProvider } from "../components/skin-analysis/skin-analysis-context";
-import { useProducts } from "../api/get-product";
-import {
-  faceMakeupProductTypesMap,
-  getFaceMakeupProductTypeIds,
-  getLashMakeupProductTypeIds,
-  getLensesProductTypeIds,
-  getLipsMakeupProductTypeIds,
-  lashMakeupProductTypeMap,
-  lensesProductTypeMap,
-  lips_makeup_product_types,
-  lipsMakeupProductTypesMap,
-} from "../api/attributes/makeups";
+  headAccessoriesProductTypeFilter,
+  neckAccessoriesProductTypeFilter,
+} from "../api/attributes/accessories";
 
 export function FindTheLook() {
   return (
@@ -205,18 +202,68 @@ function MakeupCategories() {
             View all
           </button>
         </div>
-        <ProductList makeup_type={tab} />
+        <ProductList product_type={tab} />
       </div>
     </>
   );
 }
 
-const makeupTypes: {
+const accessories = ["Sunglasses", "Chokers", "Earrings"];
+
+function AccessoriesCategories() {
+  const [tab, setTab] = useState<(typeof accessories)[number]>("Sunglasses");
+  const { setView } = useFindTheLookContext();
+
+  return (
+    <>
+      <div className="relative px-4 pb-4 space-y-2">
+        <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
+          {accessories.map((category) => {
+            const isActive = tab === category;
+            return (
+              <Fragment key={category}>
+                <button
+                  key={category}
+                  className={clsx(
+                    "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm text-white",
+                    {
+                      "bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]":
+                        isActive,
+                    },
+                  )}
+                  onClick={() => setTab(category)}
+                >
+                  {category}
+                </button>
+              </Fragment>
+            );
+          })}
+        </div>
+
+        <div className="pb-2 text-right">
+          <button
+            type="button"
+            className="text-white"
+            onClick={() => {
+              setView("all_categories");
+            }}
+          >
+            View all
+          </button>
+        </div>
+        <ProductList product_type={tab} />
+      </div>
+    </>
+  );
+}
+
+const mapTypes: {
   [key: string]: {
     attributeName: string;
     values: string[];
   };
 } = {
+  // Makeups
   Lipstick: {
     attributeName: "lips_makeup_product_type",
     values: getLipsMakeupProductTypeIds([
@@ -242,12 +289,26 @@ const makeupTypes: {
     attributeName: "lenses_product_type",
     values: getLensesProductTypeIds(["Daily Lenses", "Monthly Lenses"]),
   },
+
+  // Accessories
+  Sunglasses: {
+    attributeName: "head_accessories_product_type",
+    values: headAccessoriesProductTypeFilter(["Sunglasses"]),
+  },
+  Chokers: {
+    attributeName: "neck_accessories_product_type",
+    values: neckAccessoriesProductTypeFilter(["Chokers"]),
+  },
+  Earrings: {
+    attributeName: "head_accessories_product_type",
+    values: headAccessoriesProductTypeFilter(["Earrings"]),
+  },
 };
 
-function ProductList({ makeup_type }: { makeup_type: string }) {
+function ProductList({ product_type }: { product_type: string }) {
   const { data } = useProducts({
-    product_type_key: makeupTypes[makeup_type].attributeName,
-    type_ids: makeupTypes[makeup_type].values,
+    product_type_key: mapTypes[product_type].attributeName,
+    type_ids: mapTypes[product_type].values,
   });
 
   return (
@@ -435,7 +496,7 @@ function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
           })}
         </div>
       </div>
-      <MakeupCategories />
+      {tab === "makeup" ? <MakeupCategories /> : <AccessoriesCategories />}
     </>
   );
 }
@@ -544,8 +605,8 @@ function MakeupAllView() {
 
 function ProductHorizontalList({ category }: { category: string }) {
   const { data } = useProducts({
-    product_type_key: makeupTypes[category].attributeName,
-    type_ids: makeupTypes[category].values,
+    product_type_key: mapTypes[category].attributeName,
+    type_ids: mapTypes[category].values,
   });
 
   const { selectedItems: cart, dispatch } = useFindTheLookContext();
@@ -622,54 +683,9 @@ function ProductHorizontalList({ category }: { category: string }) {
 function AccessoriesAllView() {
   return (
     <div className="flex-1 h-full px-5 overflow-y-auto">
-      <div className="py-4">
-        <h2 className="text-base text-[#E6E5E3]">Sunglasses</h2>
-      </div>
-      <div className="grid grid-cols-2 gap-2.5 py-4 sm:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 10 }).map((_, index) => (
-          <div key={index} className="w-full rounded shadow">
-            <div className="relative overflow-hidden aspect-square">
-              <img
-                src={"https://picsum.photos/id/237/200/300"}
-                alt="Product"
-                className="object-cover w-full h-full rounded"
-              />
-            </div>
-
-            <h3 className="line-clamp-2 pt-2.5 text-xs font-semibold text-white">
-              Product Name
-            </h3>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-white/60">
-                {/* <BrandName brandId={getProductAttributes(product, "brand")} /> */}
-                Brand Name
-              </p>
-              <div className="flex flex-wrap items-center justify-end gap-x-1">
-                <span className="text-sm font-bold text-white">
-                  {/* ${product.price.toFixed(2)} */}
-                  $15
-                </span>
-                {/* <span className="text-[0.5rem] text-white/50 line-through">
-                  ${product.originalPrice.toFixed(2)}
-                </span> */}
-              </div>
-            </div>
-            <Rating rating={4} />
-            <div className="flex pt-1 space-x-1">
-              <button
-                type="button"
-                className="flex items-center justify-center w-full h-10 text-xs font-semibold text-white border border-white"
-              >
-                ADD TO CART
-              </button>
-              <button
-                type="button"
-                className="flex items-center justify-center w-full h-10 text-xs font-semibold text-black bg-white border border-white"
-              >
-                SELECT
-              </button>
-            </div>
-          </div>
+      <div className="space-y-14">
+        {accessories.map((category) => (
+          <ProductHorizontalList category={category} />
         ))}
       </div>
     </div>
