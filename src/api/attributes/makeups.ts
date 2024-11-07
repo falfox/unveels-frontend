@@ -92,6 +92,14 @@ export const face_makeup_product_types = [
   },
 ];
 
+export const faceMakeupProductTypesFilter = (productTypes: String[]) => {
+  const filteredFaceProductTypes = face_makeup_product_types
+    .filter((product) => productTypes.includes(product.label))
+    .map((product) => product.value)
+    .join(",");
+  return filteredFaceProductTypes;
+};
+
 export const faceMakeupProductTypesMap = face_makeup_product_types.reduce(
   (acc, { label, value }) => {
     acc[label] = value;

@@ -58,7 +58,7 @@ function useLipLinerQuery({
   texture: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "lipcolor", color, sub_color, texture],
+    queryKey: ["products", "lipliner", color, sub_color, texture],
     queryFn: async () => {
       const filters = [
         {

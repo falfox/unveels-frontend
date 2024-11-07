@@ -40,6 +40,11 @@ import { AccesoriesProvider } from "../components/three/accesories-context";
 import { LipColorProvider } from "./vto/lips/lip-color/lip-color-context";
 import { LipLinerProvider } from "./vto/lips/lip-liner/lip-liner-context";
 import { LipPlumperProvider } from "./vto/lips/lip-plumper/lip-plumper-context";
+import { BlushProvider } from "./vto/face/blush/blush-context";
+import { FoundationProvider } from "./vto/face/foundation/foundation-context";
+import { HighlighterProvider } from "./vto/face/highlighter/highlighter-context";
+import { ContourProvider } from "./vto/face/contour/contour-context";
+import { BronzerProvider } from "./vto/face/bronzer/bronzer-context";
 
 interface VirtualTryOnProvider {
   children: React.ReactNode;
@@ -47,11 +52,21 @@ interface VirtualTryOnProvider {
 
 export function VirtualTryOnProvider({ children }: VirtualTryOnProvider) {
   return (
-    <LipColorProvider>
-      <LipLinerProvider>
-        <LipPlumperProvider>{children}</LipPlumperProvider>
-      </LipLinerProvider>
-    </LipColorProvider>
+    <ContourProvider>
+      <BronzerProvider>
+        <HighlighterProvider>
+          <FoundationProvider>
+            <BlushProvider>
+              <LipColorProvider>
+                <LipLinerProvider>
+                  <LipPlumperProvider>{children}</LipPlumperProvider>
+                </LipLinerProvider>
+              </LipColorProvider>
+            </BlushProvider>
+          </FoundationProvider>
+        </HighlighterProvider>
+      </BronzerProvider>
+    </ContourProvider>
   );
 }
 
@@ -72,6 +87,7 @@ export function VirtualTryOn() {
     </CameraProvider>
   );
 }
+
 
 function Main() {
   return (

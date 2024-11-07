@@ -58,7 +58,7 @@ function useLipPlumperQuery({
   texture: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "lipcolor", color, sub_color, texture],
+    queryKey: ["products", "lipplumper", color, sub_color, texture],
     queryFn: async () => {
       const filters = [
         {
