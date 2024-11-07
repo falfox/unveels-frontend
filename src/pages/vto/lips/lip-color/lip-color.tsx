@@ -19,7 +19,12 @@ import { defaultHeaders, Product } from "../../../../api/shared";
 import { colors } from "../../../../api/attributes/color";
 import { LoadingProducts } from "../../../../components/loading";
 import { BrandName } from "../../../../components/product/brand";
-import { textures } from "../../../../api/attributes/texture";
+import {
+  getTextureFromLabel,
+  textures,
+} from "../../../../api/attributes/texture";
+import { useLipColorQuery } from "./lip-color-query";
+import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },
@@ -143,9 +148,10 @@ function useLipColorQuery({
 }
 export function LipColorSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
-      <div>
-        <FamilyColorSelector />
+    <LipColorProvider>
+      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
+        <div>
+          <FamilyColorSelector />
 
         <ColorSelector />
       </div>
@@ -211,64 +217,48 @@ function ColorSelector() {
     showLipColor,
     lipColors,
   } = useMakeup();
-  const { selectedColors, setSelectedColors, selectedMode } =
+  const { selectedColors, setSelectedColors, selectedMode, colorFamily } =
     useLipColorContext();
-  const replaceIndexRef = useRef(0); // To track which color to replace next
 
   const handleColorClick = (color: string) => {
-    if (!showLipColor) {
-      setShowLipColor(true);
-    }
+    if (!showLipColor) setShowLipColor(true);
+
+    // Handle color deselection
     if (selectedColors.includes(color)) {
-      // Deselect the color if it's already selected
-      setSelectedColors(selectedColors.filter((c) => c !== color));
-      setLipColors(selectedColors.filter((c) => c !== color));
-    } else if (selectedMode === "One") {
-      setLipColorMode("One");
-      // In "One" mode, only one color can be selected
-      setSelectedColors([color]);
-      setLipColors([color]);
-    } else if (selectedMode === "Dual") {
-      setLipColorMode("Dual");
-      if (selectedColors.length < 2) {
-        // Add the color if less than two are selected
-        setSelectedColors([...selectedColors, color]);
-        setLipColors([...selectedColors, color]);
-      } else {
-        // Replace the color based on replaceIndexRef
-        const newSelectedColors = [...selectedColors];
-        newSelectedColors[replaceIndexRef.current] = color;
-        setSelectedColors(newSelectedColors);
-        setLipColors(newSelectedColors);
-        // Update replaceIndexRef to alternate between 0 and 1
-        replaceIndexRef.current = (replaceIndexRef.current + 1) % 2;
-      }
-    } else if (selectedMode === "Ombre") {
-      setLipColorMode("Dual");
-      if (selectedColors.length < 2) {
-        // Add the color if less than two are selected
-        setSelectedColors([...selectedColors, color]);
-        setLipColors([...selectedColors, color]);
-      } else {
-        // Replace the color based on replaceIndexRef
-        const newSelectedColors = [...selectedColors];
-        newSelectedColors[replaceIndexRef.current] = color;
-        setSelectedColors(newSelectedColors);
-        setLipColors(newSelectedColors);
-        // Update replaceIndexRef to alternate between 0 and 1
-        replaceIndexRef.current = (replaceIndexRef.current + 1) % 2;
-      }
+      const newColors = selectedColors.filter((c) => c !== color);
+      setSelectedColors(newColors);
+      setLipColors(newColors);
+      return;
     }
+
+    // Handle different modes
+    const isMultiColorMode =
+      selectedMode === "Dual" || selectedMode === "Ombre";
+    const maxColors = isMultiColorMode ? 2 : 1;
+    setLipColorMode(isMultiColorMode ? "Dual" : "One");
+
+    // Update colors by either adding new color or replacing the oldest one
+    const newColors =
+      selectedColors.length < maxColors
+        ? [...selectedColors, color]
+        : [...selectedColors.slice(1), color]; // Remove oldest, add new
+
+    setSelectedColors(newColors);
+    setLipColors(newColors);
   };
 
   const handleClearSelection = () => {
     setSelectedColors([]);
-    replaceIndexRef.current = 0;
+
     setShowLipColor(false);
   };
 
+  if (!colorFamily) {
+    return null;
+  }
+
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
+    <div className="w-full pt-4 mx-auto lg:max-w-xl">
       <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
@@ -385,52 +375,13 @@ function ShadesSelector() {
 }
 
 function ProductList() {
-  const { colorFamily, selectedTexture } = useLipColorContext();
+  const { colorFamily, selectedTexture, selectedColors } = useLipColorContext();
 
   const { data, isLoading } = useLipColorQuery({
     color: colorFamily,
-    sub_color: null,
+    sub_colors: selectedColors,
     texture: selectedTexture,
   });
-
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
 
   return (
     <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
@@ -438,39 +389,7 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          const imageUrl =
-            mediaUrl(product.media_gallery_entries[0].file) ??
-            "https://picsum.photos/id/237/200/300";
-
-          return (
-            <div key={index} className="w-[100px] rounded shadow">
-              <div className="relative h-[70px] w-[100px] overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt="Product"
-                  className="object-cover rounded"
-                />
-              </div>
-
-              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-                {product.name}
-              </h3>
-              <p className="text-[0.625rem] text-white/60">
-                <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
-              </p>
-              <div className="flex items-end justify-between pt-1 space-x-1">
-                <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-                  $15
-                </div>
-                <button
-                  type="button"
-                  className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-                >
-                  Add to cart
-                </button>
-              </div>
-            </div>
-          );
+          return <VTOProductCard product={product} key={product.id} />;
         })
       )}
     </div>

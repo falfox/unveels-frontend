@@ -49,6 +49,10 @@ export const lipsMakeupProductTypesMap = lips_makeup_product_types.reduce(
   {} as Record<string, string>,
 );
 
+export function getLipsMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => lipsMakeupProductTypesMap[label]);
+}
+
 export const face_makeup_product_types = [
   {
     label: "Foundations",
@@ -108,6 +112,10 @@ export const faceMakeupProductTypesMap = face_makeup_product_types.reduce(
   {} as Record<string, string>,
 );
 
+export function getFaceMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => faceMakeupProductTypesMap[label]);
+}
+
 const lashMakeupProductType = [
   {
     label: "Mascaras",
@@ -135,6 +143,10 @@ export const lashMakeupProductTypeMap = lashMakeupProductType.reduce(
   {} as Record<string, string>,
 );
 
+export function getLashMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => lashMakeupProductTypeMap[label]);
+}
+
 export const lensesProductType = [
   {
     label: "Daily Lenses",
@@ -153,3 +165,50 @@ export const lensesProductTypeMap = lensesProductType.reduce(
   },
   {} as Record<string, string>,
 );
+
+export function getLensesProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => lensesProductTypeMap[label]);
+}
+
+export const eye_makeup_product_types = [
+  {
+    label: "Eyeshadows",
+    value: "5702",
+  },
+  {
+    label: "Eyeliners",
+    value: "5703",
+  },
+  {
+    label: "Concealers",
+    value: "5704",
+  },
+  {
+    label: "Eye Pencils",
+    value: "5705",
+  },
+  {
+    label: "Eye Color Correctors",
+    value: "5706",
+  },
+  {
+    label: "Eye Primers",
+    value: "5707",
+  },
+  {
+    label: "Eye Makeup Removers",
+    value: "5708",
+  },
+];
+
+export const eyeMakeupProductTypesMap = eye_makeup_product_types.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export function getEyeMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => eyeMakeupProductTypesMap[label]);
+}

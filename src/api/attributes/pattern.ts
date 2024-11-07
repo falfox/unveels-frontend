@@ -1,4 +1,6 @@
-export const patterns = {
+export const patterns: {
+  [key: string]: { label: string; value: string }[];
+} = {
   eyeshadows: [
     { label: "Eyeshadow_1", value: "5878" },
     { label: "Eyeshadow_2", value: "5879" },
@@ -113,3 +115,7 @@ export const patterns = {
     { label: "Highlighter_04", value: "5974" },
   ],
 };
+
+export function getPatternByIndex(type: string, index: number) {
+  return patterns[type][index];
+}

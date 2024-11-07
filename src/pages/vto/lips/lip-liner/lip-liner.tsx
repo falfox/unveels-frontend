@@ -153,7 +153,7 @@ function FamilyColorSelector() {
   const { colorFamily, setColorFamily } = useLipLinerContext();
   return (
     <div
-      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
+      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colorFamilies.map((item, index) => (
@@ -214,11 +214,11 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-2 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
           onClick={() => {
             resetColor();
           }}
@@ -245,13 +245,21 @@ function ColorSelector() {
   );
 }
 
-const sizes = [
+// const sizes = [
+//   "Small",
+//   "Upper Lip",
+//   "Large Lower",
+//   "Large Narrower",
+//   "Large & Full",
+//   "Wider",
+// ];
+
+// Todo: Update the sizes to match the actual sizes
+const lipLinerSizes = [
   "Small",
-  "Upper Lip",
-  "Large Lower",
-  "Large Narrower",
-  "Large & Full",
-  "Wider",
+  // "Medium",
+  // "Large",
+  // "Extra Large",
 ];
 
 function SizeSelector() {
@@ -264,9 +272,9 @@ function SizeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
-        {sizes.map((size, index) => (
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+        {lipLinerSizes.map((size, index) => (
           <button
             key={size}
             type="button"

@@ -37,6 +37,10 @@ import { SkinAnalysisProvider } from "../components/skin-analysis/skin-analysis-
 import { useProducts } from "../api/get-product";
 import {
   faceMakeupProductTypesMap,
+  getFaceMakeupProductTypeIds,
+  getLashMakeupProductTypeIds,
+  getLensesProductTypeIds,
+  getLipsMakeupProductTypeIds,
   lashMakeupProductTypeMap,
   lensesProductTypeMap,
   lips_makeup_product_types,
@@ -215,27 +219,28 @@ const makeupTypes: {
 } = {
   Lipstick: {
     attributeName: "lips_makeup_product_type",
-    values: ["Lipsticks", "Lip Stains", "Lip Tints", "Lip Glosses"].map(
-      (type) => lipsMakeupProductTypesMap[type],
-    ),
+    values: getLipsMakeupProductTypeIds([
+      "Lipsticks",
+      "Lip Stains",
+      "Lip Tints",
+      "Lip Glosses",
+    ]),
   },
   Mascara: {
     attributeName: "lash_makeup_product_type",
-    values: ["Mascaras"].map((type) => lashMakeupProductTypeMap[type]),
+    values: getLashMakeupProductTypeIds(["Mascaras"]),
   },
   Blusher: {
     attributeName: "face_makeup_product_type",
-    values: ["Blushes"].map((type) => faceMakeupProductTypesMap[type]),
+    values: getFaceMakeupProductTypeIds(["Blushes"]),
   },
   Highlighter: {
     attributeName: "face_makeup_product_type",
-    values: ["Highlighters"].map((type) => faceMakeupProductTypesMap[type]),
+    values: getFaceMakeupProductTypeIds(["Highlighters"]),
   },
   Eyecolor: {
     attributeName: "lenses_product_type",
-    values: ["Daily Lenses", "Monthly Lenses"].map(
-      (type) => lensesProductTypeMap[type],
-    ),
+    values: getLensesProductTypeIds(["Daily Lenses", "Monthly Lenses"]),
   },
 };
 
@@ -570,7 +575,7 @@ function ProductHorizontalList({ category }: { category: string }) {
                   />
                 </div>
 
-                <h3 className="line-clamp-2 pt-2.5 text-xs font-semibold text-white h-10">
+                <h3 className="line-clamp-2 h-10 pt-2.5 text-xs font-semibold text-white">
                   {product.name}
                 </h3>
                 <div className="flex items-center justify-between">
