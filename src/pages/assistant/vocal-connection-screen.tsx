@@ -16,6 +16,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import VoiceButton from "../../components/assistant/voice-button";
 import { X } from "lucide-react";
+import { botPrompt } from "../../utils/prompt";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -23,6 +24,10 @@ interface Chat {
   id: number;
   text: string;
   sender: "user" | "agent";
+  mode: "voice-connection" | "text-connection" | "audio-connection";
+  type: "audio" | "chat";
+  timestamp: string;
+  audioURL?: string | null;
 }
 
 const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
@@ -32,7 +37,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [speak, setSpeak] = useState(false);
   const [audioSource, setAudioSource] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState("Hi I'm Sarah");
 
   const [chats, setChats] = useState<Chat[]>([]);
 
@@ -40,46 +45,28 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
   const [loading, setLoading] = useState(false);
   const audioPlayer = useRef<ReactAudioPlayer>(null);
-  const { transcript, browserSupportsSpeechRecognition } =
+  const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
 
-  useEffect(() => {
-    getWebsiteVisits();
-  }, []);
+  const getCurrentTimestamp = (): string => {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
 
   useEffect(() => {
     setMsg(transcript);
   }, [transcript]);
 
-  useEffect(() => {
-    const chatBox = document.querySelector(".chat-box");
-    if (chatBox) {
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-  }, [chats]);
-
-  const getResponse = async (userMsg: string | Blob) => {
-    if (typeof userMsg === "string" && !userMsg.trim()) {
+  const getResponse = async (userMsg: string) => {
+    if (!userMsg.trim()) {
       console.error("Prompt can't be empty.");
       return;
     }
 
-    setChats((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text: userMsg instanceof Blob ? "Audio Message" : userMsg,
-        sender: "user",
-      },
-    ]);
+    const timestamp = getCurrentTimestamp();
+    setLoading(true);
 
-    if (typeof userMsg === "string") {
-      setLoading(true);
-    }
-
-    const systemPrompt = `Anda adalah asisten virtual yang ahli dalam produk.`;
     const conversationHistory = [
-      systemPrompt,
       ...chats.map((message) =>
         message.sender === "user"
           ? `User: ${message.text}`
@@ -89,35 +76,40 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
     const prompt = `${conversationHistory}\nUser: ${userMsg}\nAgent:`;
 
+    console.log(prompt);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: botPrompt,
+    });
+    const result = await model.generateContent(prompt);
+
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-      setText(responseText);
+      const responseText = await result.response.text(); // Pastikan await di sini jika perlu
+      console.log(responseText);
+      const respond = JSON.parse(responseText);
+
+      // Tambahkan respons ke chats
+      setChats((prevChats) => [
+        ...prevChats,
+        {
+          id: Date.now() + 1,
+          text: respond.chat,
+          sender: "agent",
+          type: "chat",
+          mode: "voice-connection",
+          timestamp,
+        },
+      ]);
+
+      setText(respond.chat);
       setSpeak(true);
     } catch (error) {
-      console.error("Failed to fetch response from AI.", error);
+      setText(await result.response.text());
+      setSpeak(true);
+      console.error("Error fetching AI response:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getWebsiteVisits = async () => {
-    const url =
-      "https://counter10.p.rapidapi.com/?ID=prompt3&COLOR=red&CLABEL=blue";
-    const options = {
-      method: "GET",
-      headers: {
-        "X-RapidAPI-Key": "ede3c5163fmsh01abdacf07fd2b0p1c0e4bjsn1db1b15be576",
-        "X-RapidAPI-Host": "counter10.p.rapidapi.com",
-      },
-    };
-    try {
-      const response = await fetch(url, options);
-      const result = await response.text();
-      console.log(result);
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -125,31 +117,56 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     setAudioSource(null);
     setSpeak(false);
     setPlaying(false);
+    setLoading(false);
+    setMsg("");
   }
 
   function playerReady() {
     audioPlayer.current?.audioEl.current?.play();
     setPlaying(true);
-    setChats((prev) => [
-      ...prev,
-      { id: Date.now() + 1, text: text, sender: "agent" },
-    ]);
   }
 
   const startListening = () => {
+    if (loading) {
+      console.log("Currently loading; cannot start listening.");
+      return;
+    }
     if (browserSupportsSpeechRecognition) {
-      SpeechRecognition.startListening();
+      resetTranscript(); // Clear previous transcript
+      SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
     } else {
-      console.error("Voice recognision not supported by browser.");
+      console.error("Voice recognition not supported in this browser.");
     }
   };
+
   const stopListening = () => {
+    if (loading) {
+      console.log("Currently loading; cannot start listening.");
+      return;
+    }
+    SpeechRecognition.stopListening();
     if (msg.trim()) {
-      getResponse(msg);
+      addChatMessage(msg); // Add the transcript to chats when recording stops
     } else {
       console.error("Message cannot be empty.");
     }
-    SpeechRecognition.stopListening();
+  };
+
+  const addChatMessage = (message: string) => {
+    const timestamp = getCurrentTimestamp();
+    setChats((prevChats) => [
+      ...prevChats,
+      {
+        id: Date.now(),
+        text: message,
+        sender: "user",
+        mode: "voice-connection",
+        type: "chat",
+        timestamp,
+      },
+    ]);
+    getResponse(message);
+    setMsg("");
   };
 
   const onSendMessage = (message: string) => {
@@ -169,19 +186,10 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 flex h-1/3 flex-col bg-gradient-to-b from-[#1B1404] to-[#2C1F06]">
+        {/* chat appear here */}
         <div className="flex-1 p-4 text-xl text-white">
-          Hi Sarah, I'm looking for a gift set of luxury skincare products for
-          my friend's birthday. Could you recommend some options that include
-          moisturizer and serum? Also, are there any special discounts available
-          right now?
+          {loading ? <LoadingChat showAvatar={false} /> : msg}
         </div>
-        <div className="flex-1 space-y-4 overflow-y-auto p-4 text-xl text-white">
-          {chats.map((chat) => (
-            <MessageItem message={chat} />
-          ))}
-          {loading && <LoadingChat />}
-        </div>
-
         <div className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">
           <div className="pointer-events-none absolute inset-x-0 -top-[116px] flex justify-center">
             <BleedEffect className="h-48" />
@@ -205,6 +213,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
                   msg={msg}
                   setMsg={setMsg}
                   onSendMessage={onSendMessage}
+                  showVoice={false}
                 />
               </div>
             ) : (

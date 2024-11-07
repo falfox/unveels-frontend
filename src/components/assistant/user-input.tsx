@@ -9,9 +9,15 @@ interface UserInputProps {
   msg: string;
   setMsg: (value: string) => void;
   onSendMessage: (message: string, audioURL?: string | null) => void;
+  showVoice?: boolean;
 }
 
-const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
+const UserInput = ({
+  msg,
+  setMsg,
+  onSendMessage,
+  showVoice = true,
+}: UserInputProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [recordingState, setRecordingState] = useState<
@@ -258,15 +264,22 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
         </div>
 
         <div className="absolute inset-y-0 right-0 flex h-full w-12 items-center justify-center">
-          <button type="button" onClick={handleMicrophoneClick}>
-            {recordingState === "idle" ? (
-              <Mic className="size-6 text-gray-400" />
-            ) : recordingState === "recording" ? (
-              <PauseCircle className="size-6 text-red-600" />
-            ) : (
-              <CirclePlay className="size-6 text-white" />
-            )}
-          </button>
+          {showVoice ? (
+            <>
+              {" "}
+              <button type="button" onClick={handleMicrophoneClick}>
+                {recordingState === "idle" ? (
+                  <Mic className="size-6 text-gray-400" />
+                ) : recordingState === "recording" ? (
+                  <PauseCircle className="size-6 text-red-600" />
+                ) : (
+                  <CirclePlay className="size-6 text-white" />
+                )}
+              </button>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
       <button

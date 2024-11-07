@@ -10,6 +10,7 @@ import {
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ReactAudioPlayer from "react-audio-player";
 import { useEffect, useRef, useState } from "react";
+import { botPrompt } from "../../utils/prompt";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -49,9 +50,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     const timestamp = getCurrentTimestamp();
     setLoading(true);
 
-    const systemPrompt = `Anda adalah asisten virtual yang ahli dalam produk.`;
     const conversationHistory = [
-      systemPrompt,
       ...chats.map((message) =>
         message.sender === "user"
           ? `User: ${message.text}`
@@ -62,14 +61,33 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     const prompt = `${conversationHistory}\nUser: ${userMsg}\nAgent:`;
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: botPrompt,
+      });
+
       const result = await model.generateContent(prompt);
       const responseText = result.response.text();
-      setText(responseText);
+      console.log(responseText);
+      const respond = JSON.parse(responseText);
+
+      // Tambahkan respons ke chats
+      setChats((prevChats) => [
+        ...prevChats,
+        {
+          id: Date.now() + 1,
+          text: respond.chat,
+          sender: "agent",
+          type: "chat",
+          mode: "audio-connection",
+          timestamp,
+        },
+      ]);
+
+      setText(respond.chat);
       setSpeak(true);
     } catch (error) {
       console.error("Error fetching AI response:", error);
-      console.error("Failed to fetch response from AI.");
     } finally {
       setLoading(false);
     }

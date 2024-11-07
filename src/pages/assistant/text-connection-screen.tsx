@@ -7,6 +7,7 @@ import {
 } from "../../components/assistant";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useState } from "react";
+import { botPrompt } from "../../utils/prompt";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -43,17 +44,10 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [msg, setMsg] = useState("");
 
   const getResponse = async (userMsg: string) => {
-    if (!userMsg.trim()) {
-      console.error("Prompt can't be empty.");
-      return;
-    }
-
     const timestamp = getCurrentTimestamp();
     setLoading(true);
 
-    const systemPrompt = `Anda adalah asisten virtual yang ahli dalam produk.`;
     const conversationHistory = [
-      systemPrompt,
       ...chats.map((message) =>
         message.sender === "user"
           ? `User: ${message.text}`
@@ -63,17 +57,24 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
     const prompt = `${conversationHistory}\nUser: ${userMsg}\nAgent:`;
 
+    console.log(prompt);
+
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: botPrompt,
+      });
       const result = await model.generateContent(prompt);
       const responseText = await result.response.text(); // Pastikan await di sini jika perlu
+      console.log(responseText);
+      const respond = JSON.parse(responseText);
 
       // Tambahkan respons ke chats
       setChats((prevChats) => [
         ...prevChats,
         {
           id: Date.now() + 1,
-          text: responseText,
+          text: respond.chat,
           sender: "agent",
           type: "chat",
           mode: "text-connection",
@@ -95,7 +96,7 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         ...prev,
         {
           id: Date.now() + 1,
-          text: message,
+          text: message != "" ? message : "",
           sender: "user",
           mode: "text-connection",
           type: "audio",
