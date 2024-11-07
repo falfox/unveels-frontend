@@ -2,12 +2,17 @@ import {
   BleedEffect,
   LoadingChat,
   MessageItem,
+  SuggestedGifts,
   TopNavigation,
   UserInput,
 } from "../../components/assistant";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { botPrompt } from "../../utils/prompt";
+import { categories } from "../../api/virtual-assistant-attributes/category";
+import { ProductRequest } from "../../types/productRequest";
+import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
+import { Product } from "../../api/shared";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -42,6 +47,24 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [text, setText] = useState("");
   const [speak, setSpeak] = useState(false);
   const [msg, setMsg] = useState("");
+
+  const [fetchProducts, setFetchProducts] = useState(false); // State baru untuk memicu fetch produk
+  const [products, setProducts] = useState<ProductRequest[]>([]);
+
+  // State untuk menyimpan hasil produk dari API Magento
+  const [productData, setProductData] = useState<Product[]>([]);
+
+  useEffect(() => {
+    if (fetchProducts && products.length > 0) {
+      setLoading(true);
+      fetchVirtualAssistantProduct(products, categories)
+        .then((fetchedProducts) => {
+          setProductData(fetchedProducts);
+          setFetchProducts(false); // Reset the fetch trigger
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [fetchProducts, products]);
 
   const getResponse = async (userMsg: string) => {
     const timestamp = getCurrentTimestamp();
@@ -81,6 +104,12 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           timestamp,
         },
       ]);
+
+      if (respond.isFinished) {
+        setProducts(respond.product);
+        setLoading(true);
+        setFetchProducts(true);
+      }
     } catch (error) {
       console.error("Error fetching AI response:", error);
     } finally {
@@ -132,7 +161,7 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         ))}
         {loading && <LoadingChat />}
       </main>
-
+      {productData.length > 0 && <SuggestedGifts product={productData} />}
       <footer className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">
         <div className="pointer-events-none absolute inset-x-0 -top-[116px] flex justify-center">
           <BleedEffect className="h-48" />
