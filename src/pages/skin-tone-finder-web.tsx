@@ -5,17 +5,20 @@ import { VideoStream } from "../components/recorder/video-stream";
 import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-tone-finder-scene";
 import { SkinColorProvider } from "../components/skin-tone-finder-scene/skin-color-context";
 import { MakeupProvider } from "../context/makeup-context";
+import { InferenceProvider } from "../context/inference-context";
 
 export function SkinToneFinderWeb() {
   return (
     <CameraProvider>
-      <SkinColorProvider>
-        <MakeupProvider>
-          <div className="h-full min-h-dvh">
-            <Main />
-          </div>
-        </MakeupProvider>
-      </SkinColorProvider>
+      <InferenceProvider>
+        <SkinColorProvider>
+          <MakeupProvider>
+            <div className="h-full min-h-dvh">
+              <Main />
+            </div>
+          </MakeupProvider>
+        </SkinColorProvider>
+      </InferenceProvider>
     </CameraProvider>
   );
 }

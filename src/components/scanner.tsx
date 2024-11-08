@@ -6,9 +6,6 @@ export function Scanner() {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
-    null,
-  );
 
   // Memuat gambar ketika capturedImage berubah
   useEffect(() => {
@@ -20,40 +17,6 @@ export function Scanner() {
       image.onerror = (err) => console.error("Gagal memuat gambar:", err);
     }
   }, [criterias.capturedImage]);
-
-  // Inisialisasi MediaPipe Face Landmarker
-  useEffect(() => {
-    const initFaceLandmarker = async () => {
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
-      );
-      const landmarker = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-        },
-        runningMode: "IMAGE",
-        numFaces: 1,
-      });
-      setFaceLandmarker(landmarker);
-    };
-
-    initFaceLandmarker();
-  }, []);
-
-  // Deteksi wajah pada interval terpisah
-  useEffect(() => {
-    const detectFace = async () => {
-      if (faceLandmarker && imageLoaded) {
-        const detections = await faceLandmarker.detect(imageLoaded);
-        console.log("Deteksi wajah:", detections); // Debugging
-      }
-    };
-
-    const interval = setInterval(detectFace, 500);
-
-    return () => clearInterval(interval);
-  }, [faceLandmarker, imageLoaded]);
 
   // Animasi Scanner dengan `requestAnimationFrame`
   useEffect(() => {

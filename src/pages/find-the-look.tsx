@@ -1,13 +1,10 @@
 import { RecorderStatus } from "../components/assistant";
 import { FindTheLookScene } from "../components/find-the-look/find-the-look-scene";
 import { VideoScene } from "../components/recorder/recorder";
-import {
-  CameraProvider,
-  useCamera,
-} from "../components/recorder/recorder-context";
+import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { FindTheLookProvider } from "../context/find-the-look-context";
-import { TopNavigation } from "./skin-tone-finder";
+import { TopNavigation } from "../components/top-navigation";
 
 export function FindTheLook() {
   return (

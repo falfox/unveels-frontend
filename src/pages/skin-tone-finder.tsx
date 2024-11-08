@@ -213,10 +213,10 @@ function ShadesSelector() {
   );
 }
 
-const isShadeSelected = (product: Product, selectedShade: string) =>
-  getProductAttributes(product, "hexacode")?.value.includes(
-    selectedShade ?? "",
-  );
+const isShadeSelected = (product: Product, selectedShade: string) => {
+  const attribute = getProductAttributes(product, "hexacode");
+  return attribute?.value?.includes(selectedShade ?? "");
+};
 
 function MatchedShades() {
   const [selectedTne, setSelectedTone] = useState(tone_types[0]);
@@ -498,20 +498,23 @@ function Sidebar({ setCollapsed }: SidebarProps) {
         />
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
-          <button className="">
+          <button className="" onClick={screenShoot}>
             <Icons.camera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={flipCamera}>
             <Icons.flipCamera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button
+            className=""
+            onClick={() => setCollapsed((prevState) => !prevState)}
+          >
             <Icons.expand className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={compareCapture}>
             <Icons.compare className="size-6 text-white" />
           </button>
           <button className="">
-            <Icons.reset className="size-6 text-white" />
+            <Icons.reset onClick={resetCapture} className="size-6 text-white" />
           </button>
           <button className="hidden">
             <Icons.upload className="size-6 text-white" />

@@ -73,14 +73,16 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
     try {
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash-002",
         systemInstruction: botPrompt,
       });
 
       const result = await model.generateContent(prompt);
       const responseText = result.response.text();
-      console.log(responseText);
-      const respond = JSON.parse(responseText);
+      const removeBackticks = responseText.replace(/```/g, "");
+      const jsonLabel = removeBackticks.replace(/json/g, "");
+      console.log(jsonLabel);
+      const respond = JSON.parse(jsonLabel);
 
       // Tambahkan respons ke chats
       setChats((prevChats) => [
