@@ -5,6 +5,7 @@ import {
   LoadingChat,
   MessageItem,
   ModelScene,
+  SuggestedGifts,
   TopNavigation,
   UserInput,
   // UserInput,
@@ -17,6 +18,10 @@ import SpeechRecognition, {
 import VoiceButton from "../../components/assistant/voice-button";
 import { X } from "lucide-react";
 import { botPrompt } from "../../utils/prompt";
+import { ProductRequest } from "../../types/productRequest";
+import { Product } from "../../api/shared";
+import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
+import { categories } from "../../api/virtual-assistant-attributes/category";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -48,6 +53,10 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
 
+  const [fetchProducts, setFetchProducts] = useState(false);
+  const [products, setProducts] = useState<ProductRequest[]>([]);
+  const [productData, setProductData] = useState<Product[]>([]);
+
   const getCurrentTimestamp = (): string => {
     const now = new Date();
     return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -56,6 +65,19 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   useEffect(() => {
     setMsg(transcript);
   }, [transcript]);
+
+  useEffect(() => {
+    if (fetchProducts && products.length > 0) {
+      setLoading(true);
+      fetchVirtualAssistantProduct(products, categories)
+        .then((fetchedProducts) => {
+          setProductData(fetchedProducts);
+          setFetchProducts(false);
+          setLoading(false);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [fetchProducts, products]);
 
   const getResponse = async (userMsg: string) => {
     if (!userMsg.trim()) {
@@ -101,6 +123,12 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           timestamp,
         },
       ]);
+
+      if (respond.isFinished) {
+        setProducts(respond.product);
+        setLoading(true);
+        setFetchProducts(true);
+      }
 
       setText(respond.chat);
       setSpeak(true);
@@ -186,8 +214,8 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 flex h-1/3 flex-col bg-gradient-to-b from-[#1B1404] to-[#2C1F06]">
-        {/* chat appear here */}
         <div className="flex-1 p-4 text-xl text-white">
+          {productData.length > 0 && <SuggestedGifts product={productData} />}
           {loading ? <LoadingChat showAvatar={false} /> : msg}
         </div>
         <div className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">

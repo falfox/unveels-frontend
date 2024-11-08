@@ -11,6 +11,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import ReactAudioPlayer from "react-audio-player";
 import { useEffect, useRef, useState } from "react";
 import { botPrompt } from "../../utils/prompt";
+import { getCurrentTimestamp } from "../../utils/getCurrentTimeStamp";
+import { ProductRequest } from "../../types/productRequest";
+import { Product } from "../../api/shared";
+import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
+import { categories } from "../../api/virtual-assistant-attributes/category";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -25,7 +30,6 @@ interface Chat {
 }
 
 const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
-  const [suggestedProduct, setSuggestedProduct] = useState<boolean>(false);
   const [speak, setSpeak] = useState(false);
   const [audioSource, setAudioSource] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -36,17 +40,24 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [loading, setLoading] = useState(false);
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
-  const getCurrentTimestamp = (): string => {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
+  const [fetchProducts, setFetchProducts] = useState(false);
+  const [products, setProducts] = useState<ProductRequest[]>([]);
+  const [productData, setProductData] = useState<Product[]>([]);
+
+  useEffect(() => {
+    if (fetchProducts && products.length > 0) {
+      setLoading(true);
+      fetchVirtualAssistantProduct(products, categories)
+        .then((fetchedProducts) => {
+          setProductData(fetchedProducts);
+          setFetchProducts(false);
+          setLoading(false);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [fetchProducts, products]);
 
   const getResponse = async (userMsg: string) => {
-    if (!userMsg.trim()) {
-      console.error("Prompt can't be empty.");
-      return;
-    }
-
     const timestamp = getCurrentTimestamp();
     setLoading(true);
 
@@ -83,6 +94,12 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           timestamp,
         },
       ]);
+
+      if (respond.isFinished) {
+        setProducts(respond.product);
+        setLoading(true);
+        setFetchProducts(true);
+      }
 
       setText(respond.chat);
       setSpeak(true);
@@ -171,14 +188,13 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex h-1/2 flex-col bg-gradient-to-b from-[#1B1404] to-[#2C1F06]">
-        {suggestedProduct ? <SuggestedGifts /> : null}
         <div className="chat-box flex-1 space-y-4 overflow-y-auto p-4 text-xl text-white">
           {chats.map((chat) => (
             <MessageItem key={chat.id} message={chat} />
           ))}
           {loading && <LoadingChat showAvatar={false} />}
         </div>
-
+        {productData.length > 0 && <SuggestedGifts product={productData} />}
         <div className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">
           <div className="pointer-events-none absolute inset-x-0 -top-[116px] flex justify-center">
             <BleedEffect className="h-48" />

@@ -13,25 +13,43 @@ import { categories } from "../../api/virtual-assistant-attributes/category";
 import { ProductRequest } from "../../types/productRequest";
 import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
 import { Product } from "../../api/shared";
+import { getCurrentTimestamp } from "../../utils/getCurrentTimeStamp";
+import { mediaUrl } from "../../utils/apiUtils";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
-interface Chat {
-  id: number;
-  text: string;
-  sender: "user" | "agent";
-  mode: "voice-connection" | "text-connection" | "audio-connection";
-  type: "audio" | "chat";
-  timestamp: string;
-  audioURL?: string | null;
-}
+type Chat =
+  | {
+      id: number;
+      text: string;
+      sender: string;
+      type?: "chat" | "audio" | "product";
+      mode: "voice-connection" | "text-connection" | "audio-connection";
+      timestamp: string;
+      audioURL?: string | null;
+    }
+  | {
+      id: number;
+      type: "chat" | "audio" | "product";
+      sender: string;
+      audioURL?: string | null;
+      text?: undefined;
+      timestamp: string;
+    }
+  | {
+      id: number;
+      type: "chat" | "audio" | "product";
+      sender: string;
+      name: string;
+      price: string;
+      originalPrice: string;
+      image: string;
+      brand: string;
+      text?: undefined;
+      timestamp: string;
+    };
 
 const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
-  const getCurrentTimestamp = (): string => {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
   const [chats, setChats] = useState<Chat[]>([
     {
       id: 1,
@@ -44,14 +62,18 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   ]);
 
   const [loading, setLoading] = useState(false);
-  const [text, setText] = useState("");
-  const [speak, setSpeak] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const [fetchProducts, setFetchProducts] = useState(false); // State baru untuk memicu fetch produk
-  const [products, setProducts] = useState<ProductRequest[]>([]);
+  const testData: ProductRequest[] = [
+    {
+      category: "Makeup",
+      sub_category: "Lip",
+      product_type: "Lipstick",
+    },
+  ];
 
-  // State untuk menyimpan hasil produk dari API Magento
+  const [fetchProducts, setFetchProducts] = useState(false);
+  const [products, setProducts] = useState<ProductRequest[]>([]);
   const [productData, setProductData] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -60,11 +82,31 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       fetchVirtualAssistantProduct(products, categories)
         .then((fetchedProducts) => {
           setProductData(fetchedProducts);
-          setFetchProducts(false); // Reset the fetch trigger
+          setFetchProducts(false);
+
+          fetchedProducts.forEach((item) => {
+            const imageUrl =
+              mediaUrl(item.media_gallery_entries[0]?.file) ??
+              "https://picsum.photos/id/237/200/300";
+            setChats((prevChats) => [
+              ...prevChats,
+              {
+                id: item.id,
+                type: "product",
+                sender: "agent",
+                name: item.name,
+                price: item.price,
+                originalPrice: item.price,
+                image: imageUrl,
+                brand: "Tom Ford",
+                timestamp: getCurrentTimestamp(),
+              },
+            ]);
+          });
         })
         .finally(() => setLoading(false));
     }
-  }, [fetchProducts, products]);
+  }, [fetchProducts, products]); // Hapus chats dari sini!
 
   const getResponse = async (userMsg: string) => {
     const timestamp = getCurrentTimestamp();
@@ -161,7 +203,6 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         ))}
         {loading && <LoadingChat />}
       </main>
-      {productData.length > 0 && <SuggestedGifts product={productData} />}
       <footer className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">
         <div className="pointer-events-none absolute inset-x-0 -top-[116px] flex justify-center">
           <BleedEffect className="h-48" />
