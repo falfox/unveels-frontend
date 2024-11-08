@@ -7,15 +7,16 @@ type Message =
       id: number;
       text: string;
       sender: string;
-      type?: undefined;
+      type?: "chat" | "audio";
       mode: "voice-connection" | "text-connection" | "audio-connection";
       timestamp: string;
+      audioURL?: string | null;
     }
   | {
       id: number;
       type: "audio";
       sender: string;
-      audioUrl: string;
+      audioURL?: string | null;
       text?: undefined;
       timestamp: string;
     }
@@ -37,49 +38,48 @@ interface MessageItemProps {
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
-  // Determine if the current message has mode 'audio-connection'
+  const isUser = message.sender === "user";
   const isAudioConnection =
     "mode" in message && message.mode === "audio-connection";
+  const isTextConnection =
+    "mode" in message && message.mode === "text-connection";
 
-  // **Hide agent's message bubble during audio-connection**
+  // Hide agent's message bubble only during audio-connection
   if (message.sender === "agent" && isAudioConnection) {
     return null;
   }
 
   return (
     <div
-      className={clsx("flex flex-col", {
-        "items-end": message.sender === "user",
-        "items-start": message.sender !== "user" && !isAudioConnection,
-        "items-center": message.sender !== "user" && isAudioConnection,
+      className={clsx("mb-4 flex w-full", {
+        "justify-end": isUser, // Align user's messages to the right
+        "justify-start": !isUser, // Align agent's messages to the left
       })}
     >
-      <div className="flex items-end">
-        {/* Conditionally render the agent's avatar */}
-        {message.sender === "agent" && !isAudioConnection && (
+      <div className="flex max-w-[75%] items-end space-x-2">
+        {/* Avatar for agent messages on the left */}
+        {!isUser && (
           <img
             alt="Agent"
-            className="mr-2 size-14 rounded-full"
+            className="h-12 w-12 rounded-full"
             src={SarahAvatar}
           />
         )}
+
+        {/* Message bubble */}
         <div
           className={clsx(
-            "relative max-w-[60%] rounded-3xl text-white",
-            {
-              "rounded-br-none bg-[linear-gradient(90deg,rgba(202,156,67,0.2)_0%,rgba(145,110,43,0.2)_27.4%,rgba(106,79,27,0.2)_59.4%,rgba(71,50,9,0.2)_100%)]":
-                message.sender === "user",
-              "rounded-bl-none bg-[linear-gradient(90deg,rgba(202,156,67,0.5)_0%,rgba(145,110,43,0.5)_27.4%,rgba(106,79,27,0.5)_59.4%,rgba(71,50,9,0.5)_100%)]":
-                message.sender !== "user",
-            },
-            message.type === "audio" ? "px-3" : "p-3",
-            message.type === "product" ? "max-w-fit px-5" : "",
+            "relative w-full rounded-3xl p-3 text-white",
+            isUser
+              ? "rounded-br-none bg-[linear-gradient(90deg,rgba(202,156,67,0.2)_0%,rgba(145,110,43,0.2)_27.4%,rgba(106,79,27,0.2)_59.4%,rgba(71,50,9,0.2)_100%)]"
+              : "rounded-bl-none bg-[linear-gradient(90deg,rgba(202,156,67,0.5)_0%,rgba(145,110,43,0.5)_27.4%,rgba(106,79,27,0.5)_59.4%,rgba(71,50,9,0.5)_100%)]",
+            message.type === "audio" ? "px-4 py-2" : "p-3",
           )}
         >
-          {message.type === "audio" ? (
-            <AudioWave url={message.audioUrl} />
+          {message.type === "audio" && message.audioURL ? (
+            <AudioWave url={message.audioURL} />
           ) : message.type === "product" ? (
-            <div className="flex w-[115px] flex-col rounded-lg">
+            <div className="flex w-full flex-col rounded-lg">
               <img
                 alt={message.name}
                 className="aspect-square w-full rounded-md object-cover"
@@ -101,11 +101,13 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               </div>
             </div>
           ) : (
-            <p className="text-sm">{message.text}</p>
+            <p className="w-full text-sm">{message.text}</p>
           )}
         </div>
-        {message.sender === "user" && (
-          <div className="ml-2 size-14 rounded-full bg-white/20" />
+
+        {/* Placeholder for user avatar on the right */}
+        {isUser && (
+          <div className="h-12 w-12 flex-shrink-0 rounded-full bg-white/20" />
         )}
       </div>
     </div>

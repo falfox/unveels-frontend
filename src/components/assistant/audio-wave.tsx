@@ -1,6 +1,6 @@
 import { useWavesurfer } from "@wavesurfer/react";
 import { PauseCircle, PlayCircle } from "lucide-react";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const AudioWave = ({ url }: { url: string }) => {
   const containerRef = useRef(null);
@@ -10,21 +10,27 @@ const AudioWave = ({ url }: { url: string }) => {
     height: 48,
     waveColor: "rgb(255, 255, 255)",
     progressColor: "#CA9C43",
-    url,
-
-    // Set a bar width
     barWidth: 2,
-    // Optionally, specify the spacing between bars
     barGap: 1,
-    // And the bar radius
     barRadius: 2,
     cursorWidth: 0,
   });
 
   const onPlayPause = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     wavesurfer && wavesurfer.playPause();
   }, [wavesurfer]);
+
+  useEffect(() => {
+    if (wavesurfer && url.startsWith("blob:")) {
+      fetch(url)
+        .then((response) => response.blob())
+        .then((blob) => {
+          wavesurfer.loadBlob(blob); // Load the blob into wavesurfer
+        });
+    } else if (wavesurfer) {
+      wavesurfer.load(url); // Load normal URL
+    }
+  }, [wavesurfer, url]);
 
   return (
     <div className="flex w-full items-center space-x-1">

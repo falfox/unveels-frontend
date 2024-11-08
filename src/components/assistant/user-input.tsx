@@ -8,17 +8,27 @@ import { updateProgress } from "../../utils/updateProgress";
 interface UserInputProps {
   msg: string;
   setMsg: (value: string) => void;
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, audioURL?: string | null) => void;
+  showVoice?: boolean;
 }
 
-const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
+const UserInput = ({
+  msg,
+  setMsg,
+  onSendMessage,
+  showVoice = true,
+}: UserInputProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [recordingState, setRecordingState] = useState<
     "idle" | "recording" | "paused"
   >("idle");
-
   const [progressMs, setProgressMs] = useState(0);
+  const [isSending, setIsSending] = useState(false);
+  const [isSendDisabled, setIsSendDisabled] = useState(false); // New state for disabling send button
+  const transcriptRef = useRef<string>("");
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [audioURL, setAudioURL] = useState<string | null>(null);
 
   const plugins = useMemo(
     () => [
@@ -29,58 +39,178 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
     ],
     [],
   );
+
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
     height: 48,
     waveColor: "rgb(255, 255, 255)",
     progressColor: "#CA9C43",
-
-    // Set a bar width
     barWidth: 2,
-    // Optionally, specify the spacing between bars
     barGap: 1,
-    // And the bar radius
     barRadius: 2,
     cursorWidth: 0,
+    plugins,
   });
 
   const record = plugins[0];
 
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "id-ID";
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            transcriptRef.current += result[0].transcript + " ";
+          }
+        }
+      };
+
+      recognition.onend = () => {
+        setVoiceTranscript(transcriptRef.current.trim());
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.warn("SpeechRecognition tidak didukung di browser ini.");
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (recordingState === "recording" && recognitionRef.current) {
+      recognitionRef.current.start();
+    } else if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  }, [recordingState]);
+
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     if (wavesurfer) {
       wavesurfer.registerPlugin(record);
-      record.on("record-end", (blob) => {
-        console.log("Recording ended", blob);
-        setRecordingState("idle");
-        setProgressMs(0);
-      });
 
       record.on("record-start", () => {
         console.log("Recording started");
         setRecordingState("recording");
+        setProgressMs(0); // Reset progress
+        transcriptRef.current = "";
+        setAudioURL(null);
+
+        // Start a custom timer to simulate progress updates
+        recordingIntervalRef.current = setInterval(() => {
+          setProgressMs((prev) => prev + 1000); // Increase by 1000 ms (1 second)
+        }, 1000);
       });
 
-      record.on("record-pause", (blob) => {
-        console.log("Recording paused", blob);
+      record.on("record-end", (blob) => {
+        console.log("Recording ended");
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+        }
+        const generatedAudioURL = URL.createObjectURL(blob);
+        setAudioURL(generatedAudioURL);
+        setRecordingState("idle");
+        setVoiceTranscript(transcriptRef.current.trim());
+
+        if (isSending) {
+          onSendMessage(transcriptRef.current.trim(), generatedAudioURL);
+          transcriptRef.current = "";
+          setIsSending(false);
+        }
+
+        setIsSendDisabled(false);
+      });
+
+      record.on("record-pause", () => {
+        console.log("Recording paused");
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+        }
+        setVoiceTranscript(transcriptRef.current.trim());
         setRecordingState("paused");
       });
 
       record.on("record-resume", () => {
         console.log("Recording resumed");
         setRecordingState("recording");
-      });
 
-      record.on("record-progress", (time) => {
-        console.log("Recording progress", time);
-
-        setProgressMs(time);
+        // Restart the interval for progress updates
+        recordingIntervalRef.current = setInterval(() => {
+          setProgressMs((prev) => prev + 1000); // Increase by 1000 ms (1 second)
+        }, 1000);
       });
 
       return () => {
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current); // Clear interval on component unmount
+        }
         record.destroy();
+        record.unAll();
       };
     }
-  }, [wavesurfer, record]);
+  }, [wavesurfer, record, isSending, onSendMessage]);
+
+  const handleTrashClick = () => {
+    setAudioURL(null);
+    setVoiceTranscript("");
+    transcriptRef.current = "";
+    setRecordingState("idle");
+    setIsSendDisabled(false);
+    if (wavesurfer && record) {
+      record.destroy();
+      const newRecord = RecordPlugin.create({
+        scrollingWaveform: true,
+        renderRecordedAudio: false,
+      });
+      wavesurfer.registerPlugin(newRecord);
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (recordingState === "recording" || recordingState === "paused") {
+      setIsSending(true);
+      setIsSendDisabled(true);
+      record.stopRecording();
+    } else {
+      onSendMessage(msg, null);
+      setMsg("");
+    }
+    setRecordingState("idle");
+  };
+
+  const handleMicrophoneClick = () => {
+    if (recordingState === "idle") {
+      record.startRecording();
+      setIsSendDisabled(true);
+    } else if (recordingState === "recording") {
+      record.pauseRecording();
+      setIsSendDisabled(false);
+    } else {
+      record.resumeRecording();
+      setIsSendDisabled(true);
+    }
+  };
 
   return (
     <>
@@ -99,12 +229,7 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
         />
         {recordingState !== "idle" ? (
           <div className="mx-2 flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={() => {
-                record.stopRecording();
-              }}
-            >
+            <button type="button" onClick={handleTrashClick}>
               <Trash className="size-6 text-white" />
             </button>
 
@@ -118,11 +243,11 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
           )}
           placeholder="Ask me anything..."
           type="text"
-          value={msg}
+          value={recordingState === "idle" ? msg : voiceTranscript}
           onChange={(e) => setMsg(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              onSendMessage(msg);
+            if (e.key === "Enter" && !isSendDisabled) {
+              handleSendMessage();
             }
           }}
         />
@@ -139,32 +264,32 @@ const UserInput = ({ msg, setMsg, onSendMessage }: UserInputProps) => {
         </div>
 
         <div className="absolute inset-y-0 right-0 flex h-full w-12 items-center justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              if (recordingState === "idle") {
-                record.startRecording();
-              } else if (recordingState === "recording") {
-                record.pauseRecording();
-              } else {
-                record.resumeRecording();
-              }
-            }}
-          >
-            {recordingState === "idle" ? (
-              <Mic className="size-6 text-gray-400" />
-            ) : recordingState === "recording" ? (
-              <PauseCircle className="size-6 text-red-600" />
-            ) : (
-              <CirclePlay className="size-6 text-white" />
-            )}
-          </button>
+          {showVoice ? (
+            <>
+              {" "}
+              <button type="button" onClick={handleMicrophoneClick}>
+                {recordingState === "idle" ? (
+                  <Mic className="size-6 text-gray-400" />
+                ) : recordingState === "recording" ? (
+                  <PauseCircle className="size-6 text-red-600" />
+                ) : (
+                  <CirclePlay className="size-6 text-white" />
+                )}
+              </button>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
       <button
         type="button"
-        onClick={() => onSendMessage(msg)}
-        className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]"
+        onClick={handleSendMessage}
+        disabled={isSendDisabled} // Disable button based on state
+        className={clsx(
+          "flex size-14 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]",
+          { "cursor-not-allowed opacity-50": isSendDisabled },
+        )}
       >
         <Send className="h-6 w-6 text-white" />
       </button>

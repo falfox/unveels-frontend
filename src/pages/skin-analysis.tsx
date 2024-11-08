@@ -78,6 +78,7 @@ function Main() {
 
           setInferenceResult(skinAnalysisResult[0]);
           setSkinAnalysisResult(skinAnalysisResult[1]);
+          console.log(skinAnalysisResult[1]);
         } catch (error: any) {
           console.error("Inference error:", error);
           setInferenceError(
