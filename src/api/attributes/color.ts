@@ -25,7 +25,11 @@ export const colors = [
   { label: "Silver", value: "5618", hex: "#C0C0C0" },
   { label: "Transparent", value: "5619", hex: "none" },
   { label: "Yellow", value: "5620", hex: "#FFFF00" },
-  { label: "Shimmer", value: "5621", hex: "#E8D5A6" }, // Made up shimmer color
+  { label: "Shimmer", value: "5621", hex: "#E8D5A6" },
   { label: "Bronze", value: "6478", hex: "#CD7F32" },
   { label: "Nude", value: "6479", hex: "#E1E1A3" },
 ];
+
+export function filterColors(selectedColors: string[]) {
+  return colors.filter((color) => selectedColors.includes(color.label));
+}

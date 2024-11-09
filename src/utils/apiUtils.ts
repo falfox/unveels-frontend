@@ -69,13 +69,21 @@ export const getProductAttributes = (
   );
 };
 
-export async function fetchConfigurableProducts(products: Product[]) {
+export async function fetchConfigurableProducts(
+  results: {
+    items: Array<Product>;
+  },
+  parentFilters: FilterGroup[] = [],
+) {
   // Check if it has any configurable products
-
-  const productFound = products.filter((p) => p.type_id === "configurable");
+  const productFound = results.items.filter(
+    (p) => p.type_id === "configurable",
+  );
 
   if (productFound.length === 0) {
-    return [];
+    return {
+      items: results.items,
+    };
   }
 
   // Get entity ids of the configurable products in prodcut[extension_attributes][configurable_product_links]
@@ -83,18 +91,8 @@ export async function fetchConfigurableProducts(products: Product[]) {
     .map((p) => p.extension_attributes.configurable_product_links ?? [])
     .flat();
 
-  // Get the configurable products
-
   const filters = [
-    {
-      filters: [
-        {
-          field: "type_id",
-          value: "simple",
-          condition_type: "eq",
-        },
-      ],
-    },
+    ...parentFilters,
     {
       filters: [
         {
@@ -113,9 +111,16 @@ export async function fetchConfigurableProducts(products: Product[]) {
     },
   );
 
-  const results = (await response.json()) as {
+  // Combine results with configurable products
+  const filteredResults = results.items.filter(
+    (product) => product.type_id === "simple",
+  );
+
+  const configrableResponse = (await response.json()) as {
     items: Array<Product>;
   };
 
-  return results.items;
+  return {
+    items: [...filteredResults, ...configrableResponse.items],
+  };
 }

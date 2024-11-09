@@ -1,47 +1,19 @@
 import clsx from "clsx";
-import { useState } from "react";
+import { useEffect } from "react";
+import { colors } from "../../../../api/attributes/color";
+import { filterTextures } from "../../../../api/attributes/texture";
 import { Icons } from "../../../../components/icons";
+import { LoadingProducts } from "../../../../components/loading";
+import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { EyeShadowProvider, useEyeShadowContext } from "./eye-shadow-context";
-import { ColorPalette } from "../../../../components/color-palette";
-
-const colorFamilies = [
-  { name: "Yellow", value: "#FFFF00" },
-  { name: "Black", value: "#000000" },
-  { name: "Silver", value: "#C0C0C0" },
-  {
-    name: "Gold",
-    value:
-      "linear-gradient(90deg, #CA9C43 0%, #C79A42 33%, #BE923E 56%, #AE8638 77%, #98752F 96%, #92702D 100%)",
-  },
-  { name: "Rose Gold", value: "#B76E79" },
-  { name: "Brass", value: "#B5A642" },
-  { name: "Gray", value: "#808080" },
-  {
-    name: "Multicolor",
-    value:
-      "linear-gradient(270deg, #E0467C 0%, #E55300 25.22%, #00E510 47.5%, #1400FF 72%, #FFFA00 100%)",
-  },
-  { name: "Pink", value: "#FE3699" },
-  { name: "Beige", value: "#F2D3BC" },
-  { name: "Brown", value: "#3D0B0B" },
-  { name: "Red", value: "#FF0000" },
-  { name: "White", value: "#FFFFFF" },
-  { name: "Purple", value: "#800080" },
-  { name: "Blue", value: "#1400FF" },
-  { name: "Green", value: "#52FF00" },
-  { name: "Transparent", value: "none" },
-  { name: "Orange", value: "#FF7A00" },
-  { name: "Bronze", value: "#CD7F32" },
-  { name: "Nude", value: "#E1E1A3" },
-];
+import { useEyeshadowsQuery } from "./eye-shadow-query";
 
 export function EyeShadowSelector() {
   return (
     <EyeShadowProvider>
       <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
         <div>
-          <FamilyColorSelector />
-
           <ColorSelector />
         </div>
 
@@ -55,69 +27,56 @@ export function EyeShadowSelector() {
   );
 }
 
-function FamilyColorSelector() {
-  const { selectedMode, colorFamily, setColorFamily } = useEyeShadowContext();
-
-  if (selectedMode !== "One") {
-    return null;
-  }
-
-  return (
-    <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
-      data-mode="lip-color"
-    >
-      {colorFamilies.map((item, index) => (
-        <button
-          type="button"
-          className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
-            {
-              "border-white/80": colorFamily === item.name,
-            },
-          )}
-          onClick={() => setColorFamily(item.name)}
-        >
-          <div
-            className="size-2.5 shrink-0 rounded-full"
-            style={{
-              background: item.value,
-            }}
-          />
-          <span className="text-sm">{item.name}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-const colors = [
-  "#E0467C",
-  "#740039",
-  "#8D0046",
-  "#B20058",
-  "#B51F69",
-  "#DF1050",
-  "#E31B7B",
-  "#E861A4",
-  "#FE3699",
-];
-
-const gradients = [
-  ["#342112", "#9A6035"],
-  ["#3D2B1F", "#A37353"],
-  ["#483C32", "#AE9179"],
-  ["#4A2912", "#B0612C"],
-  ["#4F300D", "#B56F1E"],
-  ["#5C4033", "#C2876C"],
-  ["#6A4B3A", "#D09372"],
-  ["#7B3F00", "#E17300"],
-  ["#8B4513", "#251205"],
-];
+const maxColorsMap: {
+  [key: string]: number;
+} = {
+  One: 1,
+  Dual: 2,
+  Tri: 3,
+  Quadra: 4,
+  Tetra: 5,
+};
 
 function ColorSelector() {
-  const { selectedMode, selectedColor, setSelectedColor } =
+  const { selectedMode, colorFamily, selectedColors, setSelectedColors } =
     useEyeShadowContext();
+
+  const { data } = useEyeshadowsQuery({
+    color: null,
+    hexcodes: null,
+    texture: null,
+  });
+
+  const extracted_sub_colors = extractUniqueCustomAttributes(
+    data?.items ?? [],
+    "hexacode",
+  ).flatMap((item) => item.split(","));
+
+  const maxColors = maxColorsMap[selectedMode] || 1;
+
+  const handleColorClick = (color: string) => {
+    // Handle color deselection
+    if (selectedColors.includes(color)) {
+      setSelectedColors(selectedColors.filter((c) => c !== color));
+      return;
+    }
+
+    // Update colors by either adding new color or replacing the oldest one
+    const newColors =
+      selectedColors.length < maxColors
+        ? [...selectedColors, color]
+        : [...selectedColors.slice(1), color]; // Remove oldest, add new
+
+    setSelectedColors(newColors);
+  };
+
+  useEffect(() => {
+    const maxColors = maxColorsMap[selectedMode] || 1;
+
+    if (selectedColors.length > maxColors) {
+      setSelectedColors(selectedColors.slice(0, maxColors));
+    }
+  }, [selectedMode, selectedColors, setSelectedColors]);
 
   return (
     <div className="w-full py-2 mx-auto lg:max-w-xl">
@@ -126,62 +85,34 @@ function ColorSelector() {
           type="button"
           className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
           onClick={() => {
-            setSelectedColor(null);
+            setSelectedColors([]);
           }}
         >
           <Icons.empty className="size-10" />
         </button>
-
-        {selectedMode === "One"
-          ? colors.map((color, index) => (
-              <ColorPalette
-                size="large"
-                palette={{
-                  color: color,
-                }}
-              />
+        {/* {renderPaletteItems()} */}
+        {extracted_sub_colors
+          ? extracted_sub_colors.map((color, index) => (
+              <button
+                key={color}
+                type="button"
+                className={clsx(
+                  "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+                  {
+                    "border-white/80": selectedColors.includes(color),
+                  },
+                )}
+                style={{ background: color }}
+                onClick={() => handleColorClick(color)}
+              ></button>
             ))
-          : selectedMode === "Dual"
-            ? gradients.map((gradient, index) => (
-                <ColorPalette
-                  size="large"
-                  palette={{
-                    gradient: gradient,
-                  }}
-                />
-              ))
-            : selectedMode === "Tri"
-              ? Array.from({ length: 8 }, (_, index) => (
-                  <ColorPalette
-                    size="large"
-                    palette={{
-                      colors: ["#864121", "#5C4033", "#6C564C"],
-                    }}
-                  />
-                ))
-              : selectedMode === "Quadra"
-                ? Array.from({ length: 8 }, (_, index) => (
-                    <ColorPalette
-                      size="large"
-                      palette={{
-                        colors: ["#C75364", "#964955", "#B76E79", "#E0467C"],
-                      }}
-                    />
-                  ))
-                : colors.map((color, index) => (
-                    <ColorPalette
-                      size="large"
-                      palette={{
-                        color: color,
-                      }}
-                    />
-                  ))}
+          : null}
       </div>
     </div>
   );
 }
 
-const textures = ["Metallic", "Matt", "Shimmer"];
+const textures = filterTextures(["Metallic", "Matte", "Shimmer"]);
 
 function TextureSelector() {
   const { selectedTexture, setSelectedTexture } = useEyeShadowContext();
@@ -190,18 +121,24 @@ function TextureSelector() {
       <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
-            key={texture}
+            key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80 shrink-0",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
-                  selectedTexture === texture,
+                  selectedTexture === texture.value,
               },
             )}
-            onClick={() => setSelectedTexture(texture)}
+            onClick={() => {
+              if (selectedTexture === texture.value) {
+                setSelectedTexture(null);
+              } else {
+                setSelectedTexture(texture.value);
+              }
+            }}
           >
-            <span className="text-sm">{texture}</span>
+            <span className="text-sm">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -283,76 +220,23 @@ function ModeSelector() {
 }
 
 function ProductList() {
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
+  const { selectedTexture, selectedColors } = useEyeShadowContext();
 
-  const { colorFamily, selectedTexture } = useEyeShadowContext();
+  const { data, isLoading } = useEyeshadowsQuery({
+    color: null,
+    hexcodes: selectedColors,
+    texture: selectedTexture,
+  });
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto !border-t-0 pb-2 pt-4 no-scrollbar active:cursor-grabbing">
-      {products.map((product, index) => (
-        <div key={index} className="w-[100px] rounded shadow">
-          <div className="relative h-[70px] w-[100px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="object-cover rounded"
-            />
-          </div>
-
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between pt-1 space-x-1">
-            <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-              $15
-            </div>
-            <button
-              type="button"
-              className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-            >
-              Add to cart
-            </button>
-          </div>
-        </div>
-      ))}
+    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+      {isLoading ? (
+        <LoadingProducts />
+      ) : (
+        data?.items.map((product, index) => {
+          return <VTOProductCard product={product} key={product.id} />;
+        })
+      )}
     </div>
   );
 }
