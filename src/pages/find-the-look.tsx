@@ -29,13 +29,13 @@ import { VideoScene } from "../components/recorder/recorder";
 import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
-import { SkinAnalysisProvider } from "../components/skin-analysis/skin-analysis-context";
+import { SkinAnalysisProvider } from "../context/skin-analysis-context";
 import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { skinAnalysisInference } from "../inference/skinAnalysisInference";
 import { FaceResults } from "../types/faceResults";
 import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
-import { TopNavigation } from "./skin-tone-finder";
+import { TopNavigation } from "../components/top-navigation";
 import {
   headAccessoriesProductTypeFilter,
   neckAccessoriesProductTypeFilter,

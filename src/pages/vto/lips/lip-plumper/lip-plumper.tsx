@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { textures } from "../../../../api/attributes/texture";
 import { Icons } from "../../../../components/icons";
 import { LoadingProducts } from "../../../../components/loading";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { useLipPlumperContext } from "./lip-plumper-context";

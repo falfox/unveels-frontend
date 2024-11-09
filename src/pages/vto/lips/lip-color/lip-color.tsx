@@ -4,7 +4,7 @@ import { textures } from "../../../../api/attributes/texture";
 import { ColorPalette } from "../../../../components/color-palette";
 import { Icons } from "../../../../components/icons";
 import { LoadingProducts } from "../../../../components/loading";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 import { LipColorProvider, useLipColorContext } from "./lip-color-context";
 
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";

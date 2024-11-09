@@ -28,6 +28,10 @@ import {
   useInferenceContext,
 } from "../context/inference-context";
 import { TopNavigation } from "../components/top-navigation";
+import * as tf from "@tensorflow/tfjs-core";
+import * as tflite from "@tensorflow/tfjs-tflite";
+import { loadTFLiteModel } from "../utils/tfliteInference";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export function FaceAnalyzer() {
   return (
@@ -42,6 +46,16 @@ export function FaceAnalyzer() {
 }
 
 function MainContent() {
+  const [modelFaceShape, setModelFaceShape] =
+    useState<tflite.TFLiteModel | null>(null);
+
+  const [modelPersonalityFinder, setModelPersonalityFinder] =
+    useState<tflite.TFLiteModel | null>(null);
+
+  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
+    null,
+  );
+
   const { criterias } = useCamera();
   const {
     isInferenceFinished,
@@ -56,19 +70,84 @@ function MainContent() {
   );
 
   useEffect(() => {
+    let isMounted = true;
+    const dummyInput = tf.zeros([1, 224, 224, 3], "float32");
+
+    const loadModel = async () => {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
+        );
+
+        const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+            delegate: "GPU",
+          },
+          outputFaceBlendshapes: true,
+          minFaceDetectionConfidence: 0.7,
+          minFacePresenceConfidence: 0.7,
+          minTrackingConfidence: 0.7,
+          runningMode: "IMAGE",
+          numFaces: 1,
+        });
+
+        setModelFaceShape(
+          await loadTFLiteModel(
+            "/models/personality-finder/face-analyzer.tflite",
+          ),
+        );
+        setModelPersonalityFinder(
+          await loadTFLiteModel(
+            "/models/personality-finder/personality_finder.tflite",
+          ),
+        );
+
+        if (isMounted) {
+          setFaceLandmarker(faceLandmarker);
+          // warmup
+          modelFaceShape?.predict(dummyInput);
+          modelPersonalityFinder?.predict(dummyInput);
+          modelFaceShape?.predict(dummyInput);
+          modelPersonalityFinder?.predict(dummyInput);
+        }
+      } catch (error) {
+        console.error("Failed to initialize: ", error);
+      }
+    };
+
+    loadModel();
+
+    return () => {
+      isMounted = false;
+      if (faceLandmarker) {
+        faceLandmarker.close();
+      }
+      if (modelPersonalityFinder && modelFaceShape) {
+        dummyInput.dispose();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const performInference = async () => {
       if (criterias.isCaptured && criterias.capturedImage) {
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
         try {
-          const personalityResult: Classifier[] = await personalityInference(
-            criterias.capturedImage,
-            224,
-            224,
-          );
-          setInferenceResult(personalityResult);
-          setIsInferenceFinished(true);
+          if (modelFaceShape && modelPersonalityFinder && faceLandmarker) {
+            const personalityResult: Classifier[] = await personalityInference(
+              modelFaceShape,
+              modelPersonalityFinder,
+              faceLandmarker,
+              criterias.capturedImage,
+              224,
+              224,
+            );
+            setInferenceResult(personalityResult);
+            setIsInferenceFinished(true);
+          }
         } catch (error: any) {
           setIsInferenceFinished(false);
           console.error("Inference error:", error);

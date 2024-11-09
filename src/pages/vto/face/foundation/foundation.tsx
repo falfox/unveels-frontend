@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
-
 import { ColorPalette } from "../../../../components/color-palette";
 import { useMakeup } from "../../../../context/makeup-context";
 import { FoundationProvider, useFoundationContext } from "./foundation-context";
@@ -100,13 +99,8 @@ function useFaceFoundationQuery({
 
 export function FoundationSelector() {
   return (
-<<<<<<< HEAD
-    <FoundationProvider>
-      <div className="mx-auto w-full px-4 lg:max-w-xl">
-=======
     <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
       <div>
->>>>>>> 71f85c7876481aa24e47957c5979f579f277ff24
         <FamilyColorSelector />
 
         <ColorSelector />
@@ -296,26 +290,6 @@ function ProductList() {
   ];
 
   return (
-<<<<<<< HEAD
-    <div className="flex w-full gap-4 overflow-x-auto border-t border-white pb-2 pt-4 no-scrollbar active:cursor-grabbing">
-      {products.map((product, index) => (
-        <div key={index} className="w-[100px] rounded shadow">
-          <div className="relative h-[70px] w-[100px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="rounded object-cover"
-            />
-          </div>
-
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between space-x-1 pt-1">
-            <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-              $15
-=======
     <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
@@ -352,7 +326,6 @@ function ProductList() {
                   Add to cart
                 </button>
               </div>
->>>>>>> 71f85c7876481aa24e47957c5979f579f277ff24
             </div>
           );
         })
