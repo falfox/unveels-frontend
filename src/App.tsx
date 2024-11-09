@@ -45,7 +45,7 @@ import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
 import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
 import { FindTheLook } from "./pages/find-the-look";
-
+import { SkinAnalysisWeb } from "./pages/skin-analysis.-web";
 // Define routes using object syntax
 const routes = [
   {
@@ -64,6 +64,7 @@ const routes = [
   { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
+  { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
   {
     path: "/virtual-try-on-product/:sku",
     element: <SingleVirtualTryOn />,
@@ -144,6 +145,7 @@ function Home() {
         Personality Finder Web
       </LinkButton>
       <LinkButton to="/skin-tone-finder-web">Skin Tone Finder Web</LinkButton>
+      <LinkButton to="/skin-analysis-web">Skin Analysis Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
     </div>

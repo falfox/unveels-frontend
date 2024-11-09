@@ -122,6 +122,19 @@ export function SkinAnalysisScene({ data }: SkinAnalysisSceneProps) {
 
   const handleLabelClick = (label: string | null) => {
     if (label != null) {
+      if ((window as any).flutter_inappwebview) {
+        (window as any).flutter_inappwebview
+          .callHandler(
+            "getLabel",
+            JSON.stringify({ skinAnalysisLabelClick: label }),
+          )
+          .then((result: any) => {
+            console.log("Flutter responded with:", result);
+          })
+          .catch((error: any) => {
+            console.error("Error calling Flutter handler:", error);
+          });
+      }
       setTab(label);
       setView("problems");
       console.log(label);
