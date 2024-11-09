@@ -23,21 +23,18 @@ const ModelScene = ({
       <Canvas dpr={2}>
         <OrthographicCamera
           makeDefault
-          zoom={1400}
-          position={[0.06, 1.6, 1]}
+          zoom={620}
+          position={[0.06, 1.5, 1]}
           rotation={[0, 0.05, 0]}
         />
 
         <Suspense fallback={null}>
-          <Environment
-            background={false}
-            files="/photo_studio_loft_hall_1k.hdr"
-          />
+          <Environment background={false} files="/images/bg.hdr" />
         </Suspense>
 
         <Suspense fallback={null}>
           <Avatar
-            avatar_url="/model.glb"
+            avatar_url="/sarah.glb"
             speak={speak}
             text={text}
             playing={playing}
