@@ -43,6 +43,7 @@ import {
   headAccessoriesProductTypeFilter,
   neckAccessoriesProductTypeFilter,
 } from "../api/attributes/accessories";
+import { FindTheLookScene } from "../components/find-the-look/find-the-look-scene";
 
 export function FindTheLook() {
   return (
@@ -60,54 +61,24 @@ export function FindTheLook() {
 
 function Main() {
   const { criterias } = useCamera();
-  const [inferenceResult, setInferenceResult] = useState<FaceResults[] | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [inferenceError, setInferenceError] = useState<string | null>(null);
-  const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
-
-  useEffect(() => {
-    const faceAnalyzerInference = async () => {
-      if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
-        setIsInferenceRunning(true);
-        setIsLoading(true);
-        setInferenceError(null);
-        try {
-          const skinAnalysisResult: FaceResults[] = await skinAnalysisInference(
-            criterias.capturedImage,
-          );
-
-          setInferenceResult(skinAnalysisResult);
-        } catch (error: any) {
-          console.error("Inference error:", error);
-          setInferenceError(
-            error.message || "An error occurred during inference.",
-          );
-        } finally {
-          setIsLoading(false); // Pastikan isLoading diubah kembali
-          setIsInferenceRunning(false); // Tambahkan ini jika perlu
-        }
-      }
-    };
-
-    faceAnalyzerInference();
-  }, [criterias.isCaptured, criterias.capturedImage]);
 
   return (
     <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
       <div className="absolute inset-0">
-        {!isLoading && inferenceResult != null ? (
-          <SkinAnalysisScene data={inferenceResult} />
+        {criterias.isCaptured && criterias.capturedImage ? (
+          <FindTheLookScene />
         ) : (
-          <VideoStream />
+          <>
+            <VideoStream />
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                zIndex: 0,
+              }}
+            ></div>
+          </>
         )}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          }}
-        ></div>
       </div>
       <RecorderStatus />
       <TopNavigation item={false} />
@@ -418,12 +389,6 @@ function InferenceResults({
 }) {
   return (
     <>
-      <div
-        className="fixed inset-0 w-full h-full -z-10"
-        onClick={() => {
-          onFaceClick?.();
-        }}
-      ></div>
       <div className="absolute inset-x-0 flex items-center justify-center bottom-32">
         <button
           type="button"

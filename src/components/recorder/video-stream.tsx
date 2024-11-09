@@ -335,7 +335,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     cancel: cancelCountdown,
     isActive: isCountdownActive,
   } = useCountdown({
-    initialCount: 0.5,
+    initialCount: 3,
     onComplete: capture, // Callback when countdown finishes
   });
 
