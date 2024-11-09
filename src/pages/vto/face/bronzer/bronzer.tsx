@@ -4,7 +4,7 @@ import { Icons } from "../../../../components/icons";
 import { ColorPalette } from "../../../../components/color-palette";
 import { BronzerProvider, useBronzerContext } from "./bronzer-context";
 import { useLashesContext } from "../../eyes/lashes/lashes-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 import { useQuery } from "@tanstack/react-query";
 import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
 import {
@@ -98,15 +98,15 @@ function useFaceBronzerQuery({
 
 export function BronzerSelector() {
   return (
-      <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
-        <ColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <ColorSelector />
 
-        <ShapeSelector />
+      <ShapeSelector />
 
-        <TextureSelector />
+      <TextureSelector />
 
-        <ProductList />
-      </div>
+      <ProductList />
+    </div>
   );
 }
 

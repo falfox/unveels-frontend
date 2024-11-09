@@ -3,7 +3,7 @@ import { Icons } from "../../../../components/icons";
 
 import { ColorPalette } from "../../../../components/color-palette";
 import { ConcealerProvider, useConcealerContext } from "./concealer-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 
 const colorFamilies = [
   { name: "Light Skin", value: "#FAD4B4" },

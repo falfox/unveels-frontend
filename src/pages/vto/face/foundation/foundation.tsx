@@ -1,8 +1,7 @@
 import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
-
 import { ColorPalette } from "../../../../components/color-palette";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 import { FoundationProvider, useFoundationContext } from "./foundation-context";
 import { useQuery } from "@tanstack/react-query";
 import {

@@ -6,7 +6,7 @@ import { WATCH } from "../../../utils/constants";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { calculateDistance } from "../../../utils/calculateDistance";
 import { handQuaternion } from "../../../utils/handOrientation";
-import { useAccesories } from "../accesories-context";
+import { useAccesories } from "../../../context/accesories-context";
 
 interface WatchProps extends MeshProps {
   handLandmarks: React.RefObject<Landmark[]>;

@@ -7,7 +7,7 @@ import {
   HighlighterProvider,
   useHighlighterContext,
 } from "./highlighter-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 import { useQuery } from "@tanstack/react-query";
 import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
 import {

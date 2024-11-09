@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { Lightbulb, Scan, ScanFace } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useCamera } from "./recorder-context";
+import { useCamera } from "../../context/recorder-context";
 
 const categorizedHints = {
   facePosition: [

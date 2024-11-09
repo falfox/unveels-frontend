@@ -3,7 +3,7 @@ import React, { useMemo, Suspense } from "react";
 import { MeshBasicMaterial, TextureLoader } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
-import { useMakeup } from "../makeup-context";
+import { useMakeup } from "../../../context/makeup-context";
 import { CONCEALER_TEXTURE } from "../../../utils/constants";
 
 interface ConcealerProps extends MeshProps {

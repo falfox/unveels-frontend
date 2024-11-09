@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 import { EyebrowsProvider, useEyebrowsContext } from "./eyebrows-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 import { events } from "@react-three/fiber";
 import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";

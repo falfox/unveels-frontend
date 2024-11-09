@@ -3,11 +3,12 @@ import { Landmark } from "../../types/landmark";
 import { BboxLandmark } from "../../types/bboxLandmark";
 import { adjustBoundingBoxes } from "../../utils/boundingBoxUtils";
 import { skinAnalysisDataItem } from "../../utils/constants";
+import { FaceResults } from "../../types/faceResults";
 
 interface OverlayCanvasProps {
   image: HTMLImageElement;
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  data: BboxLandmark[];
+  data: FaceResults[];
   landmarks: Landmark[];
   onLabelClick?: (label: string | null) => void; // Diperbarui
 }

@@ -3,7 +3,7 @@ import { Icons } from "../../../../components/icons";
 
 import { ColorPalette } from "../../../../components/color-palette";
 import { BlushProvider, useBlushContext } from "./blush-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+import { useMakeup } from "../../../../context/makeup-context";
 import { useQuery } from "@tanstack/react-query";
 import {
   buildSearchParams,

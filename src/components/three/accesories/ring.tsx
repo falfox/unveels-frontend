@@ -5,7 +5,7 @@ import { Landmark } from "../../../types/landmark";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { calculateDistance } from "../../../utils/calculateDistance";
 import { handQuaternion } from "../../../utils/handOrientation";
-import { useAccesories } from "../accesories-context";
+import { useAccesories } from "../../../context/accesories-context";
 import { RING } from "../../../utils/constants";
 
 interface RingProps extends MeshProps {

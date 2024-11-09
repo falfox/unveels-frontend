@@ -26,19 +26,16 @@ import { LoadingProducts } from "../components/loading";
 import { BrandName } from "../components/product/brand";
 import { Rating } from "../components/rating";
 import { VideoScene } from "../components/recorder/recorder";
-import {
-  CameraProvider,
-  useCamera,
-} from "../components/recorder/recorder-context";
+import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
-import { SkinAnalysisProvider } from "../components/skin-analysis/skin-analysis-context";
+import { SkinAnalysisProvider } from "../context/skin-analysis-context";
 import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { skinAnalysisInference } from "../inference/skinAnalysisInference";
 import { FaceResults } from "../types/faceResults";
 import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
-import { TopNavigation } from "./skin-tone-finder";
+import { TopNavigation } from "../components/top-navigation";
 import {
   headAccessoriesProductTypeFilter,
   neckAccessoriesProductTypeFilter,
@@ -63,7 +60,7 @@ function Main() {
   const { criterias } = useCamera();
 
   return (
-    <div className="relative w-full h-full mx-auto bg-black min-h-dvh">
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
         {criterias.isCaptured && criterias.capturedImage ? (
           <FindTheLookScene />
@@ -103,7 +100,7 @@ function MainContent() {
         }}
       />
     ) : (
-      <div className="flex px-5 pb-10 space-x-5 font-serif">
+      <div className="flex space-x-5 px-5 pb-10 font-serif">
         <button
           type="button"
           className="h-10 w-full rounded border border-[#CA9C43] text-white"
@@ -115,7 +112,7 @@ function MainContent() {
           className="h-10 w-full rounded bg-gradient-to-r from-[#CA9C43] to-[#92702D] text-white"
           onClick={() => setShareOpen(true)}
         >
-          Share <Icons.share className="inline-block ml-4 size-6" />
+          Share <Icons.share className="ml-4 inline-block size-6" />
         </button>
       </div>
     );
@@ -138,7 +135,7 @@ function MakeupCategories() {
 
   return (
     <>
-      <div className="relative px-4 pb-4 space-y-2">
+      <div className="relative space-y-2 px-4 pb-4">
         <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
           {makeups.map((category) => {
             const isActive = tab === category;
@@ -187,7 +184,7 @@ function AccessoriesCategories() {
 
   return (
     <>
-      <div className="relative px-4 pb-4 space-y-2">
+      <div className="relative space-y-2 px-4 pb-4">
         <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
           {accessories.map((category) => {
             const isActive = tab === category;
@@ -296,7 +293,7 @@ function ProductList({ product_type }: { product_type: string }) {
                 <img
                   src={imageUrl}
                   alt="Product"
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
 
@@ -308,7 +305,7 @@ function ProductList({ product_type }: { product_type: string }) {
                 <BrandName brandId={getProductAttributes(product, "brand")} />
               </p>
 
-              <div className="flex items-end justify-between pt-1 space-x-1">
+              <div className="flex items-end justify-between space-x-1 pt-1">
                 <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
                   ${product.price.toFixed(2)}
                 </div>
@@ -389,10 +386,10 @@ function InferenceResults({
 }) {
   return (
     <>
-      <div className="absolute inset-x-0 flex items-center justify-center bottom-32">
+      <div className="absolute inset-x-0 bottom-32 flex items-center justify-center">
         <button
           type="button"
-          className="px-10 py-3 text-sm text-white bg-black"
+          className="bg-black px-10 py-3 text-sm text-white"
           onClick={() => {
             onResultClick?.();
           }}
@@ -413,13 +410,13 @@ function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
   return (
     <>
       <div
-        className="fixed inset-0 w-full h-full"
+        className="fixed inset-0 h-full w-full"
         onClick={() => {
           onClose();
         }}
       ></div>
-      <div className="w-full px-4 mx-auto space-y-2 lg:max-w-xl">
-        <div className="flex items-center justify-between w-full h-10 text-center border-b border-gray-600">
+      <div className="mx-auto w-full space-y-2 px-4 lg:max-w-xl">
+        <div className="flex h-10 w-full items-center justify-between border-b border-gray-600 text-center">
           {["makeup", "accessories"].map((shadeTab) => {
             const isActive = tab === shadeTab;
             return (
@@ -444,12 +441,12 @@ function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
                           activeClassNames,
                         )}
                       >
-                        <span className="text-lg text-center">
+                        <span className="text-center text-lg">
                           {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
                         </span>
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-lg text-center text-white/70">
+                        <span className="text-center text-lg text-white/70">
                           {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
                         </span>
                       </div>
@@ -479,7 +476,7 @@ function AllProductsPage({ onClose }: { onClose: () => void }) {
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2">
         <button type="button" className="size-6" onClick={() => onClose()}>
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="h-6 w-6" />
         </button>
         <div className="flex items-center justify-end space-x-2.5">
           <Heart className="size-6" />
@@ -495,16 +492,16 @@ function AllProductsPage({ onClose }: { onClose: () => void }) {
             ) as string;
             return (
               <div className="relative size-9">
-                <img src={imageUrl} className="object-cover w-full h-full" />
+                <img src={imageUrl} className="h-full w-full object-cover" />
 
-                <div className="absolute top-0 right-0">
+                <div className="absolute right-0 top-0">
                   <button
                     type="button"
                     onClick={() => {
                       dispatch({ type: "remove", payload: product });
                     }}
                   >
-                    <X className="text-black size-5" />
+                    <X className="size-5 text-black" />
                   </button>
                 </div>
               </div>
@@ -540,13 +537,13 @@ function AllProductsPage({ onClose }: { onClose: () => void }) {
         <div className="mx-auto flex max-w-sm space-x-2.5 pb-6 pt-4 lg:space-x-6">
           <button
             type="button"
-            className="flex items-center justify-center w-full h-10 text-xs font-semibold text-white border border-white"
+            className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
           >
             TRY NOW
           </button>
           <button
             type="button"
-            className="flex items-center justify-center w-full h-10 text-xs font-semibold text-black bg-white border border-white"
+            className="flex h-10 w-full items-center justify-center border border-white bg-white text-xs font-semibold text-black"
           >
             ADD ALL TO CART
           </button>
@@ -558,7 +555,7 @@ function AllProductsPage({ onClose }: { onClose: () => void }) {
 
 function MakeupAllView() {
   return (
-    <div className="flex-1 h-full px-5 overflow-y-auto">
+    <div className="h-full flex-1 overflow-y-auto px-5">
       <div className="space-y-14">
         {makeups.map((category) => (
           <ProductHorizontalList category={category} />
@@ -593,11 +590,11 @@ function ProductHorizontalList({ category }: { category: string }) {
                 key={product.id}
                 className="w-[calc(50%-0.5rem)] shrink-0 rounded shadow lg:w-[calc(20%-0.5rem)]"
               >
-                <div className="relative w-full overflow-hidden aspect-square">
+                <div className="relative aspect-square w-full overflow-hidden">
                   <img
                     src={imageUrl}
                     alt="Product"
-                    className="object-cover w-full h-full rounded"
+                    className="h-full w-full rounded object-cover"
                   />
                 </div>
 
@@ -617,16 +614,16 @@ function ProductHorizontalList({ category }: { category: string }) {
                   </div>
                 </div>
                 <Rating rating={4} />
-                <div className="flex pt-1 space-x-1">
+                <div className="flex space-x-1 pt-1">
                   <button
                     type="button"
-                    className="flex items-center justify-center w-full h-10 text-xs font-semibold text-white border border-white"
+                    className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
                   >
                     ADD TO CART
                   </button>
                   <button
                     type="button"
-                    className="flex items-center justify-center w-full h-10 text-xs font-semibold text-black bg-white border border-white"
+                    className="flex h-10 w-full items-center justify-center border border-white bg-white text-xs font-semibold text-black"
                     onClick={() => {
                       dispatch({ type: "add", payload: product });
                     }}
@@ -647,7 +644,7 @@ function ProductHorizontalList({ category }: { category: string }) {
 
 function AccessoriesAllView() {
   return (
-    <div className="flex-1 h-full px-5 overflow-y-auto">
+    <div className="h-full flex-1 overflow-y-auto px-5">
       <div className="space-y-14">
         {accessories.map((category) => (
           <ProductHorizontalList category={category} />
@@ -675,7 +672,7 @@ function SingleCategoryView({
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2">
         <button type="button" className="size-6" onClick={() => onClose()}>
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="h-6 w-6" />
         </button>
         <div className="flex items-center justify-end space-x-2.5">
           <Heart className="size-6" />
@@ -683,7 +680,7 @@ function SingleCategoryView({
         </div>
       </div>
 
-      <div className="flex-1 h-full px-5 overflow-y-auto">
+      <div className="h-full flex-1 overflow-y-auto px-5">
         <div className="py-4">
           <h2 className="text-base text-[#E6E5E3]">{category}</h2>
         </div>
@@ -695,11 +692,11 @@ function SingleCategoryView({
                 ) as string;
                 return (
                   <div key={product.id} className="w-full rounded shadow">
-                    <div className="relative overflow-hidden aspect-square">
+                    <div className="relative aspect-square overflow-hidden">
                       <img
                         src={imageUrl}
                         alt="Product"
-                        className="object-cover w-full h-full rounded"
+                        className="h-full w-full rounded object-cover"
                       />
                     </div>
 
@@ -719,16 +716,16 @@ function SingleCategoryView({
                       </div>
                     </div>
                     <Rating rating={4} />
-                    <div className="flex pt-1 space-x-1">
+                    <div className="flex space-x-1 pt-1">
                       <button
                         type="button"
-                        className="flex items-center justify-center w-full h-10 text-xs font-semibold text-white border border-white"
+                        className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
                       >
                         ADD TO CART
                       </button>
                       <button
                         type="button"
-                        className="flex items-center justify-center w-full h-10 text-xs font-semibold text-black bg-white border border-white"
+                        className="flex h-10 w-full items-center justify-center border border-white bg-white text-xs font-semibold text-black"
                       >
                         TRY ON
                       </button>
@@ -749,26 +746,26 @@ function RecorderStatus() {
   const { finish } = useCamera();
 
   return (
-    <div className="absolute inset-x-0 flex items-center justify-center gap-4 top-14">
+    <div className="absolute inset-x-0 top-14 flex items-center justify-center gap-4">
       <button
-        className="flex items-center justify-center size-8"
+        className="flex size-8 items-center justify-center"
         onClick={handleStartPause}
       >
         {isPaused ? (
-          <CirclePlay className="text-white size-6" />
+          <CirclePlay className="size-6 text-white" />
         ) : isRecording ? (
-          <PauseCircle className="text-white size-6" />
+          <PauseCircle className="size-6 text-white" />
         ) : null}
       </button>
       <span className="relative flex size-4">
         {isRecording ? (
-          <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
         ) : null}
-        <span className="relative inline-flex bg-red-500 rounded-full size-4"></span>
+        <span className="relative inline-flex size-4 rounded-full bg-red-500"></span>
       </span>
       <div className="font-serif text-white">{formattedTime}</div>
       <button
-        className="flex items-center justify-center size-8"
+        className="flex size-8 items-center justify-center"
         onClick={
           isRecording
             ? () => {
@@ -779,9 +776,9 @@ function RecorderStatus() {
         }
       >
         {isRecording || isPaused ? (
-          <StopCircle className="text-white size-6" />
+          <StopCircle className="size-6 text-white" />
         ) : (
-          <CirclePlay className="text-white size-6" />
+          <CirclePlay className="size-6 text-white" />
         )}
       </button>
     </div>
