@@ -7,8 +7,8 @@ interface EyeShadowContextType {
   setSelectModeIndex: (index: number) => void;
   colorFamily: string | null;
   setColorFamily: (color: string | null) => void;
-  selectedColor: string | null;
-  setSelectedColor: (color: string | null) => void;
+  selectedColors: string[];
+  setSelectedColors: (colors: string[]) => void;
   selectedTexture: string | null;
   setSelectedTexture: (texture: string | null) => void;
 }
@@ -20,10 +20,10 @@ const EyeShadowContext = createContext<EyeShadowContextType | undefined>(
 
 // Create a provider component
 export function EyeShadowProvider({ children }: { children: React.ReactNode }) {
-  const [selectedMode, setMode] = useState<string>("color");
+  const [selectedMode, setMode] = useState<string>("One");
   const [modeIndex, setSelectModeIndex] = useState<number>(0);
   const [colorFamily, setColorFamily] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
 
   return (
@@ -35,8 +35,8 @@ export function EyeShadowProvider({ children }: { children: React.ReactNode }) {
         setSelectModeIndex,
         colorFamily,
         setColorFamily,
-        selectedColor,
-        setSelectedColor,
+        selectedColors,
+        setSelectedColors,
         selectedTexture,
         setSelectedTexture,
       }}

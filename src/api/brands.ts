@@ -36,6 +36,7 @@ export function useBrandsQuery() {
   return useQuery({
     queryKey: brandsKey.all,
     queryFn: fetchBrands,
+    staleTime: 1000 * 60 * 5,
   });
 }
 
@@ -43,6 +44,7 @@ export function useBrandsQuerySuspense() {
   return useSuspenseQuery({
     queryKey: brandsKey.all,
     queryFn: fetchBrands,
+    staleTime: 1000 * 60 * 5,
   });
 }
 

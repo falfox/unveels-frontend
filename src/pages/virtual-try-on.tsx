@@ -32,8 +32,40 @@ import { LipsMode } from "./vto/lips/lips-makeup";
 import { NailsMode } from "./vto/nails/nails-makeup";
 import { NeckAccessoriesMode } from "./vto/neck-accessories/neck-accessories";
 import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
-import { MakeupProvider } from "../context/makeup-context";
-import { AccesoriesProvider } from "../context/accesories-context";
+import { MakeupProvider } from "../components/three/makeup-context";
+import { AccesoriesProvider } from "../components/three/accesories-context";
+import { LipColorProvider } from "./vto/lips/lip-color/lip-color-context";
+import { LipLinerProvider } from "./vto/lips/lip-liner/lip-liner-context";
+import { LipPlumperProvider } from "./vto/lips/lip-plumper/lip-plumper-context";
+import { BlushProvider } from "./vto/face/blush/blush-context";
+import { FoundationProvider } from "./vto/face/foundation/foundation-context";
+import { HighlighterProvider } from "./vto/face/highlighter/highlighter-context";
+import { ContourProvider } from "./vto/face/contour/contour-context";
+import { BronzerProvider } from "./vto/face/bronzer/bronzer-context";
+
+interface VirtualTryOnProvider {
+  children: React.ReactNode;
+}
+
+export function VirtualTryOnProvider({ children }: VirtualTryOnProvider) {
+  return (
+    <ContourProvider>
+      <BronzerProvider>
+        <HighlighterProvider>
+          <FoundationProvider>
+            <BlushProvider>
+              <LipColorProvider>
+                <LipLinerProvider>
+                  <LipPlumperProvider>{children}</LipPlumperProvider>
+                </LipLinerProvider>
+              </LipColorProvider>
+            </BlushProvider>
+          </FoundationProvider>
+        </HighlighterProvider>
+      </BronzerProvider>
+    </ContourProvider>
+  );
+}
 
 export function VirtualTryOn() {
   return (
@@ -41,9 +73,11 @@ export function VirtualTryOn() {
       <SkinColorProvider>
         <MakeupProvider>
           <AccesoriesProvider>
-            <div className="h-full min-h-dvh">
-              <Main />
-            </div>
+            <VirtualTryOnProvider>
+              <div className="h-full min-h-dvh">
+                <Main />
+              </div>
+            </VirtualTryOnProvider>
           </AccesoriesProvider>
         </MakeupProvider>
       </SkinColorProvider>

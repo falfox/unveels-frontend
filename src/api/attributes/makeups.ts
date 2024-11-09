@@ -33,6 +33,14 @@ export const lips_makeup_product_types = [
   },
 ];
 
+export const lipsMakeupProductTypesFilter = (productTypes: String[]) => {
+  const filteredLipsProductTypes = lips_makeup_product_types
+    .filter((product) => productTypes.includes(product.label))
+    .map((product) => product.value)
+    .join(",");
+  return filteredLipsProductTypes;
+};
+
 export const lipsMakeupProductTypesMap = lips_makeup_product_types.reduce(
   (acc, { label, value }) => {
     acc[label] = value;
@@ -40,6 +48,10 @@ export const lipsMakeupProductTypesMap = lips_makeup_product_types.reduce(
   },
   {} as Record<string, string>,
 );
+
+export function getLipsMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => lipsMakeupProductTypesMap[label]);
+}
 
 export const face_makeup_product_types = [
   {
@@ -84,6 +96,14 @@ export const face_makeup_product_types = [
   },
 ];
 
+export const faceMakeupProductTypesFilter = (productTypes: String[]) => {
+  const filteredFaceProductTypes = face_makeup_product_types
+    .filter((product) => productTypes.includes(product.label))
+    .map((product) => product.value)
+    .join(",");
+  return filteredFaceProductTypes;
+};
+
 export const faceMakeupProductTypesMap = face_makeup_product_types.reduce(
   (acc, { label, value }) => {
     acc[label] = value;
@@ -91,3 +111,104 @@ export const faceMakeupProductTypesMap = face_makeup_product_types.reduce(
   },
   {} as Record<string, string>,
 );
+
+export function getFaceMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => faceMakeupProductTypesMap[label]);
+}
+
+const lashMakeupProductType = [
+  {
+    label: "Mascaras",
+    value: "5709",
+  },
+  {
+    label: "Lash Curlers",
+    value: "5710",
+  },
+  {
+    label: "Individual False Lashes",
+    value: "5711",
+  },
+  {
+    label: "Full Line Lashes",
+    value: "5712",
+  },
+];
+
+export const lashMakeupProductTypeMap = lashMakeupProductType.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export function getLashMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => lashMakeupProductTypeMap[label]);
+}
+
+export const lensesProductType = [
+  {
+    label: "Daily Lenses",
+    value: "5713",
+  },
+  {
+    label: "Monthly Lenses",
+    value: "5714",
+  },
+];
+
+export const lensesProductTypeMap = lensesProductType.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export function getLensesProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => lensesProductTypeMap[label]);
+}
+
+export const eye_makeup_product_types = [
+  {
+    label: "Eyeshadows",
+    value: "5702",
+  },
+  {
+    label: "Eyeliners",
+    value: "5703",
+  },
+  {
+    label: "Concealers",
+    value: "5704",
+  },
+  {
+    label: "Eye Pencils",
+    value: "5705",
+  },
+  {
+    label: "Eye Color Correctors",
+    value: "5706",
+  },
+  {
+    label: "Eye Primers",
+    value: "5707",
+  },
+  {
+    label: "Eye Makeup Removers",
+    value: "5708",
+  },
+];
+
+export const eyeMakeupProductTypesMap = eye_makeup_product_types.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export function getEyeMakeupProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => eyeMakeupProductTypesMap[label]);
+}

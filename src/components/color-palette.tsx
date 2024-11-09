@@ -30,27 +30,30 @@ export function ColorPalette({
   palette,
   size,
   selected = false,
+  onClick,
 }: {
   size: "small" | "large";
   palette: PaletteType;
   selected?: boolean;
+  onClick?: () => void;
 }) {
   if ("color" in palette) {
     return (
-      <div
+      <button
         className={clsx("shrink-0 rounded-full border border-transparent", {
           "size-10": size === "large",
           "size-2.5": size === "small",
           "border-white": selected,
         })}
         style={{ background: palette.color }}
+        onClick={onClick}
       />
     );
   }
 
   if ("gradient" in palette) {
     return (
-      <div
+      <button
         className={clsx("shrink-0 rounded-full border border-transparent", {
           "size-10": size === "large",
           "size-2.5": size === "small",
@@ -59,20 +62,22 @@ export function ColorPalette({
         style={{
           background: `linear-gradient(270deg, ${palette.gradient[0]} 0%, ${palette.gradient[1]} 100%)`,
         }}
+        onClick={onClick}
       />
     );
   }
 
   return (
-    <div
+    <button
       className={clsx("shrink-0 rounded-full border border-transparent", {
         "size-10": size === "large",
         "size-2.5": size === "small",
         "border-white": selected,
       })}
+      onClick={onClick}
     >
       <ColorPieChart colors={palette.colors} />
-    </div>
+    </button>
   );
 }
 

@@ -9,6 +9,8 @@ interface ContourContextType {
   setSelectedMode: (mode: string) => void;
   replaceIndex: number;
   setReplaceIndex: (index: number) => void;
+  selectedTexture: string | null;
+  setSelectedTexture: (texture: string | null) => void;
 }
 
 // Create the context
@@ -20,6 +22,7 @@ export function ContourProvider({ children }: { children: React.ReactNode }) {
   const [selectedShape, setSelectedShape] = useState<string>("0");
   const [selectedMode, setSelectedMode] = useState<string>("One");
   const [replaceIndex, setReplaceIndex] = useState<number>(0);
+  const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
 
   // Ensure that when mode changes to "One", only one color is selected
   useEffect(() => {
@@ -47,6 +50,8 @@ export function ContourProvider({ children }: { children: React.ReactNode }) {
         setSelectedMode,
         replaceIndex,
         setReplaceIndex,
+        selectedTexture,
+        setSelectedTexture,
       }}
     >
       {children}

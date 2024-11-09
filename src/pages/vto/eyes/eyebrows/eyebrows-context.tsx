@@ -5,10 +5,10 @@ interface EyebrowsContextType {
   setColorFamily: (color: string | null) => void;
   selectedColor: string | null;
   setSelectedColor: (color: string | null) => void;
-  selectedShape: string | null;
-  setSelectedShape: (shade: string | null) => void;
-  brightness: number
-  setBrightness: (brightness: number) => void
+  selectedPattern: string | null;
+  setSelectedPattern: (shade: string | null) => void;
+  brightness: number;
+  setBrightness: (brightness: number) => void;
 }
 
 // Create the context
@@ -20,8 +20,8 @@ const EyebrowsContext = createContext<EyebrowsContextType | undefined>(
 export function EyebrowsProvider({ children }: { children: React.ReactNode }) {
   const [colorFamily, setColorFamily] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedShape, setSelectedShape] = useState<string | null>(null);
-  const [brightness, setBrightness] = useState<number>(100)
+  const [selectedPattern, setSelectedPattern] = useState<string | null>(null);
+  const [brightness, setBrightness] = useState<number>(100);
 
   return (
     <EyebrowsContext.Provider
@@ -30,10 +30,10 @@ export function EyebrowsProvider({ children }: { children: React.ReactNode }) {
         setColorFamily,
         selectedColor,
         setSelectedColor,
-        selectedShape,
-        setSelectedShape,
+        selectedPattern,
+        setSelectedPattern,
         brightness,
-        setBrightness
+        setBrightness,
       }}
     >
       {children}

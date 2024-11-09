@@ -4,7 +4,18 @@ import { Icons } from "../../../../components/icons";
 import { ColorPalette } from "../../../../components/color-palette";
 import { BronzerProvider, useBronzerContext } from "./bronzer-context";
 import { useLashesContext } from "../../eyes/lashes/lashes-context";
-import { useMakeup } from "../../../../context/makeup-context";
+import { useMakeup } from "../../../../components/three/makeup-context";
+import { useQuery } from "@tanstack/react-query";
+import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
+import {
+  buildSearchParams,
+  getProductAttributes,
+  mediaUrl,
+} from "../../../../utils/apiUtils";
+import { defaultHeaders, Product } from "../../../../api/shared";
+import { filterTextures } from "../../../../api/attributes/texture";
+import { BrandName } from "../../../../components/product/brand";
+import { LoadingProducts } from "../../../../components/loading";
 
 const colorFamilies = [
   { name: "Light Skin", value: "#FAD4B4" },
@@ -12,17 +23,90 @@ const colorFamilies = [
   { name: "Dark Skin", value: "#4B2F1B" },
 ];
 
+function useFaceBronzerQuery({
+  texture,
+  color,
+}: {
+  texture: string | null;
+  color: string | null;
+}) {
+  return useQuery({
+    queryKey: ["products", "facebronzer", color, texture],
+    queryFn: async () => {
+      const filters = [
+        {
+          filters: [
+            {
+              field: "type_id",
+              value: "simple",
+              condition_type: "eq",
+            },
+          ],
+        },
+        {
+          filters: [
+            {
+              field: "face_makeup_product_type",
+              value: faceMakeupProductTypesFilter(["Bronzers"]),
+              condition_type: "in",
+            },
+          ],
+        },
+      ];
+
+      if (color) {
+        filters.push({
+          filters: [
+            {
+              field: "color",
+              value: color,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      if (texture) {
+        filters.push({
+          filters: [
+            {
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      console.log("filters", filters);
+
+      const response = await fetch(
+        "/rest/V1/products?" + buildSearchParams(filters),
+        {
+          headers: defaultHeaders,
+        },
+      );
+
+      const results = (await response.json()) as {
+        items: Array<Product>;
+      };
+
+      return results;
+    },
+  });
+}
+
 export function BronzerSelector() {
   return (
-    <BronzerProvider>
-      <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
-        <ColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <ColorSelector />
 
-        <ShapeSelector />
+      <ShapeSelector />
 
-        <ProductList />
-      </div>
-    </BronzerProvider>
+      <TextureSelector />
+
+      <ProductList />
+    </div>
   );
 }
 
@@ -124,7 +208,54 @@ function ShapeSelector() {
   );
 }
 
+const textures = filterTextures(["Metallic", "Matte", "Shimmer"]);
+
+function TextureSelector() {
+  const { selectedTexture, setSelectedTexture } = useBronzerContext();
+  const { highlighterMaterial, setHighlighterMaterial } = useMakeup();
+
+  function setMaterial(
+    material: number,
+    texture: { label: string; value: string },
+  ) {
+    if (selectedTexture === texture.value) {
+      setSelectedTexture(null);
+    } else {
+      setSelectedTexture(texture.value);
+    }
+    setHighlighterMaterial(material);
+  }
+
+  return (
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+        {textures.map((texture, index) => (
+          <button
+            key={texture.value}
+            type="button"
+            className={clsx(
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              {
+                "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
+                  selectedTexture === texture.value,
+              },
+            )}
+            onClick={() => setMaterial(index, texture)}
+          >
+            <span className="text-sm">{texture.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ProductList() {
+  const { selectedTexture } = useBronzerContext();
+  const { data, isLoading } = useFaceBronzerQuery({
+    texture: selectedTexture,
+    color: null,
+  });
   const products = [
     {
       name: "Tom Ford Item name Tom Ford",
@@ -166,33 +297,45 @@ function ProductList() {
 
   return (
     <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
-      {products.map((product, index) => (
-        <div key={index} className="w-[100px] rounded shadow">
-          <div className="relative h-[70px] w-[100px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="rounded object-cover"
-            />
-          </div>
+      {isLoading ? (
+        <LoadingProducts />
+      ) : (
+        data?.items.map((product, index) => {
+          const imageUrl =
+            mediaUrl(product.media_gallery_entries[0].file) ??
+            "https://picsum.photos/id/237/200/300";
 
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between space-x-1 pt-1">
-            <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-              $15
+          return (
+            <div key={index} className="w-[100px] rounded shadow">
+              <div className="relative h-[70px] w-[100px] overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt="Product"
+                  className="rounded object-cover"
+                />
+              </div>
+
+              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+                {product.name}
+              </h3>
+              <p className="text-[0.625rem] text-white/60">
+                <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
+              </p>
+              <div className="flex items-end justify-between space-x-1 pt-1">
+                <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
+                  $15
+                </div>
+                <button
+                  type="button"
+                  className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
+                >
+                  Add to cart
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-            >
-              Add to cart
-            </button>
-          </div>
-        </div>
-      ))}
+          );
+        })
+      )}
     </div>
   );
 }
