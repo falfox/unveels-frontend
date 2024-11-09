@@ -64,14 +64,6 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const testData: ProductRequest[] = [
-    {
-      category: "Makeup",
-      sub_category: "Lip",
-      product_type: "Lipstick",
-    },
-  ];
-
   const [fetchProducts, setFetchProducts] = useState(false);
   const [products, setProducts] = useState<ProductRequest[]>([]);
   const [productData, setProductData] = useState<Product[]>([]);
