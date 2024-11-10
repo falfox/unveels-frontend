@@ -1,76 +1,18 @@
 import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 
-import { ColorPalette } from "../../../../components/color-palette";
-import { BlushProvider, useBlushContext } from "./blush-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
-import { useQuery } from "@tanstack/react-query";
-import {
-  buildSearchParams,
-  getProductAttributes,
-  mediaUrl,
-} from "../../../../utils/apiUtils";
-import { defaultHeaders, Product } from "../../../../api/shared";
-import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
-import { BrandName } from "../../../../components/product/brand";
-import { LoadingProducts } from "../../../../components/loading";
-import { filterTextures } from "../../../../api/attributes/texture";
 import { useRef } from "react";
-
-function useFaceBlushQuery({ texture }: { texture: string | null }) {
-  return useQuery({
-    queryKey: ["products", "faceblush", texture],
-    queryFn: async () => {
-      const filters = [
-        {
-          filters: [
-            {
-              field: "type_id",
-              value: "simple",
-              condition_type: "eq",
-            },
-          ],
-        },
-        {
-          filters: [
-            {
-              field: "face_makeup_product_type",
-              value: faceMakeupProductTypesFilter(["Blushes"]),
-              condition_type: "in",
-            },
-          ],
-        },
-      ];
-
-      if (texture) {
-        filters.push({
-          filters: [
-            {
-              field: "texture",
-              value: texture,
-              condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      console.log("filters", filters);
-
-      const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams(filters),
-        {
-          headers: defaultHeaders,
-        },
-      );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return results;
-    },
-  });
-}
+import { filterTextures } from "../../../../api/attributes/texture";
+import { ColorPalette } from "../../../../components/color-palette";
+import { LoadingProducts } from "../../../../components/loading";
+import { BrandName } from "../../../../components/product/brand";
+import { useMakeup } from "../../../../components/three/makeup-context";
+import {
+  getProductAttributes,
+  mediaUrl
+} from "../../../../utils/apiUtils";
+import { useBlushContext } from "./blush-context";
+import { useBlushQuery } from "./blush-query";
 
 export function BlushSelector() {
   return (
@@ -335,7 +277,7 @@ function ShadesSelector() {
 function ProductList() {
   const { selectedTexture } = useBlushContext();
 
-  const { data, isLoading } = useFaceBlushQuery({
+  const { data, isLoading } = useBlushQuery({
     texture: selectedTexture,
   });
   const products = [

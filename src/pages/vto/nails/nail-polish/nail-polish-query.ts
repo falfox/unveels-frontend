@@ -1,33 +1,41 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  getNailPolishProductTypeIds,
+  lipsMakeupProductTypesFilter,
+} from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
+export function useNailPolishQuery({
   color,
-  pattern,
+  texture,
 }: {
   color: string | null;
-  pattern: string | null;
+  texture: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", "nailpolish", color, texture],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              field: "nail_polish_product_type",
+              value: getNailPolishProductTypeIds([
+                "Nail Color",
+                "Gel Color",
+                "Breathable Polishes",
+              ]).join(","),
               condition_type: "in",
             },
           ],
         },
       ];
 
+      // Skip filter ini karena, lips_makeup_product_type tidak bisa di filter dengan color
       const filters = [];
 
       if (color) {
@@ -42,20 +50,20 @@ export function useEyelinerQuery({
         });
       }
 
-      if (pattern) {
+      if (texture) {
         filters.push({
           filters: [
             {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
             },
           ],
         });
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
         {
           headers: defaultHeaders,
         },

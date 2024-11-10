@@ -1,33 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  getNailPolishProductTypeIds,
+  getNailsProductTypeIds,
+  lipsMakeupProductTypesFilter,
+} from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
+export function useHairColorQuery({
   color,
-  pattern,
+  shape,
 }: {
   color: string | null;
-  pattern: string | null;
+  shape: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", "haircolor", color, shape],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
-              condition_type: "in",
+              field: "hair_color_product_type",
+              value: "",
+              condition_type: "notnull",
             },
           ],
         },
       ];
 
+      // Skip filter ini karena, lips_makeup_product_type tidak bisa di filter dengan color
       const filters = [];
 
       if (color) {
@@ -42,20 +47,20 @@ export function useEyelinerQuery({
         });
       }
 
-      if (pattern) {
+      if (shape) {
         filters.push({
           filters: [
             {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
+              field: "shape",
+              value: shape,
+              condition_type: "eq",
             },
           ],
         });
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
         {
           headers: defaultHeaders,
         },

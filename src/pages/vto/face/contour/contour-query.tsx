@@ -1,27 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  faceMakeupProductTypesFilter,
+  getLashMakeupProductTypeIds,
+} from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
-  color,
-  pattern,
-}: {
-  color: string | null;
-  pattern: string | null;
-}) {
+export function useContourQuery({ texture }: { texture: string | null }) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", "contours", texture],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              field: "face_makeup_product_type",
+              value: faceMakeupProductTypesFilter(["Contouring"]),
               condition_type: "in",
             },
           ],
@@ -30,32 +27,20 @@ export function useEyelinerQuery({
 
       const filters = [];
 
-      if (color) {
+      if (texture) {
         filters.push({
           filters: [
             {
-              field: "color",
-              value: color,
+              field: "texture",
+              value: texture,
               condition_type: "eq",
             },
           ],
         });
       }
 
-      if (pattern) {
-        filters.push({
-          filters: [
-            {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
-            },
-          ],
-        });
-      }
-
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },
