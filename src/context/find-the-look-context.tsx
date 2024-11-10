@@ -5,7 +5,7 @@ import React, {
   useReducer,
   useEffect,
 } from "react";
-import { Product } from "../../api/shared";
+import { Product } from "../api/shared";
 
 interface FindThelookContextType {
   selectedItems: {

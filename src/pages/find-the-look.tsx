@@ -19,7 +19,7 @@ import { useLipsProductQuery } from "../api/lips";
 import {
   FindTheLookProvider,
   useFindTheLookContext,
-} from "../components/find-the-look/find-the-look-context";
+} from "../context/find-the-look-context";
 import { Footer } from "../components/footer";
 import { Icons } from "../components/icons";
 import { LoadingProducts } from "../components/loading";
@@ -30,10 +30,7 @@ import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
 import { SkinAnalysisProvider } from "../context/skin-analysis-context";
-import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";
 import { useRecordingControls } from "../hooks/useRecorder";
-import { skinAnalysisInference } from "../inference/skinAnalysisInference";
-import { FaceResults } from "../types/faceResults";
 import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
 import { TopNavigation } from "../components/top-navigation";
 import {

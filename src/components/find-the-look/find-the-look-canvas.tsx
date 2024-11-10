@@ -8,7 +8,7 @@ import {
 import { FindTheLookItems } from "../../types/findTheLookItems";
 import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
-import { useFindTheLookContext } from "./find-the-look-context";
+import { useFindTheLookContext } from "../../context/find-the-look-context";
 
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
