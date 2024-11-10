@@ -5,8 +5,8 @@ interface EarringsContextType {
   setColorFamily: (color: string | null) => void;
   selectedColor: string | null;
   setSelectedColor: (color: string | null) => void;
-  selectedStyle: string | null;
-  setSelectedStyle: (shape: string | null) => void;
+  selectedShape: string | null;
+  setSelectedShape: (shape: string | null) => void;
 }
 
 // Create the context
@@ -18,7 +18,7 @@ const EarringsContext = createContext<EarringsContextType | undefined>(
 export function EarringsProvider({ children }: { children: React.ReactNode }) {
   const [colorFamily, setColorFamily] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [selectedShape, setSelectedShape] = useState<string | null>(null);
 
   return (
     <EarringsContext.Provider
@@ -27,8 +27,8 @@ export function EarringsProvider({ children }: { children: React.ReactNode }) {
         setColorFamily,
         selectedColor,
         setSelectedColor,
-        selectedStyle,
-        setSelectedStyle,
+        selectedShape,
+        setSelectedShape,
       }}
     >
       {children}
