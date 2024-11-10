@@ -9,8 +9,53 @@ import blinkData from "../../assets/blendDataBlink.json";
 import { useLoadTextures } from "../../utils/textures";
 import axios from "axios";
 import { applyAvatarMaterials } from "../../utils/avatarMaterialUtils";
+import { runBlendshapesDemo } from "./talking-head";
 
 const host = "https://talking-avatar.onrender.com";
+
+function googleTextToSpeech(text: string) {
+  const apiKey = import.meta.env.VITE_BARD_API_KEY;
+  if (!apiKey || !text) return;
+
+  const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
+
+  const data = {
+    input: {
+      text: text,
+    },
+    voice: {
+      languageCode: "en-gb",
+      name: "en-GB-Standard-A",
+      ssmlGender: "FEMALE",
+    },
+    audioConfig: {
+      audioEncoding: "MP3",
+    },
+  };
+
+  return axios
+    .post(url, data)
+    .then((response) => {
+      const audioContent = response.data.audioContent;
+      const audioBlob = toBlob(audioContent, "audio/mpeg");
+      const audioUrl = URL.createObjectURL(audioBlob);
+      return audioUrl;
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
+}
+
+// Fungsi untuk mengonversi base64 menjadi blob
+function toBlob(base64: string, contentType: string) {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: contentType });
+}
 
 function makeSpeech(text: string) {
   return axios.post(host + "/talk", { text });
@@ -74,9 +119,46 @@ const Avatar = ({
   useEffect(() => {
     if (speak === false) return;
 
+    googleTextToSpeech(text)
+      ?.then((response) => {
+        const audioSource = response;
+        runBlendshapesDemo(true, audioSource)
+          .then((blendShape) => {
+            const blendData = blendShape; // Hasil akhir blendshape
+            console.log(blendData);
+
+            if (morphTargetDictionaryBody) {
+              const newClips = [
+                createAnimation(
+                  blendData,
+                  morphTargetDictionaryBody,
+                  "HG_Body",
+                ),
+                createAnimation(
+                  blendData,
+                  morphTargetDictionaryLowerTeeth || {},
+                  "HG_TeethLower",
+                ),
+              ];
+              setClips(newClips);
+              setAudioSource(audioSource);
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            setSpeak(false);
+          });
+      })
+      .catch((err) => {
+        console.error(err);
+        setSpeak(false);
+      });
+
     makeSpeech(text)
       .then((response) => {
         const { blendData, filename } = response.data;
+        console.log(blendData);
+
         console.log(filename);
         if (morphTargetDictionaryBody) {
           const newClips = [
