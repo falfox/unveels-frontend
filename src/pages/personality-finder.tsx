@@ -12,10 +12,7 @@ import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Footer } from "../components/footer";
 import { Rating } from "../components/rating";
 import { VideoScene } from "../components/recorder/recorder";
-import {
-  CameraProvider,
-  useCamera,
-} from "../components/recorder/recorder-context";
+import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { TopNavigation } from "./skin-tone-finder";

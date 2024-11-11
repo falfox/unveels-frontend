@@ -4,7 +4,7 @@ import { Landmark } from "../../types/landmark";
 import { useTexture } from "@react-three/drei";
 import Foundation from "../three/makeup/foundation";
 import { LinearFilter, RGBFormat } from "three";
-import { useCamera } from "../recorder/recorder-context";
+import { useCamera } from "../../context/recorder-context";
 
 interface SkinToneFinderThreeSceneProps extends MeshProps {
   imageSrc: string;

@@ -5,7 +5,7 @@ import {
   FilesetResolver,
   HandLandmarker,
 } from "@mediapipe/tasks-vision";
-import { useCamera } from "../recorder/recorder-context";
+import { useCamera } from "../../context/recorder-context";
 import {
   VIDEO_WIDTH,
   VIDEO_HEIGHT,

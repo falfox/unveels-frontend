@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useCamera } from "../recorder/recorder-context";
+import { useCamera } from "../../context/recorder-context";
 import { FindTheLookCanvas } from "./find-the-look-canvas";
 
 export function FindTheLookScene() {

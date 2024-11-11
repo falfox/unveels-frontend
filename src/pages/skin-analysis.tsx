@@ -15,10 +15,7 @@ import { Icons } from "../components/icons";
 import { LoadingProducts } from "../components/loading";
 import { BrandName } from "../components/product/brand";
 import { VideoScene } from "../components/recorder/recorder";
-import {
-  CameraProvider,
-  useCamera,
-} from "../components/recorder/recorder-context";
+import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { ShareModal } from "../components/share-modal";
 import { SkinAnalysisScene } from "../components/skin-analysis/skin-analysis-scene";

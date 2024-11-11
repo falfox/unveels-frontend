@@ -12,10 +12,7 @@ import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Footer } from "../components/footer";
 import { Rating } from "../components/rating";
 import { VideoScene } from "../components/recorder/recorder";
-import {
-  CameraProvider,
-  useCamera,
-} from "../components/recorder/recorder-context";
+import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { personalityInference } from "../inference/personalityInference";
@@ -109,7 +106,7 @@ function MainContent() {
   }, [criterias.isCaptured]);
 
   return (
-    <div className="relative w-full h-full mx-auto min-h-dvh bg-pink-950">
+    <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
       <div className="absolute inset-0">
         <VideoStream debugMode={false} />
         <div
@@ -182,37 +179,37 @@ function Result() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen font-sans text-white bg-black">
+    <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2">
         <button className="size-6">
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="h-6 w-6" />
         </button>
         <button type="button" className="size-6" onClick={() => setPage(null)}>
-          <X className="w-6 h-6" />
+          <X className="h-6 w-6" />
         </button>
       </div>
 
       {/* Profile Section */}
-      <div className="flex items-start px-5 py-6 space-x-1">
-        <div className="px-5 shrink-0">
+      <div className="flex items-start space-x-1 px-5 py-6">
+        <div className="shrink-0 px-5">
           <div className="flex items-center justify-center rounded-full bg-gradient-to-b from-[#CA9C43] to-[#644D21] p-1">
             {criterias.capturedImage ? (
               <img
-                className="object-fill rounded-full size-24"
+                className="size-24 rounded-full object-fill"
                 src={criterias.capturedImage}
                 alt="Captured Profile"
               />
             ) : (
               <img
-                className="rounded-full size-24"
+                className="size-24 rounded-full"
                 src="https://avatar.iran.liara.run/public/30"
                 alt="Profile"
               />
             )}
           </div>
 
-          <div className="pt-2 text-sm text-center">
+          <div className="pt-2 text-center text-sm">
             {inferenceResult ? inferenceResult[15].outputLabel : ""}
           </div>
         </div>
@@ -221,7 +218,7 @@ function Result() {
             <Icons.hashtagCircle className="size-4" />
             <div className="text-sm">AI Personality Analysis :</div>
           </div>
-          <div className="pl-5 mt-1 text-xs">
+          <div className="mt-1 pl-5 text-xs">
             {inferenceResult?.[15]?.outputIndex !== undefined
               ? personalityAnalysisResult[inferenceResult[15].outputIndex]
               : ""}
@@ -268,8 +265,8 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
   }
 
   return (
-    <div className="flex-1 px-10 py-6 space-y-6 overflow-auto">
-      <h2 className="text-xl font-medium text-center">
+    <div className="flex-1 space-y-6 overflow-auto px-10 py-6">
+      <h2 className="text-center text-xl font-medium">
         Main 5 Personality Traits x
       </h2>
 
@@ -293,7 +290,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
         }
         className="mx-auto size-96"
       />
-      <div className="flex items-start justify-between space-x-4 text-white bg-black">
+      <div className="flex items-start justify-between space-x-4 bg-black text-white">
         {/* Left Column */}
         <div className="space-y-4">
           {/* Extraversion */}
@@ -418,14 +415,14 @@ function PersonalitySection({
   const scoreType = score < 40 ? "Low" : score < 70 ? "Moderate" : "High";
   return (
     <div className="py-5">
-      <div className="flex items-center pb-6 space-x-2">
+      <div className="flex items-center space-x-2 pb-6">
         <Icons.personalityTriangle className="size-8" />
 
         <h2 className="text-3xl font-bold text-white">{title}</h2>
       </div>
 
       <span className="text-xl font-bold">Description</span>
-      <p className="pt-1 pb-6 text-sm">{description}</p>
+      <p className="pb-6 pt-1 text-sm">{description}</p>
 
       <span className="text-xl font-bold">Score</span>
       <div
@@ -473,7 +470,7 @@ function RecommendationsTab() {
   ];
 
   return (
-    <div className="w-full px-4 py-8 overflow-auto">
+    <div className="w-full overflow-auto px-4 py-8">
       <div className="pb-14">
         <h2 className="pb-4 text-xl font-bold">Perfumes Recommendations</h2>
         <div className="flex w-full gap-4 overflow-x-auto">
@@ -483,13 +480,13 @@ function RecommendationsTab() {
                 <img
                   src={"https://picsum.photos/id/237/200/300"}
                   alt="Product"
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
 
               <div className="flex items-start justify-between py-2">
                 <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                  <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
                     {product.name}
                   </h3>
                   <p className="text-[0.625rem] text-white/60">
@@ -536,13 +533,13 @@ function RecommendationsTab() {
                 <img
                   src={"https://picsum.photos/id/237/200/300"}
                   alt="Product"
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
 
               <div className="flex items-start justify-between py-2">
                 <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                  <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
                     {product.name}
                   </h3>
                   <p className="text-[0.625rem] text-white/60">
@@ -588,13 +585,13 @@ function RecommendationsTab() {
                 <img
                   src={"https://picsum.photos/id/237/200/300"}
                   alt="Product"
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
 
               <div className="flex items-start justify-between py-2">
                 <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                  <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
                     {product.name}
                   </h3>
                   <p className="text-[0.625rem] text-white/60">
@@ -637,13 +634,13 @@ function RecommendationsTab() {
                 <img
                   src={"https://picsum.photos/id/237/200/300"}
                   alt="Product"
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
 
               <div className="flex items-start justify-between py-2">
                 <div className="w-full">
-                  <h3 className="h-10 text-sm font-semibold text-white line-clamp-2">
+                  <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
                     {product.name}
                   </h3>
                   <p className="text-[0.625rem] text-white/60">
@@ -687,7 +684,7 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
   }
 
   return (
-    <div className="grid flex-1 grid-cols-1 gap-4 px-10 py-6 space-y-6 overflow-auto md:grid-cols-2">
+    <div className="grid flex-1 grid-cols-1 gap-4 space-y-6 overflow-auto px-10 py-6 md:grid-cols-2">
       <FeatureSection
         icon={<Icons.face className="size-12" />}
         title="Face"
@@ -776,7 +773,7 @@ function FeatureSection({
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center pb-5 space-x-2">
+      <div className="flex items-center space-x-2 pb-5">
         <span className="text-2xl">{icon}</span>
         <h2 className="text-3xl font-semibold">{title}</h2>
       </div>
@@ -786,7 +783,7 @@ function FeatureSection({
             <div className="text-xl font-bold">{feature.name}</div>
             {feature.color ? (
               <div
-                className="h-6 w-ful"
+                className="w-ful h-6"
                 style={{ backgroundColor: feature.hex }}
               ></div>
             ) : (
@@ -807,32 +804,32 @@ function RecorderStatus() {
     useRecordingControls();
 
   return (
-    <div className="absolute inset-x-0 flex items-center justify-center gap-4 top-14">
+    <div className="absolute inset-x-0 top-14 flex items-center justify-center gap-4">
       <button
-        className="flex items-center justify-center size-8"
+        className="flex size-8 items-center justify-center"
         onClick={handleStartPause}
       >
         {isPaused ? (
-          <CirclePlay className="text-white size-6" />
+          <CirclePlay className="size-6 text-white" />
         ) : isRecording ? (
-          <PauseCircle className="text-white size-6" />
+          <PauseCircle className="size-6 text-white" />
         ) : null}
       </button>
       <span className="relative flex size-4">
         {isRecording ? (
-          <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
         ) : null}
-        <span className="relative inline-flex bg-red-500 rounded-full size-4"></span>
+        <span className="relative inline-flex size-4 rounded-full bg-red-500"></span>
       </span>
       <div className="font-serif text-white">{formattedTime}</div>
       <button
-        className="flex items-center justify-center size-8"
+        className="flex size-8 items-center justify-center"
         onClick={isRecording ? handleStop : handleStartPause}
       >
         {isRecording || isPaused ? (
-          <StopCircle className="text-white size-6" />
+          <StopCircle className="size-6 text-white" />
         ) : (
-          <CirclePlay className="text-white size-6" />
+          <CirclePlay className="size-6 text-white" />
         )}
       </button>
     </div>

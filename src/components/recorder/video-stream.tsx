@@ -1,14 +1,13 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Webcam from "react-webcam";
 import { FaceDetector, FilesetResolver } from "@mediapipe/tasks-vision";
-import { useCamera } from "./recorder-context";
+import { useCamera } from "../../context/recorder-context";
 import {
   BRIGHTNESS_THRESHOLD,
   POSITION_THRESHOLD_X,
   POSITION_THRESHOLD_Y,
   ORIENTATION_THRESHOLD_YAW,
   ORIENTATION_THRESHOLD_PITCH,
-  testImage,
 } from "../../utils/constants";
 import { calculateLighting, cropImage } from "../../utils/imageProcessing";
 import { CountdownOverlay } from "../countdown-overlay";
@@ -20,8 +19,6 @@ import {
   calculateOrientation,
   Orientation,
 } from "../../utils/orientationUtils";
-import RecordRTC, { RecordRTCPromisesHandler } from "recordrtc";
-import { useRecordingControls } from "../../hooks/useRecorder";
 
 interface VideoStreamProps {
   debugMode?: boolean;
@@ -55,15 +52,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     yaw: 0,
     pitch: 0,
   });
-
-  const memoizedPosition = useCallback(
-    () => position,
-    [position.x, position.y],
-  );
-  const memoizedOrientation = useCallback(
-    () => orientation,
-    [orientation.yaw, orientation.pitch],
-  );
 
   // Debug Mode State
   const [isDebugMode, setIsDebugMode] = useState<boolean>(debugMode);
@@ -236,11 +224,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     };
   }, []);
 
-  // Function to toggle camera (flip)
-  const toggleFacingMode = () => {
-    flipCamera();
-  };
-
   // Handle responsive resizing using ResizeObserver
   useEffect(() => {
     const video = webcamRef.current?.video;
@@ -377,18 +360,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             alt="Captured"
             className="h-full w-full object-cover"
           />
-          {/* Button to Retake Photo */}
-          <button
-            onClick={() => {
-              setCapturedImageSrc(null);
-              startDetection();
-              resetCapture(); // Restart detection if needed
-            }}
-            className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
-            aria-label="Retake Photo"
-          >
-            Retake Photo
-          </button>
         </div>
       ) : (
         <>

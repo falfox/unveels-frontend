@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useCamera } from "../recorder/recorder-context";
+import { useCamera } from "../../context/recorder-context";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { Canvas } from "@react-three/fiber";
 import { Landmark } from "../../types/landmark";

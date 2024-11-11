@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CameraProvider } from "../../components/recorder/recorder-context";
+import { CameraProvider } from "../../context/recorder-context";
 import MainContent from "./main-content";
 import WelcomeScreen from "./welcome-screen";
 import VocalConnectionScreen from "./vocal-connection-screen";
