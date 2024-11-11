@@ -488,6 +488,7 @@ function PersonalitySection({
 }
 
 function RecommendationsTab({ personality }: { personality: string }) {
+  const { t } = useTranslation();
   const { data: fragrances } = useFragrancesProductQuery({
     personality,
   });
@@ -502,7 +503,7 @@ function RecommendationsTab({ personality }: { personality: string }) {
   return (
     <div className="w-full overflow-auto px-4 py-8">
       <div className="pb-14">
-        <h2 className="pb-4 text-xl font-bold">Perfumes Recommendations</h2>
+        <h2 className="pb-4 text-xl font-bold"> {t("viewpersonality.perfumerec")} </h2>
         {fragrances ? (
           <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
             {fragrances.items.map((product, index) => {
@@ -545,13 +546,13 @@ function RecommendationsTab({ personality }: { personality: string }) {
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
                     >
-                      ADD TO CART
+                      {t("viewpersonality.addcart")}
                     </button>
                     <button
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
                     >
-                      SEE IMPROVEMENT
+                      {t("viewpersonality.seeimprovement")}
                     </button>
                   </div>
                 </div>
@@ -563,10 +564,9 @@ function RecommendationsTab({ personality }: { personality: string }) {
         )}
       </div>
       <div className="pb-14">
-        <h2 className="text-xl font-bold">Look Recommendations</h2>
+        <h2 className="text-xl font-bold">{t("viewpersonality.lookrec")}</h2>
         <p className="pb-4 text-sm font-bold">
-          A bold red lipstick and defined brows, mirror your strong, vibrant
-          personality
+          {t("viewpersonality.lookdec")}
         </p>
         {items ? (
           <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
@@ -610,13 +610,13 @@ function RecommendationsTab({ personality }: { personality: string }) {
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
                     >
-                      ADD TO CART
+                      {t("viewpersonality.addcart")}
                     </button>
                     <button
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
                     >
-                      SEE IMPROVEMENT
+                      {t("viewpersonality.seeimprovement")}
                     </button>
                   </div>
                 </div>
@@ -628,9 +628,9 @@ function RecommendationsTab({ personality }: { personality: string }) {
         )}
       </div>
       <div className="pb-14">
-        <h2 className="text-xl font-bold">Lip Color Recommendations</h2>
+        <h2 className="text-xl font-bold">{t("viewpersonality.lipcolorrec")}</h2>
         <p className="pb-4 text-sm font-bold">
-          The best lip color for you are orange shades
+          {t("viewpersonality.lipcolordec")}
         </p>
         {lips ? (
           <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
@@ -674,13 +674,13 @@ function RecommendationsTab({ personality }: { personality: string }) {
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
                     >
-                      ADD TO CART
+                      {t("viewpersonality.addcart")}
                     </button>
                     <button
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
                     >
-                      SEE IMPROVEMENT
+                      {t("viewpersonality.seeimprovement")}
                     </button>
                   </div>
                 </div>
