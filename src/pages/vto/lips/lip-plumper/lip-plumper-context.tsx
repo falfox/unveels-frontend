@@ -1,8 +1,12 @@
 import React, { createContext, useState, useContext } from "react";
 
 interface LipPlumperContextType {
+  colorFamily: string | null;
+  setColorFamily: (color: string | null) => void;
   selectedColor: string | null;
   setSelectedColor: (color: string | null) => void;
+  selectedTexture: string | null;
+  setSelectedTexture: (texture: string | null) => void;
 }
 
 // Create the context
@@ -19,12 +23,17 @@ export function LipPlumperProvider({
   const [colorFamily, setColorFamily] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
 
   return (
     <LipPlumperContext.Provider
       value={{
+        colorFamily,
+        setColorFamily,
         selectedColor,
         setSelectedColor,
+        selectedTexture,
+        setSelectedTexture,
       }}
     >
       {children}

@@ -15,7 +15,6 @@ import { VideoScene } from "../components/recorder/recorder";
 import { CameraProvider, useCamera } from "../context/recorder-context";
 import { VideoStream } from "../components/recorder/video-stream";
 import { useRecordingControls } from "../hooks/useRecorder";
-import { TopNavigation } from "./skin-tone-finder";
 import { personalityInference } from "../inference/personalityInference";
 import { Classifier } from "../types/classifier";
 import { personalityAnalysisResult } from "../utils/constants";
@@ -27,28 +26,159 @@ import { BrandName } from "../components/product/brand";
 import { useNavigate } from "react-router-dom";
 import { useLipsProductQuery } from "../api/lips";
 import { useLookbookProductQuery } from "../api/lookbook";
+import {
+  InferenceProvider,
+  useInferenceContext,
+} from "../context/inference-context";
+import { TopNavigation } from "./virtual-try-on";
+import { Scanner } from "../components/scanner";
+import * as tf from "@tensorflow/tfjs-core";
+import * as tflite from "@tensorflow/tfjs-tflite";
+import { loadTFLiteModel } from "../utils/tfliteInference";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export function PersonalityFinder() {
   return (
     <CameraProvider>
-      <div className="h-full min-h-dvh">
-        <MainContent />
-      </div>
+      <InferenceProvider>
+        <div className="h-full min-h-dvh">
+          <MainContent />
+        </div>
+      </InferenceProvider>
     </CameraProvider>
   );
 }
 
 function MainContent() {
-  const { criterias } = useCamera();
+  const [modelFaceShape, setModelFaceShape] =
+    useState<tflite.TFLiteModel | null>(null);
 
-  if (criterias.isCaptured) {
-    return <Result />;
+  const [modelPersonalityFinder, setModelPersonalityFinder] =
+    useState<tflite.TFLiteModel | null>(null);
+
+  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
+    null,
+  );
+
+  const { criterias } = useCamera();
+  const {
+    setIsLoading,
+    setIsInferenceFinished,
+    isInferenceFinished,
+    setInferenceError,
+    setIsInferenceRunning,
+  } = useInferenceContext();
+  const [inferenceResult, setInferenceResult] = useState<Classifier[] | null>();
+
+  useEffect(() => {
+    let isMounted = true;
+    const dummyInput = tf.zeros([1, 224, 224, 3], "float32");
+
+    const loadModel = async () => {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
+        );
+
+        const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+            delegate: "GPU",
+          },
+          outputFaceBlendshapes: true,
+          minFaceDetectionConfidence: 0.7,
+          minFacePresenceConfidence: 0.7,
+          minTrackingConfidence: 0.7,
+          runningMode: "IMAGE",
+          numFaces: 1,
+        });
+
+        setModelFaceShape(
+          await loadTFLiteModel(
+            "/models/personality-finder/face-analyzer.tflite",
+          ),
+        );
+        setModelPersonalityFinder(
+          await loadTFLiteModel(
+            "/models/personality-finder/personality_finder.tflite",
+          ),
+        );
+
+        if (isMounted) {
+          setFaceLandmarker(faceLandmarker);
+          // warmup
+          modelFaceShape?.predict(dummyInput);
+          modelPersonalityFinder?.predict(dummyInput);
+          modelFaceShape?.predict(dummyInput);
+          modelPersonalityFinder?.predict(dummyInput);
+        }
+      } catch (error) {
+        console.error("Failed to initialize: ", error);
+      }
+    };
+
+    loadModel();
+
+    return () => {
+      isMounted = false;
+      if (faceLandmarker) {
+        faceLandmarker.close();
+      }
+      if (modelPersonalityFinder && modelFaceShape) {
+        dummyInput.dispose();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const performInference = async () => {
+      if (criterias.isCaptured && criterias.capturedImage) {
+        setIsInferenceRunning(true);
+        setIsLoading(true);
+        setInferenceError(null);
+        try {
+          if (modelFaceShape && modelPersonalityFinder && faceLandmarker) {
+            const personalityResult: Classifier[] = await personalityInference(
+              modelFaceShape,
+              modelPersonalityFinder,
+              faceLandmarker,
+              criterias.capturedImage,
+              224,
+              224,
+            );
+            setInferenceResult(personalityResult);
+            setIsInferenceFinished(true);
+          }
+        } catch (error: any) {
+          setIsInferenceFinished(false);
+          console.error("Inference error:", error);
+          setInferenceError(
+            error.message || "An error occurred during inference.",
+          );
+        } finally {
+          setIsLoading(false);
+          setIsInferenceRunning(false);
+        }
+      }
+    };
+
+    performInference();
+  }, [criterias.isCaptured]);
+
+  if (inferenceResult) {
+    return <Result inferenceResult={inferenceResult} />;
   }
 
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
       <div className="absolute inset-0">
-        <VideoStream debugMode={false} />
+        {criterias.isCaptured ? (
+          <Scanner />
+        ) : (
+          <>
+            <VideoStream debugMode={false} />
+          </>
+        )}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -57,7 +187,7 @@ function MainContent() {
         ></div>
       </div>
       <RecorderStatus />
-      <TopNavigation />
+      <TopNavigation cart={isInferenceFinished} />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         <VideoScene />
@@ -67,7 +197,7 @@ function MainContent() {
   );
 }
 
-function Result() {
+function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
   const tabs = [
     {
       title: "Personality",
@@ -84,39 +214,6 @@ function Result() {
 
   const { setPage } = usePage();
   const { criterias } = useCamera();
-
-  const [inferenceResult, setInferenceResult] = useState<Classifier[] | null>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [inferenceError, setInferenceError] = useState<string | null>(null);
-  const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
-
-  useEffect(() => {
-    const performInference = async () => {
-      if (criterias.isCaptured && criterias.capturedImage) {
-        setIsInferenceRunning(true);
-        setIsLoading(true);
-        setInferenceError(null);
-        try {
-          const personalityResult: Classifier[] = await personalityInference(
-            criterias.capturedImage,
-            224,
-            224,
-          );
-          setInferenceResult(personalityResult);
-        } catch (error: any) {
-          console.error("Inference error:", error);
-          setInferenceError(
-            error.message || "An error occurred during inference.",
-          );
-        } finally {
-          setIsLoading(false);
-          setIsInferenceRunning(false);
-        }
-      }
-    };
-
-    performInference();
-  }, []);
 
   const navigate = useNavigate();
 
@@ -613,7 +710,7 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
         title="Face"
         features={[
           { name: "Face Shape", value: data[14].outputLabel },
-          { name: "Skin Tone", value: "Dark latte" },
+          { name: "Skin Tone", value: data[16].outputLabel },
         ]}
       />
       <FeatureSection

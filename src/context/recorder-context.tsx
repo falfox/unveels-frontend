@@ -1,5 +1,4 @@
 // recorder-context.tsx
-import html2canvas from "html2canvas";
 import React, {
   createContext,
   useContext,
@@ -7,8 +6,6 @@ import React, {
   ReactNode,
   useRef,
   MutableRefObject,
-  useCallback,
-  useEffect,
 } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import Webcam from "react-webcam";
@@ -32,6 +29,7 @@ interface CameraState {
   capturedImageCut: string | null;
   isCompare: boolean;
   lastBoundingBox: BoundingBox | null;
+  faceDetected: boolean;
 }
 
 interface SkinToneThreeSceneRef {
@@ -92,6 +90,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     capturedImageCut: null,
     isCompare: false,
     lastBoundingBox: null,
+    faceDetected: false,
   });
 
   function setCriterias(newState: Partial<CameraState>) {

@@ -52,3 +52,48 @@ export function useSingleProductQuery({ sku }: { sku: string }) {
     },
   });
 }
+
+export function useProducts({
+  product_type_key,
+  type_ids,
+}: {
+  product_type_key: string;
+  type_ids: string[];
+}) {
+  return useQuery({
+    queryKey: ["products", product_type_key, type_ids],
+    queryFn: async () => {
+      const filters = [
+        // {
+        //   filters: [
+        //     {
+        //       field: "type_id",
+        //       value: "simple",
+        //       condition_type: "eq",
+        //     },
+        //   ],
+        // },
+        {
+          filters: [
+            {
+              field: product_type_key,
+              value: type_ids.join(","),
+              condition_type: "in",
+            },
+          ],
+        },
+      ];
+
+      const response = await fetch(
+        "/rest/V1/products?" + buildSearchParams(filters),
+        {
+          headers: defaultHeaders,
+        },
+      );
+
+      return response.json() as Promise<{
+        items: Array<Product>;
+      }>;
+    },
+  });
+}

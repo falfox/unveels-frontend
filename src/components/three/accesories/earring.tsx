@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Landmark } from "../../../types/landmark";
 import { EARRING } from "../../../utils/constants";
-import { useAccesories } from "../accesories-context";
+import { useAccesories } from "../../../context/accesories-context";
 import { calculateDistance } from "../../../utils/calculateDistance";
 import { calculateFaceOrientation } from "../../../utils/calculateFaceOrientation";
 

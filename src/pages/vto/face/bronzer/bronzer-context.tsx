@@ -5,6 +5,8 @@ interface BronzerContextType {
   setSelectedColor: (color: string | null) => void;
   selectedShape: string | null;
   setSelectedShape: (shape: string | null) => void;
+  selectedTexture: string | null;
+  setSelectedTexture: (mode: string | null) => void;
 }
 
 // Create the context
@@ -14,6 +16,7 @@ const BronzerContext = createContext<BronzerContextType | undefined>(undefined);
 export function BronzerProvider({ children }: { children: React.ReactNode }) {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedShape, setSelectedShape] = useState<string | null>(null);
+  const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
 
   return (
     <BronzerContext.Provider
@@ -22,6 +25,8 @@ export function BronzerProvider({ children }: { children: React.ReactNode }) {
         setSelectedColor,
         selectedShape,
         setSelectedShape,
+        selectedTexture,
+        setSelectedTexture,
       }}
     >
       {children}

@@ -3,21 +3,20 @@ import "@tensorflow/tfjs-backend-cpu";
 import * as tf from "@tensorflow/tfjs-core";
 import * as tflite from "@tensorflow/tfjs-tflite";
 
-let tfliteModel: tflite.TFLiteModel | null = null;
-
-/**
- * Loads the TensorFlow Lite model.
- * @param modelUrl URL or path to the TFLite .tflite file
- */
-export const loadTFLiteModel = async (modelUrl: string): Promise<void> => {
+export const loadTFLiteModel = async (
+  modelUrl: string,
+): Promise<tflite.TFLiteModel> => {
   console.log(modelUrl);
   try {
+    let tfliteModel: tflite.TFLiteModel | null = null;
+
     tflite.setWasmPath(
       "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/wasm/",
     );
 
     tfliteModel = await tflite.loadTFLiteModel(modelUrl);
     console.log("TFLite Model loaded successfully");
+    return tfliteModel;
   } catch (error) {
     console.error("Error loading TFLite model:", error);
     throw error;
@@ -63,10 +62,11 @@ export const preprocessTFLiteImage = async (
  * @returns Inference results as Float32Array
  */
 export const runTFLiteInference = async (
+  tfliteModel: tflite.TFLiteModel,
   preprocessedImage: Float32Array,
   w: number,
   h: number,
-): Promise<tf.Tensor> => {
+): Promise<tf.Tensor<tf.Rank> | tf.Tensor<tf.Rank>[] | tf.NamedTensorMap> => {
   if (!tfliteModel) {
     throw new Error("TFLite model is not loaded");
   }
@@ -76,11 +76,12 @@ export const runTFLiteInference = async (
     const inputTensor = tf.tensor(preprocessedImage, [1, w, h, 3]);
 
     // Perform inference
-    const outputTensor = await tfliteModel.predict(inputTensor);
+    const outputTensor:
+      | tf.Tensor<tf.Rank>
+      | tf.Tensor<tf.Rank>[]
+      | tf.NamedTensorMap = await tfliteModel.predict(inputTensor);
 
     return outputTensor;
-
-    throw new Error("Unexpected output type from TFLite model");
   } catch (error) {
     console.error("Error during TFLite inference:", error);
     throw error;

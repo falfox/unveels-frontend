@@ -8,7 +8,7 @@ import {
   LENS_TEXTURE_THREE,
   LENS_TEXTURE_FOUR,
 } from "../../../utils/constants";
-import { useMakeup } from "../makeup-context";
+import { useMakeup } from "../../../context/makeup-context";
 
 interface ContactLensProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;

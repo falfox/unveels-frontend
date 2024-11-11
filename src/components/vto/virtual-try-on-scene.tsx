@@ -16,7 +16,7 @@ import { Canvas } from "@react-three/fiber";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import VirtualTryOnThreeScene from "./virtual-try-on-three-scene";
 import { Landmark } from "../../types/landmark";
-import { useAccesories } from "../three/accesories-context";
+import { useAccesories } from "../../context/accesories-context";
 import HDREnvironment from "../three/hdr-environment";
 
 export function VirtualTryOnScene() {

@@ -25,31 +25,45 @@ import { FaceResults } from "../types/faceResults";
 import {
   SkinAnalysisProvider,
   useSkinAnalysis,
-} from "../components/skin-analysis/skin-analysis-context";
+} from "../context/skin-analysis-context";
 import { SkinAnalysisResult } from "../types/skinAnalysisResult";
 import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
-import { TopNavigation } from "./skin-tone-finder";
+import { labelsDescription } from "../utils/constants";
+import { TopNavigation } from "../components/top-navigation";
+import {
+  InferenceProvider,
+  useInferenceContext,
+} from "../context/inference-context";
 
 export function SkinAnalysis() {
   return (
     <CameraProvider>
-      <SkinAnalysisProvider>
-        <div className="h-full min-h-dvh">
-          <Main />
-        </div>
-      </SkinAnalysisProvider>
+      <InferenceProvider>
+        <SkinAnalysisProvider>
+          <div className="h-full min-h-dvh">
+            <Main />
+          </div>
+        </SkinAnalysisProvider>
+      </InferenceProvider>
     </CameraProvider>
   );
 }
 
 function Main() {
   const { criterias } = useCamera();
+
+  const {
+    isLoading,
+    setIsLoading,
+    setIsInferenceFinished,
+    isInferenceFinished,
+    setInferenceError,
+    setIsInferenceRunning,
+  } = useInferenceContext();
+
   const [inferenceResult, setInferenceResult] = useState<FaceResults[] | null>(
     null,
   );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [inferenceError, setInferenceError] = useState<string | null>(null);
-  const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
   const { setSkinAnalysisResult } = useSkinAnalysis();
 
   useEffect(() => {
@@ -99,7 +113,7 @@ function Main() {
         )}
       </div>
       <RecorderStatus />
-      <TopNavigation item={false} />
+      <TopNavigation item={isInferenceFinished} />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         <MainContent />
@@ -209,10 +223,10 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="px-8">
-          <DescriptionText text="Hey there! As much as we embrace aging gracefully, those detected creases and lines can sneak up on us sooner than we'd like. To fend off those pesky wrinkles, remember to stay hydrated and wear sunscreen daily. Adding a skin-nourishing routine can work wonders. Embrace your lines, but there's no harm in giving them a little extra tender loving care by checking our recommendations to keep them at bay for as long as possible. Your future self will thank you and us for the care!  Less" />
+          {tab && <DescriptionText text={labelsDescription[tab]} />}
         </div>
 
-        <ProductList skinConcern={tab} />
+        {tab && <ProductList skinConcern={tab} />}
       </div>
     </>
   );

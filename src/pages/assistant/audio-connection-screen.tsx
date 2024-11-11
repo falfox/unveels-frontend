@@ -10,6 +10,12 @@ import {
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ReactAudioPlayer from "react-audio-player";
 import { useEffect, useRef, useState } from "react";
+import { botPrompt } from "../../utils/prompt";
+import { getCurrentTimestamp } from "../../utils/getCurrentTimeStamp";
+import { ProductRequest } from "../../types/productRequest";
+import { Product } from "../../api/shared";
+import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
+import { categories } from "../../api/virtual-assistant-attributes/category";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -18,54 +24,44 @@ interface Chat {
   text: string;
   sender: "user" | "agent";
   mode: "voice-connection" | "text-connection" | "audio-connection";
-  timestamp: string; // New property
+  type: "audio" | "chat";
+  timestamp: string;
+  audioURL?: string | null;
 }
 
 const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
-  const [suggestedProduct, setSuggestedProduct] = useState<boolean>(false);
   const [speak, setSpeak] = useState(false);
   const [audioSource, setAudioSource] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [msg, setMsg] = useState("");
 
   const [chats, setChats] = useState<Chat[]>([]);
-
   const [text, setText] = useState("");
-
   const [loading, setLoading] = useState(false);
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
-  const getCurrentTimestamp = (): string => {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
+  const [fetchProducts, setFetchProducts] = useState(false);
+  const [products, setProducts] = useState<ProductRequest[]>([]);
+  const [productData, setProductData] = useState<Product[]>([]);
 
-  const getResponse = async (userMsg: string | Blob) => {
-    if (typeof userMsg === "string" && !userMsg.trim()) {
-      console.error("Prompt can't be empty.");
-      return;
-    }
-
-    const timestamp = getCurrentTimestamp();
-
-    setChats((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text: userMsg instanceof Blob ? "Audio Message" : userMsg,
-        sender: "user",
-        mode: "audio-connection",
-        timestamp,
-      },
-    ]);
-
-    if (typeof userMsg === "string") {
+  useEffect(() => {
+    if (fetchProducts && products.length > 0) {
       setLoading(true);
+      fetchVirtualAssistantProduct(products, categories)
+        .then((fetchedProducts) => {
+          setProductData(fetchedProducts);
+          setFetchProducts(false);
+          setLoading(false);
+        })
+        .finally(() => setLoading(false));
     }
+  }, [fetchProducts, products]);
 
-    const systemPrompt = `Anda adalah asisten virtual yang ahli dalam produk.`;
+  const getResponse = async (userMsg: string) => {
+    const timestamp = getCurrentTimestamp();
+    setLoading(true);
+
     const conversationHistory = [
-      systemPrompt,
       ...chats.map((message) =>
         message.sender === "user"
           ? `User: ${message.text}`
@@ -76,26 +72,79 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     const prompt = `${conversationHistory}\nUser: ${userMsg}\nAgent:`;
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-002",
+        systemInstruction: botPrompt,
+      });
+
       const result = await model.generateContent(prompt);
       const responseText = result.response.text();
-      setText(responseText);
+      const removeBackticks = responseText.replace(/```/g, "");
+      const jsonLabel = removeBackticks.replace(/json/g, "");
+      console.log(jsonLabel);
+      const respond = JSON.parse(jsonLabel);
+
+      // Tambahkan respons ke chats
+      setChats((prevChats) => [
+        ...prevChats,
+        {
+          id: Date.now() + 1,
+          text: respond.chat,
+          sender: "agent",
+          type: "chat",
+          mode: "audio-connection",
+          timestamp,
+        },
+      ]);
+
+      if (respond.isFinished) {
+        setProducts(respond.product);
+        setLoading(true);
+        setFetchProducts(true);
+      }
+
+      setText(respond.chat);
       setSpeak(true);
     } catch (error) {
       console.error("Error fetching AI response:", error);
-      console.error("Failed to fetch response from AI.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const chatBox = document.querySelector(".chat-box");
-    if (chatBox) {
-      chatBox.scrollTop = chatBox.scrollHeight;
+  const onSendMessage = (message: string, audioURL: string | null = null) => {
+    const timestamp = getCurrentTimestamp();
+
+    if (audioURL) {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: message,
+          sender: "user",
+          mode: "audio-connection",
+          type: "audio",
+          timestamp,
+          audioURL: audioURL,
+        },
+      ]);
+    } else {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: message,
+          type: "chat",
+          sender: "user",
+          mode: "audio-connection",
+          timestamp,
+          audioURL: null,
+        },
+      ]);
     }
-    console.log(chats);
-  }, [chats]);
+
+    getResponse(message);
+  };
 
   function playerEnded() {
     setAudioSource(null);
@@ -115,14 +164,18 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         sender: "agent",
         mode: "audio-connection",
         timestamp,
+        type: "chat",
       },
     ]);
   }
 
-  const onSendMessage = (message: string) => {
-    getResponse(message);
-    setMsg("");
-  };
+  useEffect(() => {
+    const chatBox = document.querySelector(".chat-box");
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    console.log(chats);
+  }, [chats]);
 
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
@@ -137,14 +190,13 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex h-1/2 flex-col bg-gradient-to-b from-[#1B1404] to-[#2C1F06]">
-        {suggestedProduct ? <SuggestedGifts /> : null}
         <div className="chat-box flex-1 space-y-4 overflow-y-auto p-4 text-xl text-white">
           {chats.map((chat) => (
             <MessageItem key={chat.id} message={chat} />
           ))}
           {loading && <LoadingChat showAvatar={false} />}
         </div>
-
+        {productData.length > 0 && <SuggestedGifts product={productData} />}
         <div className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">
           <div className="pointer-events-none absolute inset-x-0 -top-[116px] flex justify-center">
             <BleedEffect className="h-48" />

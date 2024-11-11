@@ -2,33 +2,60 @@ import {
   BleedEffect,
   LoadingChat,
   MessageItem,
+  SuggestedGifts,
   TopNavigation,
   UserInput,
 } from "../../components/assistant";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { botPrompt } from "../../utils/prompt";
+import { categories } from "../../api/virtual-assistant-attributes/category";
+import { ProductRequest } from "../../types/productRequest";
+import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
+import { Product } from "../../api/shared";
+import { getCurrentTimestamp } from "../../utils/getCurrentTimeStamp";
+import { mediaUrl } from "../../utils/apiUtils";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
-interface Chat {
-  id: number;
-  text: string;
-  sender: "user" | "agent";
-  mode: "voice-connection" | "text-connection" | "audio-connection";
-  timestamp: string;
-}
+type Chat =
+  | {
+      id: number;
+      text: string;
+      sender: string;
+      type?: "chat" | "audio" | "product";
+      mode: "voice-connection" | "text-connection" | "audio-connection";
+      timestamp: string;
+      audioURL?: string | null;
+    }
+  | {
+      id: number;
+      type: "chat" | "audio" | "product";
+      sender: string;
+      audioURL?: string | null;
+      text?: undefined;
+      timestamp: string;
+    }
+  | {
+      id: number;
+      type: "chat" | "audio" | "product";
+      sender: string;
+      name: string;
+      price: string;
+      originalPrice: string;
+      image: string;
+      brand: string;
+      text?: undefined;
+      timestamp: string;
+    };
 
 const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
-  const getCurrentTimestamp = (): string => {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const [messages, setMessages] = useState<Chat[]>([
+  const [chats, setChats] = useState<Chat[]>([
     {
       id: 1,
       text: "Hello! I am Sarah. How can I assist you today?",
       sender: "agent",
+      type: "chat",
       mode: "text-connection",
       timestamp: getCurrentTimestamp(),
     },
@@ -37,33 +64,56 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const getResponse = async (userMsg: string | Blob) => {
-    if (typeof userMsg === "string" && !userMsg.trim()) {
-      console.error("Prompt can't be empty.");
-      return;
-    }
+  const testData: ProductRequest[] = [
+    {
+      category: "Makeup",
+      sub_category: "Lip",
+      product_type: "Lipstick",
+    },
+  ];
 
-    const timestamp = getCurrentTimestamp();
+  const [fetchProducts, setFetchProducts] = useState(false);
+  const [products, setProducts] = useState<ProductRequest[]>([]);
+  const [productData, setProductData] = useState<Product[]>([]);
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text: userMsg instanceof Blob ? "Audio Message" : userMsg,
-        sender: "user",
-        mode: "text-connection",
-        timestamp,
-      },
-    ]);
-
-    if (typeof userMsg === "string") {
+  useEffect(() => {
+    if (fetchProducts && products.length > 0) {
       setLoading(true);
-    }
+      fetchVirtualAssistantProduct(products, categories)
+        .then((fetchedProducts) => {
+          setProductData(fetchedProducts);
+          setFetchProducts(false);
 
-    const systemPrompt = `Anda adalah asisten virtual yang ahli dalam produk.`;
+          fetchedProducts.forEach((item) => {
+            const imageUrl =
+              mediaUrl(item.media_gallery_entries[0]?.file) ??
+              "https://picsum.photos/id/237/200/300";
+            setChats((prevChats) => [
+              ...prevChats,
+              {
+                id: item.id,
+                type: "product",
+                sender: "agent",
+                name: item.name,
+                price: item.price,
+                originalPrice: item.price,
+                image: imageUrl,
+                brand: "Tom Ford",
+                timestamp: getCurrentTimestamp(),
+              },
+            ]);
+          });
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [fetchProducts, products]); // Hapus chats dari sini!
+
+  const getResponse = async (userMsg: string) => {
+    const timestamp = getCurrentTimestamp();
+    setLoading(true);
+
     const conversationHistory = [
-      systemPrompt,
-      ...messages.map((message) =>
+      ...chats.map((message) =>
         message.sender === "user"
           ? `User: ${message.text}`
           : `Agent: ${message.text}`,
@@ -72,42 +122,89 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
     const prompt = `${conversationHistory}\nUser: ${userMsg}\nAgent:`;
 
+    console.log(prompt);
+
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-002",
+        systemInstruction: botPrompt,
+      });
       const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-      setMessages((prev) => [
-        ...prev,
+      const responseText = await result.response.text(); // Pastikan await di sini jika perlu
+      const removeBackticks = responseText.replace(/```/g, "");
+      const jsonLabel = removeBackticks.replace(/json/g, "");
+      console.log(jsonLabel);
+      const respond = JSON.parse(jsonLabel);
+
+      // Tambahkan respons ke chats
+      setChats((prevChats) => [
+        ...prevChats,
         {
           id: Date.now() + 1,
-          text: responseText,
+          text: respond.chat,
           sender: "agent",
+          type: "chat",
           mode: "text-connection",
           timestamp,
         },
       ]);
+
+      if (respond.isFinished) {
+        setProducts(respond.product);
+        setLoading(true);
+        setFetchProducts(true);
+      }
     } catch (error) {
       console.error("Error fetching AI response:", error);
-      console.error("Failed to fetch response from AI.");
     } finally {
       setLoading(false);
     }
   };
 
-  const onSendMessage = (message: string) => {
+  const onSendMessage = (message: string, audioURL: string | null = null) => {
+    const timestamp = getCurrentTimestamp();
+
+    if (audioURL) {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: message != "" ? message : "",
+          sender: "user",
+          mode: "text-connection",
+          type: "audio",
+          timestamp,
+          audioURL: audioURL,
+        },
+      ]);
+    } else {
+      setChats((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: message,
+          type: "chat",
+          sender: "user",
+          mode: "text-connection",
+          timestamp,
+          audioURL: null,
+        },
+      ]);
+    }
+
+    console.log(chats);
+
     getResponse(message);
-    setMsg("");
   };
 
   return (
     <div className="relative mx-auto flex h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
       <main className="flex-1 space-y-4 overflow-y-auto p-4 pt-20">
-        {messages.map((message) => (
-          <MessageItem message={message} />
+        {chats.map((message) => (
+          <MessageItem key={message.id} message={message} />
         ))}
         {loading && <LoadingChat />}
       </main>
-
       <footer className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">
         <div className="pointer-events-none absolute inset-x-0 -top-[116px] flex justify-center">
           <BleedEffect className="h-48" />

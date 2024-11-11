@@ -3,7 +3,7 @@ import { MeshProps, useLoader } from "@react-three/fiber";
 import React, { useMemo, Suspense, useEffect } from "react";
 import { MeshBasicMaterial, TextureLoader } from "three";
 import FaceMesh from "../face-mesh";
-import { useMakeup } from "../makeup-context";
+import { useMakeup } from "../../../context/makeup-context";
 import {
   CONTOUR_TEXTURE_ONE,
   CONTOUR_TEXTURE_DUAL_ONE_HIGH,

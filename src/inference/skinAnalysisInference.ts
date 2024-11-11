@@ -113,7 +113,7 @@ export const skinAnalysisInference = async (
     const colors = new Colors();
 
     const model = await tflite.loadTFLiteModel(
-      `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/skin-analysis/best_skin_float16.tflite`,
+      "/models/skin-analysis/best_skin_float16.tflite",
     );
 
     console.log("load model");

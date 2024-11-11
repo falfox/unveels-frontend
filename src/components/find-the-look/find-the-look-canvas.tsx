@@ -5,10 +5,10 @@ import {
   ObjectDetectorResult,
   FaceLandmarker,
 } from "@mediapipe/tasks-vision";
-import { useFindTheLook } from "../../context/find-the-look-context";
 import { FindTheLookItems } from "../../types/findTheLookItems";
 import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
+import { useFindTheLookContext } from "./find-the-look-context";
 
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
@@ -30,7 +30,7 @@ export function FindTheLookCanvas({
   canvasRef,
   onLabelClick,
 }: FindTheLookCanvasProps) {
-  const { setFindTheLookItems } = useFindTheLook();
+  const { selectedItems: cart } = useFindTheLookContext();
   const results: FindTheLookItems[] = [];
 
   const hitboxesRef = useRef<Hitbox[]>([]);

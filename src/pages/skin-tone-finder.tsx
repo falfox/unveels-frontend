@@ -35,7 +35,6 @@ import {
   useSkinColor,
 } from "../components/skin-tone-finder-scene/skin-color-context";
 import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-tone-finder-scene";
-import { usePage } from "../hooks/usePage";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { useScrollContainer } from "../hooks/useScrollContainer";
 import {
@@ -43,18 +42,25 @@ import {
   getProductAttributes,
   mediaUrl,
 } from "../utils/apiUtils";
-import { MakeupProvider, useMakeup } from "../components/three/makeup-context";
+import { MakeupProvider, useMakeup } from "../context/makeup-context";
+import {
+  InferenceProvider,
+  useInferenceContext,
+} from "../context/inference-context";
+import { TopNavigation } from "../components/top-navigation";
 
 export function SkinToneFinder() {
   return (
     <CameraProvider>
-      <SkinColorProvider>
-        <MakeupProvider>
-          <div className="h-full min-h-dvh">
-            <Main />
-          </div>
-        </MakeupProvider>
-      </SkinColorProvider>
+      <InferenceProvider>
+        <SkinColorProvider>
+          <MakeupProvider>
+            <div className="h-full min-h-dvh">
+              <Main />
+            </div>
+          </MakeupProvider>
+        </SkinColorProvider>
+      </InferenceProvider>
     </CameraProvider>
   );
 }
@@ -62,7 +68,7 @@ export function SkinToneFinder() {
 function Main() {
   const { criterias, status } = useCamera();
   const [collapsed, setCollapsed] = useState(false);
-
+  const { isInferenceFinished } = useInferenceContext();
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
@@ -76,14 +82,14 @@ function Main() {
         ></div>
       </div>
       <RecorderStatus />
-      <TopNavigation />
+      <TopNavigation cart={isInferenceFinished} />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         {criterias.isCaptured ? "" : <VideoScene />}
         <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
         <Footer />
       </div>
-      <Sidebar setCollapsed={setCollapsed} />
+      {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
     </div>
   );
 }
@@ -207,10 +213,10 @@ function ShadesSelector() {
   );
 }
 
-const isShadeSelected = (product: Product, selectedShade: string) =>
-  getProductAttributes(product, "hexacode")?.value.includes(
-    selectedShade ?? "",
-  );
+const isShadeSelected = (product: Product, selectedShade: string) => {
+  const attribute = getProductAttributes(product, "hexacode");
+  return attribute?.value?.includes(selectedShade ?? "");
+};
 
 function MatchedShades() {
   const [selectedTne, setSelectedTone] = useState(tone_types[0]);
@@ -469,87 +475,10 @@ function RecorderStatus() {
   );
 }
 
-export function TopNavigation({
-  item = false,
-  cart = false,
-}: {
-  item?: boolean;
-  cart?: boolean;
-}) {
-  const { setPage } = usePage();
-  const { flipCamera } = useCamera();
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
-      <div className="flex flex-col gap-4">
-        <button className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl">
-          <ChevronLeft className="size-6 text-white" />
-        </button>
-
-        {item ? (
-          <div className="space-y-2 pt-10">
-            <div className="flex gap-x-4">
-              <button className="flex size-8 shrink-0 items-center justify-center rounded-full bg-black/25 backdrop-blur-3xl">
-                <Heart className="size-5 text-white" />
-              </button>
-              <div>
-                <p className="font-semibold leading-4 text-white">
-                  Pro Filt’r Soft Matte Longwear Liquid Found
-                </p>
-                <p className="text-white/60">Brand Name</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-x-4">
-              <button className="flex size-8 shrink-0 items-center justify-center rounded-full bg-black/25 backdrop-blur-3xl">
-                <Plus className="size-5 text-white" />
-              </button>
-              <p className="font-medium text-white">$52.00</p>
-            </div>
-          </div>
-        ) : null}
-      </div>
-      <div className="flex flex-col gap-4">
-        <Link
-          type="button"
-          className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-          to="/"
-        >
-          <X className="size-6 text-white" />
-        </Link>
-        <div className="relative -m-0.5 p-0.5">
-          <div
-            className="absolute inset-0 rounded-full border-2 border-transparent"
-            style={
-              {
-                background: `linear-gradient(148deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.77) 100%) border-box`,
-                "-webkit-mask": `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                mask: `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                "-webkit-mask-composite": "destination-out",
-                "mask-composite": "exclude",
-              } as CSSProperties
-            }
-          />
-          <button
-            type="button"
-            className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-            onClick={flipCamera}
-          >
-            <Icons.flipCamera className="size-6 text-white" />
-          </button>
-        </div>
-        <button
-          type="button"
-          className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-        >
-          <Icons.myCart className="size-6 text-white" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 interface SidebarProps {
   setCollapsed: Dispatch<SetStateAction<boolean>>;
 }
+
 function Sidebar({ setCollapsed }: SidebarProps) {
   const { flipCamera, compareCapture, resetCapture, screenShoot } = useCamera();
   return (
@@ -569,20 +498,23 @@ function Sidebar({ setCollapsed }: SidebarProps) {
         />
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
-          <button className="">
+          <button className="" onClick={screenShoot}>
             <Icons.camera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={flipCamera}>
             <Icons.flipCamera className="size-6 text-white" />
           </button>
-          <button className="">
+          <button
+            className=""
+            onClick={() => setCollapsed((prevState) => !prevState)}
+          >
             <Icons.expand className="size-6 text-white" />
           </button>
-          <button className="">
+          <button className="" onClick={compareCapture}>
             <Icons.compare className="size-6 text-white" />
           </button>
           <button className="">
-            <Icons.reset className="size-6 text-white" />
+            <Icons.reset onClick={resetCapture} className="size-6 text-white" />
           </button>
           <button className="hidden">
             <Icons.upload className="size-6 text-white" />
