@@ -35,6 +35,7 @@ import { Scanner } from "../components/scanner";
 import * as tf from "@tensorflow/tfjs-core";
 import * as tflite from "@tensorflow/tfjs-tflite";
 import { loadTFLiteModel } from "../utils/tfliteInference";
+import { useTranslation } from "react-i18next";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export function PersonalityFinder() {
@@ -198,16 +199,11 @@ function MainContent() {
 }
 
 function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
+  const { t } = useTranslation();
   const tabs = [
-    {
-      title: "Personality",
-    },
-    {
-      title: "Attributes",
-    },
-    {
-      title: "Recommendations",
-    },
+    { title: t("tabsmenupf.personality"), key: "Personality" },
+    { title: t("tabsmenupf.attributes"), key: "Attributes" },
+    { title: t("tabsmenupf.recommendations"), key: "Recommendations" },
   ];
 
   const [selectedTab, setTab] = useState(tabs[0].title);
@@ -280,11 +276,11 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
               key={index}
               className={clsx(
                 "w-full translate-y-0.5 border-b-2 py-2",
-                tab.title === selectedTab
+                tab.key === selectedTab
                   ? "border-[#CA9C43] bg-gradient-to-r from-[#92702D] to-[#CA9C43] bg-clip-text text-transparent"
                   : "border-transparent",
               )}
-              onClick={() => setTab(tab.title)}
+              onClick={() => setTab(tab.key)}
             >
               {tab.title}
             </button>
@@ -309,6 +305,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
 }
 
 function PersonalityTab({ data }: { data: Classifier[] | null }) {
+  const { t } = useTranslation();
   if (!data) {
     return <div></div>;
   }
@@ -316,7 +313,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
   return (
     <div className="flex-1 space-y-6 overflow-auto px-10 py-6">
       <h2 className="text-center text-xl font-medium">
-        Main 5 Personality Traits
+        {t("viewpersonality.personality_traits")}
       </h2>
 
       <CircularProgressRings
@@ -349,7 +346,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                 ? (data[15].outputData[0] * 100).toFixed(1)
                 : ""}
             </div>
-            <span>Extraversion</span>
+            <span>{t("personality.extraversion.title")}</span>
           </div>
 
           {/* Conscientiousness */}
@@ -359,7 +356,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                 ? (data[15].outputData[3] * 100).toFixed(1)
                 : ""}
             </div>
-            <span>Conscientiousness</span>
+            <span>{t("personality.conscientiousness.title")}</span>
           </div>
 
           {/* Openness to Experience */}
@@ -369,7 +366,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                 ? (data[15].outputData[4] * 100).toFixed(1)
                 : ""}
             </div>
-            <span>Openness to Experience</span>
+            <span>{t("personality.opennesstoexperience.title")}</span>
           </div>
         </div>
 
@@ -382,7 +379,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                 ? (data[15].outputData[2] * 100).toFixed(1)
                 : ""}
             </div>
-            <span>Agreeableness</span>
+            <span>{t("personality.agreeableness.title")}</span>
           </div>
 
           {/* Neuroticism */}
@@ -392,7 +389,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                 ? (data[15].outputData[1] * 100).toFixed(1)
                 : ""}
             </div>
-            <span>Neuroticism</span>
+            <span>{t("personality.neuroticism.title")}</span>
           </div>
         </div>
       </div>
@@ -699,6 +696,8 @@ function RecommendationsTab({ personality }: { personality: string }) {
 }
 
 function AttributesTab({ data }: { data: Classifier[] | null }) {
+  const { t } = useTranslation();
+
   if (!data) {
     return <div></div>;
   }

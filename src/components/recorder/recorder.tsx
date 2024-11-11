@@ -2,24 +2,10 @@ import clsx from "clsx";
 import { Lightbulb, Scan, ScanFace } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCamera } from "../../context/recorder-context";
-
-const categorizedHints = {
-  facePosition: [
-    "Keep the face centered within the frame.",
-    "Position the face at the center of the screen for best results.",
-    "Aim the camera straight at the face.",
-  ],
-  lighting: [
-    "Ensure it is a well-lit area with natural or bright artificial light.",
-    "Ensure the light source is in front of the face, not behind.",
-  ],
-  orientation: [
-    "Hold the head upright and avoid tilting the face.",
-    "Maintain a straight gaze without looking up or down.",
-  ],
-};
+import { useTranslation } from "react-i18next";
 
 function RecorderGuide() {
+  const { t } = useTranslation();
   const {
     criterias: { facePosition, lighting, orientation },
   } = useCamera();
@@ -31,16 +17,19 @@ function RecorderGuide() {
   const getFilteredHints = () => {
     const hintsToShow: string[] = [];
 
-    if (!facePosition) {
-      hintsToShow.push(...categorizedHints.facePosition);
+    const facePositionHints = t("hints.facePosition", { returnObjects: true });
+    if (Array.isArray(facePositionHints)) {
+      hintsToShow.push(...facePositionHints);
     }
 
-    if (!lighting) {
-      hintsToShow.push(...categorizedHints.lighting);
+    const lightingHints = t("hints.lighting", { returnObjects: true });
+    if (Array.isArray(lightingHints)) {
+      hintsToShow.push(...lightingHints);
     }
 
-    if (!orientation) {
-      hintsToShow.push(...categorizedHints.orientation);
+    const orientationHints = t("hints.orientation", { returnObjects: true });
+    if (Array.isArray(orientationHints)) {
+      hintsToShow.push(...orientationHints);
     }
 
     return hintsToShow;
@@ -84,7 +73,7 @@ function RecorderGuide() {
               : "border-dashed border-white/50",
           )}
         >
-          Face Position
+          {t("criteria.facePosition")}
           <ScanFace className="size-6" />
         </div>
         <div
@@ -95,7 +84,7 @@ function RecorderGuide() {
               : "border-dashed border-white/50",
           )}
         >
-          Lighting
+          {t("criteria.lighting")}
           <Lightbulb className="size-6" />
         </div>
         <div
@@ -106,7 +95,7 @@ function RecorderGuide() {
               : "border-dashed border-white/50",
           )}
         >
-          Orientation
+          {t("criteria.orientation")}
           <Scan className="size-6" />
         </div>
       </div>

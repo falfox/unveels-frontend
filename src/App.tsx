@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
 import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
@@ -46,7 +46,8 @@ import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
 import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
 import { FindTheLook } from "./pages/find-the-look";
 import { SkinAnalysisWeb } from "./pages/skin-analysis.-web";
-// Define routes using object syntax
+import { useTranslation } from "react-i18next";
+
 const routes = [
   {
     path: "/",
@@ -131,6 +132,12 @@ const router = createBrowserRouter(routes, {
 });
 
 function Home() {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    i18n.changeLanguage("ar"); // Mengatur bahasa ke Arab saat komponen di-mount
+  }, [i18n]);
+
   useCategoriesQuerySuspense();
   useBrandsQuerySuspense();
 

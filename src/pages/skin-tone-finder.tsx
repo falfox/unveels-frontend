@@ -48,6 +48,7 @@ import {
   useInferenceContext,
 } from "../context/inference-context";
 import { TopNavigation } from "../components/top-navigation";
+import { useTranslation } from "react-i18next";
 
 export function SkinToneFinder() {
   return (
@@ -152,6 +153,8 @@ function MainContent({ collapsed, setCollapsed }: MainContentProps) {
 }
 
 function ShadesSelector() {
+  const { t } = useTranslation();
+
   const [tab, setTab] = useState("matched" as "matched" | "other");
 
   const activeClassNames =
@@ -174,7 +177,7 @@ function ShadesSelector() {
                 onClick={() => setTab(shadeTab as "matched" | "other")}
               >
                 <span className={isActive ? "text-white/70 blur-sm" : ""}>
-                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)} Shades
+                  {t(`tabOptions.${shadeTab}`)}
                 </span>
                 {isActive ? (
                   <>
@@ -185,14 +188,12 @@ function ShadesSelector() {
                       )}
                     >
                       <span className="text-center text-lg">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        Shades
+                        {t("tabOptions.matched")}
                       </span>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-center text-lg text-white/70">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        Shades
+                        {t("tabOptions.other")}
                       </span>
                     </div>
                   </>
@@ -219,6 +220,7 @@ const isShadeSelected = (product: Product, selectedShade: string) => {
 };
 
 function MatchedShades() {
+  const { t } = useTranslation();
   const [selectedTne, setSelectedTone] = useState(tone_types[0]);
   const { skinType, hexSkin } = useSkinColor();
 
@@ -237,7 +239,9 @@ function MatchedShades() {
             className="size-3 rounded-full"
             style={{ backgroundColor: hexSkin }}
           ></div>
-          <span className="text-sm">{skinType}</span>
+          <span className="text-sm">
+            {t(`skin_types.${skinType?.split(" ")[0].toLocaleLowerCase()}`)}
+          </span>
         </div>
         <div className="flex w-full min-w-0 pt-2">
           {tone_types.map((option, index) => (
@@ -250,12 +254,16 @@ function MatchedShades() {
               }}
               onClick={() => setSelectedTone(option)}
             >
-              {option.name}
+              {t(
+                `tone_types.${option.name.toLocaleLowerCase().replace(" ", "_")}`,
+              )}
             </button>
           ))}
         </div>
         <div className="w-full text-right">
-          <button className="py-2 text-[0.625rem] text-white">View all</button>
+          <button className="py-2 text-[0.625rem] text-white">
+            {t("view_all")}
+          </button>
         </div>
 
         {data ? (
@@ -271,6 +279,8 @@ function MatchedShades() {
 }
 
 function OtherShades() {
+  const { t } = useTranslation();
+
   const [selectedTone, setSelectedTone] = useState(skin_tones[0]);
 
   const [selectedShade, setSelectedShade] = useState(null as string | null);
@@ -321,7 +331,11 @@ function OtherShades() {
               className="size-3 rounded-full"
               style={{ background: tone.color }}
             ></div>
-            <span className="text-sm">{tone.name}</span>
+            <span className="text-sm">
+              {t(
+                `skin_tones.${tone.name.toLocaleLowerCase().replace(" ", "_")}`,
+              )}
+            </span>
           </div>
         ))}
       </div>

@@ -1,0 +1,221 @@
+{
+  "hints": {
+    "facePosition": [
+      "Keep the face centered within the frame.",
+      "Position the face at the center of the screen for best results.",
+      "Aim the camera straight at the face."
+    ],
+    "lighting": [
+      "Ensure it is a well-lit area with natural or bright artificial light.",
+      "Ensure the light source is in front of the face, not behind."
+    ],
+    "orientation": [
+      "Hold the head upright and avoid tilting the face.",
+      "Maintain a straight gaze without looking up or down."
+    ]
+  },
+  "criteria": {
+    "facePosition": "Face Position",
+    "lighting": "Lighting",
+    "orientation": "Orientation"
+  },
+  "tabOptions": {
+    "matched": "Matched Shades",
+    "other": "Other Shades"
+  },
+
+  "skin_types": {
+    "fair": "Fair Skin",
+    "light": "Light Skin",
+    "medium": "Medium Skin",
+    "olive": "Olive Skin",
+    "tan": "Tan Skin",
+    "brown": "Brown Skin",
+    "deep": "Deep Skin"
+  },
+  "tone_types": {
+    "perfect_fit": "Perfect Fit",
+    "lighter": "Lighter",
+    "cooler": "Cooler",
+    "warmer": "Warmer",
+    "darker": "Darker"
+  },
+  "view_all": "View all",
+  "skin_tones": {
+    "fair_skin": "Fair Skin",
+    "medium_skin": "Medium Skin",
+    "olive_skin": "Olive Skin",
+    "tan_skin": "Tan Skin",
+    "brown_skin": "Brown Skin",
+    "deep_skin": "Deep Skin"
+  },
+  "tabsmenupf": {
+    "personality": "Personality",
+    "attributes": "Attributes",
+    "recommendations: ": "Recommendations"
+  },
+  "viewpersonality": {
+    "personality_traits": "Main 5 Personality Traits"
+  },
+  "personality": {
+    "extraversion": {
+      "title": "Extraversion",
+      "description": "An extravert personality provides insights into an individual's social behaviour and interaction preferences. Extraverts are known for their outgoing, energetic, and talkative nature. They thrive in social settings, seek excitement, and enjoy being the center of attention. Extraverts are often described as sociable, assertive, and enthusiastic individuals who are comfortable in group settings and have a wide circle of friends. This also delves into the extraversion traits; highlighting that they're strong in communication, leadership, and relationship-building skills. Therefore, here's what Unveels suggests for you based on your Extraversion."
+    },
+    "conscientiousness": {
+      "title": "Conscientiousness",
+      "description": "Description for Conscientiousness..."
+    },
+    "opennesstoexperience": {
+      "title": "Openness to Experience",
+      "description": "Description for Openness to Experience..."
+    },
+    "agreeableness": {
+      "title": "Agreeableness",
+      "description": "Description for Agreeableness..."
+    },
+    "neuroticism": {
+      "title": "Neuroticism",
+      "description": "Description for Neuroticism..."
+    }
+  },
+  "attributepf": {
+    "face": {
+      "title": "Face",
+      "faceattribute": {
+        "faceshape": "Face Shape",
+        "skintone": "Skin Tone"
+      }
+    },
+    "eyes": {
+      "title": "Eyes",
+      "eyesattribute": {
+        "eyeshape": "Eye Shape",
+        "eyesize": "Eye Size ",
+        "eyeangle": "Eye Angle",
+        "eyedistance": "Eye Distance",
+        "eyelid": "Eyelid",
+        "eyecolor": "Eye Color"
+      }
+    },
+    "brows": {
+      "title": "Brows",
+      "eyesattribute": {
+        "eyebrowshape": "Eyebrow Shape",
+        "thickness": "Thickness ",
+        "eyebrowdistance": "Eyebrow Distance",
+        "eyebrowcolor": "Eyebrow Color"
+      }
+    },
+    "lips": {
+      "title": "Lips",
+      "lipattribute": {
+        "lipshape": "Lip Shape",
+        "lipcolor": "Lip Color"
+      }
+    },
+    "cheekbones": {
+      "title": "Checkbones",
+      "cheekbonesattribute": {
+        "checkbones": "Checkbones"
+      }
+    },
+    "nose": {
+      "title": "Nose",
+      "noseattribute": {
+        "noseshape": "Nose Shape"
+      }
+    },
+    "hair": {
+      "title": "Hair",
+      "hairattribute": {
+        "haircolor": "Color"
+      }
+    }
+  },
+  "thinness": {
+    "normal": "Normal",
+    "thick": "Thick",
+    "thin": "Thin"
+  },
+  "thickness": {
+    "dense": "Dense",
+    "medium": "Medium",
+    "sparse": "Sparse"
+  },
+  "nosewidth_labels": {
+    "broad": "Broad",
+    "medium": "Medium",
+    "narrow": "Narrow"
+  },
+  "nose_length_labels": {
+    "average": "Average",
+    "long": "Long",
+    "short": "Short"
+  },
+  "liplabels": {
+    "fulllips": "Full Lips",
+    "heartlips": "Heart Lips",
+    "heavylowerlips": "Heavy Lower Lips",
+    "heavyupperlips": "Heavy Upper Lips",
+    "roundlips": "Round Lips",
+    "thinlips": "Thin Lips",
+    "widelips": "Wide Lips"
+  },
+  "faceshapelabels": {
+    "heart": "Heart",
+    "oval": "Oval",
+    "round": "Round",
+    "square": "Square"
+  },
+  "eyelidlabels": {
+    "doublelids": "Double Lids",
+    "monolids": "Monolids"
+  },
+  "eyebrowshapelabels": {
+    "curved": "Curved",
+    "highArch": "High Arch",
+    "sShaped": "S-Shaped",
+    "softArch": "Soft Arch",
+    "straight": "Straight",
+    "upward": "Upward"
+  },
+  "eyebrowDistanceLabels": {
+    "close": "Close",
+    "proportioned": "Proportioned",
+    "wide": "Wide"
+  },
+  "eyesizeLabels": {
+    "large": "Large",
+    "medium": "Medium",
+    "small": "Small"
+  },
+  "eyeshapeLabels": {
+    "almond": "Almond",
+    "downturned": "Downturned",
+    "monolid": "Monolid",
+    "round": "Round",
+    "upturned": "Upturned",
+    "hooded": "Hooded"
+  },
+  "eyedistanceLabels": {
+    "averageSet": "Average-Set",
+    "closeSet": "Close-set",
+    "wideSet": "Wide-Set"
+  },
+  "eyeangleLabels": {
+    "downturned": "Downturned",
+    "neutral": "Neutral",
+    "upturned": "Upturned"
+  },
+  "cheeksbonesLabels": {
+    "highCheeks": "High Cheeks",
+    "lowCheeks": "Low Cheeks",
+    "roundCheeks": "Round Cheeks"
+  },
+  "hairLabels": {
+    "long": "Long",
+    "normal": "Normal",
+    "short": "Short"
+  }
+}
