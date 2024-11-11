@@ -10,7 +10,7 @@ import {
 } from "../../../../utils/apiUtils";
 
 export function useHandwearQuery(
-  type: "Rings" | "Bracelets" | "Necklaces",
+  type: "Rings" | "Bracelets" | "Bangles",
   {
     color,
     material,

@@ -11,7 +11,7 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { HandwearProvider, useHandwearContext } from "./handwear-context";
 import { useHandwearQuery } from "./handwear-query";
 
-function useActiveHandwear(): "Rings" | "Bracelets" | "Necklaces" {
+function useActiveHandwear(): "Rings" | "Bracelets" | "Bangles" {
   const location = useLocation();
 
   // Extract the neckwear type from the path
@@ -22,7 +22,7 @@ function useActiveHandwear(): "Rings" | "Bracelets" | "Necklaces" {
 
   if (
     activeNeckwear == null ||
-    !["rings", "bracelets", "necklaces"].includes(activeNeckwear)
+    !["rings", "bracelets", "bangles"].includes(activeNeckwear)
   ) {
     throw new Error("No active neckwear found");
   }
@@ -31,7 +31,7 @@ function useActiveHandwear(): "Rings" | "Bracelets" | "Necklaces" {
   return (activeNeckwear.charAt(0).toUpperCase() + activeNeckwear.slice(1)) as
     | "Rings"
     | "Bracelets"
-    | "Necklaces";
+    | "Bangles";
 }
 
 export function HandwearSelector() {
