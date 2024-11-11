@@ -363,7 +363,7 @@ function OtherShades() {
         ))}
       </div>
       <div className="w-full text-right">
-        <button className="py-2 text-[0.625rem] text-white">View all</button>
+        <button className="py-2 text-[0.625rem] text-white">{t("view_all")}</button>
       </div>
 
       {data ? (

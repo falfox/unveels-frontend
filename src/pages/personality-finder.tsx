@@ -206,11 +206,11 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
     { title: t("tabsmenupf.recommendations"), key: "Recommendations" },
   ];
 
-  const [selectedTab, setTab] = useState(tabs[0].title);
+  // Use state to keep track of selected tab key
+  const [selectedTab, setTab] = useState(tabs[0].key);
 
   const { setPage } = usePage();
   const { criterias } = useCamera();
-
   const navigate = useNavigate();
 
   return (
@@ -251,7 +251,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
           </div>
 
           <div className="pt-2 text-center text-sm">
-            {inferenceResult ? inferenceResult[15].outputLabel : ""}
+            {t(`personalityLabels.${inferenceResult?.[15]?.outputLabel .toLocaleLowerCase() || ""}`)}
           </div>
         </div>
         <div>
@@ -261,14 +261,13 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
           </div>
           <div className="mt-1 pl-5 text-xs">
             {inferenceResult?.[15]?.outputIndex !== undefined
-              ? personalityAnalysisResult[inferenceResult[15].outputIndex]
+              ? t(`personalityAnalysisResult.${inferenceResult[15].outputIndex}`) || ""
               : ""}
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-
       <div className="mx-auto w-full max-w-[430px] px-5">
         <div className="flex border-b-2 border-white/50">
           {tabs.map((tab, index) => (
@@ -289,20 +288,21 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
       </div>
 
       {/* Main Content */}
-      {selectedTab === "Personality" ? (
+      {selectedTab === "Personality" && (
         <PersonalityTab data={inferenceResult ?? null} />
-      ) : null}
-      {selectedTab === "Attributes" ? (
+      )}
+      {selectedTab === "Attributes" && (
         <AttributesTab data={inferenceResult ?? null} />
-      ) : null}
-      {selectedTab === "Recommendations" ? (
+      )}
+      {selectedTab === "Recommendations" && (
         <RecommendationsTab
           personality={inferenceResult?.[15]?.outputLabel ?? ""}
         />
-      ) : null}
+      )}
     </div>
   );
 }
+
 
 function PersonalityTab({ data }: { data: Classifier[] | null }) {
   const { t } = useTranslation();
@@ -366,7 +366,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                 ? (data[15].outputData[4] * 100).toFixed(1)
                 : ""}
             </div>
-            <span>{t("personality.opennesstoexperience.title")}</span>
+            <span>{t("personality.openness.title")}</span>
           </div>
         </div>
 
@@ -396,9 +396,8 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
 
       <div className="divide-y divide-white/50">
         <PersonalitySection
-          title="Openness"
-          description="People with an open personality are known for their vibrant imagination, curiosity, and eagerness to explore new ideas and experiences. You have a strong desire for novelty and diversity, and you're open to different perspectives and ways of thinking. With the trait of openness, you tend to be creative, flexible, and adaptable and are often receptive to change and innovation. 
-You're obsessed with discovering new cultures, concepts, and opportunities, and are willing to challenge conventional norms and beliefs. Overall, those with an open personality bring a sense of wonder and enthusiasm to their interactions and endeavours. Thus, here is your recommendation list from Unveels based on having an Open Personality"
+          title={t("personality.openness.title")}
+          description={t("personality.openness.description")}
           score={
             data?.[15]?.outputData !== undefined
               ? parseFloat((data[15].outputData[4] * 100).toFixed(1))
@@ -406,8 +405,8 @@ You're obsessed with discovering new cultures, concepts, and opportunities, and 
           }
         />
         <PersonalitySection
-          title="Neuroticism"
-          description="Neuroticism , as a personality trait, reflects an individual's tendency to experience negative emotions such as anxiety, depression, and moodiness. People high in neuroticism may be more prone to worry, stress, and self-doubt, they often react strongly to perceived threats or challenges. Those low in neuroticism, on the other hand, tend to be more emotionally stable and resilient in the face of adversity. Thus, here's your bespoke recommendation list from Unveels based on your Neuroticism."
+          title={t("personality.neuroticism.title")}
+          description={t("personality.neuroticism.description")}
           score={
             data?.[15]?.outputData !== undefined
               ? parseFloat((data[15].outputData[1] * 100).toFixed(1))
@@ -415,8 +414,8 @@ You're obsessed with discovering new cultures, concepts, and opportunities, and 
           }
         />
         <PersonalitySection
-          title="Agreeableness"
-          description="People with an Agreeable personality reveal their kind-hearted and compassionate nature; characterized by a strong desire to maintain harmonious relationships. People, high in agreeableness, are often cooperative, empathetic, and considerate towards others; making them valuable team players and supportive friends. They prioritize the needs of others and are willing to go out of their way to help and support those around them. Their warm and nurturing behaviour makes them approachable and easy to get along with, fostering a sense of trust and camaraderie in their social interactions. In short, your agreeable personality is a key aspect of your character and it influences your interactions and relationships with others. Unveels has prepared a customized recommendation list based on your agreeable personality."
+          title={t("personality.agreeableness.title")}
+          description={t("personality.agreeableness.description")}
           score={
             data?.[15]?.outputData !== undefined
               ? parseFloat((data[15].outputData[3] * 100).toFixed(1))
@@ -424,8 +423,8 @@ You're obsessed with discovering new cultures, concepts, and opportunities, and 
           }
         />
         <PersonalitySection
-          title="Extraversion"
-          description="An extravert personality provides insights into an individual's social behaviour and interaction preferences. Extraverts are known for their outgoing, energetic, and talkative nature. They thrive in social settings, seek excitement, and enjoy being the center of attention. Extraverts are often described as sociable, assertive, and enthusiastic individuals who are comfortable in group settings and have a wide circle of friends. This also delves into the extraversion traits; highlighting that they're strong in communication, leadership, and relationship-building skills. Therefore, here's what Unveels suggests for you based on your Extraversion"
+          title={t("personality.extraversion.title")}
+          description={t("personality.extraversion.description")}
           score={
             data?.[15]?.outputData !== undefined
               ? parseFloat((data[15].outputData[0] * 100).toFixed(1))
@@ -433,8 +432,8 @@ You're obsessed with discovering new cultures, concepts, and opportunities, and 
           }
         />
         <PersonalitySection
-          title="Conscientiousness"
-          description="Conscientiousness is a key personality trait that reflects an individual's tendency to be organized, responsible, and goal-oriented. People high in conscientiousness are known for their reliability, diligence, and attention to detail; moreover, they're often diligent in their work, follow through on tasks, and are typically well-prepared. Unveels has unveiled the Conscientious side of your personality; and here's your recommended list based on it."
+          title={t("personality.conscientiousness.title")}
+          description={t("personality.conscientiousness.description")}
           score={
             data?.[15]?.outputData !== undefined
               ? parseFloat((data[15].outputData[2] * 100).toFixed(1))
@@ -458,6 +457,7 @@ function PersonalitySection({
   // High -> 70% - 100%
   // Moderate -> above 40% - 69%
   // low -> 0% - 39%
+  const { t } = useTranslation();
   const scoreType = score < 40 ? "Low" : score < 70 ? "Moderate" : "High";
   return (
     <div className="py-5">
@@ -467,10 +467,10 @@ function PersonalitySection({
         <h2 className="text-3xl font-bold text-white">{title}</h2>
       </div>
 
-      <span className="text-xl font-bold">Description</span>
+      <span className="text-xl font-bold">{t("viewpersonality.description")}</span>
       <p className="pb-6 pt-1 text-sm">{description}</p>
 
-      <span className="text-xl font-bold">Score</span>
+      <span className="text-xl font-bold">{t("viewpersonality.score")}</span>
       <div
         className={clsx(
           "text-sm",
@@ -706,23 +706,23 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
     <div className="grid flex-1 grid-cols-1 gap-4 space-y-6 overflow-auto px-10 py-6 md:grid-cols-2">
       <FeatureSection
         icon={<Icons.face className="size-12" />}
-        title="Face"
+        title={t("attributepf.face.title")}
         features={[
-          { name: "Face Shape", value: data[14].outputLabel },
-          { name: "Skin Tone", value: data[16].outputLabel },
+          { name: t("attributepf.face.faceattribute.faceshape"),value:t(`faceshapelabels.${data[14].outputLabel.toLocaleLowerCase()}`) },
+          { name: t("attributepf.face.faceattribute.skintone"), value:  t(`skin_tones.${data[16].outputLabel.toLowerCase().replace(" ", '_')}`) },
         ]}
       />
       <FeatureSection
         icon={<Icons.eye className="size-12" />}
-        title="Eyes"
+        title={t("attributepf.eyes.title")}
         features={[
-          { name: "Eye Shape", value: data[3].outputLabel },
-          { name: "Eye Size", value: data[4].outputLabel },
-          { name: "Eye Angle", value: data[1].outputLabel },
-          { name: "Eye Distance", value: data[2].outputLabel },
-          { name: "Eyelid", value: data[6].outputLabel },
+          { name: t("attributepf.eyes.eyesattribute.eyeshape"), value: t(`eyeshapeLabels.${data[3].outputLabel.toLowerCase()}` ) },
+          { name: t("attributepf.eyes.eyesattribute.eyesize"),  value: t(`eyesizeLabels.${data[4].outputLabel.toLowerCase()}` ) },
+          { name: t("attributepf.eyes.eyesattribute.eyeangle"), value: t(`eyeangleLabels.${data[1].outputLabel.toLowerCase()}` ) },
+          { name: t("attributepf.eyes.eyesattribute.eyedistance"), value: t(`eyedistanceLabels.${data[2].outputLabel.toLowerCase().replace("-","_")}` ) },
+          { name: t("attributepf.eyes.eyesattribute.eyelid"), value: t(`eyelidLabels.${data[6].outputLabel.toLowerCase().replace("-","_")}` ) },
           {
-            name: "Eye Color",
+            name: t("attributepf.eyes.eyesattribute.eyecolor"),
             value: "",
             color: true,
             hex: data[18].outputColor,
@@ -731,13 +731,13 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
       />
       <FeatureSection
         icon={<Icons.brows className="size-12" />}
-        title="Brows"
+        title={t("attributepf.brows.title")}
         features={[
-          { name: "Eyebrow Shape", value: data[13].outputLabel },
-          { name: "Thickness", value: data[11].outputLabel },
-          { name: "Eyebrow Distance", value: data[5].outputLabel },
+          { name: t("attributepf.brows.browsattribute.eyebrowshape"), value: t(`eyebrowshapelabels.${data[13].outputLabel.toLowerCase().replace("-","_")}` ) },
+          { name: t("attributepf.brows.browsattribute.thickness"),value: t(`thickness.${data[11].outputLabel.toLowerCase()}` ) },
+          { name: t("attributepf.brows.browsattribute.eyebrowdistance"), value: t(`eyebrowdistanceLabels.${data[5].outputLabel.toLowerCase()}` ) },
           {
-            name: "Eyebrow color",
+            name: t("attributepf.brows.browsattribute.eyebrowcolor"),
             value: "",
             color: true,
             hex: data[18].outputColor,
@@ -746,11 +746,11 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
       />
       <FeatureSection
         icon={<Icons.lips className="size-12" />}
-        title="Lips"
+        title={t("attributepf.lips.title")}
         features={[
-          { name: "Lip shape", value: data[14].outputLabel },
+          { name: t("attributepf.lips.lipsattribute.lipshape"), value: t(`liplabels.${data[7].outputLabel.toLowerCase().replace("-", '_')}`) },
           {
-            name: "Lip color",
+            name: t("attributepf.lips.lipsattribute.lipcolor"),
             value: "",
             color: true,
             hex: data[17].outputColor,
@@ -759,18 +759,18 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
       />
       <FeatureSection
         icon={<Icons.cheekbones className="size-12" />}
-        title="Cheekbones"
-        features={[{ name: "cheekbones", value: data[0].outputLabel }]}
+        title={t("attributepf.cheekbones.title")}
+        features={[{ name: t("attributepf.cheekbones.cheekbonesattribute.cheeckbones"), value: t(`cheeksbonesLabels.${data[0].outputLabel.toLowerCase().replace(" ", '_')}`) }]}
       />
       <FeatureSection
         icon={<Icons.nose className="size-12" />}
-        title="Nose"
-        features={[{ name: "Nose Shape", value: data[9].outputLabel }]}
+        title={t("attributepf.nose.title")}
+        features={[{ name: t("attributepf.nose.noseattribute.noseshape"), value:t(`nosewidthlabels.${data[9].outputLabel.toLocaleLowerCase()}`)  }]}
       />
       <FeatureSection
         icon={<Icons.hair className="size-12" />}
-        title="Hair"
-        features={[{ name: "Face Shape", value: data[10].outputLabel }]}
+        title={t("attributepf.hair.title")}
+        features={[{ name: t("attributepf.hair.hairattribute.haircolor"), value: t(`hairLabels.${data[10].outputLabel.toLowerCase().replace(" ", '_')}`) }]}
       />
     </div>
   );

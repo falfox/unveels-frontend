@@ -40,7 +40,7 @@
     "warmer": "Warmer",
     "darker": "Darker"
   },
-  "view_all": "View all",
+  "view_all": "view all",
   "skin_tones": {
     "fair_skin": "Fair Skin",
     "medium_skin": "Medium Skin",
@@ -49,13 +49,17 @@
     "brown_skin": "Brown Skin",
     "deep_skin": "Deep Skin"
   },
+
   "tabsmenupf": {
     "personality": "Personality",
     "attributes": "Attributes",
     "recommendations: ": "Recommendations"
   },
   "viewpersonality": {
-    "personality_traits": "Main 5 Personality Traits"
+    "personality_traits": "Main 5 Personality Traits",
+    "score":"Score",
+    "description":"Description"
+
   },
   "personality": {
     "extraversion": {
@@ -66,8 +70,8 @@
       "title": "Conscientiousness",
       "description": "Description for Conscientiousness..."
     },
-    "opennesstoexperience": {
-      "title": "Openness to Experience",
+    "openness": {
+      "title": "Openness",
       "description": "Description for Openness to Experience..."
     },
     "agreeableness": {
@@ -78,6 +82,9 @@
       "title": "Neuroticism",
       "description": "Description for Neuroticism..."
     }
+  },
+  "analysisResult":{
+
   },
   "attributepf": {
     "face": {
@@ -109,7 +116,7 @@
     },
     "lips": {
       "title": "Lips",
-      "lipattribute": {
+      "lipsattribute": {
         "lipshape": "Lip Shape",
         "lipcolor": "Lip Color"
       }
@@ -117,7 +124,7 @@
     "cheekbones": {
       "title": "Checkbones",
       "cheekbonesattribute": {
-        "checkbones": "Checkbones"
+        "cheeckbones": "Checkbones"
       }
     },
     "nose": {
@@ -143,7 +150,7 @@
     "medium": "Medium",
     "sparse": "Sparse"
   },
-  "nosewidth_labels": {
+  "nosewidthlabels": {
     "broad": "Broad",
     "medium": "Medium",
     "narrow": "Narrow"
@@ -154,13 +161,13 @@
     "short": "Short"
   },
   "liplabels": {
-    "fulllips": "Full Lips",
-    "heartlips": "Heart Lips",
-    "heavylowerlips": "Heavy Lower Lips",
-    "heavyupperlips": "Heavy Upper Lips",
-    "roundlips": "Round Lips",
-    "thinlips": "Thin Lips",
-    "widelips": "Wide Lips"
+    "full_lips": "Full Lips",
+    "heart_lips": "Heart Lips",
+    "heavy_lower_lips": "Heavy Lower Lips",
+    "heavy_upper_lips": "Heavy Upper Lips",
+    "round_lips": "Round Lips",
+    "thin_lips": "Thin Lips",
+    "wide_lips": "Wide Lips"
   },
   "faceshapelabels": {
     "heart": "Heart",
@@ -168,8 +175,8 @@
     "round": "Round",
     "square": "Square"
   },
-  "eyelidlabels": {
-    "doublelids": "Double Lids",
+  "eyelidLabels": {
+    "double_lids": "Double Lids",
     "monolids": "Monolids"
   },
   "eyebrowshapelabels": {
@@ -180,7 +187,7 @@
     "straight": "Straight",
     "upward": "Upward"
   },
-  "eyebrowDistanceLabels": {
+  "eyebrowdistanceLabels": {
     "close": "Close",
     "proportioned": "Proportioned",
     "wide": "Wide"
@@ -199,9 +206,9 @@
     "hooded": "Hooded"
   },
   "eyedistanceLabels": {
-    "averageSet": "Average-Set",
-    "closeSet": "Close-set",
-    "wideSet": "Wide-Set"
+    "average_set": "Average-Set",
+    "close_set": "Close-set",
+    "wide_set": "Wide-Set"
   },
   "eyeangleLabels": {
     "downturned": "Downturned",
@@ -209,13 +216,21 @@
     "upturned": "Upturned"
   },
   "cheeksbonesLabels": {
-    "highCheeks": "High Cheeks",
-    "lowCheeks": "Low Cheeks",
-    "roundCheeks": "Round Cheeks"
+    "high_cheeks": "High Cheeks",
+    "low_cheeks": "Low Cheeks",
+    "roun_cheeks": "Round Cheeks"
   },
   "hairLabels": {
     "long": "Long",
     "normal": "Normal",
     "short": "Short"
+  },
+  "personalityLabels": {
+    "extravert": "Extravert", 
+    "neurotic": "Neurotic",
+    "agreeable": "Agreeable",
+    "conscientious": "Conscientious",
+    "open": "Open"
   }
+
 }
