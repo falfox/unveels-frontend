@@ -1,6 +1,6 @@
 import { CirclePlay, PauseCircle, StopCircle } from "lucide-react";
 import { useRecordingControls } from "../../hooks/useRecorder";
-import { useCamera } from "../recorder/recorder-context";
+import { useCamera } from "../../context/recorder-context";
 
 const RecorderStatus = () => {
   const { isRecording, formattedTime, handleStartPause, handleStop, isPaused } =

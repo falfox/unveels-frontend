@@ -1,6 +1,6 @@
 import { useReducer, useEffect } from "react";
 import { format } from "date-fns";
-import { useCamera } from "../components/recorder/recorder-context";
+import { useCamera } from "../context/recorder-context";
 import { useReactMediaRecorder } from "react-media-recorder";
 
 // Define action types

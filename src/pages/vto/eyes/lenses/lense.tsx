@@ -4,11 +4,12 @@ import { Icons } from "../../../../components/icons";
 
 import { ColorPalette } from "../../../../components/color-palette";
 import { LenseProvider, useLenseContext } from "./lense-context";
-import { useMakeup } from "../../../../components/three/makeup-context";
+
 import { colors } from "../../../../api/attributes/color";
 import { useLenseQuery } from "./lense-query";
 import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+import { useMakeup } from "../../../../context/makeup-context";
 
 export function LenseSelector() {
   return (

@@ -3,7 +3,7 @@ import React, { useMemo, Suspense } from "react";
 import { Color, MeshBasicMaterial } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
-import { useMakeup } from "../makeup-context";
+import { useMakeup } from "../../../context/makeup-context";
 
 interface FoundationProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;

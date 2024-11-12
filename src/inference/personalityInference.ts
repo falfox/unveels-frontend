@@ -1,9 +1,8 @@
 import {
-  loadTFLiteModel,
   preprocessTFLiteImage,
   runTFLiteInference,
 } from "../utils/tfliteInference";
-import { FilesetResolver, FaceLandmarker } from "@mediapipe/tasks-vision";
+import { FaceLandmarker } from "@mediapipe/tasks-vision";
 import {
   thickNessLabels,
   cheeksbonesLabels,
@@ -22,8 +21,10 @@ import {
   thinnessLabels,
   shortnessLabels,
 } from "../utils/constants";
+import { extractSkinColor } from "../utils/imageProcessing";
 import { base64ToImage } from "../utils/imageProcessing";
 import { Classifier } from "../types/classifier";
+import { TFLiteModel } from "@tensorflow/tfjs-tflite";
 
 const classifiers: Classifier[] = [
   {
@@ -231,6 +232,9 @@ function getAverageColor(
 }
 
 export const personalityInference = async (
+  modelFaceShape: TFLiteModel,
+  modelPersonalityFinder: TFLiteModel,
+  faceLandmarker: FaceLandmarker,
   imageData: string,
   w: number,
   h: number,
@@ -238,12 +242,19 @@ export const personalityInference = async (
   // Preprocess gambar
   const preprocessedImage = await preprocessTFLiteImage(imageData, w, h);
 
-  // face analyzer
-  await loadTFLiteModel(
-    `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/personality-finder/face-analyzer.tflite`,
+  const pred = await runTFLiteInference(
+    modelFaceShape,
+    preprocessedImage,
+    w,
+    h,
   );
 
-  const pred = await runTFLiteInference(preprocessedImage, w, h);
+  const predPersonality = await runTFLiteInference(
+    modelPersonalityFinder,
+    preprocessedImage,
+    w,
+    h,
+  );
 
   classifiers.forEach(async (classifier) => {
     const classifierTensor = pred[classifier.outputName];
@@ -251,14 +262,6 @@ export const personalityInference = async (
     const label = classifier.labels[findMaxIndexFaceAanalyzer(classifierData)];
     classifier.outputLabel = label;
   });
-
-  // personality finder
-  await loadTFLiteModel(
-    `${window.location.protocol}//${window.location.hostname}:${window.location.port}/models/personality-finder/personality_finder.tflite`,
-  );
-
-  const predPersonality = await runTFLiteInference(preprocessedImage, w, h);
-  console.log(predPersonality);
 
   const classifierPersonalityData = await predPersonality.data();
   const labelPersonality =
@@ -271,24 +274,6 @@ export const personalityInference = async (
     classifierPersonalityData[findMaxIndex(classifierPersonalityData)];
 
   classifiers[15].outputIndex = findMaxIndex(classifierPersonalityData);
-
-  // skin
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
-  );
-
-  const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
-      delegate: "GPU",
-    },
-    outputFaceBlendshapes: true,
-    minFaceDetectionConfidence: 0.7,
-    minFacePresenceConfidence: 0.7,
-    minTrackingConfidence: 0.7,
-    runningMode: "IMAGE",
-    numFaces: 1,
-  });
 
   try {
     // Konversi base64 ke Image
@@ -327,8 +312,11 @@ export const personalityInference = async (
       14, 15, 16, 17, 87, 86, 85, 84, 317, 316, 315, 314, 178, 179, 180, 317,
       316, 315,
     ];
+    const indices = [101, 50, 330, 280, 108, 69, 151, 337, 299];
 
     const irisIndices = [468, 473];
+
+    const extractedSkinColor = extractSkinColor(image, landmarks, indices, 5);
 
     const averageEyebrowColor = getAverageColor(
       eyebrowIndices,
@@ -353,6 +341,14 @@ export const personalityInference = async (
       canvas.width,
       canvas.height,
     );
+
+    classifiers.push({
+      name: "Skin Type",
+      outputName: "",
+      labels: [],
+      outputLabel: extractedSkinColor.skinType,
+      outputColor: extractedSkinColor.hexColor,
+    });
 
     classifiers.push({
       name: "Average Eyebrow Color",
@@ -386,8 +382,6 @@ export const personalityInference = async (
       outputColor: "",
       imageData: imageData,
     });
-
-    console.log(classifiers);
 
     // Kembalikan hasil setelah semua classifier diproses, termasuk gambar landmark
     return classifiers;

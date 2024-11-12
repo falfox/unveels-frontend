@@ -6,17 +6,17 @@ import { filterTextures } from "../../../../api/attributes/texture";
 import { ColorPalette } from "../../../../components/color-palette";
 import { LoadingProducts } from "../../../../components/loading";
 import { BrandName } from "../../../../components/product/brand";
-import { useMakeup } from "../../../../components/three/makeup-context";
 import {
   getProductAttributes,
   mediaUrl
 } from "../../../../utils/apiUtils";
 import { useBlushContext } from "./blush-context";
 import { useBlushQuery } from "./blush-query";
+import { useMakeup } from "../../../../context/makeup-context";
 
 export function BlushSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
       <ColorSelector />
 
       <TextureSelector />
@@ -106,11 +106,11 @@ function ColorSelector() {
   };
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
           onClick={() => {
             resetColor();
           }}
@@ -156,8 +156,8 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
@@ -197,8 +197,8 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         {blushes.map((path, index) => (
           <button
             key={index}
@@ -211,7 +211,7 @@ function ShapeSelector() {
             )}
             onClick={() => setPattern(index, index.toString())}
           >
-            <img src={path} alt="Highlighter" className="size-12 rounded" />
+            <img src={path} alt="Highlighter" className="rounded size-12" />
           </button>
         ))}
       </div>
@@ -244,8 +244,8 @@ function ShadesSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-2 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {shades.map((shade, index) => (
           <button
             key={shade}
@@ -320,7 +320,7 @@ function ProductList() {
   ];
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (
@@ -335,7 +335,7 @@ function ProductList() {
                 <img
                   src={imageUrl}
                   alt="Product"
-                  className="rounded object-cover"
+                  className="object-cover rounded"
                 />
               </div>
 
@@ -345,7 +345,7 @@ function ProductList() {
               <p className="text-[0.625rem] text-white/60">
                 <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
               </p>
-              <div className="flex items-end justify-between space-x-1 pt-1">
+              <div className="flex items-end justify-between pt-1 space-x-1">
                 <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
                   $15
                 </div>

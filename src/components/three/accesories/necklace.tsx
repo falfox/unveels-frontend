@@ -5,7 +5,7 @@ import { Landmark } from "../../../types/landmark";
 import { NECKLACE } from "../../../utils/constants";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { calculateDistance } from "../../../utils/calculateDistance";
-import { useAccesories } from "../accesories-context";
+import { useAccesories } from "../../../context/accesories-context";
 
 interface NecklaceProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;

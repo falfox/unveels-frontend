@@ -2,14 +2,105 @@ import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 
 import { skin_tones } from "../../../../api/attributes/skin_tone";
-import { textures } from "../../../../api/attributes/texture";
 import { ColorPalette } from "../../../../components/color-palette";
+import { useMakeup } from "../../../../context/makeup-context";
+import { FoundationProvider, useFoundationContext } from "./foundation-context";
+import { useQuery } from "@tanstack/react-query";
+import {
+  buildSearchParams,
+  extractUniqueCustomAttributes,
+  getProductAttributes,
+  mediaUrl,
+} from "../../../../utils/apiUtils";
+import { defaultHeaders, Product } from "../../../../api/shared";
+import {
+  faceMakeupProductTypesFilter,
+  faceMakeupProductTypesMap,
+} from "../../../../api/attributes/makeups";
+import { textures } from "../../../../api/attributes/texture";
+import { BrandName } from "../../../../components/product/brand";
 import { LoadingProducts } from "../../../../components/loading";
-import { useMakeup } from "../../../../components/three/makeup-context";
-import { VTOProductCard } from "../../../../components/vto/vto-product-card";
-import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
-import { useFoundationContext } from "./foundation-context";
 import { useFoundationQuery } from "./foundation-query";
+import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+
+const colorFamilies = [
+  { name: "Light Skin", value: "#FAD4B4" },
+  { name: "Medium Skin", value: "#D18B59" },
+  { name: "Dark Skin", value: "#4B2F1B" },
+];
+
+function useFaceFoundationQuery({
+  texture,
+  color,
+}: {
+  texture: string | null;
+  color: string | null;
+}) {
+  return useQuery({
+    queryKey: ["products", "faceblush", color, texture],
+    queryFn: async () => {
+      const filters = [
+        {
+          filters: [
+            {
+              field: "type_id",
+              value: "simple",
+              condition_type: "eq",
+            },
+          ],
+        },
+        {
+          filters: [
+            {
+              field: "face_makeup_product_type",
+              value: faceMakeupProductTypesFilter(["Foundations"]),
+              condition_type: "in",
+            },
+          ],
+        },
+      ];
+
+      if (color) {
+        filters.push({
+          filters: [
+            {
+              field: "color",
+              value: color,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      if (texture) {
+        filters.push({
+          filters: [
+            {
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      console.log("filters", filters);
+
+      const response = await fetch(
+        "/rest/V1/products?" + buildSearchParams(filters),
+        {
+          headers: defaultHeaders,
+        },
+      );
+
+      const results = (await response.json()) as {
+        items: Array<Product>;
+      };
+
+      return results;
+    },
+  });
+}
 
 export function FoundationSelector() {
   return (

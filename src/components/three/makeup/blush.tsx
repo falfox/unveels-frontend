@@ -8,7 +8,7 @@ import {
 } from "three";
 import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
-import { useMakeup } from "../makeup-context";
+import { useMakeup } from "../../../context/makeup-context";
 import {
   BLUSH_TEXTURE_FIVE,
   BLUSH_TEXTURE_FOUR,
