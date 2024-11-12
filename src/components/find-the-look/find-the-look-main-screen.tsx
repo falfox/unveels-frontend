@@ -1,14 +1,25 @@
-import { useRef, useState } from "react";
+// FindTheLookMainScreen.tsx
+import { useEffect, useRef, useState } from "react";
 import { RecorderStatus, TopNavigation } from "../../components/assistant";
 import { Icons } from "../../components/icons";
+import { useCamera } from "../../context/recorder-context";
 
-export function FindTheLookMainScreen() {
+export function FindTheLookMainScreen({
+  onSelection,
+}: {
+  onSelection: () => void;
+}) {
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   // Refs for the file inputs
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const snapshotUploadRef = useRef<HTMLInputElement>(null);
-  const videoUploadRef = useRef<HTMLInputElement>(null);
+  const photoVideoUploadRef = useRef<HTMLInputElement>(null);
+
+  // Refs for displaying the uploaded media
+  const uploadedImageRef = useRef<HTMLImageElement>(null);
+  const uploadedVideoRef = useRef<HTMLVideoElement>(null);
+  const { imageRef, videoRef, setRunningMode } = useCamera();
 
   // Function to toggle active sections
   const handleSectionClick = (
@@ -17,26 +28,89 @@ export function FindTheLookMainScreen() {
     setActiveSection(activeSection === section ? null : section);
   };
 
-  // Function to handle image upload
+  const handleLiveCamera = () => {
+    onSelection();
+    setRunningMode("LIVE_CAMERA");
+    imageRef.current = null;
+    videoRef.current = null;
+  };
+
   const handleUploadImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
       console.log("Image uploaded:", file);
-      // Additional logic to send file to server can be added here
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (uploadedImageRef.current) {
+          uploadedImageRef.current.src = reader.result as string;
+          uploadedImageRef.current.onload = () => {
+            imageRef.current = uploadedImageRef.current; // Set imageRef with uploaded image
+            console.log(
+              "Image HTML Element is fully loaded:",
+              imageRef.current,
+            );
+            setRunningMode("IMAGE");
+            onSelection();
+          };
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  // Function to handle video upload
-  const handleUploadVideo = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadPhotoOrVideo = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
-      console.log("Video uploaded:", file);
-      // Additional logic to send file to server can be added here
+      const fileType = file.type;
+      console.log("Uploaded file type:", fileType);
+      if (fileType.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (uploadedImageRef.current) {
+            uploadedImageRef.current.src = reader.result as string;
+            imageRef.current = uploadedImageRef.current;
+            setRunningMode("IMAGE");
+            onSelection();
+          }
+        };
+        reader.readAsDataURL(file);
+      } else if (fileType.startsWith("video/")) {
+        const videoURL = URL.createObjectURL(file);
+        if (uploadedVideoRef.current) {
+          uploadedVideoRef.current.src = videoURL;
+
+          // Akses elemen HTML setelah video dimuat
+          uploadedVideoRef.current.onloadeddata = () => {
+            videoRef.current = uploadedVideoRef.current;
+            console.log("Video HTML Element after load:", videoRef.current);
+            setRunningMode("VIDEO");
+            onSelection();
+          };
+        }
+      } else {
+        console.warn("Unsupported file type:", fileType);
+      }
     }
   };
 
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-black pt-20">
+      <input
+        ref={photoVideoUploadRef}
+        type="file"
+        accept="image/*,video/*"
+        style={{ display: "none" }}
+        onChange={handleUploadPhotoOrVideo}
+      />
+      <input
+        ref={snapshotUploadRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleUploadImage}
+      />
       <RecorderStatus />
       <TopNavigation />
       <div className="px-4 text-center font-extrabold text-white xl:text-start xl:text-2xl">
@@ -46,7 +120,7 @@ export function FindTheLookMainScreen() {
       <div className="space-y-4 p-3.5">
         {/* Section Live Camera */}
         <div
-          className="rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
+          className="cursor-pointer rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
           onClick={() => handleSectionClick("liveCamera")}
         >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between">
@@ -81,28 +155,19 @@ export function FindTheLookMainScreen() {
               )}
             </div>
             {activeSection === "liveCamera" && (
-              <div>
-                <input
-                  ref={imageUploadRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleUploadImage}
-                />
-                <button
-                  onClick={() => imageUploadRef.current?.click()}
-                  className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-40 py-3 font-semibold text-white shadow-lg lg:w-auto"
-                >
-                  USE LIVE CAMERA
-                </button>
-              </div>
+              <button
+                onClick={() => handleLiveCamera()}
+                className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-40 py-3 font-semibold text-white shadow-lg lg:w-auto"
+              >
+                USE LIVE CAMERA
+              </button>
             )}
           </div>
         </div>
 
         {/* Section Take a Snapshot */}
         <div
-          className="rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
+          className="cursor-pointer rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
           onClick={() => handleSectionClick("takeSnapshot")}
         >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between">
@@ -143,13 +208,6 @@ export function FindTheLookMainScreen() {
             </div>
             {activeSection === "takeSnapshot" && (
               <div>
-                <input
-                  ref={snapshotUploadRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleUploadImage}
-                />
                 <button
                   onClick={() => snapshotUploadRef.current?.click()}
                   className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-40 py-3 font-semibold text-white shadow-lg lg:w-auto"
@@ -163,7 +221,7 @@ export function FindTheLookMainScreen() {
 
         {/* Section Upload Photo or Video */}
         <div
-          className="rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
+          className="cursor-pointer rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
           onClick={() => handleSectionClick("uploadPhotoOrVideo")}
         >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between">
@@ -204,15 +262,8 @@ export function FindTheLookMainScreen() {
             </div>
             {activeSection === "uploadPhotoOrVideo" && (
               <div>
-                <input
-                  ref={videoUploadRef}
-                  type="file"
-                  accept="image/*,video/*"
-                  style={{ display: "none" }}
-                  onChange={handleUploadVideo}
-                />
                 <button
-                  onClick={() => videoUploadRef.current?.click()}
+                  onClick={() => photoVideoUploadRef.current?.click()}
                   className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-40 py-3 font-semibold text-white shadow-lg lg:w-auto"
                 >
                   UPLOAD PHOTO/VIDEO
@@ -222,6 +273,19 @@ export function FindTheLookMainScreen() {
           </div>
         </div>
       </div>
+      {/* Uploaded Image */}
+      <img
+        ref={uploadedImageRef}
+        alt="Uploaded Image"
+        style={{ width: "300px", marginTop: "10px", display: "none" }} // Hide it, will be displayed in VideoStream
+      />
+
+      {/* Uploaded Video */}
+      <video
+        ref={uploadedVideoRef}
+        controls
+        style={{ width: "300px", marginTop: "10px", display: "none" }} // Hide it, will be displayed in VideoStream
+      />
     </div>
   );
 }

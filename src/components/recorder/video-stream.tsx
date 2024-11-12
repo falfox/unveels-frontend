@@ -24,7 +24,7 @@ interface VideoStreamProps {
   debugMode?: boolean;
 }
 
-export function VideoStream({ debugMode = true }: VideoStreamProps) {
+export function VideoStream({ debugMode = false }: VideoStreamProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
@@ -33,9 +33,11 @@ export function VideoStream({ debugMode = true }: VideoStreamProps) {
   // Using CameraContext
   const {
     webcamRef,
+    imageRef,
+    videoRef,
+    runningMode,
     criterias,
     setCriterias,
-    flipCamera,
     captureImage,
     setBoundingBox,
     captureImageCut,
@@ -73,7 +75,10 @@ export function VideoStream({ debugMode = true }: VideoStreamProps) {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`,
             delegate: "GPU",
           },
-          runningMode: "VIDEO",
+          runningMode:
+            runningMode == "LIVE_CAMERA" || runningMode == "VIDEO"
+              ? "VIDEO"
+              : "IMAGE",
           minDetectionConfidence: 0.9,
           minSuppressionThreshold: 1,
         });
@@ -96,117 +101,307 @@ export function VideoStream({ debugMode = true }: VideoStreamProps) {
     };
   }, []);
 
+  const detectLiveStream = async () => {
+    if (
+      faceDetectorRef.current &&
+      webcamRef.current &&
+      webcamRef.current.video &&
+      webcamRef.current.video.readyState === 4
+    ) {
+      const video = webcamRef.current.video;
+      const canvas = canvasRef.current;
+      if (canvas) {
+        // Get the rendered size and position of the video
+        const videoRect = video.getBoundingClientRect();
+        if (video && video.videoWidth > 0 && video.videoHeight > 0) {
+          // Update canvas size and position to match the video
+          if (
+            canvas.width !== videoRect.width ||
+            canvas.height !== videoRect.height
+          ) {
+            canvas.width = videoRect.width;
+            canvas.height = videoRect.height;
+          }
+
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const startTimeMs = performance.now();
+            try {
+              const detections = faceDetectorRef.current.detectForVideo(
+                video,
+                startTimeMs,
+              ).detections;
+
+              console.log(detections);
+
+              if (detections.length > 0) {
+                const highestScoreDetection = detections.reduce(
+                  (max, detection) => {
+                    return detection.categories[0].score >
+                      max.categories[0].score
+                      ? detection
+                      : max;
+                  },
+                  detections[0],
+                );
+
+                const box = highestScoreDetection.boundingBox;
+                const keypoints = highestScoreDetection.keypoints;
+
+                if (box) {
+                  // Refactored: Process Bounding Box
+                  const { relativePosition } = processBoundingBox(
+                    box,
+                    video,
+                    videoRect,
+                    criterias.flipped,
+                    setBoundingBox,
+                    isDebugMode,
+                    ctx,
+                  );
+
+                  setPosition(relativePosition);
+                }
+
+                if (isDebugMode) {
+                  // Refactored: Draw Keypoints
+                  drawKeypoints(
+                    keypoints,
+                    video,
+                    videoRect,
+                    criterias.flipped,
+                    canvas,
+                    ctx,
+                  );
+                }
+
+                // Calculate Orientation
+                const calculatedOrientation = calculateOrientation(keypoints);
+                setOrientation(calculatedOrientation);
+              } else {
+                // No detections, reset metrics
+                setPosition({ x: 0, y: 0 });
+                setOrientation({ yaw: 0, pitch: 0 });
+                setLighting(0);
+              }
+
+              // Calculate Brightness
+              if (video.readyState === 4) {
+                const avgBrightness = await calculateLighting(video);
+                setLighting(avgBrightness);
+              }
+            } catch (err) {
+              console.error("Detection error:", err);
+              setError(err as Error);
+            }
+          }
+        }
+      } else {
+        console.error("Video element is not properly initialized");
+      }
+    }
+
+    if (isDetectingRef.current) {
+      requestAnimationFrame(detectLiveStream);
+    }
+  };
+
+  const detectUploadedVideo = async () => {
+    if (
+      faceDetectorRef.current &&
+      videoRef.current &&
+      videoRef.current.readyState >= 3 // HAVE_FUTURE_DATA
+    ) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (canvas) {
+        // Get the rendered size and position of the video
+        const videoRect = video.getBoundingClientRect();
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+          // Update canvas size and position to match the video
+          if (
+            canvas.width !== videoRect.width ||
+            canvas.height !== videoRect.height
+          ) {
+            canvas.width = videoRect.width;
+            canvas.height = videoRect.height;
+          }
+
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const startTimeMs = performance.now();
+            try {
+              const detections = faceDetectorRef.current.detectForVideo(
+                video,
+                startTimeMs,
+              ).detections;
+
+              if (detections.length > 0) {
+                const highestScoreDetection = detections.reduce(
+                  (max, detection) =>
+                    detection.categories[0].score > max.categories[0].score
+                      ? detection
+                      : max,
+                  detections[0],
+                );
+
+                const box = highestScoreDetection.boundingBox;
+                const keypoints = highestScoreDetection.keypoints;
+
+                if (box) {
+                  const { relativePosition } = processBoundingBox(
+                    box,
+                    video,
+                    videoRect,
+                    criterias.flipped,
+                    setBoundingBox,
+                    isDebugMode,
+                    ctx,
+                  );
+
+                  setPosition(relativePosition);
+                }
+
+                if (isDebugMode && keypoints) {
+                  drawKeypoints(
+                    keypoints,
+                    video,
+                    videoRect,
+                    criterias.flipped,
+                    canvas,
+                    ctx,
+                  );
+                }
+
+                const calculatedOrientation = calculateOrientation(keypoints);
+                setOrientation(calculatedOrientation);
+              } else {
+                // No detections, reset metrics
+                setPosition({ x: 0, y: 0 });
+                setOrientation({ yaw: 0, pitch: 0 });
+                setLighting(0);
+              }
+
+              // Calculate Brightness
+              if (video.readyState >= 3) {
+                const avgBrightness = await calculateLighting(video);
+                setLighting(avgBrightness);
+              }
+            } catch (err) {
+              console.error("Detection error:", err);
+              setError(err as Error);
+            }
+          }
+        }
+      } else {
+        console.error("Video element is not properly initialized");
+      }
+    }
+
+    if (isDetectingRef.current && runningMode === "VIDEO") {
+      requestAnimationFrame(detectUploadedVideo);
+    }
+  };
+
+  // Image Detection Function
+  const detectImage = async () => {
+    if (faceDetectorRef.current && imageRef.current) {
+      const img = imageRef.current;
+      console.log("Detecting on image:", img.src);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        // Set canvas size to match image
+        if (canvas.width !== img.width || canvas.height !== img.height) {
+          canvas.width = img.width;
+          canvas.height = img.height;
+        }
+
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          try {
+            // For images, use detect instead of detectForVideo
+            const detections = faceDetectorRef.current.detect(img).detections;
+            console.log("Detect: ", detections);
+
+            if (detections.length > 0) {
+              const highestScoreDetection = detections.reduce(
+                (max, detection) =>
+                  detection.categories[0].score > max.categories[0].score
+                    ? detection
+                    : max,
+                detections[0],
+              );
+
+              const box = highestScoreDetection.boundingBox;
+              const keypoints = highestScoreDetection.keypoints;
+
+              if (box) {
+                const { relativePosition } = processBoundingBox(
+                  box,
+                  img,
+                  img.getBoundingClientRect(),
+                  criterias.flipped,
+                  setBoundingBox,
+                  isDebugMode,
+                  ctx,
+                );
+
+                setPosition(relativePosition);
+              }
+
+              if (isDebugMode && keypoints) {
+                drawKeypoints(
+                  keypoints,
+                  img,
+                  img.getBoundingClientRect(),
+                  criterias.flipped,
+                  canvas,
+                  ctx,
+                );
+              }
+
+              const calculatedOrientation = calculateOrientation(keypoints);
+              setOrientation(calculatedOrientation);
+            } else {
+              // No detections, reset metrics
+              setPosition({ x: 0, y: 0 });
+              setOrientation({ yaw: 0, pitch: 0 });
+              setLighting(0);
+            }
+
+            // Calculate Brightness
+            const avgBrightness = calculateLighting(img);
+            setLighting(await avgBrightness);
+          } catch (err) {
+            console.error("Detection error:", err);
+            setError(err as Error);
+          }
+        }
+      }
+    }
+    if (isDetectingRef.current && runningMode === "IMAGE") {
+      requestAnimationFrame(detectImage);
+    }
+  };
+
   // Function to start the detection loop
   const startDetection = useCallback(() => {
     if (isDetectingRef.current) return;
     isDetectingRef.current = true;
 
-    const detect = async () => {
-      if (
-        faceDetectorRef.current &&
-        webcamRef.current &&
-        webcamRef.current.video &&
-        webcamRef.current.video.readyState === 4
-      ) {
-        const video = webcamRef.current.video;
-        const canvas = canvasRef.current;
-        if (canvas) {
-          // Get the rendered size and position of the video
-          const videoRect = video.getBoundingClientRect();
-          if (video && video.videoWidth > 0 && video.videoHeight > 0) {
-            // Update canvas size and position to match the video
-            if (
-              canvas.width !== videoRect.width ||
-              canvas.height !== videoRect.height
-            ) {
-              canvas.width = videoRect.width;
-              canvas.height = videoRect.height;
-            }
-
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-              const startTimeMs = performance.now();
-              try {
-                const detections = faceDetectorRef.current.detectForVideo(
-                  video,
-                  startTimeMs,
-                ).detections;
-
-                if (detections.length > 0) {
-                  const highestScoreDetection = detections.reduce(
-                    (max, detection) => {
-                      return detection.categories[0].score >
-                        max.categories[0].score
-                        ? detection
-                        : max;
-                    },
-                    detections[0],
-                  );
-
-                  const box = highestScoreDetection.boundingBox;
-                  const keypoints = highestScoreDetection.keypoints;
-
-                  if (box) {
-                    // Refactored: Process Bounding Box
-                    const { relativePosition } = processBoundingBox(
-                      box,
-                      video,
-                      videoRect,
-                      criterias.flipped,
-                      setBoundingBox,
-                      isDebugMode,
-                      ctx,
-                    );
-
-                    setPosition(relativePosition);
-                  }
-
-                  if (isDebugMode && keypoints) {
-                    // Refactored: Draw Keypoints
-                    drawKeypoints(
-                      keypoints,
-                      video,
-                      videoRect,
-                      criterias.flipped,
-                      canvas,
-                      ctx,
-                    );
-                  }
-
-                  // Calculate Orientation
-                  const calculatedOrientation = calculateOrientation(keypoints);
-                  setOrientation(calculatedOrientation);
-                } else {
-                  // No detections, reset metrics
-                  setPosition({ x: 0, y: 0 });
-                  setOrientation({ yaw: 0, pitch: 0 });
-                  setLighting(0);
-                }
-
-                // Calculate Brightness
-                if (video.readyState === 4) {
-                  const avgBrightness = await calculateLighting(video);
-                  setLighting(avgBrightness);
-                }
-              } catch (err) {
-                console.error("Detection error:", err);
-                setError(err as Error);
-              }
-            }
-          }
-        } else {
-          console.error("Video element is not properly initialized");
-        }
-      }
-
-      if (isDetectingRef.current) {
-        requestAnimationFrame(detect);
-      }
-    };
-
-    detect();
+    if (runningMode == "LIVE_CAMERA") {
+      detectLiveStream();
+    } else if (runningMode === "VIDEO") {
+      detectUploadedVideo();
+    } else if (runningMode == "IMAGE") {
+      detectImage();
+    }
   }, [isDebugMode, criterias.flipped, setBoundingBox]);
 
   // Function to stop detection
@@ -307,6 +502,55 @@ export function VideoStream({ debugMode = true }: VideoStreamProps) {
         }
       }
     }
+    if (imageRef.current && criterias.lastBoundingBox) {
+      const imageSrc = imageRef.current.src;
+      if (imageSrc) {
+        try {
+          const croppedImage = await cropImage(
+            imageSrc,
+            criterias.lastBoundingBox,
+          );
+          captureImage(imageSrc);
+          captureImageCut(croppedImage);
+          setCapturedImageSrc(imageSrc); // Set the captured image
+          setCroppedImageSrc(croppedImage); // Optional: Set cropped image
+          stopDetection(); // Optionally stop detection after capture
+        } catch (error) {
+          console.error("Error cropping image:", error);
+        }
+      }
+    }
+    if (videoRef.current && criterias.lastBoundingBox) {
+      const video = videoRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas content to data URL (base64 encoded image)
+        const imageSrc = canvas.toDataURL("image/png");
+
+        if (imageSrc && criterias.lastBoundingBox) {
+          try {
+            // Meng-crop image menggunakan bounding box yang ada
+            const croppedImage = await cropImage(
+              imageSrc,
+              criterias.lastBoundingBox,
+            );
+            captureImage(imageSrc); // Simpan full image yang di-capture
+            captureImageCut(croppedImage); // Simpan cropped image
+            setCapturedImageSrc(imageSrc); // Set full captured image
+            setCroppedImageSrc(croppedImage); // Set cropped captured image
+            stopDetection(); // Optionally stop detection after capture
+          } catch (error) {
+            console.error("Error cropping image:", error);
+          }
+        }
+      }
+    }
   }, [captureImage, criterias.lastBoundingBox]);
 
   // Initialize useCountdown hook
@@ -350,7 +594,6 @@ export function VideoStream({ debugMode = true }: VideoStreamProps) {
 
   return (
     <div className="relative h-full w-full">
-      {/* Render Captured Image if available */}
       {capturedImageSrc ? (
         <div className="relative h-full w-full">
           <img
@@ -358,43 +601,82 @@ export function VideoStream({ debugMode = true }: VideoStreamProps) {
             alt="Captured"
             className="h-full w-full object-cover"
           />
+          {/* Button to Retake Photo */}
+          <button
+            onClick={() => {
+              setCapturedImageSrc(null);
+              startDetection();
+              resetCapture(); // Restart detection if needed
+            }}
+            className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
+            aria-label="Retake Photo"
+          >
+            Retake Photo
+          </button>
         </div>
       ) : (
         <>
-          {/* Webcam Video */}
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            mirrored={false} // Mirroring handled via CSS
-            videoConstraints={{
-              width: 640,
-              height: 480,
-              facingMode: criterias.flipped ? "environment" : "user",
-            }}
-            onUserMediaError={(err) =>
-              setError(
-                err instanceof Error
-                  ? err
-                  : new Error("Webcam error occurred."),
-              )
-            }
-            className={`h-full w-full object-cover ${
-              criterias.flipped ? "scale-x-[-1]" : ""
-            }`}
-          />
+          {runningMode === "LIVE_CAMERA" && (
+            <>
+              {/* Webcam Video */}
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                mirrored={false} // Mirroring handled via CSS
+                videoConstraints={{
+                  width: 640,
+                  height: 480,
+                  facingMode: criterias.flipped ? "environment" : "user",
+                }}
+                onUserMediaError={(err) =>
+                  setError(
+                    err instanceof Error
+                      ? err
+                      : new Error("Webcam error occurred."),
+                  )
+                }
+                className={`h-full w-full object-cover ${
+                  criterias.flipped ? "scale-x-[-1]" : ""
+                }`}
+              />
+            </>
+          )}
+
+          {runningMode === "VIDEO" && (
+            <video
+              ref={videoRef}
+              src={videoRef.current?.src}
+              controls
+              autoPlay
+              className="h-full w-full object-cover"
+            />
+          )}
+
+          {runningMode === "IMAGE" && (
+            <img
+              ref={imageRef}
+              src={imageRef.current?.src}
+              alt="Uploaded"
+              className="h-full w-full object-cover"
+            />
+          )}
 
           {/* Overlay Canvas */}
-          <canvas
-            ref={canvasRef}
-            className={`pointer-events-none absolute left-0 top-0 ${
-              isDebugMode ? "block" : "hidden"
-            }`} // Hide canvas if not in debug mode
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-          />
+          {(criterias.runningMode === "LIVE_CAMERA" ||
+            criterias.runningMode === "VIDEO" ||
+            criterias.runningMode === "IMAGE") && (
+            <canvas
+              ref={canvasRef}
+              className={`pointer-events-none absolute left-0 top-0 ${
+                isDebugMode ? "block" : "hidden"
+              }`} // Hide canvas if not in debug mode
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          )}
 
           {/* Countdown Overlay */}
           {countdown !== null && <CountdownOverlay count={countdown} />}

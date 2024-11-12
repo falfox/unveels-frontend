@@ -13,6 +13,7 @@ import { useFindTheLookContext } from "./find-the-look-context";
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
   canvasRef: React.RefObject<HTMLCanvasElement>;
+  isFlip?: boolean; // New prop added
   onLabelClick?: (label: string | null, section: string | null) => void;
 }
 
@@ -28,6 +29,7 @@ interface Hitbox {
 export function FindTheLookCanvas({
   image,
   canvasRef,
+  isFlip = false, // Default to true if not provided
   onLabelClick,
 }: FindTheLookCanvasProps) {
   const { selectedItems: cart } = useFindTheLookContext();
@@ -35,37 +37,34 @@ export function FindTheLookCanvas({
 
   const hitboxesRef = useRef<Hitbox[]>([]);
 
+  // State variables for detectors and results
   const [handDetector, setHandDetector] = useState<ObjectDetector | null>(null);
   const [handResult, setHandResult] = useState<ObjectDetectorResult | null>(
     null,
   );
   const [ringDetector, setRingDetector] = useState<ObjectDetector | null>(null);
-  const [ringResult, setringResult] = useState<ObjectDetectorResult | null>(
+  const [ringResult, setRingResult] = useState<ObjectDetectorResult | null>(
     null,
   );
   const [neckDetector, setNeckDetector] = useState<ObjectDetector | null>(null);
   const [neckResult, setNeckResult] = useState<ObjectDetectorResult | null>(
     null,
   );
-
   const [earringDetector, setEarringDetector] = useState<ObjectDetector | null>(
     null,
   );
   const [earringResult, setEarringResult] =
     useState<ObjectDetectorResult | null>(null);
-
   const [glassDetector, setGlassDetector] = useState<ObjectDetector | null>(
     null,
   );
   const [glassResult, setGlassResult] = useState<ObjectDetectorResult | null>(
     null,
   );
-
   const [headDetector, setHeadDetector] = useState<ObjectDetector | null>(null);
   const [headResult, setHeadResult] = useState<ObjectDetectorResult | null>(
     null,
   );
-
   const [makeupDetector, setMakeupDetector] = useState<ObjectDetector | null>(
     null,
   );
@@ -73,22 +72,23 @@ export function FindTheLookCanvas({
     null,
   );
 
-  // facelandmark
+  // FaceLandmarker for facial landmarks
   const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
     null,
   );
   const [faceLandmark, setFaceLandmark] = useState<Landmark[] | null>(null);
 
-  // Initialize the model
+  // Initialize the models
   useEffect(() => {
     let isMounted = true;
 
-    const InitializeHandDetector = async () => {
+    const initializeDetectors = async () => {
       try {
         const filesetResolver = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm",
         );
 
+        // Initialize FaceLandmarker
         const faceLandmarkConfiguration =
           await FaceLandmarker.createFromOptions(filesetResolver, {
             baseOptions: {
@@ -103,6 +103,7 @@ export function FindTheLookCanvas({
             minFacePresenceConfidence: 0.5,
           });
 
+        // Initialize Hand Detector
         const handConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -116,6 +117,7 @@ export function FindTheLookCanvas({
           },
         );
 
+        // Initialize Ring Detector
         const ringConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -129,6 +131,7 @@ export function FindTheLookCanvas({
           },
         );
 
+        // Initialize Neck Detector
         const neckConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -142,6 +145,7 @@ export function FindTheLookCanvas({
           },
         );
 
+        // Initialize Earring Detector
         const earringConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -155,6 +159,7 @@ export function FindTheLookCanvas({
           },
         );
 
+        // Initialize Glass Detector
         const glassConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -168,6 +173,7 @@ export function FindTheLookCanvas({
           },
         );
 
+        // Initialize Head Detector
         const headConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -181,6 +187,7 @@ export function FindTheLookCanvas({
           },
         );
 
+        // Initialize Makeup Detector
         const makeupConfiguration = await ObjectDetector.createFromOptions(
           filesetResolver,
           {
@@ -195,6 +202,7 @@ export function FindTheLookCanvas({
         );
 
         if (isMounted) {
+          setFaceLandmarker(faceLandmarkConfiguration);
           setHandDetector(handConfiguration);
           setRingDetector(ringConfiguration);
           setNeckDetector(neckConfiguration);
@@ -202,17 +210,17 @@ export function FindTheLookCanvas({
           setGlassDetector(glassConfiguration);
           setHeadDetector(headConfiguration);
           setMakeupDetector(makeupConfiguration);
-          setFaceLandmarker(faceLandmarkConfiguration);
         }
       } catch (error) {
-        console.error("Failed to initialize Hand Detector: ", error);
+        console.error("Failed to initialize detectors: ", error);
       }
     };
 
-    InitializeHandDetector();
+    initializeDetectors();
 
     return () => {
       isMounted = false;
+      // Close all detectors
       if (handDetector) {
         handDetector.close();
       }
@@ -242,7 +250,7 @@ export function FindTheLookCanvas({
 
   // Run detection
   useEffect(() => {
-    const detectHands = async () => {
+    const detectObjects = async () => {
       if (
         handDetector &&
         ringDetector &&
@@ -253,35 +261,31 @@ export function FindTheLookCanvas({
         makeupDetector &&
         faceLandmarker
       ) {
-        const resultsHand = await handDetector.detect(image);
-        const resultsRing = await ringDetector?.detect(image);
-        const resultsNeck = await neckDetector.detect(image);
-        const resultsEarring = await earringDetector?.detect(image);
-        const resultsGlass = await glassDetector?.detect(image);
-        const resultsHead = await headDetector.detect(image);
-        const resultsMakeup = await makeupDetector?.detect(image);
-        const resultsFaceLandmark = await faceLandmarker.detect(image);
-        setHandResult(resultsHand);
-        setringResult(resultsRing);
-        setNeckResult(resultsNeck);
-        setEarringResult(resultsEarring);
-        setGlassResult(resultsGlass);
-        setHeadResult(resultsHead);
-        setMakeupResult(resultsMakeup);
-        setFaceLandmark(resultsFaceLandmark.faceLandmarks[0]);
+        try {
+          const resultsHand = await handDetector.detect(image);
+          const resultsRing = await ringDetector.detect(image);
+          const resultsNeck = await neckDetector.detect(image);
+          const resultsEarring = await earringDetector.detect(image);
+          const resultsGlass = await glassDetector.detect(image);
+          const resultsHead = await headDetector.detect(image);
+          const resultsMakeup = await makeupDetector.detect(image);
+          const resultsFaceLandmark = await faceLandmarker.detect(image);
 
-        // console.log("Hand Result: ", resultsHand);
-        // console.log("Ring Result: ", resultsRing);
-        // console.log("Neck Result: ", resultsNeck);
-        // console.log("Earring Result: ", resultsEarring);
-        // console.log("Glass Result: ", resultsGlass);
-        // console.log("Head Result: ", resultsHead);
-        // console.log("Makeup Result: ", resultsMakeup);
-        // console.log("Landmark Result: ", faceLandmark);
+          setHandResult(resultsHand);
+          setRingResult(resultsRing);
+          setNeckResult(resultsNeck);
+          setEarringResult(resultsEarring);
+          setGlassResult(resultsGlass);
+          setHeadResult(resultsHead);
+          setMakeupResult(resultsMakeup);
+          setFaceLandmark(resultsFaceLandmark.faceLandmarks[0] || null);
+        } catch (error) {
+          console.error("Error during detection: ", error);
+        }
       }
     };
 
-    detectHands();
+    detectObjects();
   }, [
     handDetector,
     ringDetector,
@@ -291,16 +295,21 @@ export function FindTheLookCanvas({
     headDetector,
     makeupDetector,
     faceLandmarker,
+    image,
   ]);
 
+  // Draw detections on canvas
   useEffect(() => {
-    if (!handResult) return;
-    if (!ringResult) return;
-    if (!neckResult) return;
-    if (!earringResult) return;
-    if (!glassResult) return;
-    if (!headResult) return;
-    if (!makeupResult) return;
+    if (
+      !handResult ||
+      !ringResult ||
+      !neckResult ||
+      !earringResult ||
+      !glassResult ||
+      !headResult ||
+      !makeupResult
+    )
+      return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -341,33 +350,54 @@ export function FindTheLookCanvas({
 
       ctx.clearRect(0, 0, width, height);
 
-      // Flip horizontally only for the image
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.drawImage(
-        image,
-        -offsetX - drawWidth,
-        offsetY,
-        drawWidth,
-        drawHeight,
-      );
-      ctx.restore();
+      if (isFlip) {
+        // Apply horizontal flip
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.drawImage(
+          image,
+          -offsetX - drawWidth,
+          offsetY,
+          drawWidth,
+          drawHeight,
+        );
+        ctx.restore();
+      } else {
+        // Draw image normally
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+      }
 
-      // Draw bounding boxes and labels
-      const outerRadius = 10;
+      // Reset hitboxes for each draw
+      hitboxesRef.current = [];
 
-      handResult.detections.forEach((result) => {
-        const { boundingBox, categories } = result;
-        results.push({
-          label: result.categories[0].displayName,
-        });
-        if (boundingBox) {
-          // Calculate the center of the bounding box
-          const centerX =
-            width -
-            (boundingBox.originX * scaleX +
-              offsetX +
-              (boundingBox.width * scaleX) / 2);
+      // Function to calculate the centerX based on isFlip
+      const calculateCenterX = (bboxOriginX: number, bboxWidth: number) => {
+        if (isFlip) {
+          return (
+            width - (bboxOriginX * scaleX + offsetX + (bboxWidth * scaleX) / 2)
+          );
+        }
+        return bboxOriginX * scaleX + offsetX + (bboxWidth * scaleX) / 2;
+      };
+
+      // Function to calculate labelX based on isFlip
+      const calculateLabelX = (centerX: number) => {
+        return isFlip ? centerX - 50 : centerX + 50;
+      };
+
+      // Common function to draw detections
+      const drawDetections = (
+        detections: ObjectDetectorResult,
+        section: string,
+      ) => {
+        detections.detections.forEach((det) => {
+          const { boundingBox, categories } = det;
+          if (!boundingBox) return;
+
+          const centerX = calculateCenterX(
+            boundingBox.originX,
+            boundingBox.width,
+          );
           const centerY =
             boundingBox.originY * scaleY +
             offsetY +
@@ -375,16 +405,16 @@ export function FindTheLookCanvas({
 
           // Draw the landmark circle at the center
           ctx.beginPath();
-          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+          ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
+          ctx.fillStyle = "white"; // Red color
           ctx.fill();
           ctx.closePath();
 
           // Calculate label position
-          const labelX = centerX + 50;
+          const labelX = calculateLabelX(centerX);
           const labelY = centerY + 50;
 
-          // Draw a line from the center of the bounding box to the label position
+          // Draw a line from the center to the label
           ctx.beginPath();
           ctx.moveTo(centerX, centerY);
           ctx.lineTo(labelX, labelY);
@@ -410,370 +440,31 @@ export function FindTheLookCanvas({
             ctx.stroke();
 
             hitboxesRef.current.push({
-              label: categories[0].categoryName,
-              section: "accesories",
+              label: label,
+              section: section,
               x: labelX,
               y: labelY - 20,
               width: textWidth,
               height: 20,
             });
           }
-        }
-      });
-
-      ringResult.detections.forEach((result) => {
-        const { boundingBox, categories } = result;
-        results.push({
-          label: result.categories[0].displayName,
         });
-        if (boundingBox) {
-          // Calculate the center of the bounding box
-          const centerX =
-            width -
-            (boundingBox.originX * scaleX +
-              offsetX +
-              (boundingBox.width * scaleX) / 2);
-          const centerY =
-            boundingBox.originY * scaleY +
-            offsetY +
-            (boundingBox.height * scaleY) / 2;
+      };
 
-          // Draw the landmark circle at the center
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-          ctx.fill();
-          ctx.closePath();
+      // Draw each detection type
+      drawDetections(handResult, "accessories");
+      drawDetections(ringResult, "accessories");
+      drawDetections(neckResult, "accessories");
+      drawDetections(earringResult, "accessories");
+      drawDetections(glassResult, "accessories");
+      drawDetections(headResult, "accessories");
 
-          // Calculate label position
-          const labelX = centerX + 50;
-          const labelY = centerY + 50;
-
-          // Draw a line from the center of the bounding box to the label position
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(labelX, labelY);
-          ctx.strokeStyle = "white";
-          ctx.stroke();
-
-          // Display the label
-          if (categories && categories.length > 0) {
-            const label = categories[0].categoryName;
-            ctx.font = "12px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText(label, labelX, labelY - 5);
-
-            // Draw underline for label text
-            const textWidth = ctx.measureText(label).width;
-            const underlineEndX = labelX + textWidth;
-            const underlineY = labelY + 5;
-
-            ctx.beginPath();
-            ctx.moveTo(labelX, labelY);
-            ctx.lineTo(underlineEndX, underlineY);
-            ctx.strokeStyle = "white";
-            ctx.stroke();
-
-            hitboxesRef.current.push({
-              label: categories[0].categoryName,
-              section: "accesories",
-              x: labelX,
-              y: labelY - 20,
-              width: textWidth,
-              height: 20,
-            });
-          }
-        }
-      });
-
-      neckResult.detections.forEach((result) => {
-        const { boundingBox, categories } = result;
-        results.push({
-          label: result.categories[0].displayName,
-        });
-        if (boundingBox) {
-          // Calculate the center of the bounding box
-          const centerX =
-            width -
-            (boundingBox.originX * scaleX +
-              offsetX +
-              (boundingBox.width * scaleX) / 2);
-          const centerY =
-            boundingBox.originY * scaleY +
-            offsetY +
-            (boundingBox.height * scaleY) / 2;
-
-          // Draw the landmark circle at the center
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-          ctx.fill();
-          ctx.closePath();
-
-          // Calculate label position
-          const labelX = centerX + 50;
-          const labelY = centerY + 50;
-
-          // Draw a line from the center of the bounding box to the label position
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(labelX, labelY);
-          ctx.strokeStyle = "white";
-          ctx.stroke();
-
-          // Display the label
-          if (categories && categories.length > 0) {
-            const label = categories[0].categoryName;
-            ctx.font = "12px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText(label, labelX, labelY - 5);
-
-            // Draw underline for label text
-            const textWidth = ctx.measureText(label).width;
-            const underlineEndX = labelX + textWidth;
-            const underlineY = labelY + 5;
-
-            ctx.beginPath();
-            ctx.moveTo(labelX, labelY);
-            ctx.lineTo(underlineEndX, underlineY);
-            ctx.strokeStyle = "white";
-            ctx.stroke();
-
-            hitboxesRef.current.push({
-              label: categories[0].categoryName,
-              section: "accesories",
-              x: labelX,
-              y: labelY - 20,
-              width: textWidth,
-              height: 20,
-            });
-          }
-        }
-      });
-
-      earringResult.detections.forEach((result) => {
-        const { boundingBox, categories } = result;
-        results.push({
-          label: result.categories[0].displayName,
-        });
-        if (boundingBox) {
-          // Calculate the center of the bounding box
-          const centerX =
-            width -
-            (boundingBox.originX * scaleX +
-              offsetX +
-              (boundingBox.width * scaleX) / 2);
-          const centerY =
-            boundingBox.originY * scaleY +
-            offsetY +
-            (boundingBox.height * scaleY) / 2;
-
-          // Draw the landmark circle at the center
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-          ctx.fill();
-          ctx.closePath();
-
-          // Calculate label position
-          const labelX = centerX + 50;
-          const labelY = centerY + 50;
-
-          // Draw a line from the center of the bounding box to the label position
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(labelX, labelY);
-          ctx.strokeStyle = "white";
-          ctx.stroke();
-
-          // Display the label
-          if (categories && categories.length > 0) {
-            const label = categories[0].categoryName;
-            ctx.font = "12px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText(label, labelX, labelY - 5);
-
-            // Draw underline for label text
-            const textWidth = ctx.measureText(label).width;
-            const underlineEndX = labelX + textWidth;
-            const underlineY = labelY + 5;
-
-            ctx.beginPath();
-            ctx.moveTo(labelX, labelY);
-            ctx.lineTo(underlineEndX, underlineY);
-            ctx.strokeStyle = "white";
-            ctx.stroke();
-
-            hitboxesRef.current.push({
-              label: categories[0].categoryName,
-              section: "accesories",
-              x: labelX,
-              y: labelY - 20,
-              width: textWidth,
-              height: 20,
-            });
-          }
-        }
-      });
-
-      glassResult.detections.forEach((result) => {
-        const { boundingBox, categories } = result;
-        results.push({
-          label: result.categories[0].displayName,
-        });
-        if (boundingBox) {
-          // Calculate the center of the bounding box
-          const centerX =
-            width -
-            (boundingBox.originX * scaleX +
-              offsetX +
-              (boundingBox.width * scaleX) / 2);
-          const centerY =
-            boundingBox.originY * scaleY +
-            offsetY +
-            (boundingBox.height * scaleY) / 2;
-
-          // Draw the landmark circle at the center
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-          ctx.fill();
-          ctx.closePath();
-
-          // Calculate label position
-          const labelX = centerX + 50;
-          const labelY = centerY + 50;
-
-          // Draw a line from the center of the bounding box to the label position
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(labelX, labelY);
-          ctx.strokeStyle = "white";
-          ctx.stroke();
-
-          // Display the label
-          if (categories && categories.length > 0) {
-            const label = categories[0].categoryName;
-            ctx.font = "12px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText(label, labelX, labelY - 5);
-
-            // Draw underline for label text
-            const textWidth = ctx.measureText(label).width;
-            const underlineEndX = labelX + textWidth;
-            const underlineY = labelY + 5;
-
-            ctx.beginPath();
-            ctx.moveTo(labelX, labelY);
-            ctx.lineTo(underlineEndX, underlineY);
-            ctx.strokeStyle = "white";
-            ctx.stroke();
-
-            hitboxesRef.current.push({
-              label: categories[0].categoryName,
-              section: "accesories",
-              x: labelX,
-              y: labelY - 20,
-              width: textWidth,
-              height: 20,
-            });
-          }
-        }
-      });
-
-      headResult.detections.forEach((result) => {
-        const { boundingBox, categories } = result;
-        results.push({
-          label: result.categories[0].displayName,
-        });
-        if (boundingBox) {
-          // Calculate the center of the bounding box
-          const centerX =
-            width -
-            (boundingBox.originX * scaleX +
-              offsetX +
-              (boundingBox.width * scaleX) / 2);
-          const centerY =
-            boundingBox.originY * scaleY +
-            offsetY +
-            (boundingBox.height * scaleY) / 2;
-
-          // Draw the landmark circle at the center
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
-          ctx.fill();
-          ctx.closePath();
-
-          // Calculate label position
-          const labelX = centerX + 50;
-          const labelY = centerY + 50;
-
-          // Draw a line from the center of the bounding box to the label position
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(labelX, labelY);
-          ctx.strokeStyle = "white";
-          ctx.stroke();
-
-          // Display the label
-          if (categories && categories.length > 0) {
-            const label = categories[0].categoryName;
-            ctx.font = "12px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText(label, labelX, labelY - 5);
-
-            // Draw underline for label text
-            const textWidth = ctx.measureText(label).width;
-            const underlineEndX = labelX + textWidth;
-            const underlineY = labelY + 5;
-
-            ctx.beginPath();
-            ctx.moveTo(labelX, labelY);
-            ctx.lineTo(underlineEndX, underlineY);
-            ctx.strokeStyle = "white";
-            ctx.stroke();
-
-            hitboxesRef.current.push({
-              label: categories[0].categoryName,
-              section: "accesories",
-              x: labelX,
-              y: labelY - 20,
-              width: textWidth,
-              height: 20,
-            });
-          }
-        }
-      });
-
-      const eyebrowIndices = [
-        70, 63, 105, 66, 46, 53, 52, 65, 296, 334, 293, 295, 282, 283,
-      ];
-      const lipIndices = [
-        14, 15, 16, 17, 87, 86, 85, 84, 317, 316, 315, 314, 178, 179, 180, 317,
-        316, 315,
-      ];
-
-      const blushIndices = [280, 80];
-
-      const eyeshadowIndices = [29, 27];
-
+      // Handle Makeup Detections Separately
       makeupResult.detections.forEach((result) => {
         const { categories } = result;
 
         categories.forEach((category) => {
-          let drawXLips,
-            drawYLips,
-            labelLips,
-            drawXEyebrow,
-            drawYEyebrow,
-            labelEyebrow,
-            drawXBlusher,
-            drawYBlusher,
-            labelBlusher,
-            drawXEyeshadow,
-            drawYEyeshadow,
-            labelEyeshadow;
+          let drawX: number, drawY: number, label: string;
 
           // Define specific landmarks for each makeup category
           if (
@@ -781,280 +472,283 @@ export function FindTheLookCanvas({
             faceLandmark &&
             faceLandmark[407]
           ) {
-            drawXLips =
-              faceLandmark[407].x * image.naturalWidth * scaleX + offsetX;
-            drawYLips =
+            drawX = isFlip
+              ? width -
+                (faceLandmark[407].x * image.naturalWidth * scaleX + offsetX)
+              : faceLandmark[407].x * image.naturalWidth * scaleX + offsetX;
+            drawY =
               faceLandmark[407].y * image.naturalHeight * scaleY + offsetY;
-            labelLips = "lipstick";
+            label = "Lipstick";
 
             const averageLipColor = extractSkinColor(
               image,
               faceLandmark,
-              lipIndices,
+              [
+                14, 15, 16, 17, 87, 86, 85, 84, 317, 316, 315, 314, 178, 179,
+                180, 317, 316, 315,
+              ],
               2,
             );
 
             results.push({
-              label: result.categories[0].displayName,
+              label: category.displayName,
               color: averageLipColor.hexColor,
             });
 
             // Draw landmark point
-            const outerRadiusLips = 10;
             ctx.beginPath();
-            ctx.arc(drawXLips, drawYLips, outerRadius, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.arc(drawX, drawY, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = "white)"; // Red color
             ctx.fill();
             ctx.closePath();
 
-            // Draw label with line
-            const labelXLips = drawXLips + 50;
-            const labelYLips = drawYLips + 50;
+            // Calculate label position
+            const labelX = calculateLabelX(drawX);
+            const labelY = drawY + 50;
 
-            // Draw a line from the center of the bounding box to the label position
+            // Draw a line from the center to the label
             ctx.beginPath();
-            ctx.moveTo(drawXLips, drawYLips);
-            ctx.lineTo(labelXLips, labelYLips);
+            ctx.moveTo(drawX, drawY);
+            ctx.lineTo(labelX, labelY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             // Display the label
             ctx.font = "12px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText(labelLips, labelXLips, labelYLips - 5);
+            ctx.fillText(label, labelX, labelY - 5);
 
             // Draw underline for label text
-            const textWidth = ctx.measureText(labelLips).width;
-            const underlineEndX = labelXLips + textWidth;
-            const underlineY = labelYLips + 5;
+            const textWidth = ctx.measureText(label).width;
+            const underlineEndX = labelX + textWidth;
+            const underlineY = labelY + 5;
 
             ctx.beginPath();
-            ctx.moveTo(labelXLips, labelYLips);
+            ctx.moveTo(labelX, labelY);
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             hitboxesRef.current.push({
-              label: labelLips,
+              label: label,
               section: "makeup",
-              x: labelXLips,
-              y: labelYLips - 20,
+              x: labelX,
+              y: labelY - 20,
               width: textWidth,
               height: 20,
             });
           }
+
           if (
-            category.categoryName === "Eyebrown" &&
+            category.categoryName === "Eyebrow" &&
             faceLandmark &&
             faceLandmark[225]
           ) {
-            drawXEyebrow =
-              faceLandmark[225].x * image.naturalWidth * scaleX + offsetX;
-            drawYEyebrow =
+            drawX = isFlip
+              ? width -
+                (faceLandmark[225].x * image.naturalWidth * scaleX + offsetX)
+              : faceLandmark[225].x * image.naturalWidth * scaleX + offsetX;
+            drawY =
               faceLandmark[225].y * image.naturalHeight * scaleY + offsetY;
-
-            labelEyebrow = "eyebrown";
+            label = "Eyebrow";
 
             const averageEyebrowsColor = extractSkinColor(
               image,
               faceLandmark,
-              eyebrowIndices,
+              [70, 63, 105, 66, 46, 53, 52, 65, 296, 334, 293, 295, 282, 283],
               2,
             );
 
             results.push({
-              label: result.categories[0].displayName,
+              label: category.displayName,
               color: averageEyebrowsColor.hexColor,
             });
 
             // Draw landmark point
-            const outerRadiusEyebrow = 10;
             ctx.beginPath();
-            ctx.arc(drawXEyebrow, drawYEyebrow, outerRadius, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.arc(drawX, drawY, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = "white"; // Red color
             ctx.fill();
             ctx.closePath();
 
-            // Draw label with line
-            const labelXEyebrow = drawXEyebrow + 50;
-            const labelYEyebrow = drawYEyebrow + 50;
+            // Calculate label position
+            const labelX = calculateLabelX(drawX);
+            const labelY = drawY + 50;
 
-            // Draw a line from the center of the bounding box to the label position
+            // Draw a line from the center to the label
             ctx.beginPath();
-            ctx.moveTo(drawXEyebrow, drawYEyebrow);
-            ctx.lineTo(labelXEyebrow, labelYEyebrow);
+            ctx.moveTo(drawX, drawY);
+            ctx.lineTo(labelX, labelY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             // Display the label
             ctx.font = "12px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText(labelEyebrow, labelXEyebrow, labelYEyebrow - 5);
+            ctx.fillText(label, labelX, labelY - 5);
 
             // Draw underline for label text
-            const textWidth = ctx.measureText(labelEyebrow).width;
-            const underlineEndX = labelXEyebrow + textWidth;
-            const underlineY = labelYEyebrow + 5;
+            const textWidth = ctx.measureText(label).width;
+            const underlineEndX = labelX + textWidth;
+            const underlineY = labelY + 5;
 
             ctx.beginPath();
-            ctx.moveTo(labelXEyebrow, labelYEyebrow);
+            ctx.moveTo(labelX, labelY);
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             hitboxesRef.current.push({
-              label: labelEyebrow,
+              label: label,
               section: "makeup",
-              x: labelXEyebrow,
-              y: labelYEyebrow - 20,
+              x: labelX,
+              y: labelY - 20,
               width: textWidth,
               height: 20,
             });
           }
+
           if (
             category.categoryName === "Blusher" &&
             faceLandmark &&
             faceLandmark[280]
           ) {
-            drawXBlusher =
-              faceLandmark[280].x * image.naturalWidth * scaleX + offsetX;
-            drawYBlusher =
+            drawX = isFlip
+              ? width -
+                (faceLandmark[280].x * image.naturalWidth * scaleX + offsetX)
+              : faceLandmark[280].x * image.naturalWidth * scaleX + offsetX;
+            drawY =
               faceLandmark[280].y * image.naturalHeight * scaleY + offsetY;
+            label = "Blusher";
 
             const averageBlushColor = extractSkinColor(
               image,
               faceLandmark,
-              blushIndices,
+              [280, 80],
               2,
             );
 
-            labelBlusher = "blushes ";
-
             results.push({
-              label: result.categories[0].displayName,
+              label: category.displayName,
               color: averageBlushColor.hexColor,
             });
 
             // Draw landmark point
-            const outerRadiusBlusher = 10;
             ctx.beginPath();
-            ctx.arc(drawXBlusher, drawYBlusher, outerRadius, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.arc(drawX, drawY, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = "white"; // Red color
             ctx.fill();
             ctx.closePath();
 
-            // Draw label with line
-            const labelXBlusher = drawXBlusher + 50;
-            const labelYBlusher = drawYBlusher + 50;
+            // Calculate label position
+            const labelX = calculateLabelX(drawX);
+            const labelY = drawY + 50;
 
-            // Draw a line from the center of the bounding box to the label position
+            // Draw a line from the center to the label
             ctx.beginPath();
-            ctx.moveTo(drawXBlusher, drawYBlusher);
-            ctx.lineTo(labelXBlusher, labelYBlusher);
+            ctx.moveTo(drawX, drawY);
+            ctx.lineTo(labelX, labelY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             // Display the label
             ctx.font = "12px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText(labelBlusher, labelXBlusher, labelYBlusher - 5);
+            ctx.fillText(label, labelX, labelY - 5);
 
             // Draw underline for label text
-            const textWidth = ctx.measureText(labelBlusher).width;
-            const underlineEndX = labelXBlusher + textWidth;
-            const underlineY = labelYBlusher + 5;
+            const textWidth = ctx.measureText(label).width;
+            const underlineEndX = labelX + textWidth;
+            const underlineY = labelY + 5;
 
             ctx.beginPath();
-            ctx.moveTo(labelXBlusher, labelYBlusher);
+            ctx.moveTo(labelX, labelY);
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             hitboxesRef.current.push({
-              label: labelBlusher,
+              label: label,
               section: "makeup",
-              x: labelXBlusher,
-              y: labelYBlusher - 20,
+              x: labelX,
+              y: labelY - 20,
               width: textWidth,
               height: 20,
             });
           }
+
           if (
             category.categoryName === "Eyeshadow" &&
             faceLandmark &&
             faceLandmark[257]
           ) {
-            drawXEyeshadow =
-              faceLandmark[257].x * image.naturalWidth * scaleX + offsetX;
-            drawYEyeshadow =
+            drawX = isFlip
+              ? width -
+                (faceLandmark[257].x * image.naturalWidth * scaleX + offsetX)
+              : faceLandmark[257].x * image.naturalWidth * scaleX + offsetX;
+            drawY =
               faceLandmark[257].y * image.naturalHeight * scaleY + offsetY;
+            label = "Eyeshadow";
 
             const averageEyeshadowColor = extractSkinColor(
               image,
               faceLandmark,
-              eyeshadowIndices,
+              [29, 27],
               2,
             );
 
-            labelEyeshadow = "Eyeshadows";
-
             results.push({
-              label: result.categories[0].displayName,
+              label: category.displayName,
               color: averageEyeshadowColor.hexColor,
             });
 
             // Draw landmark point
-            const outerRadiusEyeshadow = 10;
             ctx.beginPath();
-            ctx.arc(
-              drawXEyeshadow,
-              drawYEyeshadow,
-              outerRadius,
-              0,
-              2 * Math.PI,
-            );
-            ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red color
+            ctx.arc(drawX, drawY, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = "white"; // Red color
             ctx.fill();
             ctx.closePath();
 
-            // Draw label with line
-            const labelXEyeshadow = drawXEyeshadow + 50;
-            const labelYEyeshadow = drawYEyeshadow + 50;
+            // Calculate label position
+            const labelX = calculateLabelX(drawX);
+            const labelY = drawY + 50;
 
-            // Draw a line from the center of the bounding box to the label position
+            // Draw a line from the center to the label
             ctx.beginPath();
-            ctx.moveTo(drawXEyeshadow, drawYEyeshadow);
-            ctx.lineTo(labelXEyeshadow, labelYEyeshadow);
+            ctx.moveTo(drawX, drawY);
+            ctx.lineTo(labelX, labelY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             // Display the label
             ctx.font = "12px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText(labelEyeshadow, labelXEyeshadow, labelYEyeshadow - 5);
+            ctx.fillText(label, labelX, labelY - 5);
 
             // Draw underline for label text
-            const textWidth = ctx.measureText(labelEyeshadow).width;
-            const underlineEndX = labelXEyeshadow + textWidth;
-            const underlineY = labelYEyeshadow + 5;
+            const textWidth = ctx.measureText(label).width;
+            const underlineEndX = labelX + textWidth;
+            const underlineY = labelY + 5;
 
             ctx.beginPath();
-            ctx.moveTo(labelXEyeshadow, labelYEyeshadow);
+            ctx.moveTo(labelX, labelY);
             ctx.lineTo(underlineEndX, underlineY);
             ctx.strokeStyle = "white";
             ctx.stroke();
 
             hitboxesRef.current.push({
-              label: labelEyeshadow,
+              label: label,
               section: "makeup",
-              x: labelXEyeshadow,
-              y: labelYEyeshadow - 20,
+              x: labelX,
+              y: labelY - 20,
               width: textWidth,
               height: 20,
             });
           }
         });
       });
+
+      // Optionally, handle other detection types or additional drawing here
     };
 
     drawImage();
@@ -1073,8 +767,11 @@ export function FindTheLookCanvas({
     glassResult,
     headResult,
     makeupResult,
+    faceLandmark,
+    isFlip, // Add isFlip as a dependency
   ]);
 
+  // Handle click events on the canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {

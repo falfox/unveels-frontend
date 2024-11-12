@@ -10,7 +10,7 @@ import { Landmark } from "../types/landmark";
  * Calculates the average brightness of the video frame.
  */
 export const calculateLighting = async (
-  video: HTMLVideoElement,
+  video: HTMLVideoElement | HTMLImageElement,
 ): Promise<number> => {
   const offscreenCanvas = document.createElement("canvas");
   const ctx = offscreenCanvas.getContext("2d");

@@ -59,35 +59,45 @@ export function FindTheLook() {
 
 function Main() {
   const { criterias } = useCamera();
+  const [selectionMade, setSelectionMade] = useState(false);
+
+  // Fungsi ini akan dijalankan ketika pilihan sudah dibuat
+  const handleSelection = () => {
+    setSelectionMade(true);
+  };
 
   return (
     <>
-      <FindTheLookMainScreen />
-      {/* <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
-        <div className="absolute inset-0">
-          {criterias.isCaptured && criterias.capturedImage ? (
-            <FindTheLookScene />
-          ) : (
-            <>
-              <VideoStream />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-                  zIndex: 0,
-                }}
-              ></div>
-            </>
-          )}
-        </div>
-        <RecorderStatus />
-        <TopNavigation item={false} />
+      {!selectionMade && (
+        <FindTheLookMainScreen onSelection={handleSelection} />
+      )}
+      {selectionMade && (
+        <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+          <div className="absolute inset-0">
+            {criterias.isCaptured && criterias.capturedImage ? (
+              <FindTheLookScene />
+            ) : (
+              <>
+                <VideoStream />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                    zIndex: 0,
+                  }}
+                ></div>
+              </>
+            )}
+          </div>
+          <RecorderStatus />
+          <TopNavigation item={false} />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-        <MainContent />
-        <Footer />
-      </div>
-    </div> */}
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+            <MainContent />
+            <Footer />
+          </div>
+        </div>
+      )}
     </>
   );
 }
