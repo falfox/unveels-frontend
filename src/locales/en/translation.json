@@ -55,7 +55,14 @@
     "attributes": "Attributes",
     "recommendations: ": "Recommendations"
   },
+  "scoreType":{
+    "low":"Low",
+    "moderate":"Moderate",
+    "high":"High"
+  },
   "viewpersonality": {
+    "aiPersonalityAnalysis": "AI Personality Analysis",
+    "aiFaceAnalyzer": "AI Face Analyzer",
     "personality_traits": "Main 5 Personality Traits",
     "score":"Score",
     "description":"Description",
@@ -231,7 +238,7 @@
   "personalityLabels": {
     "extravert": "Extravert", 
     "neurotic": "Neurotic",
-    "agreeable": "Agreeable",
+    "agreable": "Agreeable",
     "conscientious": "Conscientious",
     "open": "Open"
   },

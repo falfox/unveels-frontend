@@ -54,6 +54,8 @@
     "recommendations": "التوصيات"
   },
   "viewpersonality": {
+    "aiPersonalityAnalysis": "تحليل الشخصية بالذكاء الاصطناعي",
+    "aiFaceAnalyzer": "محلل الوجه بالذكاء الاصطناعي",
     "personality_traits": "السمات الرئيسية الخمسة للشخصية",
     "score": "الدرجة",
     "description":"الوصف",
@@ -64,6 +66,11 @@
     "lookdec": "أحمر شفاه جريء وحواجب محددة يعكسان شخصيتك القوية والحيوية",
     "lipcolorrec": "توصيات ألوان الشفاه",
     "lipcolordec": "أفضل ألوان الشفاه لك هي الدرجات البرتقالية"
+  },
+  "scoreTypes": {
+    "low": "منخفض",
+    "moderate": "متوسط",
+    "high": "مرتفع"
   },
   "personality": {
     "extraversion": {
@@ -229,7 +236,7 @@
   "personalityLabels": {
     "extravert": "منفتح",
     "neurotic": "عصبي",
-    "agreeable": "ودود",
+    "agreable": "ودود",
     "conscientious": "يقظ",
     "open": "منفتح الذهن"
   },

@@ -238,7 +238,7 @@ const Result = ({ inferenceResult }: { inferenceResult: Classifier[] }) => {
         <div>
           <div className="flex items-center gap-x-1">
             <Icons.hashtagCircle className="size-4" />
-            <div className="text-sm">AI Face Analyzer :</div>
+            <div className="text-sm">{t("viewpersonality.aiFaceAnalyzer")}:</div>
           </div>
         </div>
       </div>

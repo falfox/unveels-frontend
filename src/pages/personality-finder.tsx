@@ -257,7 +257,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
         <div>
           <div className="flex items-center gap-x-1">
             <Icons.hashtagCircle className="size-4" />
-            <div className="text-sm">AI Personality Analysis :</div>
+            <div className="text-sm">{t("viewpersonality.aiPersonalityAnalysis")} :</div>
           </div>
           <div className="mt-1 pl-5 text-xs">
             {inferenceResult?.[15]?.outputIndex !== undefined
@@ -481,7 +481,7 @@ function PersonalitySection({
               : "text-[#5ED400]",
         )}
       >
-        {scoreType} {score}%
+      {t(`scoreTypes.${scoreType.toLocaleLowerCase()}`, )} {score}%
       </div>
     </div>
   );
