@@ -55,7 +55,7 @@
     "attributes": "Attributes",
     "recommendations: ": "Recommendations"
   },
-  "scoreType":{
+  "scoreTypes":{
     "low":"Low",
     "moderate":"Moderate",
     "high":"High"
