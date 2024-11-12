@@ -1,27 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
+import { neckAccessoriesProductTypeFilter } from "../../../../api/attributes/accessories";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
-  color,
-  pattern,
-}: {
-  color: string | null;
-  pattern: string | null;
-}) {
+export function useNeckwearQuery(
+  type: "Chokers" | "Necklaces" | "Pendants",
+  {
+    color,
+  }: {
+    color: string | null;
+  },
+) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", type, color],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              field: "neck_accessories_product_type",
+              value: neckAccessoriesProductTypeFilter([type]).join(","),
               condition_type: "in",
             },
           ],
@@ -42,20 +43,8 @@ export function useEyelinerQuery({
         });
       }
 
-      if (pattern) {
-        filters.push({
-          filters: [
-            {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
-            },
-          ],
-        });
-      }
-
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },

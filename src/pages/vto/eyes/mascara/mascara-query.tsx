@@ -1,33 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
+import { getLashMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
+export function useMascaraQuery({
   color,
-  pattern,
+  sub_color,
 }: {
   color: string | null;
-  pattern: string | null;
+  sub_color: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", "mascara", color, sub_color],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              field: "lash_makeup_product_type",
+              value: getLashMakeupProductTypeIds(["Mascaras"]).join(","),
               condition_type: "in",
             },
           ],
         },
       ];
 
+      // Skip filter ini karena, mascara_makeup_product_type tidak bisa di filter dengan color
       const filters = [];
 
       if (color) {
@@ -42,20 +43,8 @@ export function useEyelinerQuery({
         });
       }
 
-      if (pattern) {
-        filters.push({
-          filters: [
-            {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
-            },
-          ],
-        });
-      }
-
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
         {
           headers: defaultHeaders,
         },
