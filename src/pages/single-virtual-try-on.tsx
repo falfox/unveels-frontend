@@ -1,4 +1,10 @@
-import { Link } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useNavigate,
+  useNavigation,
+  useParams,
+} from "react-router-dom";
 import { RecorderStatus } from "../components/assistant";
 import {
   CameraProvider,
@@ -8,12 +14,14 @@ import { SkinColorProvider } from "../components/skin-tone-finder-scene/skin-col
 import { AccesoriesProvider } from "../components/three/accesories-context";
 import { MakeupProvider } from "../components/three/makeup-context";
 import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
-import { ChevronLeft, Heart, Plus, X } from "lucide-react";
-import { CSSProperties } from "react";
+import { ChevronDown, ChevronLeft, Heart, Plus, X } from "lucide-react";
+import { CSSProperties, useState } from "react";
 import { Icons } from "../components/icons";
 import { usePage } from "../hooks/usePage";
 import { div } from "three/webgpu";
 import { Rating } from "../components/rating";
+import data from "../assets/message.json";
+import { Footer } from "../components/footer";
 
 export function SingleVirtualTryOn() {
   return (
@@ -47,7 +55,7 @@ function Main() {
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         {/* <Sidebar /> */}
         <MainContent />
-        {/* <Footer /> */}
+        <Footer />
       </div>
       <RecorderStatus />
     </div>
@@ -136,27 +144,50 @@ export function TopNavigation({
 }
 
 export function MainContent() {
+  const { sku } = useParams();
+  const [collapsed, setCollapsed] = useState(false);
   return (
-    <div className="h-screen w-full overflow-y-scroll bg-black/90">
-      <h5 className="mb-5 mt-20 text-center text-white">Lip Color</h5>
-      <ProductList />
-    </div>
+    <>
+      {sku ? (
+        <>
+          {collapsed ? null : <BottomContent />}
+          <div className="flex justify-center">
+            <button type="button" onClick={() => setCollapsed(!collapsed)}>
+              <ChevronDown className="size-6 text-white" />
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="h-screen w-full overflow-y-scroll bg-black/90">
+          <h5 className="mb-5 mt-20 text-center text-white">Lip Color</h5>
+          <ProductList />
+        </div>
+      )}
+    </>
   );
 }
 
+function BottomContent() {
+  return <Outlet />;
+}
+
 export function ProductList() {
+  const configurableData = data.items.filter(
+    (d) => d.type_id === "configurable",
+  );
   return (
     <div className="flex flex-wrap justify-center gap-5">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <ProductCard key={i} />
+      {configurableData.map((item, i) => (
+        <ProductCard item={item} key={i} />
       ))}
     </div>
   );
 }
 
-export function ProductCard() {
+export function ProductCard({ item }: { item: any }) {
+  const navigate = useNavigate();
   return (
-    <div className="gri flex flex-col text-white">
+    <div className="flex flex-col text-white">
       <div className="relative h-64 w-64 overflow-hidden">
         <img
           src={"https://picsum.photos/id/77/256/256"}
@@ -165,21 +196,24 @@ export function ProductCard() {
         />
         <button className="absolute right-2 top-2 text-black">icon</button>
       </div>
-      <div className="mt-3 flex justify-between">
-        <div>
-          <h2 className="font-bold">Judul</h2>
+      <div className="mt-3 flex w-full justify-between">
+        <div className="">
+          <h2 className="w-40 truncate font-bold">{item.name}</h2>
           <p className="rating">Brand Name</p>
           <Rating rating={4} />
         </div>
         <div>
-          <h2 className="text-lg font-bold">$88.00</h2>
+          <h2 className="flex-1 text-lg font-bold">${item.price}</h2>
         </div>
       </div>
       <div className="mt-3 flex space-x-1">
         <button className="flex w-full items-center justify-center gap-2 border border-white bg-black/25 px-4 py-2 text-sm">
           ADD TO CART
         </button>
-        <button className="flex w-full items-center justify-center gap-2 bg-white px-4 py-2 text-sm text-black">
+        <button
+          className="flex w-full items-center justify-center gap-2 bg-white px-4 py-2 text-sm text-black"
+          onClick={() => navigate(`/virtual-try-on-product/${item.sku}`)}
+        >
           TRY ON
         </button>
       </div>

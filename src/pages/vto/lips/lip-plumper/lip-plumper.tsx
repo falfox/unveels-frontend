@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { textures } from "../../../../api/attributes/texture";
 import { BrandName } from "../../../../components/product/brand";
 import { LoadingProducts } from "../../../../components/loading";
+import { Link } from "react-router-dom";
 
 const colorFamilies = [
   { name: "Yellow", value: "#FFFF00" },
@@ -256,6 +257,7 @@ function ProductList() {
     sub_color: null,
     texture: selectedTexture,
   });
+
   const products = [
     {
       name: "Tom Ford Item name Tom Ford",
@@ -307,13 +309,15 @@ function ProductList() {
 
           return (
             <div key={index} className="w-[100px] rounded shadow">
-              <div className="relative h-[70px] w-[100px] overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt="Product"
-                  className="rounded object-cover"
-                />
-              </div>
+              <Link to={`virtual-try-on-product/${product.sku}`}>
+                <div className="relative h-[70px] w-[100px] overflow-hidden">
+                  <img
+                    src={imageUrl}
+                    alt="Product"
+                    className="rounded object-cover"
+                  />
+                </div>
+              </Link>
 
               <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
                 {product.name}
