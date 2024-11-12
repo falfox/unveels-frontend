@@ -4,9 +4,9 @@ import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
+import { getLashMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
+export function useLashesQuery({
   color,
   pattern,
 }: {
@@ -14,14 +14,18 @@ export function useEyelinerQuery({
   pattern: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", "lashes", color, pattern],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              field: "lash_makeup_product_type",
+              value: getLashMakeupProductTypeIds([
+                "Lash Curlers",
+                "Individual False Lashes",
+                "Full Line Lashes",
+              ]).join(","),
               condition_type: "in",
             },
           ],
@@ -55,7 +59,7 @@ export function useEyelinerQuery({
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },

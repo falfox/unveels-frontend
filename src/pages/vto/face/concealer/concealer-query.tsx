@@ -1,27 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  faceMakeupProductTypesFilter,
+  getEyeMakeupProductTypeIds,
+  getLashMakeupProductTypeIds,
+} from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
-  color,
-  pattern,
-}: {
-  color: string | null;
-  pattern: string | null;
-}) {
+export function useConcealerQuery({ skin_tone }: { skin_tone: string | null }) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", "concealers", skin_tone],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
               field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              value: getEyeMakeupProductTypeIds(["Concealers"]).join(","),
               condition_type: "in",
             },
           ],
@@ -30,25 +28,13 @@ export function useEyelinerQuery({
 
       const filters = [];
 
-      if (color) {
+      if (skin_tone) {
         filters.push({
           filters: [
             {
-              field: "color",
-              value: color,
+              field: "skin_tone",
+              value: skin_tone,
               condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      if (pattern) {
-        filters.push({
-          filters: [
-            {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
             },
           ],
         });

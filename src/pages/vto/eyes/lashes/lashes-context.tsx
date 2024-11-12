@@ -3,8 +3,8 @@ import React, { createContext, useState, useContext } from "react";
 interface LashesContextType {
   colorFamily: string | null;
   setColorFamily: (color: string | null) => void;
-  selectedColor: string | null;
-  setSelectedColor: (color: string | null) => void;
+  selectedPattern: string | null;
+  setSelectedPattern: (pattern: string | null) => void;
 }
 
 // Create the context
@@ -13,15 +13,16 @@ const LashesContext = createContext<LashesContextType | undefined>(undefined);
 // Create a provider component
 export function LashesProvider({ children }: { children: React.ReactNode }) {
   const [colorFamily, setColorFamily] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedPattern, setSelectedPattern] = useState<string | null>(null);
 
   return (
     <LashesContext.Provider
       value={{
         colorFamily,
         setColorFamily,
-        selectedColor,
-        setSelectedColor,
+
+        selectedPattern,
+        setSelectedPattern,
       }}
     >
       {children}
