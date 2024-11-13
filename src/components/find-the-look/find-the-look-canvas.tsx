@@ -514,7 +514,7 @@ export function FindTheLookCanvas({
             );
 
             addFindTheLookItem({
-              label: category.displayName,
+              label: label,
               section: "makeup",
               color: averageLipColor.hexColor,
             });
@@ -584,7 +584,7 @@ export function FindTheLookCanvas({
             );
 
             addFindTheLookItem({
-              label: category.displayName,
+              label: label,
               section: "makeup",
               color: averageEyebrowsColor.hexColor,
             });
@@ -654,7 +654,7 @@ export function FindTheLookCanvas({
             );
 
             addFindTheLookItem({
-              label: category.displayName,
+              label: label,
               section: "makeup",
               color: averageBlushColor.hexColor,
             });
@@ -724,7 +724,7 @@ export function FindTheLookCanvas({
             );
 
             addFindTheLookItem({
-              label: category.displayName,
+              label: label,
               section: "makeup",
               color: averageEyeshadowColor.hexColor,
             });
@@ -815,6 +815,7 @@ export function FindTheLookCanvas({
 
       let labelClicked: string | null = null;
       let sectionClicked: string | null = null;
+      let hitboxFound = false; // Track if a hitbox is found
 
       for (const bbox of hitboxesRef.current) {
         if (
@@ -824,9 +825,16 @@ export function FindTheLookCanvas({
           y <= bbox.y + bbox.height
         ) {
           labelClicked = bbox.label;
-          sectionClicked = bbox.section; // Capture the section as well
+          sectionClicked = bbox.section;
+          hitboxFound = true; // A hitbox was clicked
           break;
         }
+      }
+
+      if (!hitboxFound) {
+        // No hitbox clicked, set to null
+        labelClicked = null;
+        sectionClicked = null;
       }
 
       if (onLabelClick) {

@@ -5,10 +5,10 @@ import { FindTheLookItems } from "../types/findTheLookItems";
 interface FindThelookContextType {
   findTheLookItems: FindTheLookItems[] | null;
   setFindTheLookItems: (FindTheLookItems: FindTheLookItems[] | null) => void;
-  tab: string;
-  setTab: (tab: string) => void;
-  section: string;
-  setSection: (section: string) => void;
+  tab: string | null;
+  setTab: (tab: string | null) => void;
+  section: string | null;
+  setSection: (section: string | null) => void;
   addFindTheLookItem: (item: FindTheLookItems) => void;
   selectedItems: {
     items: Product[];
@@ -81,8 +81,8 @@ export function FindTheLookProvider({
     setFindTheLookItems((prevItems) => [...(prevItems || []), item]);
   };
 
-  const [tab, setTab] = useState<string>("");
-  const [section, setSection] = useState<string>("");
+  const [tab, setTab] = useState<string | null>(null);
+  const [section, setSection] = useState<string | null>(null);
 
   return (
     <FindTheLookContext.Provider

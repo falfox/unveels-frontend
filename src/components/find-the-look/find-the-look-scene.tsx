@@ -24,28 +24,31 @@ export function FindTheLookScene() {
   }, [criterias.capturedImage]);
 
   const handleLabelClick = (label: string | null, tab: string | null) => {
-    if (label && tab) {
-      if ((window as any).flutter_inappwebview) {
-        (window as any).flutter_inappwebview
-          .callHandler(
-            "getLabelTab",
-            JSON.stringify({
-              findTheLookLabelClick: label,
-              findTheLookSection: tab,
-            }),
-          )
-          .then((result: any) => {
-            console.log("Flutter responded with:", result);
-          })
-          .catch((error: any) => {
-            console.error("Error calling Flutter handler:", error);
-          });
-      }
-      setTab(label);
-      setSection(tab);
-      console.log(label);
-      console.log(tab);
+    // Check if Flutter's in-app web view is available, and call handler with the label and section (even if they are null)
+    if ((window as any).flutter_inappwebview) {
+      (window as any).flutter_inappwebview
+        .callHandler(
+          "getLabelTab",
+          JSON.stringify({
+            findTheLookLabelClick: label,
+            findTheLookSection: tab,
+          }),
+        )
+        .then((result: any) => {
+          console.log("Flutter responded with:", result);
+        })
+        .catch((error: any) => {
+          console.error("Error calling Flutter handler:", error);
+        });
     }
+
+    // Update state for `tab` and `section`, even if they are null
+    setTab(label);
+    setSection(tab);
+
+    // Log the current values of label and tab (including null)
+    console.log("Label:", label);
+    console.log("Section:", tab);
   };
 
   return (
