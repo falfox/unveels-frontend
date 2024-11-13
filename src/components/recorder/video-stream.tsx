@@ -649,6 +649,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
               src={videoRef.current?.src}
               controls
               autoPlay
+              loop
               className="h-full w-full object-cover"
             />
           )}

@@ -19,7 +19,7 @@ import { useLipsProductQuery } from "../api/lips";
 import {
   FindTheLookProvider,
   useFindTheLookContext,
-} from "../components/find-the-look/find-the-look-context";
+} from "../context/find-the-look-context";
 import { Footer } from "../components/footer";
 import { Icons } from "../components/icons";
 import { LoadingProducts } from "../components/loading";

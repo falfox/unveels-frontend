@@ -22,7 +22,23 @@ export function FindTheLookScene() {
   }, [criterias.capturedImage]);
 
   const handleLabelClick = (label: string | null, tab: string | null) => {
-    if (label != null) {
+    if (label && tab) {
+      if ((window as any).flutter_inappwebview) {
+        (window as any).flutter_inappwebview
+          .callHandler(
+            "getLabelTab",
+            JSON.stringify({
+              findTheLookLabelClick: label,
+              findTheLookSection: tab,
+            }),
+          )
+          .then((result: any) => {
+            console.log("Flutter responded with:", result);
+          })
+          .catch((error: any) => {
+            console.error("Error calling Flutter handler:", error);
+          });
+      }
       console.log(label);
       console.log(tab);
     }

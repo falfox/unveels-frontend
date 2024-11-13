@@ -8,7 +8,7 @@ import {
 import { FindTheLookItems } from "../../types/findTheLookItems";
 import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
-import { useFindTheLookContext } from "./find-the-look-context";
+import { useFindTheLookContext } from "../../context/find-the-look-context";
 
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
@@ -33,7 +33,7 @@ export function FindTheLookCanvas({
   onLabelClick,
 }: FindTheLookCanvasProps) {
   const { selectedItems: cart } = useFindTheLookContext();
-  const results: FindTheLookItems[] = [];
+  const { findTheLookItems, addFindTheLookItem } = useFindTheLookContext();
 
   const hitboxesRef = useRef<Hitbox[]>([]);
 
@@ -298,6 +298,24 @@ export function FindTheLookCanvas({
     image,
   ]);
 
+  // send detection to webview
+  useEffect(() => {
+    if (findTheLookItems) {
+      console.log("Detected Items: ", findTheLookItems);
+      if ((window as any).flutter_inappwebview) {
+        const resultString = JSON.stringify(findTheLookItems);
+        (window as any).flutter_inappwebview
+          .callHandler("detectionResult", resultString)
+          .then((result: any) => {
+            console.log("Flutter responded with:", result);
+          })
+          .catch((error: any) => {
+            console.error("Error calling Flutter handler:", error);
+          });
+      }
+    }
+  }, [findTheLookItems]);
+
   // Draw detections on canvas
   useEffect(() => {
     if (
@@ -439,6 +457,11 @@ export function FindTheLookCanvas({
             ctx.strokeStyle = "white";
             ctx.stroke();
 
+            addFindTheLookItem({
+              label: label,
+              section: "accesories",
+            });
+
             hitboxesRef.current.push({
               label: label,
               section: section,
@@ -490,8 +513,9 @@ export function FindTheLookCanvas({
               2,
             );
 
-            results.push({
+            addFindTheLookItem({
               label: category.displayName,
+              section: "makeup",
               color: averageLipColor.hexColor,
             });
 
@@ -559,8 +583,9 @@ export function FindTheLookCanvas({
               2,
             );
 
-            results.push({
+            addFindTheLookItem({
               label: category.displayName,
+              section: "makeup",
               color: averageEyebrowsColor.hexColor,
             });
 
@@ -628,8 +653,9 @@ export function FindTheLookCanvas({
               2,
             );
 
-            results.push({
+            addFindTheLookItem({
               label: category.displayName,
+              section: "makeup",
               color: averageBlushColor.hexColor,
             });
 
@@ -697,8 +723,9 @@ export function FindTheLookCanvas({
               2,
             );
 
-            results.push({
+            addFindTheLookItem({
               label: category.displayName,
+              section: "makeup",
               color: averageEyeshadowColor.hexColor,
             });
 
@@ -747,8 +774,6 @@ export function FindTheLookCanvas({
           }
         });
       });
-
-      // Optionally, handle other detection types or additional drawing here
     };
 
     drawImage();
