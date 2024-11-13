@@ -1,16 +1,21 @@
-import { Suspense } from "react";
-import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
-import { useBrandsQuerySuspense } from "./api/brands";
-import { useCategoriesQuerySuspense } from "./api/categories";
+import React, { Suspense } from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import "./index.css";
-import { FaceAnalyzer } from "./pages/face-analyzer";
-import { PersonalityFinder } from "./pages/personality-finder";
-import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
-import { SkinAnalysis } from "./pages/skin-analysis";
+import { useCategoriesQuerySuspense } from "./api/categories";
+import { useBrandsQuerySuspense } from "./api/brands";
+import VoiceCommand from "./components/voice-command/voice-command";
+
+// Halaman yang diimpor
 import { SkinToneFinder } from "./pages/skin-tone-finder";
+import { PersonalityFinder } from "./pages/personality-finder";
+import { FaceAnalyzer } from "./pages/face-analyzer";
+import { SkinAnalysis } from "./pages/skin-analysis";
+import { FindTheLook } from "./pages/find-the-look";
+import { PersonalityFinderWeb } from "./pages/personality-finder-web";
 import { SkinToneFinderWeb } from "./pages/skin-tone-finder-web";
 import { VirtulAssistant } from "./pages/assistant/virtual-assistant";
-import { TryOnSelector, VirtualTryOn } from "./pages/virtual-try-on";
+import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
+import { VirtualTryOn, TryOnSelector } from "./pages/virtual-try-on";
 import { EyeLinerSelector } from "./pages/vto/eyes/eye-liners/eye-liner";
 import { EyeShadowSelector } from "./pages/vto/eyes/eye-shadow/eye-shadow";
 import { EyebrowsSelector } from "./pages/vto/eyes/eyebrows/eyebrows";
@@ -43,93 +48,8 @@ import { NailsMode } from "./pages/vto/nails/nails-makeup";
 import { PressOnNailsSelector } from "./pages/vto/nails/press-on-nails/press-on-nails";
 import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear";
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
-import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
-import { FindTheLook } from "./pages/find-the-look";
-import { SkinAnalysisWeb } from "./pages/skin-analysis.-web";
-// Define routes using object syntax
-const routes = [
-  {
-    path: "/",
-    element: (
-      <Suspense fallback={<>Loading...</>}>
-        <Home />
-      </Suspense>
-    ),
-  },
-  { path: "/skin-tone-finder", element: <SkinToneFinder /> },
-  { path: "/personality-finder", element: <PersonalityFinder /> },
-  { path: "/face-analyzer", element: <FaceAnalyzer /> },
-  { path: "/skin-analysis", element: <SkinAnalysis /> },
-  { path: "/find-the-look", element: <FindTheLook /> },
-  { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
-  { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
-  { path: "/virtual-assistant", element: <VirtulAssistant /> },
-  { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
-  {
-    path: "/virtual-try-on-product/:sku",
-    element: <SingleVirtualTryOn />,
-  },
-  {
-    path: "/virtual-try-on",
-    element: <VirtualTryOn />,
-    children: [
-      { path: "makeups", element: <TryOnSelector /> },
-      // Lips
-      { path: "lips", element: <LipsMode /> },
-      { path: "lip-color", element: <LipColorSelector /> },
-      { path: "lip-liner", element: <LipLinerSelector /> },
-      { path: "lip-plumper", element: <LipPlumperSelector /> },
-      // Eyes
-      { path: "eyes", element: <EyesMode /> },
-      { path: "eyebrows", element: <EyebrowsSelector /> },
-      { path: "eye-shadow", element: <EyeShadowSelector /> },
-      { path: "eye-liner", element: <EyeLinerSelector /> },
-      { path: "lashes", element: <LashesSelector /> },
-      { path: "mascara", element: <MascaraSelector /> },
-      { path: "lenses", element: <LenseSelector /> },
-      // Face
-      { path: "face", element: <FaceMode /> },
-      { path: "foundation", element: <FoundationSelector /> },
-      { path: "concealer", element: <ConcealerSelector /> },
-      { path: "contour", element: <ContourSelector /> },
-      { path: "blush", element: <BlushSelector /> },
-      { path: "bronzer", element: <BronzerSelector /> },
-      { path: "highlighter", element: <HighlighterSelector /> },
-      // Nails
-      { path: "nails", element: <NailsMode /> },
-      { path: "nail-polish", element: <NailPolishSelector /> },
-      { path: "press-on-nails", element: <PressOnNailsSelector /> },
-      // Hair
-      { path: "hair", element: <HairMode /> },
-      { path: "hair-color", element: <HairColorSelector /> },
 
-      // Head
-      { path: "sunglasses", element: <GlassesSelector /> },
-      { path: "glasses", element: <GlassesSelector /> },
-      { path: "earrings", element: <EarringsSelector /> },
-      { path: "headbands", element: <HeadbandSelector /> },
-      { path: "hats", element: <HatsSelector /> },
-      { path: "tiaras", element: <TiaraSelector /> },
-      // Neck
-      { path: "pendants", element: <NeckwearSelector /> },
-      { path: "necklaces", element: <NeckwearSelector /> },
-      { path: "chokers", element: <NeckwearSelector /> },
-      { path: "scarves", element: <ScarvesSelector /> },
-      // Hand
-      { path: "rings", element: <HandwearSelector /> },
-      { path: "bracelets", element: <HandwearSelector /> },
-      { path: "bangles", element: <HandwearSelector /> },
-      { path: "watches", element: <WatchesSelector /> },
-    ],
-  },
-];
-
-// Create a memory router instance
-const router = createBrowserRouter(routes, {
-  // initialEntries: ["/virtual-try-on/makeups"], // Set the initial route
-  // initialIndex: 0,
-});
-
+// Komponen Home
 function Home() {
   useCategoriesQuerySuspense();
   useBrandsQuerySuspense();
@@ -145,14 +65,10 @@ function Home() {
         Personality Finder Web
       </LinkButton>
       <LinkButton to="/skin-tone-finder-web">Skin Tone Finder Web</LinkButton>
-      <LinkButton to="/skin-analysis-web">Skin Analysis Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
     </div>
   );
-}
-function App() {
-  return <RouterProvider router={router} />;
 }
 
 // Link button component
@@ -169,6 +85,101 @@ function LinkButton({
         {children}
       </button>
     </Link>
+  );
+}
+
+// Komponen Utama App
+function App() {
+  return (
+    <Router>
+      <div>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <Home />
+              </Suspense>
+            }
+          />
+          <Route path="/skin-tone-finder" element={<SkinToneFinder />} />
+          <Route path="/personality-finder" element={<PersonalityFinder />} />
+          <Route path="/face-analyzer" element={<FaceAnalyzer />} />
+          <Route path="/skin-analysis" element={<SkinAnalysis />} />
+          <Route path="/find-the-look" element={<FindTheLook />} />
+          <Route
+            path="/personality-finder-web"
+            element={<PersonalityFinderWeb />}
+          />
+          <Route path="/skin-tone-finder-web" element={<SkinToneFinderWeb />} />
+          <Route path="/virtual-assistant" element={<VirtulAssistant />} />
+          <Route
+            path="/virtual-try-on-product/:sku"
+            element={<SingleVirtualTryOn />}
+          />
+          <Route path="/virtual-try-on" element={<VirtualTryOn />}>
+            {/* Rute anak untuk Virtual Try On */}
+            <Route path="makeups" element={<TryOnSelector />} />
+
+            {/* Lips */}
+            <Route path="lips" element={<LipsMode />} />
+            <Route path="lip-color" element={<LipColorSelector />} />
+            <Route path="lip-liner" element={<LipLinerSelector />} />
+            <Route path="lip-plumper" element={<LipPlumperSelector />} />
+
+            {/* Eyes */}
+            <Route path="eyes" element={<EyesMode />} />
+            <Route path="eyebrows" element={<EyebrowsSelector />} />
+            <Route path="eye-shadow" element={<EyeShadowSelector />} />
+            <Route path="eye-liner" element={<EyeLinerSelector />} />
+            <Route path="lashes" element={<LashesSelector />} />
+            <Route path="mascara" element={<MascaraSelector />} />
+            <Route path="lenses" element={<LenseSelector />} />
+
+            {/* Face */}
+            <Route path="face" element={<FaceMode />} />
+            <Route path="foundation" element={<FoundationSelector />} />
+            <Route path="concealer" element={<ConcealerSelector />} />
+            <Route path="contour" element={<ContourSelector />} />
+            <Route path="blush" element={<BlushSelector />} />
+            <Route path="bronzer" element={<BronzerSelector />} />
+            <Route path="highlighter" element={<HighlighterSelector />} />
+
+            {/* Nails */}
+            <Route path="nails" element={<NailsMode />} />
+            <Route path="nail-polish" element={<NailPolishSelector />} />
+            <Route path="press-on-nails" element={<PressOnNailsSelector />} />
+
+            {/* Hair */}
+            <Route path="hair" element={<HairMode />} />
+            <Route path="hair-color" element={<HairColorSelector />} />
+
+            {/* Head */}
+            <Route path="sunglasses" element={<GlassesSelector />} />
+            <Route path="glasses" element={<GlassesSelector />} />
+            <Route path="earrings" element={<EarringsSelector />} />
+            <Route path="headbands" element={<HeadbandSelector />} />
+            <Route path="hats" element={<HatsSelector />} />
+            <Route path="tiaras" element={<TiaraSelector />} />
+
+            {/* Neck */}
+            <Route path="pendants" element={<NeckwearSelector />} />
+            <Route path="necklaces" element={<NeckwearSelector />} />
+            <Route path="chokers" element={<NeckwearSelector />} />
+            <Route path="scarves" element={<ScarvesSelector />} />
+
+            {/* Hand */}
+            <Route path="rings" element={<HandwearSelector />} />
+            <Route path="bracelets" element={<HandwearSelector />} />
+            <Route path="bangles" element={<HandwearSelector />} />
+            <Route path="watches" element={<WatchesSelector />} />
+          </Route>
+        </Routes>
+
+        {/* VoiceCommand ditempatkan di luar <Routes> agar tetap terlihat di semua halaman */}
+        <VoiceCommand />
+      </div>
+    </Router>
   );
 }
 
