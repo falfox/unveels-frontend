@@ -459,7 +459,7 @@ export function FindTheLookCanvas({
 
             addFindTheLookItem({
               label: label,
-              section: "accesories",
+              section: "accessories",
             });
 
             hitboxesRef.current.push({

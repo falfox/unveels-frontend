@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useCamera } from "../../context/recorder-context";
 import { FindTheLookCanvas } from "./find-the-look-canvas";
+import { useFindTheLookContext } from "../../context/find-the-look-context";
 
 export function FindTheLookScene() {
   const { criterias } = useCamera();
   const findTheLookCanvasRef = useRef<HTMLCanvasElement>(null);
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
+  const { setTab, setSection } = useFindTheLookContext();
 
   useEffect(() => {
     if (criterias.capturedImage) {
@@ -39,6 +41,8 @@ export function FindTheLookScene() {
             console.error("Error calling Flutter handler:", error);
           });
       }
+      setTab(label);
+      setSection(tab);
       console.log(label);
       console.log(tab);
     }

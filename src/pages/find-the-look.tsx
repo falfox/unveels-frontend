@@ -42,6 +42,7 @@ import {
 } from "../api/attributes/accessories";
 import { FindTheLookScene } from "../components/find-the-look/find-the-look-scene";
 import { FindTheLookMainScreen } from "../components/find-the-look/find-the-look-main-screen";
+import { FindTheLookItems } from "../types/findTheLookItems";
 
 export function FindTheLook() {
   return (
@@ -135,107 +136,71 @@ function MainContent() {
   return <BottomContent />;
 }
 
-const makeups = [
-  "Lipstick",
-  "Mascara",
-  "Blusher",
-  "Highlighter",
-  "Eyecolor",
-] as const;
-
-function MakeupCategories() {
-  const [tab, setTab] = useState<(typeof makeups)[number]>("Lipstick");
+function MakeupCategories({ makeups }: { makeups: FindTheLookItems[] }) {
+  const [tab, setTab] = useState<string | undefined>(makeups[0]?.section);
   const { setView } = useFindTheLookContext();
 
   return (
-    <>
-      <div className="relative space-y-2 px-4 pb-4">
-        <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
-          {makeups.map((category) => {
-            const isActive = tab === category;
-            return (
-              <Fragment key={category}>
-                <button
-                  key={category}
-                  className={clsx(
-                    "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm text-white",
-                    {
-                      "bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]":
-                        isActive,
-                    },
-                  )}
-                  onClick={() => setTab(category)}
-                >
-                  {category}
-                </button>
-              </Fragment>
-            );
-          })}
-        </div>
-
-        <div className="pb-2 text-right">
-          <button
-            type="button"
-            className="text-white"
-            onClick={() => {
-              setView("all_categories");
-            }}
-          >
-            View all
-          </button>
-        </div>
-        <ProductList product_type={tab} />
+    <div className="relative space-y-2 px-4 pb-4">
+      <div className="flex w-full items-center space-x-3.5 overflow-x-auto pt-7 no-scrollbar">
+        {makeups.map((category) => {
+          const isActive = tab === category.section;
+          return (
+            <Fragment key={category.section}>
+              <button
+                className={`shrink-0 rounded-full border px-3 py-1 text-sm ${
+                  isActive
+                    ? "bg-gradient-to-r from-yellow-600 to-yellow-800"
+                    : ""
+                }`}
+                onClick={() => setTab(category.section)}
+              >
+                {category.section}
+              </button>
+            </Fragment>
+          );
+        })}
       </div>
-    </>
+
+      {/* Only render ProductList if a valid tab (section) is selected */}
+      {tab && mapTypes[tab] ? <ProductList product_type={tab} /> : null}
+    </div>
   );
 }
 
-const accessories = ["Sunglasses", "Chokers", "Earrings"];
-
-function AccessoriesCategories() {
-  const [tab, setTab] = useState<(typeof accessories)[number]>("Sunglasses");
+function AccessoriesCategories({
+  accessories,
+}: {
+  accessories: FindTheLookItems[];
+}) {
+  const [tab, setTab] = useState<string | undefined>(accessories[0]?.section);
   const { setView } = useFindTheLookContext();
 
   return (
-    <>
-      <div className="relative space-y-2 px-4 pb-4">
-        <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
-          {accessories.map((category) => {
-            const isActive = tab === category;
-            return (
-              <Fragment key={category}>
-                <button
-                  key={category}
-                  className={clsx(
-                    "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm text-white",
-                    {
-                      "bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]":
-                        isActive,
-                    },
-                  )}
-                  onClick={() => setTab(category)}
-                >
-                  {category}
-                </button>
-              </Fragment>
-            );
-          })}
-        </div>
-
-        <div className="pb-2 text-right">
-          <button
-            type="button"
-            className="text-white"
-            onClick={() => {
-              setView("all_categories");
-            }}
-          >
-            View all
-          </button>
-        </div>
-        <ProductList product_type={tab} />
+    <div className="relative space-y-2 px-4 pb-4">
+      <div className="flex w-full items-center space-x-3.5 overflow-x-auto pt-7 no-scrollbar">
+        {accessories.map((category) => {
+          const isActive = tab === category.section;
+          return (
+            <Fragment key={category.section}>
+              <button
+                className={`shrink-0 rounded-full border px-3 py-1 text-sm ${
+                  isActive
+                    ? "bg-gradient-to-r from-yellow-600 to-yellow-800"
+                    : ""
+                }`}
+                onClick={() => setTab(category.section)}
+              >
+                {category.section}
+              </button>
+            </Fragment>
+          );
+        })}
       </div>
-    </>
+
+      {/* Only render ProductList if a valid tab (section) is selected */}
+      {tab && mapTypes[tab] ? <ProductList product_type={tab} /> : null}
+    </div>
   );
 }
 
@@ -340,9 +305,33 @@ function ProductList({ product_type }: { product_type: string }) {
   );
 }
 
+const groupedItems = (findTheLookItems: FindTheLookItems[]) => {
+  if (!findTheLookItems) return { makeup: [], accessories: [] };
+  return {
+    makeup: findTheLookItems.filter((item) => item.section === "makeup"),
+    accessories: findTheLookItems.filter(
+      (item) => item.section === "accessories",
+    ),
+  };
+};
+
 function BottomContent() {
   const { criterias, setCriterias } = useCamera();
-  const { view, setView } = useFindTheLookContext();
+  const { view, setView, findTheLookItems } = useFindTheLookContext();
+  const [groupedItemsData, setGroupedItemsData] = useState<{
+    makeup: FindTheLookItems[];
+    accessories: FindTheLookItems[];
+  }>({
+    makeup: [],
+    accessories: [],
+  });
+
+  useEffect(() => {
+    if (findTheLookItems) {
+      const grouped = groupedItems(findTheLookItems);
+      setGroupedItemsData(grouped);
+    }
+  }, [findTheLookItems]);
 
   if (criterias.isCaptured) {
     if (view === "face") {
@@ -361,9 +350,8 @@ function BottomContent() {
     if (view === "recommendations") {
       return (
         <ProductRecommendationsTabs
-          onClose={() => {
-            setView("face");
-          }}
+          groupedItemsData={groupedItemsData}
+          onClose={() => setView("face")}
         />
       );
     }
@@ -415,20 +403,21 @@ function InferenceResults({
   );
 }
 
-function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
+function ProductRecommendationsTabs({
+  groupedItemsData,
+  onClose,
+}: {
+  groupedItemsData: {
+    makeup: FindTheLookItems[];
+    accessories: FindTheLookItems[];
+  };
+  onClose: () => void;
+}) {
   const [tab, setTab] = useState<"makeup" | "accessories">("makeup");
-
-  const activeClassNames =
-    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text text-transparent";
 
   return (
     <>
-      <div
-        className="fixed inset-0 h-full w-full"
-        onClick={() => {
-          onClose();
-        }}
-      ></div>
+      <div className="fixed inset-0 h-full w-full" onClick={onClose}></div>
       <div className="mx-auto w-full space-y-2 px-4 lg:max-w-xl">
         <div className="flex h-10 w-full items-center justify-between border-b border-gray-600 text-center">
           {["makeup", "accessories"].map((shadeTab) => {
@@ -438,41 +427,22 @@ function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
                 <button
                   key={shadeTab}
                   className={`relative h-10 grow border-b text-lg ${
-                    isActive
-                      ? activeClassNames
-                      : "border-transparent text-gray-500"
+                    isActive ? "text-white" : "text-gray-500"
                   }`}
                   onClick={() => setTab(shadeTab as "makeup" | "accessories")}
                 >
-                  <span className={isActive ? "text-white/70 blur-sm" : ""}>
-                    {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}
-                  </span>
-                  {isActive ? (
-                    <>
-                      <div
-                        className={clsx(
-                          "absolute inset-0 flex items-center justify-center text-lg blur-sm",
-                          activeClassNames,
-                        )}
-                      >
-                        <span className="text-center text-lg">
-                          {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        </span>
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-center text-lg text-white/70">
-                          {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        </span>
-                      </div>
-                    </>
-                  ) : null}
+                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}
                 </button>
               </Fragment>
             );
           })}
         </div>
       </div>
-      {tab === "makeup" ? <MakeupCategories /> : <AccessoriesCategories />}
+      {tab === "makeup" ? (
+        <MakeupCategories makeups={groupedItemsData.makeup} />
+      ) : (
+        <AccessoriesCategories accessories={groupedItemsData.accessories} />
+      )}
     </>
   );
 }
