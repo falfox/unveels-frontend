@@ -212,3 +212,77 @@ export const eyeMakeupProductTypesMap = eye_makeup_product_types.reduce(
 export function getEyeMakeupProductTypeIds(labels: string[]): string[] {
   return labels.map((label) => eyeMakeupProductTypesMap[label]);
 }
+
+export const nail_polish_product_types = [
+  {
+    label: "Nail Color",
+    value: "5683",
+  },
+  {
+    label: "Gel Color",
+    value: "5684",
+  },
+  {
+    label: "Glossy Top Coats",
+    value: "5685",
+  },
+  {
+    label: "Base Coats",
+    value: "5686",
+  },
+  {
+    label: "Nail Polish Removers",
+    value: "5687",
+  },
+  {
+    label: "Breathable Polishes",
+    value: "5688",
+  },
+  {
+    label: "Matte Top Coats",
+    value: "5689",
+  },
+  {
+    label: "Gel Top Coats",
+    value: "5690",
+  },
+  {
+    label: "Gel Primers",
+    value: "5691",
+  },
+  {
+    label: "Quick Dry Top Coats",
+    value: "5692",
+  },
+];
+
+export const nailPolishProductTypesMap = nail_polish_product_types.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export function getNailPolishProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => nailPolishProductTypesMap[label]);
+}
+
+export const nails_product_types = [
+  {
+    label: "Press on Nails",
+    value: "6513",
+  },
+];
+
+export const nailsProductTypesMap = nails_product_types.reduce(
+  (acc, { label, value }) => {
+    acc[label] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export function getNailsProductTypeIds(labels: string[]): string[] {
+  return labels.map((label) => nailsProductTypesMap[label]);
+}

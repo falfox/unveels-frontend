@@ -44,3 +44,9 @@ export const materials = [
     value: "6645",
   },
 ];
+
+export function filterMaterials(selectedMaterials: String[]) {
+  return materials.filter((material) =>
+    selectedMaterials.includes(material.label),
+  );
+}

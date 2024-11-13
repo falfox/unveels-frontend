@@ -1,27 +1,33 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  handAccessoriesProductTypeFilter,
+  neckAccessoriesProductTypeFilter,
+} from "../../../../api/attributes/accessories";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
-  color,
-  pattern,
-}: {
-  color: string | null;
-  pattern: string | null;
-}) {
+export function useHandwearQuery(
+  type: "Rings" | "Bracelets" | "Bangles",
+  {
+    color,
+    material,
+  }: {
+    color: string | null;
+    material: string | null;
+  },
+) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", type, color, material],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              field: "hand_accessories_product_type",
+              value: handAccessoriesProductTypeFilter([type]).join(","),
               condition_type: "in",
             },
           ],
@@ -42,20 +48,20 @@ export function useEyelinerQuery({
         });
       }
 
-      if (pattern) {
+      if (material) {
         filters.push({
           filters: [
             {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
+              field: "material",
+              value: material,
+              condition_type: "eq",
             },
           ],
         });
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },

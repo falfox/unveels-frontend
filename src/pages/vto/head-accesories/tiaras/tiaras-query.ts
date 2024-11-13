@@ -1,27 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
+import { headAccessoriesProductTypeFilter } from "../../../../api/attributes/accessories";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
-import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
 
-export function useEyelinerQuery({
+export function useTiarasQuery({
   color,
-  pattern,
+  occasion,
+  material,
 }: {
   color: string | null;
-  pattern: string | null;
+  occasion: string | null;
+  material: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "eyeliners", color, pattern],
+    queryKey: ["products", "tiaras", color, occasion, material],
     queryFn: async () => {
       const baseFilters = [
         {
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+              field: "head_accessories_product_type",
+              value: headAccessoriesProductTypeFilter(["Tiaras"]).join(","),
               condition_type: "in",
             },
           ],
@@ -42,20 +44,32 @@ export function useEyelinerQuery({
         });
       }
 
-      if (pattern) {
+      if (occasion) {
         filters.push({
           filters: [
             {
-              field: "pattern",
-              value: pattern,
-              condition_type: "finset",
+              field: "occasion",
+              value: occasion,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      if (material) {
+        filters.push({
+          filters: [
+            {
+              field: "material",
+              value: material,
+              condition_type: "eq",
             },
           ],
         });
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },
