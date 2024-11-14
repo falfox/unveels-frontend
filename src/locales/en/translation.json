@@ -257,5 +257,9 @@
     "try_now": "TRY NOW",
     "add_all_to_cart": "ADD ALL TO CART",
     "try_on": "TRY ON"
+  },
+  "tabOptionsftl": {
+    "makeup": "Makeup",
+    "accessories": "Accessories"
   }
 }

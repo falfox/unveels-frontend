@@ -255,5 +255,9 @@
     "try_now": "جرب الآن",
     "add_all_to_cart": "أضف الكل إلى السلة",
     "try_on": "جربه"
+  },
+  "tabOptionsftl": {
+    "makeup": "مكياج",
+    "accessories": "إكسسوارات"
   }
 }

@@ -45,16 +45,11 @@ import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
 import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
 import { FindTheLook } from "./pages/find-the-look";
-<<<<<<< HEAD
-import { SkinAnalysisWeb } from "./pages/skin-analysis.-web";
 import { useTranslation } from "react-i18next";
-
-=======
 import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
 import { FindTheLookWeb } from "./pages/find-the-look-web";
 import { element } from "three/webgpu";
 // Define routes using object syntax
->>>>>>> 9610912bcaa9e11c128c8012fbbb24e8619c4704
 const routes = [
   {
     path: "/",
