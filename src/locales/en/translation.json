@@ -55,24 +55,24 @@
     "attributes": "Attributes",
     "recommendations: ": "Recommendations"
   },
-  "scoreTypes":{
-    "low":"Low",
-    "moderate":"Moderate",
-    "high":"High"
+  "scoreTypes": {
+    "low": "Low",
+    "moderate": "Moderate",
+    "high": "High"
   },
   "viewpersonality": {
     "aiPersonalityAnalysis": "AI Personality Analysis",
     "aiFaceAnalyzer": "AI Face Analyzer",
     "personality_traits": "Main 5 Personality Traits",
-    "score":"Score",
-    "description":"Description",
-    "perfumerec":"Perfumes Recommendations",
-    "addcart":"ADD TO CART",
-    "seeimprovement":"SEE IMPROVEMENT",
-    "lookrec":"Look Recommendations",
-    "lookdec":" A bold red lipstick and defined brows, mirror your strong, vibrant personality",
-    "lipcolorrec":"Lip Color Recommendations",
-    "lipcolordec":"The best lip color for you are orange shades"
+    "score": "Score",
+    "description": "Description",
+    "perfumerec": "Perfumes Recommendations",
+    "addcart": "ADD TO CART",
+    "seeimprovement": "SEE IMPROVEMENT",
+    "lookrec": "Look Recommendations",
+    "lookdec": " A bold red lipstick and defined brows, mirror your strong, vibrant personality",
+    "lipcolorrec": "Lip Color Recommendations",
+    "lipcolordec": "The best lip color for you are orange shades"
   },
   "personality": {
     "extraversion": {
@@ -236,7 +236,7 @@
     "short": "Short"
   },
   "personalityLabels": {
-    "extravert": "Extravert", 
+    "extravert": "Extravert",
     "neurotic": "Neurotic",
     "agreable": "Agreeable",
     "conscientious": "Conscientious",
@@ -248,7 +248,14 @@
     "People with an agreeable personality are kind-hearted and compassionate, characterized by a strong desire to maintain harmonious relationships. They are cooperative, empathetic, and considerate towards others, making them valuable team players and supportive friends. Unveels has prepared a customized recommendation list based on your agreeable personality.",
     "Individuals high in conscientiousness are organized, responsible, and goal-oriented. Known for their reliability, diligence, and attention to detail, they are diligent in their work and well-prepared. Unveels has unveiled the conscientious side of your personality and provides a recommended list based on it.",
     "Individuals with an open personality possess a vibrant imagination, curiosity, and eagerness to explore new ideas and experiences. They are creative, flexible, and adaptable, receptive to change and innovation. Unveels has prepared a recommendation list based on your open personality."
-  ]
+  ],
 
-
+  "viewftl": {
+    "find_the_look": "FIND THE LOOK",
+    "addcart": "ADD TO CART",
+    "view_all": "View all",
+    "try_now": "TRY NOW",
+    "add_all_to_cart": "ADD ALL TO CART",
+    "try_on": "TRY ON"
+  }
 }
