@@ -137,7 +137,13 @@ function ShapeSelector() {
                 "border-white/80": selectedShape === pattern.value,
               },
             )}
-            onClick={() => setSelectedShape(pattern.value)}
+            onClick={() => {
+              if (selectedShape === pattern.value) {
+                setSelectedShape(null);
+              } else {
+                setSelectedShape(pattern.value);
+              }
+            }}
           >
             <img
               src={eyeliners[index % eyeliners.length]}

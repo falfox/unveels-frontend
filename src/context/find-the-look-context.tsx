@@ -1,13 +1,15 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useReducer,
-  useEffect,
-} from "react";
-import { Product } from "../../api/shared";
+import React, { createContext, useState, useContext, useReducer } from "react";
+import { Product } from "../api/shared";
+import { FindTheLookItems } from "../types/findTheLookItems";
 
 interface FindThelookContextType {
+  findTheLookItems: FindTheLookItems[] | null;
+  setFindTheLookItems: (FindTheLookItems: FindTheLookItems[] | null) => void;
+  tab: string | null;
+  setTab: (tab: string | null) => void;
+  section: string | null;
+  setSection: (section: string | null) => void;
+  addFindTheLookItem: (item: FindTheLookItems) => void;
   selectedItems: {
     items: Product[];
   };
@@ -71,10 +73,27 @@ export function FindTheLookProvider({
   });
 
   const [view, setView] = useState<FindThelookContextType["view"]>("face");
+  const [findTheLookItems, setFindTheLookItems] = useState<
+    FindTheLookItems[] | null
+  >(null);
+
+  const addFindTheLookItem = (item: FindTheLookItems) => {
+    setFindTheLookItems((prevItems) => [...(prevItems || []), item]);
+  };
+
+  const [tab, setTab] = useState<string | null>(null);
+  const [section, setSection] = useState<string | null>(null);
 
   return (
     <FindTheLookContext.Provider
       value={{
+        tab,
+        setTab,
+        section,
+        setSection,
+        findTheLookItems,
+        setFindTheLookItems,
+        addFindTheLookItem,
         selectedItems: cart,
         dispatch,
         view,

@@ -43,6 +43,8 @@ import {
 import { FindTheLookScene } from "../components/find-the-look/find-the-look-scene";
 import { useTranslation } from "react-i18next";
 
+const { t } = useTranslation();
+
 export function FindTheLook() {
   return (
     <CameraProvider>
@@ -131,7 +133,6 @@ const makeups = [
 ] as const;
 
 function MakeupCategories() {
-  const { t } = useTranslation();
   const [tab, setTab] = useState<(typeof makeups)[number]>("Lipstick");
   const { setView } = useFindTheLookContext();
 
@@ -169,7 +170,7 @@ function MakeupCategories() {
               setView("all_categories");
             }}
           >
-            {t("viewftl.view_all")}
+            View all
           </button>
         </div>
         <ProductList product_type={tab} />
@@ -181,7 +182,6 @@ function MakeupCategories() {
 const accessories = ["Sunglasses", "Chokers", "Earrings"];
 
 function AccessoriesCategories() {
-  const { t } = useTranslation();
   const [tab, setTab] = useState<(typeof accessories)[number]>("Sunglasses");
   const { setView } = useFindTheLookContext();
 
@@ -219,7 +219,7 @@ function AccessoriesCategories() {
               setView("all_categories");
             }}
           >
-            {t("viewftl.find_the_look")}
+            View all
           </button>
         </div>
         <ProductList product_type={tab} />
@@ -277,7 +277,6 @@ const mapTypes: {
 };
 
 function ProductList({ product_type }: { product_type: string }) {
-  const { t } = useTranslation();
   const { data } = useProducts({
     product_type_key: mapTypes[product_type].attributeName,
     type_ids: mapTypes[product_type].values,
@@ -317,7 +316,7 @@ function ProductList({ product_type }: { product_type: string }) {
                   type="button"
                   className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
                 >
-                  {t("viewftl.addcart")}
+                  Add to cart
                 </button>
               </div>
             </div>
@@ -388,7 +387,6 @@ function InferenceResults({
   onFaceClick?: () => void;
   onResultClick?: () => void;
 }) {
-  const { t } = useTranslation();
   return (
     <>
       <div className="absolute inset-x-0 bottom-32 flex items-center justify-center">
@@ -399,7 +397,7 @@ function InferenceResults({
             onResultClick?.();
           }}
         >
-          {t("viewftl.find_the_look")}
+          FIND THE LOOK
         </button>
       </div>
     </>
@@ -407,7 +405,6 @@ function InferenceResults({
 }
 
 function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
   const [tab, setTab] = useState<"makeup" | "accessories">("makeup");
 
   const activeClassNames =
@@ -472,7 +469,6 @@ function ProductRecommendationsTabs({ onClose }: { onClose: () => void }) {
 function AllProductsPage({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<"makeup" | "accessories">("makeup");
   const { selectedItems: cart, dispatch } = useFindTheLookContext();
-  const { t } = useTranslation();
 
   return (
     <div
@@ -546,13 +542,13 @@ function AllProductsPage({ onClose }: { onClose: () => void }) {
             type="button"
             className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
           >
-            {t("viewftl.try_now")}
+            TRY NOW
           </button>
           <button
             type="button"
             className="flex h-10 w-full items-center justify-center border border-white bg-white text-xs font-semibold text-black"
           >
-            {t("viewftl.add_all_to_cart")}
+            ADD ALL TO CART
           </button>
         </div>
       </div>
@@ -577,7 +573,7 @@ function ProductHorizontalList({ category }: { category: string }) {
     product_type_key: mapTypes[category].attributeName,
     type_ids: mapTypes[category].values,
   });
-  const { t } = useTranslation();
+
   const { selectedItems: cart, dispatch } = useFindTheLookContext();
 
   return (
@@ -626,7 +622,7 @@ function ProductHorizontalList({ category }: { category: string }) {
                     type="button"
                     className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
                   >
-                    {t("viewftl.addcart")}
+                    ADD TO CART
                   </button>
                   <button
                     type="button"
@@ -669,7 +665,7 @@ function SingleCategoryView({
   onClose: () => void;
 }) {
   const { data } = useLipsProductQuery({});
-  const { t } = useTranslation();
+
   return (
     <div
       className={clsx(
@@ -728,13 +724,13 @@ function SingleCategoryView({
                         type="button"
                         className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
                       >
-                        {t("viewftl.addcart")}
+                        ADD TO CART
                       </button>
                       <button
                         type="button"
                         className="flex h-10 w-full items-center justify-center border border-white bg-white text-xs font-semibold text-black"
                       >
-                        {t("viewftl.try_on")}
+                        TRY ON
                       </button>
                     </div>
                   </div>

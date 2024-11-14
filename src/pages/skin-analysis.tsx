@@ -435,7 +435,9 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           </div>
           <div className="flex items-center gap-x-2">
             <Icons.hashtagCircle className="size-5" />
-            <div className="text-lg">Skin Age: 27</div>
+            <div className="text-lg">
+              Skin Age: {Math.floor(Math.random() * (64 - 20 + 1)) + 20}
+            </div>
           </div>
         </div>
       </div>

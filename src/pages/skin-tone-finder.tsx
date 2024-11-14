@@ -18,7 +18,6 @@ import {
   Suspense,
   useState,
 } from "react";
-import { Link } from "react-router-dom";
 import { skin_tones, tone_types } from "../api/attributes/skin_tone";
 import { getBrandName, useBrandsQuerySuspense } from "../api/brands";
 import { Product } from "../api/shared";
@@ -67,9 +66,10 @@ export function SkinToneFinder() {
 }
 
 function Main() {
-  const { criterias, status } = useCamera();
+  const { criterias, status, setRunningMode } = useCamera();
   const [collapsed, setCollapsed] = useState(false);
   const { isInferenceFinished } = useInferenceContext();
+
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
       <div className="absolute inset-0">
