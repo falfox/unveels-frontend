@@ -13,61 +13,9 @@ import { runBlendshapesDemo } from "./talking-head";
 
 const host = "https://talking-avatar.onrender.com";
 
-function googleTextToSpeech(text: string) {
-  const apiKey = import.meta.env.VITE_BARD_API_KEY;
-  if (!apiKey || !text) return;
-
-  const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
-
-  const data = {
-    input: {
-      text: text,
-    },
-    voice: {
-      languageCode: "en-gb",
-      name: "en-GB-Standard-A",
-      ssmlGender: "FEMALE",
-    },
-    audioConfig: {
-      audioEncoding: "MP3",
-    },
-  };
-
-  return axios
-    .post(url, data)
-    .then((response) => {
-      const audioContent = response.data.audioContent;
-      const audioBlob = toBlob(audioContent, "audio/mpeg");
-      const audioUrl = URL.createObjectURL(audioBlob);
-      return audioUrl;
-    })
-    .catch((error) => {
-      throw new Error(error.message);
-    });
-}
-
-// Fungsi untuk mengonversi base64 menjadi blob
-function toBlob(base64: string, contentType: string) {
-  const byteCharacters = atob(base64);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-  return new Blob([byteArray], { type: contentType });
-}
-
-function makeSpeech(text: string) {
-  return axios.post(host + "/talk", { text });
-}
-
-interface AvatarProps {
-  avatar_url: string;
-  speak: boolean;
-  text: string;
-  setAudioSource: (audioSource: string) => void;
-  playing: boolean;
-  setSpeak: (speak: boolean) => void;
+// Modified makeSpeech function to accept a language parameter
+function makeSpeech(text, language = "en") {
+  return axios.post(host + "/talk", { text, language });
 }
 
 const Avatar = ({
@@ -77,22 +25,22 @@ const Avatar = ({
   playing,
   setAudioSource,
   setSpeak,
-}: AvatarProps) => {
+}) => {
   const gltf = useGLTF(avatar_url);
   const textures = useLoadTextures();
   const mixer = useMemo(
     () => new THREE.AnimationMixer(gltf.scene),
     [gltf.scene],
   );
+  const { animations } = gltf;
+  const { actions } = useAnimations(animations, gltf.scene);
 
-  const [clips, setClips] = useState<(THREE.AnimationClip | null)[]>([]);
+  const idleAnimation = animations.find((clip) => clip.name === "idle");
+  const talkAnimation = animations.find((clip) => clip.name === "talk");
 
-  let morphTargetDictionaryBody: { [key: string]: number } | null | undefined =
-    null;
-  let morphTargetDictionaryLowerTeeth:
-    | { [key: string]: number }
-    | null
-    | undefined = null;
+  const [clips, setClips] = useState([]);
+  let morphTargetDictionaryBody = null;
+  let morphTargetDictionaryLowerTeeth = null;
 
   gltf.scene.traverse((node) => {
     if (
@@ -117,16 +65,25 @@ const Avatar = ({
   });
 
   useEffect(() => {
-    if (speak === false) return;
+    if (idleAnimation) {
+      const idleAction = mixer.clipAction(idleAnimation);
+      idleAction.play();
+    }
+  }, [idleAnimation, mixer]);
 
-    googleTextToSpeech(text)
-      ?.then((response) => {
-        const audioSource = response;
-        runBlendshapesDemo(true, audioSource)
-          .then((blendShape) => {
-            const blendData = blendShape; // Hasil akhir blendshape
-            console.log(blendData);
+  useEffect(() => {
+    if (speak) {
+      // Transition smoothly from idle to talk
+      if (idleAnimation && talkAnimation) {
+        const idleAction = mixer.clipAction(idleAnimation);
+        const talkAction = mixer.clipAction(talkAnimation);
 
+        idleAction.crossFadeTo(talkAction, 0.5, false).play();
+
+        // Pass 'ar' for Arabic language here
+        makeSpeech(text, "ar") // Pass "ar" for Arabic
+          .then((response) => {
+            const { blendData, filename } = response.data;
             if (morphTargetDictionaryBody) {
               const newClips = [
                 createAnimation(
@@ -141,44 +98,28 @@ const Avatar = ({
                 ),
               ];
               setClips(newClips);
+
+              const audioSource = host + filename;
               setAudioSource(audioSource);
+
+              talkAction.reset().setLoop(THREE.LoopRepeat, Infinity);
+              talkAction.clampWhenFinished = true;
             }
           })
           .catch((err) => {
             console.error(err);
             setSpeak(false);
           });
-      })
-      .catch((err) => {
-        console.error(err);
-        setSpeak(false);
-      });
-
-    makeSpeech(text)
-      .then((response) => {
-        const { blendData, filename } = response.data;
-        console.log(blendData);
-
-        console.log(filename);
-        if (morphTargetDictionaryBody) {
-          const newClips = [
-            createAnimation(blendData, morphTargetDictionaryBody, "HG_Body"),
-            createAnimation(
-              blendData,
-              morphTargetDictionaryLowerTeeth || {},
-              "HG_TeethLower",
-            ),
-          ];
-          setClips(newClips);
-
-          const audioSource = host + filename;
-          setAudioSource(audioSource);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        setSpeak(false);
-      });
+      }
+    } else {
+      if (talkAnimation) {
+        const talkAction = mixer.clipAction(talkAnimation);
+        talkAction.stop();
+      }
+      if (idleAnimation) {
+        mixer.clipAction(idleAnimation).reset().play();
+      }
+    }
   }, [
     speak,
     text,
@@ -186,53 +127,25 @@ const Avatar = ({
     morphTargetDictionaryLowerTeeth,
     setAudioSource,
     setSpeak,
+    mixer,
+    idleAnimation,
+    talkAnimation,
   ]);
 
-  const idleFbx = useFBX("/idle.fbx");
-  const { clips: idleClips } = useAnimations(idleFbx.animations);
-
-  idleClips[0].tracks = _.filter(idleClips[0].tracks, (track) => {
-    return (
-      track.name.includes("Head") ||
-      track.name.includes("Neck") ||
-      track.name.includes("Spine2")
-    );
-  });
-
-  idleClips[0].tracks = _.map(idleClips[0].tracks, (track) => {
-    if (track.name.includes("Head")) {
-      track.name = "head.quaternion";
-    }
-
-    if (track.name.includes("Neck")) {
-      track.name = "neck.quaternion";
-    }
-
-    if (track.name.includes("Spine")) {
-      track.name = "spine2.quaternion";
-    }
-
-    return track;
-  });
-
   useEffect(() => {
-    const idleClipAction = mixer.clipAction(idleClips[0]);
-    idleClipAction.play();
-
     const blinkClip = createAnimation(
       blinkData,
-      morphTargetDictionaryBody!,
+      morphTargetDictionaryBody,
       "HG_Body",
     );
     if (blinkClip) {
       const blinkAction = mixer.clipAction(blinkClip);
       blinkAction.play();
     }
-  }, [idleClips, mixer, morphTargetDictionaryBody]);
+  }, [mixer, morphTargetDictionaryBody]);
 
-  // Play animation clips when available
   useEffect(() => {
-    if (playing === false) return;
+    if (!playing) return;
 
     _.each(clips, (clip) => {
       if (clip) {
