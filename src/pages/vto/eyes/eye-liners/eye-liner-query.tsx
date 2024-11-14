@@ -55,7 +55,7 @@ export function useEyelinerQuery({
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
+        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
         {
           headers: defaultHeaders,
         },

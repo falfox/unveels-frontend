@@ -62,18 +62,7 @@ function ImageCanvas({ image, canvasRef }: ImageCanvasProps) {
       // Simpan keadaan awal konteks
       ctx.save();
 
-      // Terapkan flip horizontal
-      ctx.scale(-1, 1);
-
-      // Sesuaikan posisi gambar setelah flip
-      ctx.drawImage(
-        image,
-        -offsetX - drawWidth,
-        offsetY,
-        drawWidth,
-        drawHeight,
-      );
-
+      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
       // Kembalikan keadaan awal konteks
       ctx.restore();
     };

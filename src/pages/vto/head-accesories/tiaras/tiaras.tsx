@@ -1,42 +1,13 @@
 import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 
-import { ColorPalette } from "../../../../components/color-palette";
-import { Link } from "react-router-dom";
-
-import { cloneElement } from "react";
+import { filterOccasions } from "../../../../api/attributes/occasion";
+import { LoadingProducts } from "../../../../components/loading";
+import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { TiaraProvider, useTiaraContext } from "./tiaras-context";
-
-const colorFamilies = [
-  { name: "Yellow", value: "#FFFF00" },
-  { name: "Black", value: "#000000" },
-  { name: "Silver", value: "#C0C0C0" },
-  {
-    name: "Gold",
-    value:
-      "linear-gradient(90deg, #CA9C43 0%, #C79A42 33%, #BE923E 56%, #AE8638 77%, #98752F 96%, #92702D 100%)",
-  },
-  { name: "Rose Gold", value: "#B76E79" },
-  { name: "Brass", value: "#B5A642" },
-  { name: "Gray", value: "#808080" },
-  {
-    name: "Multicolor",
-    value:
-      "linear-gradient(270deg, #E0467C 0%, #E55300 25.22%, #00E510 47.5%, #1400FF 72%, #FFFA00 100%)",
-  },
-  { name: "Pink", value: "#FE3699" },
-  { name: "Beige", value: "#F2D3BC" },
-  { name: "Brown", value: "#3D0B0B" },
-  { name: "Red", value: "#FF0000" },
-  { name: "White", value: "#FFFFFF" },
-  { name: "Purple", value: "#800080" },
-  { name: "Blue", value: "#1400FF" },
-  { name: "Green", value: "#52FF00" },
-  { name: "Transparent", value: "none" },
-  { name: "Orange", value: "#FF7A00" },
-  { name: "Bronze", value: "#CD7F32" },
-  { name: "Nude", value: "#E1E1A3" },
-];
+import { useTiarasQuery } from "./tiaras-query";
+import { colors } from "../../../../api/attributes/color";
 
 export function TiaraSelector() {
   return (
@@ -59,45 +30,42 @@ function FamilyColorSelector() {
       className="flex items-center w-full py-2 space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
-      {colorFamilies.map((item, index) => (
+      {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
             "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
             {
-              "border-white/80": colorFamily === item.name,
+              "border-white/80": colorFamily === item.value,
             },
           )}
-          onClick={() => setColorFamily(item.name)}
+          onClick={() => setColorFamily(item.value)}
         >
           <div
             className="size-2.5 shrink-0 rounded-full"
             style={{
-              background: item.value,
+              background: item.hex,
             }}
           />
-          <span className="text-sm">{item.name}</span>
+          <span className="text-sm">{item.label}</span>
         </button>
       ))}
     </div>
   );
 }
 
-const colors = [
-  "#FFFFFF",
-  "#342112",
-  "#3D2B1F",
-  "#483C32",
-  "#4A2912",
-  "#4F300D",
-  "#5C4033",
-  "#6A4B3A",
-  "#7B3F00",
-  "#8B4513",
-];
-
 function ColorSelector() {
-  const { selectedColor, setSelectedColor } = useTiaraContext();
+  const { colorFamily, selectedColor, setSelectedColor } = useTiaraContext();
+  const { data } = useTiarasQuery({
+    color: colorFamily,
+    material: null,
+    occasion: null,
+  });
+
+  const extracted_sub_colors = extractUniqueCustomAttributes(
+    data?.items ?? [],
+    "hexacode",
+  ).flatMap((item) => item.split(","));
 
   return (
     <div className="mx-auto w-full !border-t-0 pb-4 lg:max-w-xl">
@@ -111,20 +79,25 @@ function ColorSelector() {
         >
           <Icons.empty className="size-10" />
         </button>
-        {colors.map((color, index) => (
+        {extracted_sub_colors.map((color, index) => (
           <button
+            key={color}
             type="button"
-            key={index}
-            onClick={() => setSelectedColor(color)}
-          >
-            <ColorPalette
-              size="large"
-              palette={{
-                color: color,
-              }}
-              selected={selectedColor === color}
-            />
-          </button>
+            className={clsx(
+              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              {
+                "border-white/80": selectedColor === color,
+              },
+            )}
+            style={{ background: color }}
+            onClick={() => {
+              if (selectedColor === color) {
+                setSelectedColor(null);
+              } else {
+                setSelectedColor(color);
+              }
+            }}
+          ></button>
         ))}
       </div>
     </div>
@@ -149,12 +122,12 @@ function ModeSelector() {
         <div className="h-5 border-r border-white"></div>
         <button
           className={clsx("relative h-10 grow text-lg", {
-            "text-white": selectedMode === "fabrics",
-            "text-white/60": selectedMode !== "fabrics",
+            "text-white": selectedMode === "materials",
+            "text-white/60": selectedMode !== "materials",
           })}
-          onClick={() => setSelectedMode("fabrics")}
+          onClick={() => setSelectedMode("materials")}
         >
-          Fabric
+          Material
         </button>
       </div>
 
@@ -163,7 +136,7 @@ function ModeSelector() {
   );
 }
 
-const occasions = ["Bridal", "Soiree"];
+const occasions = filterOccasions(["Bridal", "Soiree"]);
 
 function OccasionSelector() {
   const { selectedOccasion, setSelectedOccasion } = useTiaraContext();
@@ -172,18 +145,18 @@ function OccasionSelector() {
     <div className="flex w-full items-center space-x-2 overflow-x-auto !border-t-0 py-2 no-scrollbar">
       {occasions.map((occasion, index) => (
         <button
-          key={occasion}
+          key={occasion.value}
           type="button"
           className={clsx(
-            "inline-flex items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80 shrink-0",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
-                selectedOccasion === occasion,
+                selectedOccasion === occasion.value,
             },
           )}
-          onClick={() => setSelectedOccasion(occasion)}
+          onClick={() => setSelectedOccasion(occasion.value)}
         >
-          <span className="text-sm">{occasion}</span>
+          <span className="text-sm">{occasion.label}</span>
         </button>
       ))}
     </div>
@@ -215,7 +188,7 @@ function FabricSelector() {
           key={material.name}
           type="button"
           className={clsx(
-            "inline-flex items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80 shrink-0",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedMaterial === material.name,
@@ -236,76 +209,23 @@ function FabricSelector() {
 }
 
 function TiaraProductList() {
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
+  const { colorFamily, selectedMaterial, selectedOccasion } = useTiaraContext();
 
-  const { colorFamily } = useTiaraContext();
+  const { data, isLoading } = useTiarasQuery({
+    color: colorFamily,
+    occasion: selectedOccasion,
+    material: null,
+  });
 
   return (
     <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
-      {products.map((product, index) => (
-        <div key={index} className="w-[100px] rounded shadow">
-          <div className="relative h-[70px] w-[100px] overflow-hidden">
-            <img
-              src={"https://picsum.photos/id/237/200/300"}
-              alt="Product"
-              className="object-cover rounded"
-            />
-          </div>
-
-          <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-            {product.name}
-          </h3>
-          <p className="text-[0.625rem] text-white/60">{product.brand}</p>
-          <div className="flex items-end justify-between pt-1 space-x-1">
-            <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-              $15
-            </div>
-            <button
-              type="button"
-              className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-            >
-              Add to cart
-            </button>
-          </div>
-        </div>
-      ))}
+      {isLoading ? (
+        <LoadingProducts />
+      ) : (
+        data?.items.map((product, index) => {
+          return <VTOProductCard product={product} key={product.id} />;
+        })
+      )}
     </div>
   );
 }

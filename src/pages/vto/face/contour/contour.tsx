@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
 import {
   buildSearchParams,
+  extractUniqueCustomAttributes,
   getProductAttributes,
   mediaUrl,
 } from "../../../../utils/apiUtils";
@@ -17,6 +18,8 @@ import { LoadingProducts } from "../../../../components/loading";
 import { BrandName } from "../../../../components/product/brand";
 import { filterTextures } from "../../../../api/attributes/texture";
 import Textures from "three/src/renderers/common/Textures.js";
+import { useContourQuery } from "./contour-query";
+import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 
 const colors = [
   "#342112",
@@ -105,7 +108,7 @@ function useFaceContourQuery({
 
 export function ContourSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
       <ColorSelector />
       <ModeSelector />
       <ShapeSelector />
@@ -125,69 +128,75 @@ function ColorSelector() {
   } = useMakeup();
   const { selectedColors, setSelectedColors, selectedMode } =
     useContourContext();
-  const replaceIndexRef = useRef(0); // To track which color to replace next
+
+  const { data } = useContourQuery({
+    texture: null,
+  });
+
+  const extracted_sub_colors = extractUniqueCustomAttributes(
+    data?.items ?? [],
+    "hexacode",
+  ).flatMap((item) => item.split(","));
 
   const handleColorClick = (color: string) => {
     if (!showContour) {
       setShowContour(true);
     }
+    // Handle color deselection
     if (selectedColors.includes(color)) {
-      // Deselect the color if it's already selected
-      setSelectedColors(selectedColors.filter((c) => c !== color));
-      setContourColors(selectedColors.filter((c) => c !== color));
-    } else if (selectedMode === "One") {
-      setContourMode("One");
-      // In "One" mode, only one color can be selected
-      setSelectedColors([color]);
-      setContourColors([color]);
-    } else if (selectedMode === "Dual") {
-      setContourMode("Dual");
-      if (selectedColors.length < 2) {
-        // Add the color if less than two are selected
-        setSelectedColors([...selectedColors, color]);
-        setContourColors([...selectedColors, color]);
-      } else {
-        // Replace the color based on replaceIndexRef
-        const newSelectedColors = [...selectedColors];
-        newSelectedColors[replaceIndexRef.current] = color;
-        setSelectedColors(newSelectedColors);
-        setContourColors(newSelectedColors);
-        // Update replaceIndexRef to alternate between 0 and 1
-        replaceIndexRef.current = (replaceIndexRef.current + 1) % 2;
-      }
+      const newColors = selectedColors.filter((c) => c !== color);
+      setSelectedColors(newColors);
+      setContourColors(newColors);
+      return;
     }
+
+    // Handle different modes
+    const isMultiColorMode = selectedMode === "Dual";
+    const maxColors = isMultiColorMode ? 2 : 1;
+
+    setContourMode(isMultiColorMode ? "Dual" : "One");
+
+    // Update colors by either adding new color or replacing the oldest one
+    const newColors =
+      selectedColors.length < maxColors
+        ? [...selectedColors, color]
+        : [...selectedColors.slice(1), color]; // Remove oldest, add new
+
+    setSelectedColors(newColors);
+    setContourColors(newColors);
   };
 
   const handleClearSelection = () => {
     setSelectedColors([]);
-    replaceIndexRef.current = 0;
     setShowContour(false);
   };
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
           onClick={handleClearSelection}
         >
           <Icons.empty className="size-10" />
         </button>
-        {colors.map((color, index) => (
-          <button
-            type="button"
-            key={index}
-            onClick={() => handleColorClick(color)}
-            className={clsx("cursor-pointer")}
-          >
-            <ColorPalette
-              size="large"
-              palette={{ color }}
-              selected={selectedColors.includes(color)}
-            />
-          </button>
-        ))}
+        {extracted_sub_colors
+          ? extracted_sub_colors.map((color, index) => (
+              <button
+                type="button"
+                key={index}
+                onClick={() => handleColorClick(color)}
+                className={clsx("cursor-pointer")}
+              >
+                <ColorPalette
+                  size="large"
+                  palette={{ color }}
+                  selected={selectedColors.includes(color)}
+                />
+              </button>
+            ))
+          : null}
       </div>
       {/* Removed the error message since all buttons are enabled */}
     </div>
@@ -214,8 +223,8 @@ function ModeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-2 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {modes.map((mode) => (
           <button
             key={mode}
@@ -263,8 +272,8 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         {contours.map((path, index) => (
           <button
             key={index}
@@ -277,7 +286,7 @@ function ShapeSelector() {
             )}
             onClick={() => setShape(index.toString())}
           >
-            <img src={path} alt="Eyebrow" className="size-12 rounded" />
+            <img src={path} alt="Eyebrow" className="rounded size-12" />
           </button>
         ))}
       </div>
@@ -304,8 +313,8 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto lg:max-w-xl">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
@@ -330,65 +339,16 @@ function TextureSelector() {
 function ProductList() {
   const { selectedTexture } = useContourContext();
 
-  const { data, isLoading } = useFaceContourQuery({
-    color: null,
+  const { data, isLoading } = useContourQuery({
     texture: selectedTexture,
   });
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    // Add more products as needed
-  ];
-
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          const imageUrl =
-            mediaUrl(product.media_gallery_entries[0].file) ??
-            "https://picsum.photos/id/237/200/300";
-
-          return (
-            <div key={index} className="w-[100px] rounded shadow">
-              <div className="relative h-[70px] w-[100px] overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt="Product"
-                  className="rounded object-cover"
-                />
-              </div>
-
-              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-                {product.name}
-              </h3>
-              <p className="text-[0.625rem] text-white/60">
-                <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
-              </p>
-              <div className="flex items-end justify-between space-x-1 pt-1">
-                <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-                  $15
-                </div>
-                <button
-                  type="button"
-                  className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-                >
-                  Add to cart
-                </button>
-              </div>
-            </div>
-          );
+          return <VTOProductCard product={product} key={product.id} />;
         })
       )}
     </div>

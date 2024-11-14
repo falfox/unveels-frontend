@@ -356,6 +356,14 @@ export const skinAnalysisInference = async (
         score: data.score,
       });
     });
+
+    results.push({
+      class: 1000,
+      label: "imageData",
+      score: 0,
+      data: imageData,
+    });
+
     return [toDraw, results];
   } catch (e) {
     console.warn("Error occured durring inference : " + e);

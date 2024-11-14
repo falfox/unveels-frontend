@@ -1,30 +1,32 @@
-// FaceMesh.tsx
 import React, { useMemo, useEffect, useRef } from "react";
 import {
   BufferGeometry,
   Float32BufferAttribute,
   Uint16BufferAttribute,
   Material,
-  DoubleSide,
+  Mesh,
 } from "three";
-import { useFrame } from "@react-three/fiber"; // Import useFrame
-import { faces, uvs, positions } from "../../utils/constants"; // Pastikan data faces dan uvs valid
+import { useFrame } from "@react-three/fiber";
+import { faces, uvs, positions } from "../../utils/constants";
 import { Landmark } from "../../types/landmark";
 
 interface FaceMeshProps {
   planeSize: [number, number];
   landmarks: React.RefObject<Landmark[]>;
   material: Material;
+  flipHorizontal?: boolean;
 }
 
 const FaceMesh: React.FC<FaceMeshProps> = ({
   planeSize,
   landmarks,
   material,
+  flipHorizontal = false,
 }) => {
   const geometryRef = useRef<BufferGeometry | null>(null);
+  const meshRef = useRef<Mesh>(null); // Ref for the mesh
 
-  // Initialize geometry with inverted face indices
+  // Initialize geometry without modifying face indices
   const geometry = useMemo(() => {
     const geom = new BufferGeometry();
     const vertices = new Float32Array(positions.length * 3);
@@ -41,25 +43,14 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
       uvArray[i * 2 + 1] = uvs[i][1];
     }
 
-    // Set attributes
     geom.setAttribute("position", new Float32BufferAttribute(vertices, 3));
     geom.setAttribute("uv", new Float32BufferAttribute(uvArray, 2));
-
-    // Invert face indices to flip the mesh
-    const invertedFaces: number[] = [];
-    for (let i = 0; i < faces.length; i += 3) {
-      // Membalik urutan indeks untuk setiap segitiga
-      invertedFaces.push(faces[i], faces[i + 2], faces[i + 1]);
-    }
-    geom.setIndex(new Uint16BufferAttribute(invertedFaces, 1));
-
-    // Compute normals after inverting indices
+    geom.setIndex(new Uint16BufferAttribute(faces, 1));
     geom.computeVertexNormals();
 
     return geom;
   }, [planeSize]);
 
-  // Assign geometry to mesh
   useEffect(() => {
     if (geometryRef.current) {
       geometryRef.current.setAttribute(
@@ -68,11 +59,11 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
       );
       geometryRef.current.setAttribute("uv", geometry.getAttribute("uv"));
       geometryRef.current.setIndex(geometry.getIndex());
-      geometryRef.current.computeVertexNormals(); // Recompute normals
+      geometryRef.current.computeVertexNormals();
     }
   }, [geometry]);
 
-  // Update vertex positions based on landmarks using useFrame
+  // Update vertex positions based on landmarks
   useFrame(() => {
     if (
       geometryRef.current &&
@@ -85,33 +76,34 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
 
       const outputWidth = planeSize[0];
       const outputHeight = planeSize[1];
-
       const minCount = Math.min(landmarks.current.length, position.count);
 
       for (let i = 0; i < minCount; i++) {
         const landmark = landmarks.current[i];
-
-        // Skala koordinat sesuai ukuran plane tanpa membalikkan x
-        const x = -(landmark.x - 0.5) * outputWidth;
+        const x = (landmark.x - 0.5) * outputWidth;
         const y = -(landmark.y - 0.5) * outputHeight;
         const z = -landmark.z;
-
-        // Update posisi vertex
         position.setXYZ(i, x, y, z);
       }
 
       position.needsUpdate = true;
-      geometryRef.current.computeVertexNormals(); // Recompute normals setelah update
+      geometryRef.current.computeVertexNormals();
+    }
+
+    // Flip mesh horizontally by setting scale.x to -1 if flipHorizontal is true
+    if (meshRef.current) {
+      meshRef.current.scale.set(flipHorizontal ? -1 : 1, 1, 1);
     }
   });
 
   return (
     <mesh
       geometry={geometry}
-      material={material} // Pastikan material diatur ke FrontSide (default)
+      material={material}
       ref={(mesh) => {
         if (mesh) {
           geometryRef.current = mesh.geometry;
+          meshRef.current = mesh; // Store reference to mesh for scale adjustment
         }
       }}
     />
