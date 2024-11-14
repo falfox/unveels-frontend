@@ -40,6 +40,7 @@ function MainContent() {
     null,
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isModelLoad, setIsModelLoad] = useState<boolean>(false);
   const [inferenceError, setInferenceError] = useState<string | null>(null);
   const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
 
@@ -84,6 +85,7 @@ function MainContent() {
           modelPersonalityFinder?.predict(dummyInput);
           modelFaceShape?.predict(dummyInput);
           modelPersonalityFinder?.predict(dummyInput);
+          setIsModelLoad(true);
         }
       } catch (error) {
         console.error("Failed to initialize: ", error);
@@ -183,7 +185,7 @@ function MainContent() {
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
       <div className="absolute inset-0">
-        <VideoStream debugMode={false} />
+        {isModelLoad && <VideoStream debugMode={false} />}
         <div
           className="absolute inset-0"
           style={{

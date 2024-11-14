@@ -73,7 +73,8 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
     try {
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash-002",
+        model: "gemini-1.5-pro-002",
+        generationConfig: { temperature: 1.3 },
         systemInstruction: botPrompt,
       });
 
