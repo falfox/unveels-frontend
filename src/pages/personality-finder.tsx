@@ -172,13 +172,14 @@ function MainContent() {
   return (
     <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
       <div className="absolute inset-0">
-        {criterias.isCaptured ? (
+        <VideoStream debugMode={false} />
+        {/* {criterias.isCaptured ? (
           <Scanner />
         ) : (
           <>
-            <VideoStream debugMode={false} />
+            
           </>
-        )}
+        )} */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
