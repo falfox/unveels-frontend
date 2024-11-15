@@ -9,6 +9,7 @@ import { FindTheLookItems } from "../../types/findTheLookItems";
 import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
 import { useFindTheLookContext } from "../../context/find-the-look-context";
+import { useTranslation } from "react-i18next";
 
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
@@ -34,7 +35,7 @@ export function FindTheLookCanvas({
 }: FindTheLookCanvasProps) {
   const { selectedItems: cart } = useFindTheLookContext();
   const { findTheLookItems, addFindTheLookItem } = useFindTheLookContext();
-
+  const { t } = useTranslation();
   const hitboxesRef = useRef<Hitbox[]>([]);
 
   // State variables for detectors and results
@@ -197,7 +198,7 @@ export function FindTheLookCanvas({
             },
             runningMode: "IMAGE",
             maxResults: 4,
-            scoreThreshold: 0.1,
+            scoreThreshold: 0.01,
           },
         );
 
@@ -404,6 +405,7 @@ export function FindTheLookCanvas({
       };
 
       // Common function to draw detections
+
       const drawDetections = (
         detections: ObjectDetectorResult,
         section: string,
@@ -444,7 +446,7 @@ export function FindTheLookCanvas({
             const label = categories[0].categoryName;
             ctx.font = "12px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText(label, labelX, labelY - 5);
+            ctx.fillText(t(`categories_label.${label}`), labelX, labelY - 5);
 
             // Draw underline for label text
             const textWidth = ctx.measureText(label).width;

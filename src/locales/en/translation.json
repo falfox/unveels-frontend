@@ -23,7 +23,47 @@
     "matched": "Matched Shades",
     "other": "Other Shades"
   },
-
+  "camera_select": {
+    "live": {
+      "title": "Live Camera",
+      "desc": {
+        "text": " Hold the camera parallel to the face...",
+        "h4": "Steps to Follow",
+        "li1": "Choose a high-quality photo or video for upper body only.",
+        "li2": "Ensure the entire face is centered in the frame.",
+        "li3": "Position the camera at eye level with the face.",
+        "li4": "Keep the camera steady and avoid tilting.",
+        "li5": "Ensure the area is well-lit for clear detection.",
+        "li6": "Avoid shadows on the face by using soft, even lighting.",
+        "btn": "USE LIVE CAMERA"
+      }
+    },
+    "snap": {
+      "title": "Take a Snapshot",
+      "desc": {
+        "text": "Unveil the potential of your favorite images with our photo upload feature.",
+        "h4": "Steps to Follow",
+        "li1": "Take a clear, high-resolution photo for the best results.",
+        "li2": "Make sure the entire upper body is visible in the photo.",
+        "li3": "Take a photo with even lighting and minimal shadows.",
+        "li4": "Ensure the photo contains only one individual for accurate analysis.",
+        "btn": "UPLOAD PHOTO"
+      }
+    },
+    "upload": {
+      "title": "Upload Photo Or Video",
+      "desc": {
+        "text": "Immerse yourself in the luxury of transformation with our video upload feature.",
+        "h4": "Steps to Follow",
+        "li1": "Choose a high-quality photo or video for upper body only.",
+        "li2": "Ensure the photo or video is stable and not shaky",
+        "li3": "Make sure the entire look is visible",
+        "li4": "Opt for a photo or video with bright, even lighting and minimal shadows.",
+        "li5": "Ensure the photo or video contains only one individual for precise detection.",
+        "btn": "UPLOAD PHOTO/VIDEO"
+      }
+    }
+  },
   "skin_types": {
     "fair": "Fair Skin",
     "light": "Light Skin",
@@ -256,10 +296,32 @@
     "view_all": "View all",
     "try_now": "TRY NOW",
     "add_all_to_cart": "ADD ALL TO CART",
-    "try_on": "TRY ON"
+    "try_on": "TRY ON",
+    "select": "SELECT",
+    "similar": "Similar",
+    "page": "How do you want to find the look"
   },
   "tabOptionsftl": {
     "makeup": "Makeup",
     "accessories": "Accessories"
+  },
+  "categories_label": {
+    "Headband": "Headband",
+    "Hat": "Hat",
+    "Cap": "Cat",
+    "Lipstick": "Lipstick",
+    "Mascara": "Mascara",
+    "Blusher": "Blusher",
+    "Highlighter": "Highlighter",
+    "Eyecolor": "Eyecolor",
+    "Glasses": "Glasses",
+    "Sunglasses": "Sunglasses",
+    "Watch": "Watch",
+    "Bracelet": "Bracelet",
+    "earring": "Earring",
+    "Necklace": "Necklace",
+    "Neckless": "Neckless",
+    "Scarf": "Scarf",
+    "rings": "Rings"
   }
 }

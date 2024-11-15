@@ -178,7 +178,7 @@ function MakeupCategories({
                   onTabChange(category.label); // Notify parent of the selected tab
                 }}
               >
-                {category.label}
+                {t(`categories_label.${category.label}`)}
               </button>
             </Fragment>
           );
@@ -245,7 +245,7 @@ function AccessoriesCategories({
                   onTabChange(category.label); // Notify parent of the selected tab
                 }}
               >
-                {category.label}
+                {t(`categories_label.${category.label}`)}
               </button>
             </Fragment>
           );
@@ -654,7 +654,7 @@ function AllProductsPage({
               setTab(item as "makeup" | "accessories");
             }}
           >
-            Similar {item}
+            {t("viewftl.similar")} {t(`tabOptionsftl.${item}`)}
           </button>
         ))}
       </div>
@@ -671,7 +671,7 @@ function AllProductsPage({
             type="button"
             className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
           >
-            {t("viewftl.tyr_now")}
+            {t("viewftl.try_now")}
           </button>
           <button
             type="button"
@@ -743,7 +743,9 @@ function ProductHorizontalList({ category }: { category: string }) {
   return (
     <div key={category}>
       <div className="py-4">
-        <h2 className="text-base text-[#E6E5E3]">{category}</h2>
+        <h2 className="text-base text-[#E6E5E3]">
+          {t(`categories_label.${category}`)}
+        </h2>
       </div>
       <div className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing">
         {data ? (
@@ -795,7 +797,7 @@ function ProductHorizontalList({ category }: { category: string }) {
                       dispatch({ type: "add", payload: product });
                     }}
                   >
-                    SELECT
+                    {t("viewftl.select")}
                   </button>
                 </div>
               </div>
@@ -838,7 +840,9 @@ function SingleCategoryView({
 
       <div className="h-full flex-1 overflow-y-auto px-5">
         <div className="py-4">
-          <h2 className="text-base text-[#E6E5E3]">{category}</h2>
+          <h2 className="text-base text-[#E6E5E3]">
+            {t(`categories_label.${category}`)}
+          </h2>
         </div>
         <div className="grid grid-cols-2 gap-2.5 py-4 sm:grid-cols-3 xl:grid-cols-5">
           {data
