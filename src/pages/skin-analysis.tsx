@@ -34,6 +34,7 @@ import {
   InferenceProvider,
   useInferenceContext,
 } from "../context/inference-context";
+import { useTranslation } from "react-i18next";
 
 export function SkinAnalysis() {
   return (
@@ -258,6 +259,7 @@ function DescriptionText({ text }: { text: string }) {
 }
 
 function ProductList({ skinConcern }: { skinConcern: string }) {
+  const { t } = useTranslation();
   const { data } = useSkincareProductQuery({
     skinConcern,
   });
@@ -301,13 +303,13 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
                   type="button"
                   className="flex h-7 w-full items-center justify-center border border-white text-[0.375rem] font-semibold text-white"
                 >
-                  ADD TO CART
+                  {t("viewskinan.addcart")}
                 </button>
                 <button
                   type="button"
                   className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.45rem] font-semibold text-black"
                 >
-                  SEE IMPROVEMENT
+                  {t("viewskinan.seeimprovement")}
                 </button>
               </div>
             </div>
@@ -352,6 +354,7 @@ function BottomContent() {
 }
 
 function ProblemResults() {
+  const { t } = useTranslation();
   const { view, setView } = useSkinAnalysis();
   return (
     <>
@@ -363,7 +366,7 @@ function ProblemResults() {
             setView("results");
           }}
         >
-          ANALYSIS RESULT
+          {t("viewskinan.analysis_result")}
         </button>
       </div>
     </>
@@ -378,6 +381,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
     getTotalScoreByLabel,
   } = useSkinAnalysis();
 
+  const { t } = useTranslation();
   const { criterias } = useCamera();
 
   return (
@@ -403,7 +407,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
         </div>
 
         <h1 className="bg-[linear-gradient(89.39deg,#92702D_0.52%,#CA9C43_99.44%)] bg-clip-text text-3xl font-medium text-transparent">
-          Analysis Results
+          {t("viewskinan.analysis_result")}
         </h1>
       </div>
 
@@ -430,13 +434,14 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           <div className="flex items-center gap-x-2">
             <Icons.chart className="size-5" />
             <div className="text-lg">
-              Skin Health Score : {calculateSkinHealthScore()}%
+              {t("viewskinan.skin_health")} {calculateSkinHealthScore()}%
             </div>
           </div>
           <div className="flex items-center gap-x-2">
             <Icons.hashtagCircle className="size-5" />
             <div className="text-lg">
-              Skin Age: {Math.floor(Math.random() * (64 - 20 + 1)) + 20}
+              {t("viewskinan.skin_age")}{" "}
+              {Math.floor(Math.random() * (64 - 20 + 1)) + 20}
             </div>
           </div>
         </div>
@@ -444,7 +449,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto py-6">
         <h2 className="text-center text-xl font-medium">
-          Detected Skin Problems
+          {t("viewskinan.detected_skin")}
         </h2>
 
         <div className="relative pt-8">
@@ -471,7 +476,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             <div className="text-xl font-bold">
               {calculateAverageSkinProblemsScore()}%
             </div>
-            <div className="">Skin Problems</div>
+            <div className="">{t("viewskinan.skin_problem")}</div>
           </div>
         </div>
 
@@ -532,7 +537,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
         </div>
 
         <h2 className="pt-12 text-center text-xl font-medium">
-          Detected Skin Condition
+          {t("viewskinan.detected_skin_con")}
         </h2>
 
         <div className="relative pt-8">
@@ -571,7 +576,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             <div className="text-xl font-bold">
               {calculateAverageSkinConditionScore()}%
             </div>
-            <div className="">Skin Problems</div>
+            <div className="">{t("viewskinan.skin_problem")}</div>
           </div>
         </div>
 
@@ -733,6 +738,7 @@ function ProblemSection({
   description: string;
   score: number;
 }) {
+  const { t } = useTranslation();
   // High -> 70% - 100%
   // Moderate -> above 40% - 69%
   // low -> 0% - 39%
@@ -742,14 +748,16 @@ function ProblemSection({
       <div className="flex items-center space-x-2 pb-6">
         <Icons.personalityTriangle className="size-8 shrink-0" />
 
-        <h2 className="text-3xl font-bold text-white">{title}</h2>
+        <h2 className="text-3xl font-bold text-white">
+          {t(`skinlabel.${title.toLocaleLowerCase()}`).toLocaleUpperCase()}
+        </h2>
       </div>
-      <span className="text-xl font-bold">Detected</span>
+      <span className="text-xl font-bold">{t("viewskinan.detected")}</span>
       <p className="pb-6 pt-1 text-sm">{detected}</p>
       <div className="pt-6"></div>
-      <span className="text-xl font-bold">Description</span>
+      <span className="text-xl font-bold">{t("viewskinan.description")}</span>
       <p className="pb-6 pt-1 text-sm">{description}</p>
-      <span className="text-xl font-bold">Score</span>
+      <span className="text-xl font-bold">{t("viewskinan.score")}</span>
       <div
         className={clsx(
           "text-sm",
@@ -760,11 +768,11 @@ function ProblemSection({
               : "text-[#5ED400]",
         )}
       >
-        {scoreType} {score}%
+        {t(`scoreTypes.${scoreType.toLocaleLowerCase()}`)} {score}%
       </div>
 
       <div className="py-8">
-        <h2 className="pb-4 text-xl font-bold">Recommended products</h2>
+        <h2 className="pb-4 text-xl font-bold">{t("viewskinan.recomend")}</h2>
 
         <ProductList skinConcern={title} />
       </div>

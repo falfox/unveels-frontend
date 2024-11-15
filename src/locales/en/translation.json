@@ -323,5 +323,39 @@
     "Neckless": "Neckless",
     "Scarf": "Scarf",
     "rings": "Rings"
+  },
+
+  "viewskinan": {
+    "analysis_result": "ANALYSIS RESULT",
+    "skin_health": " Skin Health Score :",
+    "skin_age": "Skin Age :",
+    "detected_skin": "Detected Skin Problems",
+    "detected_skin_con": "Detected Skin Condition",
+    "skin_problem": "Skin Problems",
+    "detected": "Detected",
+    "description": "Description",
+    "recomend": "Recommended Products",
+    "score": "Score",
+    "addcart": "ADD TO CART",
+    "seeimprovement": "SEE IMPROVEMENT"
+  },
+  "skinlabel": {
+    "radiance": "radiance",
+    "texture": "texture",
+    "moistures": "moistures",
+    "whitehead": "whitehead",
+    "blackhead": "blackhead",
+    "acne": "acne",
+    "spots": "spots",
+    "pore": "pore",
+    "wrinkles": "wrinkles",
+    "droopy eyelid upper": "droopy eyelid upper",
+    "droopy eyelid lower": "droopy eyelid lower",
+    "eyebag": "eyebag",
+    "skinredness": "skinredness",
+    "oily": "oily",
+    "firmness": "firmness",
+    "dark circles": "dark circle",
+    "dry": "dry"
   }
 }

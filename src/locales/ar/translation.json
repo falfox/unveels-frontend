@@ -322,5 +322,37 @@
     "Neckless": "عقد",
     "Scarf": "وشاح",
     "rings": "خواتم"
+  },
+
+  "viewskinan": {
+    "analysis_result": "نتيجة التحليل",
+    "skin_health": "درجة صحة البشرة :",
+    "skin_age": "عمر البشرة :",
+    "detected_skin": "المشاكل الجلدية المكتشفة",
+    "detected_skin_con": "حالة الجلد المكتشفة",
+    "skin_problem": "مشاكل الجلد",
+    "detected": "مكتشف",
+    "description": "الوصف",
+    "recomend": "المنتجات الموصى بها",
+    "score": "الدرجة"
+  },
+  "skinlabel": {
+    "radiance": "التألق",
+    "texture": "الملمس",
+    "moistures": "الرطوبة",
+    "whitehead": "الرؤوس البيضاء",
+    "blackhead": "الرؤوس السوداء",
+    "acne": "حب الشباب",
+    "spots": "البقع",
+    "pore": "المسامات",
+    "wrinkles": "التجاعيد",
+    "droopy eyelid upper": "جفن علوى مترهل",
+    "droopy eyelid lower": "جفن سفلي مترهل",
+    "eyebag": "انتفاخات تحت العين",
+    "skinredness": "احمرار الجلد",
+    "oily": "دهنية",
+    "firmness": "الشد",
+    "dark circle": "الهالات السوداء",
+    "dry": "جاف"
   }
 }
