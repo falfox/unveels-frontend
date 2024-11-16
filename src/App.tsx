@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Children, Suspense } from "react";
 import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
 import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
@@ -48,6 +48,8 @@ import { FindTheLook } from "./pages/find-the-look";
 import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
 import { FindTheLookWeb } from "./pages/find-the-look-web";
 import { element } from "three/webgpu";
+import { SingleVirtualTryOnDetail } from "./pages/single-virtual-try-on-detail";
+
 // Define routes using object syntax
 const routes = [
   {
@@ -69,8 +71,9 @@ const routes = [
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
   { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
   {
-    path: "/virtual-try-on-product/:sku",
+    path: "/virtual-try-on-product",
     element: <SingleVirtualTryOn />,
+    children: [{ path: ":sku", element: <SingleVirtualTryOnDetail /> }],
   },
   {
     path: "/virtual-try-on",
@@ -151,6 +154,9 @@ function Home() {
       <LinkButton to="/skin-analysis-web">Skin Analysis Web</LinkButton>
       <LinkButton to="/find-the-look-web">Find The Look Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
+      <LinkButton to="/virtual-try-on-product">
+        Virtual Try On Product
+      </LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
     </div>
   );

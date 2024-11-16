@@ -175,9 +175,9 @@ export function SingleVirtualTryOn() {
     <CameraProvider>
       <SkinColorProvider>
         <MakeupProvider>
-          <div className="h-full min-h-dvh">
-            <Main />
-          </div>
+            <div className="h-full min-h-dvh">
+              <Main />
+            </div>
         </MakeupProvider>
       </SkinColorProvider>
     </CameraProvider>

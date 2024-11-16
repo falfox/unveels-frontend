@@ -135,7 +135,7 @@ function ColorSelector() {
   );
 
   return (
-    <div className="mx-auto w-full pt-4 lg:max-w-xl">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
       <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
