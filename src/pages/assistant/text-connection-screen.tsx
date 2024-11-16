@@ -123,7 +123,7 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         systemInstruction: botPrompt,
       });
       const result = await model.generateContent(prompt);
-      const responseText = await result.response.text(); // Pastikan await di sini jika perlu
+      const responseText = await result.response.text();
       const removeBackticks = responseText.replace(/```/g, "");
       const jsonLabel = removeBackticks.replace(/json/g, "");
       console.log(jsonLabel);

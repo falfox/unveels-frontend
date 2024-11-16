@@ -37,6 +37,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
   const [chats, setChats] = useState<Chat[]>([]);
   const [text, setText] = useState("");
+  const [language, setLanguage] = useState("en-US");
   const [loading, setLoading] = useState(false);
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
@@ -105,6 +106,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       }
 
       setText(respond.chat);
+      setLanguage(respond.lang);
       setSpeak(true);
     } catch (error) {
       console.error("Error fetching AI response:", error);
@@ -187,6 +189,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           playing={playing}
           setAudioSource={setAudioSource}
           setSpeak={setSpeak}
+          language={language}
         />
       </div>
 
@@ -216,6 +219,13 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         ref={audioPlayer}
         onEnded={playerEnded}
         onCanPlayThrough={playerReady}
+        onError={(e) => {
+          console.error("Audio Playback Error:", e);
+          console.log(
+            "Audio Source:",
+            audioSource || "No audio source provided",
+          );
+        }}
       />
 
       <TopNavigation onBack={onBack} />

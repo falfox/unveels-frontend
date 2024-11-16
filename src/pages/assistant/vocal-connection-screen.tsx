@@ -47,6 +47,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [chats, setChats] = useState<Chat[]>([]);
 
   const [text, setText] = useState("");
+  const [languange, setLanguage] = useState("");
 
   const [loading, setLoading] = useState(false);
   const audioPlayer = useRef<ReactAudioPlayer>(null);
@@ -134,6 +135,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       }
 
       setText(respond.chat);
+      setLanguage(respond.lang);
       setSpeak(true);
     } catch (error) {
       setText(await result.response.text());
@@ -214,6 +216,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           playing={playing}
           setAudioSource={setAudioSource}
           setSpeak={setSpeak}
+          language={languange}
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 flex h-1/3 flex-col bg-gradient-to-b from-[#1B1404] to-[#2C1F06]">

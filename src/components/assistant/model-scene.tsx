@@ -9,6 +9,7 @@ interface ModelSceneProps {
   playing: boolean;
   setAudioSource: (source: string | null) => void;
   setSpeak: (speak: boolean) => void;
+  language: string | "en-US";
 }
 
 const ModelScene = ({
@@ -17,6 +18,7 @@ const ModelScene = ({
   playing,
   setAudioSource,
   setSpeak,
+  language,
 }: ModelSceneProps) => {
   return (
     <>
@@ -54,6 +56,7 @@ const ModelScene = ({
             playing={playing}
             setAudioSource={setAudioSource}
             setSpeak={setSpeak}
+            language={language}
           />
         </Suspense>
       </Canvas>

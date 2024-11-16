@@ -9,13 +9,23 @@ import blinkData from "../../assets/blendDataBlink.json";
 import { useLoadTextures } from "../../utils/textures";
 import axios from "axios";
 import { applyAvatarMaterials } from "../../utils/avatarMaterialUtils";
-import { runBlendshapesDemo } from "./talking-head";
 
-const host = "https://talking-avatar.onrender.com";
+const host = "https://talking-avatar.evorty.id";
 
-// Modified makeSpeech function to accept a language parameter
-function makeSpeech(text, language = "en") {
+function makeSpeech(text: string, language = "en-US") {
+  console.log(text, language);
+
   return axios.post(host + "/talk", { text, language });
+}
+
+interface AvatarProps {
+  avatar_url: string;
+  speak: boolean;
+  text: string;
+  setAudioSource: (audioSource: string) => void;
+  playing: boolean;
+  setSpeak: (speak: boolean) => void;
+  language: string | "en-US";
 }
 
 const Avatar = ({
@@ -25,7 +35,8 @@ const Avatar = ({
   playing,
   setAudioSource,
   setSpeak,
-}) => {
+  language,
+}: AvatarProps) => {
   const gltf = useGLTF(avatar_url);
   const textures = useLoadTextures();
   const mixer = useMemo(
@@ -38,9 +49,10 @@ const Avatar = ({
   const idleAnimation = animations.find((clip) => clip.name === "idle");
   const talkAnimation = animations.find((clip) => clip.name === "talk");
 
-  const [clips, setClips] = useState([]);
-  let morphTargetDictionaryBody = null;
-  let morphTargetDictionaryLowerTeeth = null;
+  const [clips, setClips] = useState<(THREE.AnimationClip | null)[]>([]);
+  let morphTargetDictionaryBody: Mesh["morphTargetDictionary"] | null = null;
+  let morphTargetDictionaryLowerTeeth: Mesh["morphTargetDictionary"] | null =
+    null;
 
   gltf.scene.traverse((node) => {
     if (
@@ -81,8 +93,10 @@ const Avatar = ({
         idleAction.crossFadeTo(talkAction, 0.5, false).play();
 
         // Pass 'ar' for Arabic language here
-        makeSpeech(text, "ar") // Pass "ar" for Arabic
+        makeSpeech(text, language) // Pass "ar" for Arabic
           .then((response) => {
+            console.log("Response Headers:", response.headers);
+            console.log("Response Data:", response.data);
             const { blendData, filename } = response.data;
             if (morphTargetDictionaryBody) {
               const newClips = [
@@ -133,14 +147,17 @@ const Avatar = ({
   ]);
 
   useEffect(() => {
-    const blinkClip = createAnimation(
-      blinkData,
-      morphTargetDictionaryBody,
-      "HG_Body",
-    );
-    if (blinkClip) {
-      const blinkAction = mixer.clipAction(blinkClip);
-      blinkAction.play();
+    if (morphTargetDictionaryBody) {
+      // Pastikan variabel valid
+      const blinkClip = createAnimation(
+        blinkData,
+        morphTargetDictionaryBody,
+        "HG_Body",
+      );
+      if (blinkClip) {
+        const blinkAction = mixer.clipAction(blinkClip);
+        blinkAction.play();
+      }
     }
   }, [mixer, morphTargetDictionaryBody]);
 
