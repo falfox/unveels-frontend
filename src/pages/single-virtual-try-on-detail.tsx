@@ -21,6 +21,10 @@ export function SingleVirtualTryOnDetail() {
 
       {/* <ShadesSelector />*/}
 
+      {/* <ShapeSelector /> */}
+
+      {/* <Mode /> */}
+
       <ProductList />
     </div>
   );
@@ -110,12 +114,85 @@ function TextureSelector() {
   );
 }
 
+const blushes = [
+  "/blushes/blusher-1.png",
+  "/blushes/blusher-2.png",
+  "/blushes/blusher-3.png",
+  "/blushes/blusher-4.png",
+  "/blushes/blusher-5.png",
+];
+
+function ShapeSelector() {
+  const [selectedShape, setSelectedShape] = useState<string>();
+
+  function setPattern(pattern: number, patternName: string) {
+    setSelectedShape(patternName);
+  }
+
+  return (
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+        {blushes.map((path, index) => (
+          <button
+            key={index}
+            type="button"
+            className={clsx(
+              "inline-flex shrink-0 items-center rounded-sm border border-transparent text-white/80",
+              {
+                "border-white/80": selectedShape === index.toString(),
+              },
+            )}
+            onClick={() => setPattern(index, index.toString())}
+          >
+            <img src={path} alt="Highlighter" className="size-12 rounded" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const modes = [
+  {
+    name: "Lip Color",
+    path: "lip-color",
+  },
+  {
+    name: "Lip Liner",
+    path: "lip-liner",
+  },
+  {
+    name: "Lip Plumper",
+    path: "lip-plumper",
+  },
+];
+
+export function Mode() {
+  return (
+    <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+      {modes.map((mode, index) => (
+        <button
+          key={mode.path}
+          type="button"
+          className="inline-flex items-center gap-x-2 whitespace-nowrap rounded-full border border-white/80 px-3 py-1 text-white/80"
+        >
+          <span className="text-sm">{mode.name}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ProductList() {
   const [isLoading, setIsloading] = useState(false);
   const { sku } = useParams();
-  const productConfigurable = data.items.filter((i) => i.sku === sku);
+  const productConfigurable = data.items.find((i) => i.sku === sku);
+  const category = productConfigurable?.custom_attributes.find(
+    (i) => i.attribute_code === "lips_makeup_product_type",
+  );
+  console.log(category);
   const productSimples = data.items.filter((i) =>
-    productConfigurable[0].extension_attributes.configurable_product_links?.includes(
+    productConfigurable?.extension_attributes.configurable_product_links?.includes(
       i.id,
     ),
   );
