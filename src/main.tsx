@@ -1,19 +1,18 @@
-import "regenerator-runtime/runtime";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "regenerator-runtime/runtime";
 import App from "./App.tsx";
 import "./index.css";
-import { PageProvider } from "./hooks/usePage.tsx";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <PageProvider>
-        <App />
-      </PageProvider>
+      <App />
     </QueryClientProvider>
   </StrictMode>,
 );
+
+console.log("App is running");
