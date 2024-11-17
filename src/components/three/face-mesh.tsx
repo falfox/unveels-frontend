@@ -21,7 +21,7 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
   planeSize,
   landmarks,
   material,
-  flipHorizontal = false,
+  flipHorizontal = true,
 }) => {
   const geometryRef = useRef<BufferGeometry | null>(null);
   const meshRef = useRef<Mesh>(null); // Ref for the mesh
