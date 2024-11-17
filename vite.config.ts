@@ -48,11 +48,11 @@ function generateHtmlFromTemplate(route: string) {
 const inputObjects = Object.fromEntries(
   baseRoutes.map((route) => {
     const name = route === "/" ? "index" : route.slice(1);
-    const htmlPath = path.resolve(__dirname, `templates/${name}.html`);
+    const htmlPath = path.resolve(__dirname, `pages/${name}.html`);
 
-    // Ensure templates directory exists
-    if (!fs.existsSync("templates")) {
-      fs.mkdirSync("templates");
+    // Ensure pages directory exists
+    if (!fs.existsSync("pages")) {
+      fs.mkdirSync("pages");
     }
 
     // Write modified template file
