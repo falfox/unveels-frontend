@@ -11,17 +11,15 @@ import { colors } from "../../../../api/attributes/color";
 
 export function HairColorSelector() {
   return (
-    <HairColorProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <div>
-          <FamilyColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <div>
+        <FamilyColorSelector />
 
-          <ColorSelector />
-        </div>
-
-        <ProductList />
+        <ColorSelector />
       </div>
-    </HairColorProvider>
+
+      <ProductList />
+    </div>
   );
 }
 

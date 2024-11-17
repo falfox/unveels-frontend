@@ -13,33 +13,31 @@ const colorFamilies = [{ name: "Black", value: "#000000" }];
 
 export function LashesSelector() {
   return (
-    <LashesProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <FamilyColorSelector />
 
-        <ColorSelector />
+      <ColorSelector />
 
-        <div className="flex items-center justify-between w-full h-10 text-center">
-          <Link
-            className={`relative h-10 grow text-lg`}
-            to="/virtual-try-on/lashes"
-          >
-            <span className={"text-white"}>Lashes</span>
-          </Link>
-          <div className="h-5 border-r border-white"></div>
-          <Link
-            className={`relative h-10 grow text-lg`}
-            to="/virtual-try-on/mascara"
-          >
-            <span className={"text-white/60"}>Mascara</span>
-          </Link>
-        </div>
-
-        <ShapeSelector />
-
-        <ProductList />
+      <div className="flex h-10 w-full items-center justify-between text-center">
+        <Link
+          className={`relative h-10 grow text-lg`}
+          to="/virtual-try-on/lashes"
+        >
+          <span className={"text-white"}>Lashes</span>
+        </Link>
+        <div className="h-5 border-r border-white"></div>
+        <Link
+          className={`relative h-10 grow text-lg`}
+          to="/virtual-try-on/mascara"
+        >
+          <span className={"text-white/60"}>Mascara</span>
+        </Link>
       </div>
-    </LashesProvider>
+
+      <ShapeSelector />
+
+      <ProductList />
+    </div>
   );
 }
 

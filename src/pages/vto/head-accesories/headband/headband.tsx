@@ -12,14 +12,12 @@ import { useHeadbandQuery } from "./headband-query";
 
 export function HeadbandSelector() {
   return (
-    <HeadbandProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <HeadbandFamilyColorSelector />
-        <HeadbandColorSelector />
-        <HeadbandFabricSelector />
-        <HeadbandProductList />
-      </div>
-    </HeadbandProvider>
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <HeadbandFamilyColorSelector />
+      <HeadbandColorSelector />
+      <HeadbandFabricSelector />
+      <HeadbandProductList />
+    </div>
   );
 }
 

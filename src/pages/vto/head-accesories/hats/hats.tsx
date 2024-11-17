@@ -13,14 +13,12 @@ import { useHatsQuery } from "./hats-query";
 
 export function HatsSelector() {
   return (
-    <HatsProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
-        <ColorSelector />
-        <ModeSelector />
-        <ProductList />
-      </div>
-    </HatsProvider>
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <FamilyColorSelector />
+      <ColorSelector />
+      <ModeSelector />
+      <ProductList />
+    </div>
   );
 }
 

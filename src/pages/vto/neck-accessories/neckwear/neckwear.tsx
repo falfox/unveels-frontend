@@ -35,13 +35,11 @@ function useActiveNeckwear(): "Chokers" | "Necklaces" | "Pendants" {
 
 export function NeckwearSelector() {
   return (
-    <NeckwearProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
-        <ColorSelector />
-        <NeckwearProductList />
-      </div>
-    </NeckwearProvider>
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <FamilyColorSelector />
+      <ColorSelector />
+      <NeckwearProductList />
+    </div>
   );
 }
 
