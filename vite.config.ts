@@ -27,7 +27,6 @@ function generateHtmlFromTemplate(route: string) {
   );
 
   // Find root div position
-  const rootDiv = '<div id="root"></div>';
   const moduleScriptPos = template.indexOf('<script type="module"');
 
   // Split the template into parts

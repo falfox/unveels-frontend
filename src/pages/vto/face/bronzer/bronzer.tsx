@@ -8,6 +8,7 @@ import { useMakeup } from "../../../../context/makeup-context";
 import { useQuery } from "@tanstack/react-query";
 import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
 import {
+  baseUrl,
   buildSearchParams,
   extractUniqueCustomAttributes,
   getProductAttributes,
@@ -84,7 +85,7 @@ function useFaceBronzerQuery({
       console.log("filters", filters);
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams(filters),
+        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
         {
           headers: defaultHeaders,
         },

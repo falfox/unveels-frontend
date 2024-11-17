@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { defaultHeaders, LookbookCategory, Product } from "./shared";
-import { buildSearchParams } from "../utils/apiUtils";
+import { baseUrl, buildSearchParams } from "../utils/apiUtils";
 
 export type CustomAttributeValue = {
   label: string;
@@ -20,7 +20,7 @@ const lookbookKey = {
 };
 
 async function fetchLookbookProducts(options: LookbookFilters) {
-  let response = await fetch("/rest/V1/lookbook/categories", {
+  let response = await fetch(baseUrl + "/rest/V1/lookbook/categories", {
     headers: defaultHeaders,
   });
   if (!response.ok) {
@@ -67,7 +67,7 @@ async function fetchLookbookProducts(options: LookbookFilters) {
     },
   ];
 
-  response = await fetch("/rest/V1/products?" + buildSearchParams(filters), {
+  response = await fetch(baseUrl + "/rest/V1/products?" + buildSearchParams(filters), {
     headers: defaultHeaders,
   });
 

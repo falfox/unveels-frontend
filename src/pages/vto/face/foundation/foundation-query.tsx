@@ -5,6 +5,7 @@ import {
 } from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
+  baseUrl,
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
@@ -58,7 +59,7 @@ export function useFoundationQuery({
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters]),
         {
           headers: defaultHeaders,
         },

@@ -5,6 +5,7 @@ import {
 } from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
+  baseUrl,
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
@@ -77,7 +78,7 @@ export function useGlassesQuery({
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
+        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
         {
           headers: defaultHeaders,
         },
