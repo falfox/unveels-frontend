@@ -34,6 +34,11 @@ import {
   InferenceProvider,
   useInferenceContext,
 } from "../context/inference-context";
+import * as tf from "@tensorflow/tfjs-core";
+import * as tflite from "@tensorflow/tfjs-tflite";
+import { loadTFLiteModel } from "../utils/tfliteInference";
+import { useModelLoader } from "../hooks/useModelLoader";
+import { ModelLoadingScreen } from "../components/model-loading-screen";
 
 export function SkinAnalysis() {
   return (
@@ -52,6 +57,9 @@ export function SkinAnalysis() {
 function Main() {
   const { criterias } = useCamera();
 
+  const [modelSkinAnalysis, setModelSkinAnalysis] =
+    useState<tflite.TFLiteModel | null>(null);
+
   const {
     isLoading,
     setIsLoading,
@@ -66,6 +74,30 @@ function Main() {
   );
   const { setSkinAnalysisResult } = useSkinAnalysis();
 
+  const steps = [
+    async () => {
+      const model = await loadTFLiteModel(
+        "/models/skin-analysis/best_skin_float16.tflite",
+      );
+      setModelSkinAnalysis(model);
+    },
+    async () => {
+      if (modelSkinAnalysis) {
+        modelSkinAnalysis.predict(tf.zeros([1, 640, 640, 3], "float32"));
+      }
+    },
+  ];
+
+  const {
+    progress,
+    isLoading: modelLoading,
+    loadModels,
+  } = useModelLoader(steps);
+
+  useEffect(() => {
+    loadModels();
+  }, []);
+
   useEffect(() => {
     const faceAnalyzerInference = async () => {
       if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
@@ -73,12 +105,17 @@ function Main() {
         setIsLoading(true);
         setInferenceError(null);
         try {
-          const skinAnalysisResult: [FaceResults[], SkinAnalysisResult[]] =
-            await skinAnalysisInference(criterias.capturedImage);
+          if (modelSkinAnalysis) {
+            const skinAnalysisResult: [FaceResults[], SkinAnalysisResult[]] =
+              await skinAnalysisInference(
+                criterias.capturedImage,
+                modelSkinAnalysis,
+              );
 
-          setInferenceResult(skinAnalysisResult[0]);
-          setSkinAnalysisResult(skinAnalysisResult[1]);
-          console.log(skinAnalysisResult[1]);
+            setInferenceResult(skinAnalysisResult[0]);
+            setSkinAnalysisResult(skinAnalysisResult[1]);
+            console.log(skinAnalysisResult[1]);
+          }
         } catch (error: any) {
           console.error("Inference error:", error);
           setInferenceError(
@@ -95,31 +132,34 @@ function Main() {
   }, [criterias.isCaptured, criterias.capturedImage]);
 
   return (
-    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
-      <div className="absolute inset-0">
-        {!isLoading && inferenceResult != null ? (
-          <SkinAnalysisScene data={inferenceResult} />
-        ) : (
-          <>
-            <VideoStream />
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-                zIndex: 0,
-              }}
-            ></div>
-          </>
-        )}
-      </div>
-      <RecorderStatus />
-      <TopNavigation item={isInferenceFinished} />
+    <>
+      {modelLoading && <ModelLoadingScreen progress={progress} />}
+      <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+        <div className="absolute inset-0">
+          {!isLoading && inferenceResult != null ? (
+            <SkinAnalysisScene data={inferenceResult} />
+          ) : (
+            <>
+              <VideoStream />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                  zIndex: 0,
+                }}
+              ></div>
+            </>
+          )}
+        </div>
+        <RecorderStatus />
+        <TopNavigation item={isInferenceFinished} />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-        <MainContent />
-        <Footer />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+          <MainContent />
+          <Footer />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

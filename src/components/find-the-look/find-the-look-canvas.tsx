@@ -13,8 +13,18 @@ import { useFindTheLookContext } from "../../context/find-the-look-context";
 interface FindTheLookCanvasProps {
   image: HTMLImageElement;
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  isFlip?: boolean; // New prop added
+  isFlip?: boolean;
   onLabelClick?: (label: string | null, section: string | null) => void;
+  models: {
+    faceLandmarker: FaceLandmarker | null;
+    handDetector: ObjectDetector | null;
+    ringDetector: ObjectDetector | null;
+    neckDetector: ObjectDetector | null;
+    earringDetector: ObjectDetector | null;
+    glassDetector: ObjectDetector | null;
+    headDetector: ObjectDetector | null;
+    makeupDetector: ObjectDetector | null;
+  };
 }
 
 interface Hitbox {
@@ -29,224 +39,48 @@ interface Hitbox {
 export function FindTheLookCanvas({
   image,
   canvasRef,
-  isFlip = false, // Default to true if not provided
+  isFlip = false,
   onLabelClick,
+  models,
 }: FindTheLookCanvasProps) {
   const { selectedItems: cart } = useFindTheLookContext();
   const { findTheLookItems, addFindTheLookItem } = useFindTheLookContext();
 
   const hitboxesRef = useRef<Hitbox[]>([]);
 
-  // State variables for detectors and results
-  const [handDetector, setHandDetector] = useState<ObjectDetector | null>(null);
+  // Gunakan models dari props
+  const {
+    faceLandmarker,
+    handDetector,
+    ringDetector,
+    neckDetector,
+    earringDetector,
+    glassDetector,
+    headDetector,
+    makeupDetector,
+  } = models;
+
   const [handResult, setHandResult] = useState<ObjectDetectorResult | null>(
     null,
   );
-  const [ringDetector, setRingDetector] = useState<ObjectDetector | null>(null);
   const [ringResult, setRingResult] = useState<ObjectDetectorResult | null>(
     null,
   );
-  const [neckDetector, setNeckDetector] = useState<ObjectDetector | null>(null);
   const [neckResult, setNeckResult] = useState<ObjectDetectorResult | null>(
-    null,
-  );
-  const [earringDetector, setEarringDetector] = useState<ObjectDetector | null>(
     null,
   );
   const [earringResult, setEarringResult] =
     useState<ObjectDetectorResult | null>(null);
-  const [glassDetector, setGlassDetector] = useState<ObjectDetector | null>(
-    null,
-  );
   const [glassResult, setGlassResult] = useState<ObjectDetectorResult | null>(
     null,
   );
-  const [headDetector, setHeadDetector] = useState<ObjectDetector | null>(null);
   const [headResult, setHeadResult] = useState<ObjectDetectorResult | null>(
-    null,
-  );
-  const [makeupDetector, setMakeupDetector] = useState<ObjectDetector | null>(
     null,
   );
   const [makeupResult, setMakeupResult] = useState<ObjectDetectorResult | null>(
     null,
   );
-
-  // FaceLandmarker for facial landmarks
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
-    null,
-  );
   const [faceLandmark, setFaceLandmark] = useState<Landmark[] | null>(null);
-
-  // Initialize the models
-  useEffect(() => {
-    let isMounted = true;
-
-    const initializeDetectors = async () => {
-      try {
-        const filesetResolver = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm",
-        );
-
-        // Initialize FaceLandmarker
-        const faceLandmarkConfiguration =
-          await FaceLandmarker.createFromOptions(filesetResolver, {
-            baseOptions: {
-              modelAssetPath:
-                "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            numFaces: 1,
-            minFaceDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5,
-            minFacePresenceConfidence: 0.5,
-          });
-
-        // Initialize Hand Detector
-        const handConfiguration = await ObjectDetector.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: "/models/find-the-look/hand.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            maxResults: 2,
-            scoreThreshold: 0.63,
-          },
-        );
-
-        // Initialize Ring Detector
-        const ringConfiguration = await ObjectDetector.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: "/models/find-the-look/rings.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            maxResults: 1,
-            scoreThreshold: 0.2,
-          },
-        );
-
-        // Initialize Neck Detector
-        const neckConfiguration = await ObjectDetector.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: "/models/find-the-look/neck.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            maxResults: 1,
-            scoreThreshold: 0.7,
-          },
-        );
-
-        // Initialize Earring Detector
-        const earringConfiguration = await ObjectDetector.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: "/models/find-the-look/earrings.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            maxResults: 1,
-            scoreThreshold: 0.8,
-          },
-        );
-
-        // Initialize Glass Detector
-        const glassConfiguration = await ObjectDetector.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: "/models/find-the-look/glass.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            maxResults: 1,
-            scoreThreshold: 0.6,
-          },
-        );
-
-        // Initialize Head Detector
-        const headConfiguration = await ObjectDetector.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: "/models/find-the-look/head.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            maxResults: 1,
-            scoreThreshold: 0.63,
-          },
-        );
-
-        // Initialize Makeup Detector
-        const makeupConfiguration = await ObjectDetector.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: "/models/find-the-look/makeup.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "IMAGE",
-            maxResults: 4,
-            scoreThreshold: 0.1,
-          },
-        );
-
-        if (isMounted) {
-          setFaceLandmarker(faceLandmarkConfiguration);
-          setHandDetector(handConfiguration);
-          setRingDetector(ringConfiguration);
-          setNeckDetector(neckConfiguration);
-          setEarringDetector(earringConfiguration);
-          setGlassDetector(glassConfiguration);
-          setHeadDetector(headConfiguration);
-          setMakeupDetector(makeupConfiguration);
-        }
-      } catch (error) {
-        console.error("Failed to initialize detectors: ", error);
-      }
-    };
-
-    initializeDetectors();
-
-    return () => {
-      isMounted = false;
-      // Close all detectors
-      if (handDetector) {
-        handDetector.close();
-      }
-      if (ringDetector) {
-        ringDetector.close();
-      }
-      if (neckDetector) {
-        neckDetector.close();
-      }
-      if (earringDetector) {
-        earringDetector.close();
-      }
-      if (glassDetector) {
-        glassDetector.close();
-      }
-      if (headDetector) {
-        headDetector.close();
-      }
-      if (makeupDetector) {
-        makeupDetector.close();
-      }
-      if (faceLandmarker) {
-        faceLandmarker.close();
-      }
-    };
-  }, []);
 
   // Run detection
   useEffect(() => {

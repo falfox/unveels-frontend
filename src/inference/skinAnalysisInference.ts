@@ -88,6 +88,7 @@ const preprocess = (
 
 export const skinAnalysisInference = async (
   imageData: string,
+  model: tflite.TFLiteModel,
 ): Promise<[FaceResults[], SkinAnalysisResult[]]> => {
   try {
     let inBatch: number | undefined;
@@ -103,20 +104,8 @@ export const skinAnalysisInference = async (
     let yRatio: number | undefined;
     const toDraw: FaceResults[] = [];
     const results: SkinAnalysisResult[] = [];
-
-    tflite.setWasmPath(
-      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/wasm/",
-    );
-
     const image = await base64ToImage(imageData);
-
     const colors = new Colors();
-
-    const model = await tflite.loadTFLiteModel(
-      "/models/skin-analysis/best_skin_float16.tflite",
-    );
-
-    console.log("load model");
 
     if (model.inputs[0].shape) {
       [inBatch, modelHeight, modelWidth, modelDepth] = model.inputs[0].shape;

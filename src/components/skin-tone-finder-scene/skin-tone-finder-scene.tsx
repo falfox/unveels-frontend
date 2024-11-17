@@ -80,29 +80,35 @@ function ImageCanvas({ image, canvasRef }: ImageCanvasProps) {
 
 interface SkinToneFinderSceneProps {
   debugMode?: boolean; // Opsional untuk mode debug
+  faceLandmarker: FaceLandmarker | null; // Model diterima sebagai prop
 }
 
 export function SkinToneFinderScene({
   debugMode = false,
+  faceLandmarker,
 }: SkinToneFinderSceneProps) {
-  return <SkinToneFinderInnerScene debugMode={debugMode} />;
+  return (
+    <SkinToneFinderInnerScene
+      debugMode={debugMode}
+      faceLandmarker={faceLandmarker}
+    />
+  );
 }
 
 interface SkinToneFinderInnerSceneProps {
   debugMode: boolean;
+  faceLandmarker: FaceLandmarker | null;
 }
 
 function SkinToneFinderInnerScene({
   debugMode,
+  faceLandmarker,
 }: SkinToneFinderInnerSceneProps) {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
-    null,
-  );
+
   // Replace useState with useRef for landmarks
   const landmarksRef = useRef<Landmark[]>([]);
-  const [isLandmarkerReady, setIsLandmarkerReady] = useState<boolean>(false);
 
   const { setSkinColor, setHexColor } = useSkinColor();
   const { setFoundationColor } = useMakeup();
@@ -134,48 +140,6 @@ function SkinToneFinderInnerScene({
     }
   }, [criterias.capturedImage]);
 
-  // Inisialisasi FaceLandmarker
-  useEffect(() => {
-    let isMounted = true; // Untuk mencegah pembaruan state setelah unmount
-
-    const initializeFaceLandmarker = async () => {
-      try {
-        const filesetResolver = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm",
-        );
-        const landmarker = await FaceLandmarker.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath:
-                "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-              delegate: "GPU", // Opsional: gunakan "GPU" jika didukung
-            },
-            outputFaceBlendshapes: true,
-            runningMode: "IMAGE",
-            numFaces: 1,
-          },
-        );
-        if (isMounted) {
-          setFaceLandmarker(landmarker);
-          setIsLandmarkerReady(true);
-        }
-      } catch (error) {
-        console.error("Gagal menginisialisasi FaceLandmarker:", error);
-      }
-    };
-
-    initializeFaceLandmarker();
-
-    // Cleanup pada unmount
-    return () => {
-      isMounted = false;
-      if (faceLandmarker) {
-        faceLandmarker.close();
-      }
-    };
-  }, []);
-
   // for flutter webView
   function changeHex(data: string) {
     setHexColor(data);
@@ -185,7 +149,7 @@ function SkinToneFinderInnerScene({
   // Memproses gambar dan mendeteksi landmark
   useEffect(() => {
     const processImage = async () => {
-      if (imageLoaded && faceLandmarker && isLandmarkerReady) {
+      if (imageLoaded && faceLandmarker) {
         // for flutter webview comunication
         console.log("Detection Running Skin Tone Finder");
         if ((window as any).flutter_inappwebview) {
@@ -226,9 +190,6 @@ function SkinToneFinderInnerScene({
               extractedSkinColor.hexColor,
               extractedSkinColor.skinType,
             );
-
-            // set skin hex to show on three scene
-            setHexColor(extractedSkinColor.hexColor);
 
             setIsInferenceFinished(true);
 
@@ -272,7 +233,7 @@ function SkinToneFinderInnerScene({
     };
 
     processImage();
-  }, [imageLoaded, faceLandmarker, isLandmarkerReady]);
+  }, [imageLoaded, faceLandmarker]);
 
   // Jika tidak ada gambar yang ditangkap, render hanya canvas overlay
   if (!criterias.capturedImage || !imageLoaded) {

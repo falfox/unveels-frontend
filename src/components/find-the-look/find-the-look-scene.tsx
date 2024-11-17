@@ -2,8 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import { useCamera } from "../../context/recorder-context";
 import { FindTheLookCanvas } from "./find-the-look-canvas";
 import { useFindTheLookContext } from "../../context/find-the-look-context";
+import { FaceLandmarker, ObjectDetector } from "@mediapipe/tasks-vision";
 
-export function FindTheLookScene() {
+interface FindTheLookSceneProps {
+  models: {
+    faceLandmarker: FaceLandmarker | null;
+    handDetector: ObjectDetector | null;
+    ringDetector: ObjectDetector | null;
+    neckDetector: ObjectDetector | null;
+    earringDetector: ObjectDetector | null;
+    glassDetector: ObjectDetector | null;
+    headDetector: ObjectDetector | null;
+    makeupDetector: ObjectDetector | null;
+  };
+}
+
+export function FindTheLookScene({ models }: FindTheLookSceneProps) {
   const { criterias } = useCamera();
   const findTheLookCanvasRef = useRef<HTMLCanvasElement>(null);
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
@@ -76,6 +90,7 @@ export function FindTheLookScene() {
               image={imageLoaded}
               canvasRef={findTheLookCanvasRef}
               onLabelClick={handleLabelClick}
+              models={models}
             />
           </canvas>
         </div>

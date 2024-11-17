@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import { Icons } from "../components/icons";
 import clsx from "clsx";
 import {
@@ -32,6 +32,8 @@ import * as tf from "@tensorflow/tfjs-core";
 import * as tflite from "@tensorflow/tfjs-tflite";
 import { loadTFLiteModel } from "../utils/tfliteInference";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import { useModelLoader } from "../hooks/useModelLoader";
+import { ModelLoadingScreen } from "../components/model-loading-screen";
 
 export function FaceAnalyzer() {
   return (
@@ -46,15 +48,9 @@ export function FaceAnalyzer() {
 }
 
 function MainContent() {
-  const [modelFaceShape, setModelFaceShape] =
-    useState<tflite.TFLiteModel | null>(null);
-
-  const [modelPersonalityFinder, setModelPersonalityFinder] =
-    useState<tflite.TFLiteModel | null>(null);
-
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
-    null,
-  );
+  const modelFaceShapeRef = useRef<tflite.TFLiteModel | null>(null);
+  const modelPersonalityFinderRef = useRef<tflite.TFLiteModel | null>(null);
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
 
   const { criterias } = useCamera();
   const {
@@ -69,17 +65,14 @@ function MainContent() {
     null,
   );
 
-  useEffect(() => {
-    let isMounted = true;
-    const dummyInput = tf.zeros([1, 224, 224, 3], "float32");
-
-    const loadModel = async () => {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
-        );
-
-        const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+  const steps = [
+    async () => {
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
+      );
+      const faceLandmarkerInstance = await FaceLandmarker.createFromOptions(
+        vision,
+        {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
             delegate: "GPU",
@@ -90,43 +83,44 @@ function MainContent() {
           minTrackingConfidence: 0.7,
           runningMode: "IMAGE",
           numFaces: 1,
-        });
-
-        setModelFaceShape(
-          await loadTFLiteModel(
-            "/models/personality-finder/face-analyzer.tflite",
-          ),
+        },
+      );
+      faceLandmarkerRef.current = faceLandmarkerInstance;
+    },
+    async () => {
+      const model = await loadTFLiteModel(
+        "/models/personality-finder/face-analyzer.tflite",
+      );
+      modelFaceShapeRef.current = model;
+    },
+    async () => {
+      const model = await loadTFLiteModel(
+        "/models/personality-finder/personality_finder.tflite",
+      );
+      modelPersonalityFinderRef.current = model;
+    },
+    async () => {
+      if (modelFaceShapeRef.current) {
+        modelFaceShapeRef.current.predict(
+          tf.zeros([1, 224, 224, 3], "float32"),
         );
-        setModelPersonalityFinder(
-          await loadTFLiteModel(
-            "/models/personality-finder/personality_finder.tflite",
-          ),
+      }
+      if (modelPersonalityFinderRef.current) {
+        modelPersonalityFinderRef.current.predict(
+          tf.zeros([1, 224, 224, 3], "float32"),
         );
-
-        if (isMounted) {
-          setFaceLandmarker(faceLandmarker);
-          // warmup
-          modelFaceShape?.predict(dummyInput);
-          modelPersonalityFinder?.predict(dummyInput);
-          modelFaceShape?.predict(dummyInput);
-          modelPersonalityFinder?.predict(dummyInput);
-        }
-      } catch (error) {
-        console.error("Failed to initialize: ", error);
       }
-    };
+    },
+  ];
 
-    loadModel();
+  const {
+    progress,
+    isLoading: modelLoading,
+    loadModels,
+  } = useModelLoader(steps);
 
-    return () => {
-      isMounted = false;
-      if (faceLandmarker) {
-        faceLandmarker.close();
-      }
-      if (modelPersonalityFinder && modelFaceShape) {
-        dummyInput.dispose();
-      }
-    };
+  useEffect(() => {
+    loadModels();
   }, []);
 
   useEffect(() => {
@@ -136,11 +130,15 @@ function MainContent() {
         setIsLoading(true);
         setInferenceError(null);
         try {
-          if (modelFaceShape && modelPersonalityFinder && faceLandmarker) {
+          if (
+            modelFaceShapeRef.current &&
+            modelPersonalityFinderRef.current &&
+            faceLandmarkerRef.current
+          ) {
             const personalityResult: Classifier[] = await personalityInference(
-              modelFaceShape,
-              modelPersonalityFinder,
-              faceLandmarker,
+              modelFaceShapeRef.current,
+              modelPersonalityFinderRef.current,
+              faceLandmarkerRef.current,
               criterias.capturedImage,
               224,
               224,
@@ -169,24 +167,27 @@ function MainContent() {
   }
 
   return (
-    <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
-      <div className="absolute inset-0">
-        <VideoStream debugMode={false} />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          }}
-        ></div>
-      </div>
-      <RecorderStatus />
-      <TopNavigation cart={isInferenceFinished} />
+    <>
+      {modelLoading && <ModelLoadingScreen progress={progress} />}
+      <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
+        <div className="absolute inset-0">
+          <VideoStream debugMode={false} />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+            }}
+          ></div>
+        </div>
+        <RecorderStatus />
+        <TopNavigation cart={isInferenceFinished} />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-        <VideoScene />
-        <Footer />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+          <VideoScene />
+          <Footer />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
