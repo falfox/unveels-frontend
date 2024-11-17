@@ -19,15 +19,13 @@ const colorFamilies = [
 
 export function ConcealerSelector() {
   return (
-    <ConcealerProvider>
-      <div className="w-full px-4 mx-auto lg:max-w-xl">
-        <FamilyColorSelector />
+    <div className="mx-auto w-full px-4 lg:max-w-xl">
+      <FamilyColorSelector />
 
-        <ColorSelector />
+      <ColorSelector />
 
-        <ProductList />
-      </div>
-    </ConcealerProvider>
+      <ProductList />
+    </div>
   );
 }
 

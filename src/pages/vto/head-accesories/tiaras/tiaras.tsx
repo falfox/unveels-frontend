@@ -11,14 +11,12 @@ import { colors } from "../../../../api/attributes/color";
 
 export function TiaraSelector() {
   return (
-    <TiaraProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
-        <ColorSelector />
-        <ModeSelector />
-        <TiaraProductList />
-      </div>
-    </TiaraProvider>
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <FamilyColorSelector />
+      <ColorSelector />
+      <ModeSelector />
+      <TiaraProductList />
+    </div>
   );
 }
 

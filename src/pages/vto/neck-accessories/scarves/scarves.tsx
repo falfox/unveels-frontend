@@ -11,14 +11,12 @@ import { useScarvesQuery } from "./scarves-query";
 
 export function ScarvesSelector() {
   return (
-    <ScarvesProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
-        <ColorSelector />
-        <FabricSelector />
-        <ScarvesProductList />
-      </div>
-    </ScarvesProvider>
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <FamilyColorSelector />
+      <ColorSelector />
+      <FabricSelector />
+      <ScarvesProductList />
+    </div>
   );
 }
 

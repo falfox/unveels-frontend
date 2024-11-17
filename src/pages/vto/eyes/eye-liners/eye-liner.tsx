@@ -11,19 +11,17 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 
 export function EyeLinerSelector() {
   return (
-    <EyeLinerProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <div>
-          <FamilyColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <div>
+        <FamilyColorSelector />
 
-          <ColorSelector />
-        </div>
-
-        <ShapeSelector />
-
-        <ProductList />
+        <ColorSelector />
       </div>
-    </EyeLinerProvider>
+
+      <ShapeSelector />
+
+      <ProductList />
+    </div>
   );
 }
 

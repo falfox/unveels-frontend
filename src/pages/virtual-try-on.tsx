@@ -42,6 +42,25 @@ import { FoundationProvider } from "./vto/face/foundation/foundation-context";
 import { HighlighterProvider } from "./vto/face/highlighter/highlighter-context";
 import { ContourProvider } from "./vto/face/contour/contour-context";
 import { BronzerProvider } from "./vto/face/bronzer/bronzer-context";
+import { ConcealerProvider } from "./vto/face/concealer/concealer-context";
+import { EyeLinerProvider } from "./vto/eyes/eye-liners/eye-liner-context";
+import { MascaraProvider } from "./vto/eyes/mascara/mascara-context";
+import { LenseProvider } from "./vto/eyes/lenses/lense-context";
+import { LashesProvider } from "./vto/eyes/lashes/lashes-context";
+import { EyebrowsProvider } from "./vto/eyes/eyebrows/eyebrows-context";
+import { EyeShadowProvider } from "./vto/eyes/eye-shadow/eye-shadow-context";
+import { HairColorProvider } from "./vto/hair/hair-color/hair-color-context";
+import { PressOnNailsProvider } from "./vto/nails/press-on-nails/press-on-nails-context";
+import { NailPolishProvider } from "./vto/nails/nail-polish/nail-polish-context";
+import { EarringsProvider } from "./vto/head-accesories/earrings/earrings-context";
+import { GlassesProvider } from "./vto/head-accesories/glasses/glasses-context";
+import { HatsProvider } from "./vto/head-accesories/hats/hats-context";
+import { NeckwearProvider } from "./vto/neck-accessories/neckwear/neckwear-context";
+import { ScarvesProvider } from "./vto/neck-accessories/scarves/scarves-context";
+import { TiaraProvider } from "./vto/head-accesories/tiaras/tiaras-context";
+import { HeadbandProvider } from "./vto/head-accesories/headband/headband-context";
+import { HandwearProvider } from "./vto/hand-accessories/handwear/handwear-context";
+import { WatchesProvider } from "./vto/hand-accessories/watches/watches-context";
 
 interface VirtualTryOnProvider {
   children: React.ReactNode;
@@ -49,21 +68,61 @@ interface VirtualTryOnProvider {
 
 export function VirtualTryOnProvider({ children }: VirtualTryOnProvider) {
   return (
-    <ContourProvider>
-      <BronzerProvider>
-        <HighlighterProvider>
-          <FoundationProvider>
-            <BlushProvider>
-              <LipColorProvider>
-                <LipLinerProvider>
-                  <LipPlumperProvider>{children}</LipPlumperProvider>
-                </LipLinerProvider>
-              </LipColorProvider>
-            </BlushProvider>
-          </FoundationProvider>
-        </HighlighterProvider>
-      </BronzerProvider>
-    </ContourProvider>
+    <WatchesProvider>
+      <HandwearProvider>
+        <ScarvesProvider>
+          <NeckwearProvider>
+            <TiaraProvider>
+              <HeadbandProvider>
+                <HatsProvider>
+                  <GlassesProvider>
+                    <EarringsProvider>
+                      <HairColorProvider>
+                        <PressOnNailsProvider>
+                          <NailPolishProvider>
+                            <MascaraProvider>
+                              <LenseProvider>
+                                <LashesProvider>
+                                  <EyebrowsProvider>
+                                    <EyeShadowProvider>
+                                      <EyeLinerProvider>
+                                        <ConcealerProvider>
+                                          <ContourProvider>
+                                            <BronzerProvider>
+                                              <HighlighterProvider>
+                                                <FoundationProvider>
+                                                  <BlushProvider>
+                                                    <LipColorProvider>
+                                                      <LipLinerProvider>
+                                                        <LipPlumperProvider>
+                                                          {children}
+                                                        </LipPlumperProvider>
+                                                      </LipLinerProvider>
+                                                    </LipColorProvider>
+                                                  </BlushProvider>
+                                                </FoundationProvider>
+                                              </HighlighterProvider>
+                                            </BronzerProvider>
+                                          </ContourProvider>
+                                        </ConcealerProvider>
+                                      </EyeLinerProvider>
+                                    </EyeShadowProvider>
+                                  </EyebrowsProvider>
+                                </LashesProvider>
+                              </LenseProvider>
+                            </MascaraProvider>
+                          </NailPolishProvider>
+                        </PressOnNailsProvider>
+                      </HairColorProvider>
+                    </EarringsProvider>
+                  </GlassesProvider>
+                </HatsProvider>
+              </HeadbandProvider>
+            </TiaraProvider>
+          </NeckwearProvider>
+        </ScarvesProvider>
+      </HandwearProvider>
+    </WatchesProvider>
   );
 }
 
@@ -237,10 +296,6 @@ export function Makeups() {
     {
       name: "Face",
       icon: <Icons.makeupFace />,
-    },
-    {
-      name: "Nails",
-      icon: <Icons.makeupNails />,
     },
     {
       name: "Hair",
