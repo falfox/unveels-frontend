@@ -1,5 +1,10 @@
 import { Suspense } from "react";
-import { createMemoryRouter, Link, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  createMemoryRouter,
+  Link,
+  RouterProvider,
+} from "react-router-dom";
 import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
 import "./index.css";
@@ -72,7 +77,7 @@ const routes = [
   {
     path: "/virtual-try-on-product",
     element: <SingleVirtualTryOn />,
-    children: [{ path: ":sku", element: <SingleVirtualTryOnDetail /> }],
+    // children: [{ path: ":sku", element: <SingleVirtualTryOnDetail /> }],
   },
   {
     path: "/virtual-try-on",
@@ -130,8 +135,8 @@ const routes = [
 ];
 
 // Create a memory router instance
-const router = createMemoryRouter(routes, {
-  initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+const router = createBrowserRouter(routes, {
+  // initialEntries: [window.__INITIAL_ROUTE__ || "/"],
 });
 
 function Home() {
@@ -139,7 +144,7 @@ function Home() {
   useBrandsQuerySuspense();
 
   return (
-    <div className="absolute left-0 flex flex-col gap-4 top-4">
+    <div className="absolute left-0 top-4 flex flex-col gap-4">
       <LinkButton to="/skin-tone-finder">Skin Tone Finder</LinkButton>
       <LinkButton to="/personality-finder">Personality Finder</LinkButton>
       <LinkButton to="/face-analyzer">Face Analyzer</LinkButton>
@@ -152,7 +157,7 @@ function Home() {
       <LinkButton to="/skin-analysis-web">Skin Analysis Web</LinkButton>
       <LinkButton to="/find-the-look-web">Find The Look Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
-      <LinkButton to="/virtual-try-on-product">
+      <LinkButton to="/virtual-try-on-product/689304331029">
         Virtual Try On Product
       </LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>

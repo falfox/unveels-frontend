@@ -1,16 +1,14 @@
 import clsx from "clsx";
-import { colors } from "../api/attributes/color";
-import { Icons } from "../components/icons";
-import { ColorPalette } from "../components/color-palette";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { textures } from "../api/attributes/texture";
-import { LoadingProducts } from "../components/loading";
-import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
-import { BrandName } from "../components/product/brand";
-import { Link, useParams } from "react-router-dom";
 import data from "../assets/message.json";
+import { ColorPalette } from "../components/color-palette";
+import { Icons } from "../components/icons";
+import { LoadingProducts } from "../components/loading";
 
 export function SingleVirtualTryOnDetail() {
+  const {} = useParams();
   return (
     <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
       <div>
@@ -23,7 +21,7 @@ export function SingleVirtualTryOnDetail() {
 
       {/* <ShapeSelector /> */}
 
-      {/* <Mode /> */}
+      <Mode />
 
       <ProductList />
     </div>
@@ -168,6 +166,7 @@ const modes = [
 ];
 
 export function Mode() {
+  const navigate = useNavigate();
   return (
     <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
       {modes.map((mode, index) => (
@@ -175,6 +174,9 @@ export function Mode() {
           key={mode.path}
           type="button"
           className="inline-flex items-center gap-x-2 whitespace-nowrap rounded-full border border-white/80 px-3 py-1 text-white/80"
+          onClick={() => {
+            navigate("/virtual-try-on/" + mode.path);
+          }}
         >
           <span className="text-sm">{mode.name}</span>
         </button>

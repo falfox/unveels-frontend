@@ -1,67 +1,31 @@
 import clsx from "clsx";
-import { colors } from "../../../../api/attributes/color";
-import { textures } from "../../../../api/attributes/texture";
+import { filterTexturesByValue } from "../../../../api/attributes/texture";
 import { ColorPalette } from "../../../../components/color-palette";
 import { Icons } from "../../../../components/icons";
-import { LoadingProducts } from "../../../../components/loading";
 import { useMakeup } from "../../../../context/makeup-context";
-import { LipColorProvider, useLipColorContext } from "./lip-color-context";
+import { useLipColorContext } from "./lip-color-context";
 
+import { Product } from "../../../../api/shared";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
-import { useLipColorQuery } from "./lip-color-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 
-export function LipColorSelector() {
+export function SingleLipColorSelector({ product }: { product: Product }) {
   return (
-    <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
       <div>
-        <FamilyColorSelector />
-
-        <ColorSelector />
+        <ColorSelector product={product} />
       </div>
 
-      <TextureSelector />
+      <TextureSelector product={product} />
 
-      <ShadesSelector />
+      <ShadesSelector product={product} />
 
-      <ProductList />
+      <ProductList product={product} />
     </div>
   );
 }
 
-function FamilyColorSelector() {
-  const { colorFamily, setColorFamily } = useLipColorContext();
-
-  return (
-    <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
-      data-mode="lip-color"
-    >
-      {colors.map((item, index) => (
-        <button
-          type="button"
-          className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
-            {
-              "border-white/80": colorFamily === item.value,
-            },
-          )}
-          onClick={() => setColorFamily(item.value)}
-        >
-          <div
-            className="size-2.5 shrink-0 rounded-full"
-            style={{
-              background: item.hex,
-            }}
-          />
-          <span className="text-sm">{item.label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ColorSelector() {
+function ColorSelector({ product }: { product: Product }) {
   const {
     setLipColors,
     setLipColorMode,
@@ -105,27 +69,17 @@ function ColorSelector() {
     setShowLipColor(false);
   };
 
-  const { data } = useLipColorQuery({
-    color: colorFamily,
-    sub_color: null,
-    texture: null,
-  });
-
-  if (!colorFamily) {
-    return null;
-  }
-
   const extracted_sub_colors = extractUniqueCustomAttributes(
-    data?.items ?? [],
+    [product],
     "hexacode",
-  );
+  ).flatMap((color) => color.split(","));
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
           <Icons.empty className="size-10" />
@@ -150,11 +104,16 @@ function ColorSelector() {
   );
 }
 
-function TextureSelector() {
+function TextureSelector({ product }: { product: Product }) {
   const { selectedTexture, setSelectedTexture } = useLipColorContext();
+
+  const productTextures = extractUniqueCustomAttributes([product], "texture");
+
+  const textures = filterTexturesByValue(productTextures);
+
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.label}
@@ -184,7 +143,7 @@ function TextureSelector() {
 
 const shades = ["One", "Dual", "Ombre"];
 
-function ShadesSelector() {
+function ShadesSelector({ product }: { product: Product }) {
   const { setSelectedMode, selectedMode, setSelectedColors, setReplaceIndex } =
     useLipColorContext();
   const { setLipColorMode, lipColors, setLipColors } = useMakeup();
@@ -207,8 +166,8 @@ function ShadesSelector() {
   }
 
   return (
-    <div className="w-full py-2 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {shades.map((shade, index) => (
           <button
             key={shade}
@@ -237,24 +196,12 @@ function ShadesSelector() {
   );
 }
 
-function ProductList() {
-  const { colorFamily, selectedTexture, selectedColors } = useLipColorContext();
-
-  const { data, isLoading } = useLipColorQuery({
-    color: colorFamily,
-    sub_color: selectedColors[0],
-    texture: selectedTexture,
-  });
-
+function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
-      {isLoading ? (
-        <LoadingProducts />
-      ) : (
-        data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
-        })
-      )}
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+      {[product].map((product, index) => {
+        return <VTOProductCard product={product} key={product.id} />;
+      })}
     </div>
   );
 }

@@ -26,3 +26,9 @@ export function filterOccasions(selectedOccasions: string[]) {
     return selectedOccasions.includes(occasion.label);
   });
 }
+
+export function filterOccasionsByValue(selectedOccasions: string[]) {
+  return occasions.filter((occasion) => {
+    return selectedOccasions.includes(occasion.value);
+  });
+}
