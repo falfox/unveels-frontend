@@ -34,7 +34,11 @@ import { TopNavigation } from "./virtual-try-on";
 import { Scanner } from "../components/scanner";
 import * as tf from "@tensorflow/tfjs-core";
 import * as tflite from "@tensorflow/tfjs-tflite";
-import { loadTFLiteModel } from "../utils/tfliteInference";
+import {
+  loadTFLiteModel,
+  preprocessTFLiteImage,
+  runTFLiteInference,
+} from "../utils/tfliteInference";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { ModelLoadingScreen } from "../components/model-loading-screen";
@@ -138,13 +142,30 @@ function MainContent() {
             modelPersonalityFinderRef.current &&
             faceLandmarkerRef.current
           ) {
-            const personalityResult: Classifier[] = await personalityInference(
-              modelFaceShapeRef.current,
-              modelPersonalityFinderRef.current,
-              faceLandmarkerRef.current,
+            // Preprocess gambar
+            const preprocessedImage = await preprocessTFLiteImage(
               criterias.capturedImage,
               224,
               224,
+            );
+            const predFaceShape = await runTFLiteInference(
+              modelFaceShapeRef.current,
+              preprocessedImage,
+              224,
+              224,
+            );
+            const predPersonality = await runTFLiteInference(
+              modelPersonalityFinderRef.current,
+              preprocessedImage,
+              224,
+              224,
+            );
+
+            const personalityResult: Classifier[] = await personalityInference(
+              faceLandmarkerRef.current,
+              predFaceShape,
+              predPersonality,
+              criterias.capturedImage,
             );
             setInferenceResult(personalityResult);
             setIsInferenceFinished(true);

@@ -20,6 +20,7 @@
     "@techstark/opencv-js": "^4.10.0-release.1",
     "@tensorflow/tfjs-backend-cpu": "^3.20.0",
     "@tensorflow/tfjs-backend-wasm": "^3.20.0",
+    "@tensorflow/tfjs-backend-webgl": "^3.20.0",
     "@tensorflow/tfjs-tflite": "^0.0.1-alpha.9",
     "@types/d3-contour": "^3.0.6",
     "@types/three": "^0.169.0",

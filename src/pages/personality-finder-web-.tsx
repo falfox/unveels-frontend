@@ -9,9 +9,14 @@ import { InferenceProvider } from "../context/inference-context";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import * as tf from "@tensorflow/tfjs-core";
 import * as tflite from "@tensorflow/tfjs-tflite";
-import { loadTFLiteModel } from "../utils/tfliteInference";
+import {
+  loadTFLiteModel,
+  preprocessTFLiteImage,
+  runTFLiteInference,
+} from "../utils/tfliteInference";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { ModelLoadingScreen } from "../components/model-loading-screen";
+import { Scanner } from "../components/scanner";
 
 export function PersonalityFinderWeb() {
   return (
@@ -36,7 +41,6 @@ function MainContent() {
     null,
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isModelLoad, setIsModelLoad] = useState<boolean>(false);
   const [inferenceError, setInferenceError] = useState<string | null>(null);
   const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
 
@@ -77,15 +81,19 @@ function MainContent() {
     async () => {
       // Warmup for modelFaceShape
       if (modelFaceShapeRef.current) {
-        modelFaceShapeRef.current.predict(
+        const warmupFace = modelFaceShapeRef.current.predict(
           tf.zeros([1, 224, 224, 3], "float32"),
         );
+
+        tf.dispose([warmupFace]);
       }
       // Warmup for modelPersonalityFinder
       if (modelPersonalityFinderRef.current) {
-        modelPersonalityFinderRef.current.predict(
+        const warmupPersonality = modelPersonalityFinderRef.current.predict(
           tf.zeros([1, 224, 224, 3], "float32"),
         );
+
+        tf.dispose([warmupPersonality]);
       }
     },
   ];
@@ -125,13 +133,30 @@ function MainContent() {
             modelPersonalityFinderRef.current &&
             faceLandmarkerRef.current
           ) {
-            const personalityResult: Classifier[] = await personalityInference(
-              modelFaceShapeRef.current,
-              modelPersonalityFinderRef.current,
-              faceLandmarkerRef.current,
+            // Preprocess gambar
+            const preprocessedImage = await preprocessTFLiteImage(
               criterias.capturedImage,
               224,
               224,
+            );
+            const predFaceShape = await runTFLiteInference(
+              modelFaceShapeRef.current,
+              preprocessedImage,
+              224,
+              224,
+            );
+            const predPersonality = await runTFLiteInference(
+              modelPersonalityFinderRef.current,
+              preprocessedImage,
+              224,
+              224,
+            );
+
+            const personalityResult: Classifier[] = await personalityInference(
+              faceLandmarkerRef.current,
+              predFaceShape,
+              predPersonality,
+              criterias.capturedImage,
             );
             setInferenceResult(personalityResult);
 
@@ -185,7 +210,13 @@ function MainContent() {
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
         <div className="absolute inset-0">
-          <VideoStream debugMode={false} />
+          {criterias.isCaptured ? (
+            <Scanner />
+          ) : (
+            <>
+              <VideoStream debugMode={false} />
+            </>
+          )}
           <div
             className="absolute inset-0"
             style={{

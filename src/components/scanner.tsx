@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useCamera } from "../context/recorder-context";
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export function Scanner() {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Memuat gambar ketika capturedImage berubah
   useEffect(() => {
     if (criterias.capturedImage) {
       const image = new Image();
@@ -18,7 +16,6 @@ export function Scanner() {
     }
   }, [criterias.capturedImage]);
 
-  // Animasi Scanner dengan `requestAnimationFrame`
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !imageLoaded) return;
@@ -30,7 +27,8 @@ export function Scanner() {
     }
 
     let scanPosition = 0;
-    let direction = 1; // 1 untuk turun, -1 untuk naik
+    let direction = 1;
+    let animationId: number;
 
     const animateScanner = () => {
       const { innerWidth: width, innerHeight: height } = window;
@@ -40,7 +38,6 @@ export function Scanner() {
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
 
-      // Hitung ukuran dan posisi gambar
       const imgAspect = imageLoaded.naturalWidth / imageLoaded.naturalHeight;
       const canvasAspect = width / height;
       let drawWidth, drawHeight, offsetX, offsetY;
@@ -57,54 +54,41 @@ export function Scanner() {
         offsetY = 0;
       }
 
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.drawImage(
-        imageLoaded,
-        -offsetX - drawWidth,
-        offsetY,
-        drawWidth,
-        drawHeight,
-      );
-      ctx.restore();
+      ctx.drawImage(imageLoaded, offsetX, offsetY, drawWidth, drawHeight);
 
-      // Gambar animasi scanning (lapisan bawah hijau neon)
       ctx.fillStyle = "rgba(0, 255, 0, 0.6)";
       ctx.shadowBlur = 20;
       ctx.shadowColor = "rgba(0, 255, 0, 1)";
       ctx.fillRect(0, scanPosition, width, 15);
 
-      // Reset shadow sebelum menggambar lapisan atas
       ctx.shadowBlur = 0;
       ctx.shadowColor = "transparent";
 
-      // Gambar lapisan atas (garis putih di tengah)
       ctx.fillStyle = "white";
       ctx.fillRect(0, scanPosition + 3, width, 9);
 
-      // Update posisi scanner
       scanPosition += 5 * direction;
       if (scanPosition >= height - 15 || scanPosition <= 0) {
-        direction *= -1; // Balik arah
+        direction *= -1;
       }
 
-      requestAnimationFrame(animateScanner); // Panggil ulang untuk animasi berikutnya
+      animationId = requestAnimationFrame(animateScanner);
     };
 
     animateScanner();
 
-    return () => cancelAnimationFrame(animateScanner);
+    return () => cancelAnimationFrame(animationId);
   }, [imageLoaded, canvasRef]);
 
   return (
     <div
       className="fixed inset-0 flex items-center justify-center"
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 1000 }} // Set zIndex lebih tinggi
     >
       <canvas
         ref={canvasRef}
         className="absolute left-0 top-0 h-full w-full"
-        style={{ zIndex: 100 }}
+        style={{ zIndex: 1000 }} // Pastikan canvas berada di atas
       />
     </div>
   );

@@ -185,6 +185,9 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
                 setPosition({ x: 0, y: 0 });
                 setOrientation({ yaw: 0, pitch: 0 });
                 setLighting(0);
+                console.log(position);
+                console.log(orientation);
+                console.log(lighting);
               }
 
               // Calculate Brightness
@@ -453,11 +456,15 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
 
     const isPositionGood =
       Math.abs(position.x) < POSITION_THRESHOLD_X &&
-      Math.abs(position.y) < POSITION_THRESHOLD_Y;
+      Math.abs(position.x) > 0 &&
+      Math.abs(position.y) < POSITION_THRESHOLD_Y &&
+      Math.abs(position.y) > 0;
 
     const isOrientationGood =
       Math.abs(orientation.yaw) < ORIENTATION_THRESHOLD_YAW &&
-      Math.abs(orientation.pitch) < ORIENTATION_THRESHOLD_PITCH;
+      Math.abs(orientation.yaw) > 0 &&
+      Math.abs(orientation.pitch) < ORIENTATION_THRESHOLD_PITCH &&
+      Math.abs(orientation.pitch) > 0;
 
     setCriterias({
       lighting: isBrightnessGood,
@@ -494,9 +501,9 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
           );
           captureImage(imageSrc);
           captureImageCut(croppedImage);
-          setCapturedImageSrc(imageSrc); // Set the captured image
-          setCroppedImageSrc(croppedImage); // Optional: Set cropped image
-          stopDetection(); // Optionally stop detection after capture
+          setCapturedImageSrc(imageSrc);
+          setCroppedImageSrc(croppedImage);
+          stopDetection();
         } catch (error) {
           console.error("Error cropping image:", error);
         }
@@ -601,18 +608,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             alt="Captured"
             className="h-full w-full object-cover"
           />
-          {/* Button to Retake Photo */}
-          <button
-            onClick={() => {
-              setCapturedImageSrc(null);
-              startDetection();
-              resetCapture(); // Restart detection if needed
-            }}
-            className="absolute bottom-4 left-4 rounded bg-gray-700 px-4 py-2 text-white"
-            aria-label="Retake Photo"
-          >
-            Retake Photo
-          </button>
         </div>
       ) : (
         <>

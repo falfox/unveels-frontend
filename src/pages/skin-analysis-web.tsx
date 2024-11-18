@@ -20,6 +20,7 @@ import * as tflite from "@tensorflow/tfjs-tflite";
 import { loadTFLiteModel } from "../utils/tfliteInference";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { ModelLoadingScreen } from "../components/model-loading-screen";
+import { Scanner } from "../components/scanner";
 
 export function SkinAnalysisWeb() {
   return (
@@ -38,7 +39,6 @@ export function SkinAnalysisWeb() {
 function Main() {
   const { criterias } = useCamera();
 
-  // Menggunakan useRef untuk model
   const modelSkinAnalysisRef = useRef<tflite.TFLiteModel | null>(null);
 
   const {
@@ -64,9 +64,12 @@ function Main() {
     },
     async () => {
       if (modelSkinAnalysisRef.current) {
-        modelSkinAnalysisRef.current.predict(
+        console.log("warming up model");
+
+        const warmupModel = await modelSkinAnalysisRef.current.predict(
           tf.zeros([1, 640, 640, 3], "float32"),
         );
+        tf.dispose([warmupModel]);
       }
     },
   ];
@@ -104,17 +107,12 @@ function Main() {
                 criterias.capturedImage,
                 modelSkinAnalysisRef.current,
               );
-
             if (skinAnalysisResult) {
               console.log("Skin Analysis Result:", skinAnalysisResult[1]);
-
-              // Konversi hasil ke JSON untuk log/debug
               const resultString = JSON.stringify(skinAnalysisResult[1]);
               console.log("Skin Analysis Result as JSON:", resultString);
-
               setInferenceResult(skinAnalysisResult[0]);
               setSkinAnalysisResult(skinAnalysisResult[1]);
-
               if ((window as any).flutter_inappwebview) {
                 (window as any).flutter_inappwebview
                   .callHandler("detectionResult", resultString)
@@ -150,7 +148,7 @@ function Main() {
     };
 
     faceAnalyzerInference();
-  }, [criterias.isCaptured, criterias.capturedImage]);
+  }, [criterias.capturedImage]);
 
   return (
     <>
@@ -161,14 +159,22 @@ function Main() {
             <SkinAnalysisScene data={inferenceResult} />
           ) : (
             <>
-              <VideoStream />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-                  zIndex: 0,
-                }}
-              ></div>
+              {criterias.isCaptured ? (
+                <>
+                  <Scanner />
+                </>
+              ) : (
+                <>
+                  <VideoStream />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                      zIndex: 0,
+                    }}
+                  ></div>
+                </>
+              )}
             </>
           )}
         </div>
