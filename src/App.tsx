@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 import {
-  createBrowserRouter,
   createMemoryRouter,
   Link,
-  RouterProvider,
+  RouterProvider
 } from "react-router-dom";
 import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
@@ -15,7 +14,6 @@ import { FindTheLookWeb } from "./pages/find-the-look-web";
 import { PersonalityFinder } from "./pages/personality-finder";
 import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
 import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
-import { SingleVirtualTryOnDetail } from "./pages/single-virtual-try-on-detail";
 import { SkinAnalysis } from "./pages/skin-analysis";
 import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
 import { SkinToneFinder } from "./pages/skin-tone-finder";
@@ -159,9 +157,13 @@ function Home() {
   );
 }
 function App() {
-  const router = createMemoryRouter(routes, {
-    initialEntries: [window.__INITIAL_ROUTE__ || "/"],
-  });
+  const router = import.meta.env.DEV
+    ? createMemoryRouter(routes, {
+        initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+      })
+    : createMemoryRouter(routes, {
+        initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+      });
   return <RouterProvider router={router} />;
 }
 
