@@ -15,9 +15,12 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Link, useNavigate } from "react-router-dom";
 
 import clsx from "clsx";
-import { useSearchParams } from "react-router-dom";
 import {
-  eye_makeup_product_types,
+  handAccessoriesProductTypeFilter,
+  headAccessoriesProductTypeFilter,
+  neckAccessoriesProductTypeFilter,
+} from "../api/attributes/accessories";
+import {
   faceMakeupProductTypesFilter,
   getEyeMakeupProductTypeIds,
   getFaceMakeupProductTypeIds,
@@ -32,6 +35,7 @@ import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
 import { AccesoriesProvider } from "../context/accesories-context";
 import { MakeupProvider } from "../context/makeup-context";
 import { CameraProvider, useCamera } from "../context/recorder-context";
+import { useVirtualTryOnProduct } from "../context/virtual-try-on-product-context";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
 import { VirtualTryOnProvider } from "./virtual-try-on";
@@ -54,19 +58,14 @@ import { SingleEarringsSelector } from "./vto/head-accesories/earrings/earrings-
 import { SingleGlassesSelector } from "./vto/head-accesories/glasses/glasses-single";
 import { SingleHatsSelector } from "./vto/head-accesories/hats/hats-single";
 import { SingleHeadbandSelector } from "./vto/head-accesories/headband/headband-single";
+import { SingleTiaraSelector } from "./vto/head-accesories/tiaras/tiaras-single";
+import { SingleLipColorSelector } from "./vto/lips/lip-color/lip-color-single";
 import { SingleLipLinerSelector } from "./vto/lips/lip-liner/lip-liner-single";
 import { SingleLipPlumperSelector } from "./vto/lips/lip-plumper/lip-plumper-single";
 import { SingleNailPolishSelector } from "./vto/nails/nail-polish/nail-polish-single";
 import { SinglePressOnNailsSelector } from "./vto/nails/press-on-nails/press-on-nails-single";
 import { SingleNeckwearSelector } from "./vto/neck-accessories/neckwear/neckwear-single";
 import { SingleScarvesSelector } from "./vto/neck-accessories/scarves/scarves-single";
-import { SingleTiaraSelector } from "./vto/head-accesories/tiaras/tiaras-single";
-import { SingleLipColorSelector } from "./vto/lips/lip-color/lip-color-single";
-import {
-  handAccessoriesProductTypeFilter,
-  headAccessoriesProductTypeFilter,
-  neckAccessoriesProductTypeFilter,
-} from "../api/attributes/accessories";
 
 export const productTypeCheckers = {
   isLipColorProduct: (data: Product) => {
@@ -213,21 +212,24 @@ export const productTypeCheckers = {
 
 export function SingleVirtualTryOn() {
   const [selectedSKU, setSelectedSKU] = useState<Product | null>(null);
-  const [searchParams] = useSearchParams();
+  const { skus } = useVirtualTryOnProduct();
 
-  const param = searchParams.get("sku") || "";
-  const skus = param.split(",");
-
-  const { data } = useMultipleProductsQuery({
+  const { data, isLoading } = useMultipleProductsQuery({
     skus: skus,
   });
 
-  console.log({
-    data,
-  });
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">Loading...</div>
+    );
+  }
 
   if (!data?.length) {
-    return null;
+    return (
+      <div className="flex h-full items-center justify-center">
+        No products found
+      </div>
+    );
   }
 
   return (
@@ -275,8 +277,8 @@ export function SKUSelector({
   onSelect: (selectedSKUs: string) => void;
 }) {
   return (
-    <div className="pointer-events-none fixed inset-y-0 left-0 z-[99] flex flex-col items-center justify-center [&_button]:pointer-events-auto">
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-black/25 p-4 backdrop-blur-3xl">
+    <div className="pointer-events-none fixed inset-y-0 left-0 z-10 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
+      <div className="flex h-full max-h-64 flex-col items-center justify-center gap-4 overflow-y-auto rounded-lg bg-black/25 p-4 backdrop-blur-3xl">
         <div className="flex flex-col items-center justify-center gap-4">
           {skus.map((sku) => {
             const imageUrl = mediaUrl(sku.media_gallery_entries[0].file);

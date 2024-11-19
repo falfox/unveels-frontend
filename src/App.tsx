@@ -77,7 +77,6 @@ const routes = [
   {
     path: "/virtual-try-on-product",
     element: <SingleVirtualTryOn />,
-    // children: [{ path: ":sku", element: <SingleVirtualTryOnDetail /> }],
   },
   {
     path: "/virtual-try-on",
@@ -134,11 +133,6 @@ const routes = [
   },
 ];
 
-// Create a memory router instance
-const router = createBrowserRouter(routes, {
-  // initialEntries: [window.__INITIAL_ROUTE__ || "/"],
-});
-
 function Home() {
   useCategoriesQuerySuspense();
   useBrandsQuerySuspense();
@@ -165,6 +159,9 @@ function Home() {
   );
 }
 function App() {
+  const router = createMemoryRouter(routes, {
+    initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+  });
   return <RouterProvider router={router} />;
 }
 
