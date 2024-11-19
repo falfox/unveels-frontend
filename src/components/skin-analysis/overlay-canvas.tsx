@@ -236,7 +236,7 @@ function OverlayCanvas({
           // Draw label text
           ctx.font = "12px Arial";
           ctx.fillStyle = "white";
-          ctx.fillText(dataItem.label, labelX, labelY - 5);
+          ctx.fillText(t(`skinlabel.${dataItem.label}`), labelX, labelY - 5);
 
           // Draw underline for label text
           const textWidth = ctx.measureText(dataItem.label).width;

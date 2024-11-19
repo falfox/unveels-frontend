@@ -337,25 +337,27 @@
     "recomend": "Recommended Products",
     "score": "Score",
     "addcart": "ADD TO CART",
-    "seeimprovement": "SEE IMPROVEMENT"
+    "seeimprovement": "SEE IMPROVEMENT",
+    "Less": "Less",
+    "Readmore": "Read More"
   },
   "skinlabel": {
     "radiance": "radiance",
     "texture": "texture",
-    "moistures": "moistures",
+    "moisture": "moisture",
     "whitehead": "whitehead",
     "blackhead": "blackhead",
     "acne": "acne",
     "spots": "spots",
-    "pore": "pore",
+    "pores": "pores",
     "wrinkles": "wrinkles",
-    "droopy eyelid upper": "droopy eyelid upper",
-    "droopy eyelid lower": "droopy eyelid lower",
-    "eyebag": "eyebag",
-    "skinredness": "skinredness",
+    "droopy upper eyelid": "droopy upper eyelid",
+    "droopy lower eyelid": "droopy lower eyelid",
+    "eyebags": "eyebags",
+    "redness": "redness",
     "oily": "oily",
     "firmness": "firmness",
-    "dark circles": "dark circle",
+    "dark circles": "dark circles",
     "dry": "dry"
   }
 }
