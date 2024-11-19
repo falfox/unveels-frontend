@@ -1,7 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Footer } from "../components/footer";
 import { VideoStream } from "../components/recorder/video-stream";
-import SkinAnalysisScene from "../components/skin-analysis/skin-analysis-scene";
 import {
   InferenceProvider,
   useInferenceContext,
@@ -21,6 +20,7 @@ import { loadTFLiteModel } from "../utils/tfliteInference";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { ModelLoadingScreen } from "../components/model-loading-screen";
 import { Scanner } from "../components/scanner";
+import SkinAnalysisScene from "../components/skin-analysis/skin-analysis-scene";
 
 export function SkinAnalysisWeb() {
   return (
@@ -55,6 +55,10 @@ function Main() {
 
   const { setSkinAnalysisResult } = useSkinAnalysis();
 
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
+
   const steps = [
     async () => {
       const model = await loadTFLiteModel(
@@ -86,7 +90,12 @@ function Main() {
 
   useEffect(() => {
     const faceAnalyzerInference = async () => {
-      if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
+      if (
+        criterias.isCaptured &&
+        criterias.capturedImage &&
+        !isLoading &&
+        !isInferenceCompleted
+      ) {
         if ((window as any).flutter_inappwebview) {
           (window as any).flutter_inappwebview
             .callHandler("detectionRun", "Detection Running Skin Analysis")
@@ -97,9 +106,14 @@ function Main() {
               console.error("Error calling Flutter handler:", error);
             });
         }
+
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
+
+        // Tambahkan delay sebelum inferensi
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         try {
           if (modelSkinAnalysisRef.current) {
             const skinAnalysisResult: [FaceResults[], SkinAnalysisResult[]] =
@@ -107,12 +121,16 @@ function Main() {
                 criterias.capturedImage,
                 modelSkinAnalysisRef.current,
               );
+
             if (skinAnalysisResult) {
               console.log("Skin Analysis Result:", skinAnalysisResult[1]);
               const resultString = JSON.stringify(skinAnalysisResult[1]);
               console.log("Skin Analysis Result as JSON:", resultString);
+
               setInferenceResult(skinAnalysisResult[0]);
               setSkinAnalysisResult(skinAnalysisResult[1]);
+              setIsInferenceCompleted(true);
+
               if ((window as any).flutter_inappwebview) {
                 (window as any).flutter_inappwebview
                   .callHandler("detectionResult", resultString)
@@ -122,6 +140,10 @@ function Main() {
                   .catch((error: any) => {
                     console.error("Error calling Flutter handler:", error);
                   });
+
+                setTimeout(() => {
+                  setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
+                }, 2000);
               }
             }
           }
@@ -148,35 +170,41 @@ function Main() {
     };
 
     faceAnalyzerInference();
-  }, [criterias.capturedImage]);
+  }, [criterias.isCaptured, criterias.capturedImage]);
 
   return (
     <>
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
         <div className="absolute inset-0">
-          {!isLoading && inferenceResult != null ? (
-            <SkinAnalysisScene data={inferenceResult} />
-          ) : (
-            <>
-              {criterias.isCaptured ? (
-                <>
-                  <Scanner />
-                </>
-              ) : (
-                <>
-                  <VideoStream />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-                      zIndex: 0,
-                    }}
-                  ></div>
-                </>
-              )}
-            </>
-          )}
+          <>
+            {!isLoading && inferenceResult != null ? (
+              <SkinAnalysisScene data={inferenceResult} />
+            ) : (
+              <>
+                {criterias.isCaptured ? (
+                  <>
+                    {showScannerAfterInference || !isInferenceCompleted ? (
+                      <Scanner />
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <VideoStream />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                        zIndex: 0,
+                      }}
+                    ></div>
+                  </>
+                )}
+              </>
+            )}
+          </>
         </div>
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">

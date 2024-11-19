@@ -243,25 +243,6 @@ export const personalityInference = async (
     | tf.NamedTensorMap,
   imageData: string,
 ): Promise<Classifier[]> => {
-  classifiers.forEach(async (classifier) => {
-    const classifierTensor = pred[classifier.outputName];
-    const classifierData = await classifierTensor.data();
-    const label = classifier.labels[findMaxIndexFaceAanalyzer(classifierData)];
-    classifier.outputLabel = label;
-  });
-
-  const classifierPersonalityData = await predPersonality.data();
-  const labelPersonality =
-    classifiers[15].labels[findMaxIndex(classifierPersonalityData)];
-
-  classifiers[15].outputLabel = labelPersonality;
-  classifiers[15].outputData = classifierPersonalityData;
-
-  classifiers[15].outputScore =
-    classifierPersonalityData[findMaxIndex(classifierPersonalityData)];
-
-  classifiers[15].outputIndex = findMaxIndex(classifierPersonalityData);
-
   try {
     // Konversi base64 ke Image
     const image: HTMLImageElement = await base64ToImage(imageData);
@@ -285,9 +266,25 @@ export const personalityInference = async (
     // Deteksi landmark wajah
     const results = faceLandmarker.detect(imageDataCanvas);
 
-    if (!results || results.faceLandmarks[0].length === 0) {
-      throw new Error("Tidak ada wajah yang terdeteksi.");
-    }
+    classifiers.forEach(async (classifier) => {
+      const classifierTensor = pred[classifier.outputName];
+      const classifierData = await classifierTensor.data();
+      const label =
+        classifier.labels[findMaxIndexFaceAanalyzer(classifierData)];
+      classifier.outputLabel = label;
+    });
+
+    const classifierPersonalityData = await predPersonality.data();
+    const labelPersonality =
+      classifiers[15].labels[findMaxIndex(classifierPersonalityData)];
+
+    classifiers[15].outputLabel = labelPersonality;
+    classifiers[15].outputData = classifierPersonalityData;
+
+    classifiers[15].outputScore =
+      classifierPersonalityData[findMaxIndex(classifierPersonalityData)];
+
+    classifiers[15].outputIndex = findMaxIndex(classifierPersonalityData);
 
     const landmarks = results.faceLandmarks[0];
 

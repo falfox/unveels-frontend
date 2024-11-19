@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useCamera } from "../../context/recorder-context";
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import { FaceLandmarker } from "@mediapipe/tasks-vision";
 import { Canvas } from "@react-three/fiber";
 import { useSkinColor } from "./skin-color-context"; // Pastikan path ini benar
 import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
 import SkinToneFinderThreeScene from "./skin-tone-finder-three-scene";
-import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
+import { SRGBColorSpace } from "three";
 import { useMakeup } from "../../context/makeup-context";
 import { Rnd } from "react-rnd";
-import html2canvas from "html2canvas";
 import { useInferenceContext } from "../../context/inference-context";
+import { Scanner } from "../scanner";
 
 // Komponen Canvas untuk menggambar gambar di atas
 interface ImageCanvasProps {
@@ -116,14 +116,11 @@ function SkinToneFinderInnerScene({
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const divRef = useRef<HTMLCanvasElement>(null);
 
-  const [isTextureLoaded, setIsTextureLoaded] = useState<boolean>(false);
-
   const { setIsInferenceFinished } = useInferenceContext();
 
-  // Handler untuk mengatur status pemuatan tekstur
-  const handleTextureLoaded = () => {
-    setIsTextureLoaded(true);
-  };
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
 
   // Memuat gambar ketika capturedImage berubah
   useEffect(() => {
@@ -163,6 +160,9 @@ function SkinToneFinderInnerScene({
             });
         }
         try {
+          // Tambahkan delay sebelum inferensi
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
           const results = await faceLandmarker.detect(imageLoaded);
           if (results && results.faceLandmarks.length > 0) {
             // Asumsikan wajah pertama
@@ -192,6 +192,7 @@ function SkinToneFinderInnerScene({
             );
 
             setIsInferenceFinished(true);
+            setIsInferenceCompleted(true);
 
             // for flutter webView
             if (extractedSkinColor) {
@@ -212,6 +213,10 @@ function SkinToneFinderInnerScene({
                     console.error("Error calling Flutter handler:", error);
                   });
               }
+
+              setTimeout(() => {
+                setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
+              }, 3000);
             }
           }
         } catch (error) {
@@ -241,63 +246,83 @@ function SkinToneFinderInnerScene({
   }
 
   return (
-    <div className="fixed inset-0 flex">
-      {/* Render kondisional overlay canvas */}
-      {/* Overlay Canvas */}
-      <Rnd
-        style={{
-          display: criterias.isCompare ? "flex" : "none",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#f0f0f0",
-          zIndex: 9999,
-          position: "absolute",
-          left: 0,
-          top: 0,
-          height: "100%",
-          width: "50%",
-          overflow: "hidden",
-          borderRight: "2px solid black",
-        }}
-        default={{
-          x: 0,
-          y: 0,
-          width: "50%",
-          height: "100%",
-        }}
-        enableResizing={{
-          top: false,
-          right: true,
-          bottom: false,
-          left: false,
-        }}
-        disableDragging={true}
-      >
-        <canvas
-          ref={overlayCanvasRef}
-          className="pointer-events-none absolute left-0 top-0 h-full w-screen"
-          style={{ zIndex: 50 }}
-        >
-          {/* Komponen untuk menggambar gambar di overlay canvas */}
-          <ImageCanvas image={imageLoaded} canvasRef={overlayCanvasRef} />
-        </canvas>
-      </Rnd>
+    <>
+      {criterias.isCaptured ? (
+        <>
+          {showScannerAfterInference || !isInferenceCompleted ? (
+            <Scanner />
+          ) : (
+            <div className="fixed inset-0 flex">
+              {/* Render kondisional overlay canvas */}
+              {/* Overlay Canvas */}
+              <Rnd
+                style={{
+                  display: criterias.isCompare ? "flex" : "none",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#f0f0f0",
+                  zIndex: 9999,
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  height: "100%",
+                  width: "50%",
+                  overflow: "hidden",
+                  borderRight: "2px solid black",
+                }}
+                default={{
+                  x: 0,
+                  y: 0,
+                  width: "50%",
+                  height: "100%",
+                }}
+                enableResizing={{
+                  top: false,
+                  right: true,
+                  bottom: false,
+                  left: false,
+                }}
+                disableDragging={true}
+              >
+                <canvas
+                  ref={overlayCanvasRef}
+                  className="pointer-events-none absolute left-0 top-0 h-full w-screen"
+                  style={{ zIndex: 50 }}
+                >
+                  {/* Komponen untuk menggambar gambar di overlay canvas */}
+                  <ImageCanvas
+                    image={imageLoaded}
+                    canvasRef={overlayCanvasRef}
+                  />
+                </canvas>
+              </Rnd>
 
-      {/* 3D Canvas */}
-      <Canvas
-        className="absolute left-0 top-0 h-full w-full"
-        ref={divRef}
-        style={{ zIndex: 0 }}
-        orthographic
-        camera={{ zoom: 1, position: [0, 0, 10], near: -1000, far: 1000 }}
-        gl={{ toneMapping: 1, outputColorSpace: SRGBColorSpace }}
-      >
-        <SkinToneFinderThreeScene
-          imageSrc={criterias.capturedImage}
-          landmarks={landmarksRef} // Pass landmarksRef.current
-        />
-      </Canvas>
-    </div>
+              {/* 3D Canvas */}
+              <Canvas
+                className="absolute left-0 top-0 h-full w-full"
+                ref={divRef}
+                style={{ zIndex: 0 }}
+                orthographic
+                camera={{
+                  zoom: 1,
+                  position: [0, 0, 10],
+                  near: -1000,
+                  far: 1000,
+                }}
+                gl={{ toneMapping: 1, outputColorSpace: SRGBColorSpace }}
+              >
+                <SkinToneFinderThreeScene
+                  imageSrc={criterias.capturedImage}
+                  landmarks={landmarksRef} // Pass landmarksRef.current
+                />
+              </Canvas>
+            </div>
+          )}
+        </>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }
 

@@ -7,7 +7,7 @@ import {
   StopCircle,
   X,
 } from "lucide-react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useSkincareProductQuery } from "../api/skin-care";
 import { CircularProgressRings } from "../components/circle-progress-rings";
 import { Footer } from "../components/footer";
@@ -39,6 +39,7 @@ import * as tflite from "@tensorflow/tfjs-tflite";
 import { loadTFLiteModel } from "../utils/tfliteInference";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { ModelLoadingScreen } from "../components/model-loading-screen";
+import { Scanner } from "../components/scanner";
 
 export function SkinAnalysis() {
   return (
@@ -57,8 +58,7 @@ export function SkinAnalysis() {
 function Main() {
   const { criterias } = useCamera();
 
-  const [modelSkinAnalysis, setModelSkinAnalysis] =
-    useState<tflite.TFLiteModel | null>(null);
+  const modelSkinAnalysisRef = useRef<tflite.TFLiteModel | null>(null);
 
   const {
     isLoading,
@@ -72,18 +72,29 @@ function Main() {
   const [inferenceResult, setInferenceResult] = useState<FaceResults[] | null>(
     null,
   );
+
   const { setSkinAnalysisResult } = useSkinAnalysis();
+
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
 
   const steps = [
     async () => {
       const model = await loadTFLiteModel(
         "/models/skin-analysis/best_skin_float16.tflite",
       );
-      setModelSkinAnalysis(model);
+
+      modelSkinAnalysisRef.current = model;
     },
     async () => {
-      if (modelSkinAnalysis) {
-        modelSkinAnalysis.predict(tf.zeros([1, 640, 640, 3], "float32"));
+      if (modelSkinAnalysisRef.current) {
+        console.log("warming up model");
+
+        const warmupModel = await modelSkinAnalysisRef.current.predict(
+          tf.zeros([1, 640, 640, 3], "float32"),
+        );
+        tf.dispose([warmupModel]);
       }
     },
   ];
@@ -100,21 +111,36 @@ function Main() {
 
   useEffect(() => {
     const faceAnalyzerInference = async () => {
-      if (criterias.isCaptured && criterias.capturedImage && !isLoading) {
+      if (
+        criterias.isCaptured &&
+        criterias.capturedImage &&
+        !isLoading &&
+        !isInferenceCompleted
+      ) {
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
+
+        // Tambahkan delay sebelum inferensi
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         try {
-          if (modelSkinAnalysis) {
+          if (modelSkinAnalysisRef.current) {
             const skinAnalysisResult: [FaceResults[], SkinAnalysisResult[]] =
               await skinAnalysisInference(
                 criterias.capturedImage,
-                modelSkinAnalysis,
+                modelSkinAnalysisRef.current,
               );
 
             setInferenceResult(skinAnalysisResult[0]);
             setSkinAnalysisResult(skinAnalysisResult[1]);
+            setIsInferenceCompleted(true);
+
             console.log(skinAnalysisResult[1]);
+
+            setTimeout(() => {
+              setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
+            }, 2000);
           }
         } catch (error: any) {
           console.error("Inference error:", error);
@@ -136,26 +162,40 @@ function Main() {
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
         <div className="absolute inset-0">
-          {!isLoading && inferenceResult != null ? (
-            <SkinAnalysisScene data={inferenceResult} />
-          ) : (
-            <>
-              <VideoStream />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-                  zIndex: 0,
-                }}
-              ></div>
-            </>
-          )}
+          <>
+            {!isLoading && inferenceResult != null ? (
+              <SkinAnalysisScene data={inferenceResult} />
+            ) : (
+              <>
+                {criterias.isCaptured ? (
+                  <>
+                    {showScannerAfterInference || !isInferenceCompleted ? (
+                      <Scanner />
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <VideoStream />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                        zIndex: 0,
+                      }}
+                    ></div>
+                  </>
+                )}
+              </>
+            )}
+          </>
         </div>
         <RecorderStatus />
         <TopNavigation item={isInferenceFinished} />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-          <MainContent />
+          <MainContent isInferenceCompleted={isInferenceCompleted} />
           <Footer />
         </div>
       </div>
@@ -163,7 +203,11 @@ function Main() {
   );
 }
 
-function MainContent() {
+function MainContent({
+  isInferenceCompleted = false,
+}: {
+  isInferenceCompleted: boolean;
+}) {
   const { criterias } = useCamera();
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -193,7 +237,7 @@ function MainContent() {
     );
   }
 
-  return <BottomContent />;
+  return <BottomContent isInferenceCompleted={isInferenceCompleted} />;
 }
 
 const tabs = [
@@ -360,13 +404,17 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
   );
 }
 
-function BottomContent() {
+function BottomContent({
+  isInferenceCompleted = false,
+}: {
+  isInferenceCompleted: boolean;
+}) {
   const { criterias, setCriterias } = useCamera();
   const { view, setView } = useSkinAnalysis();
 
   if (criterias.isCaptured) {
     if (view === "face") {
-      return <ProblemResults />;
+      return <ProblemResults isInferenceCompleted={isInferenceCompleted} />;
     }
 
     if (view === "problems") {
@@ -391,21 +439,29 @@ function BottomContent() {
   return <VideoScene />;
 }
 
-function ProblemResults() {
+function ProblemResults({
+  isInferenceCompleted = false,
+}: {
+  isInferenceCompleted: boolean;
+}) {
   const { view, setView } = useSkinAnalysis();
   return (
     <>
-      <div className="absolute inset-x-0 bottom-32 flex items-center justify-center">
-        <button
-          type="button"
-          className="bg-black px-10 py-3 text-sm text-white"
-          onClick={() => {
-            setView("results");
-          }}
-        >
-          ANALYSIS RESULT
-        </button>
-      </div>
+      {isInferenceCompleted && (
+        <>
+          <div className="absolute inset-x-0 bottom-32 flex items-center justify-center">
+            <button
+              type="button"
+              className="bg-black px-10 py-3 text-sm text-white"
+              onClick={() => {
+                setView("results");
+              }}
+            >
+              ANALYSIS RESULT
+            </button>
+          </div>
+        </>
+      )}
     </>
   );
 }

@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ObjectDetector,
-  FilesetResolver,
   ObjectDetectorResult,
   FaceLandmarker,
 } from "@mediapipe/tasks-vision";
-import { FindTheLookItems } from "../../types/findTheLookItems";
 import { Landmark } from "../../types/landmark";
 import { extractSkinColor } from "../../utils/imageProcessing";
 import { useFindTheLookContext } from "../../context/find-the-look-context";
@@ -15,6 +13,7 @@ interface FindTheLookCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   isFlip?: boolean;
   onLabelClick?: (label: string | null, section: string | null) => void;
+  onDetectDone?: (isDetectFinished: boolean) => void;
   models: {
     faceLandmarker: FaceLandmarker | null;
     handDetector: ObjectDetector | null;
@@ -40,6 +39,7 @@ export function FindTheLookCanvas({
   image,
   canvasRef,
   isFlip = false,
+  onDetectDone,
   onLabelClick,
   models,
 }: FindTheLookCanvasProps) {
@@ -47,6 +47,10 @@ export function FindTheLookCanvas({
   const { findTheLookItems, addFindTheLookItem } = useFindTheLookContext();
 
   const hitboxesRef = useRef<Hitbox[]>([]);
+
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
 
   // Gunakan models dari props
   const {
@@ -96,6 +100,9 @@ export function FindTheLookCanvas({
         faceLandmarker
       ) {
         try {
+          // Tambahkan delay sebelum inferensi
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
           const resultsHand = await handDetector.detect(image);
           const resultsRing = await ringDetector.detect(image);
           const resultsNeck = await neckDetector.detect(image);
@@ -113,6 +120,15 @@ export function FindTheLookCanvas({
           setHeadResult(resultsHead);
           setMakeupResult(resultsMakeup);
           setFaceLandmark(resultsFaceLandmark.faceLandmarks[0] || null);
+
+          setIsInferenceCompleted(true);
+
+          setTimeout(() => {
+            setShowScannerAfterInference(false);
+            if (onDetectDone) {
+              onDetectDone(true);
+            }
+          }, 3000);
         } catch (error) {
           console.error("Error during detection: ", error);
         }
@@ -627,7 +643,7 @@ export function FindTheLookCanvas({
     headResult,
     makeupResult,
     faceLandmark,
-    isFlip, // Add isFlip as a dependency
+    isFlip,
   ]);
 
   // Handle click events on the canvas

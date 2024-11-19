@@ -72,6 +72,10 @@ function MainContent() {
     null,
   );
 
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
+
   const steps = [
     async () => {
       const vision = await FilesetResolver.forVisionTasks(
@@ -107,15 +111,21 @@ function MainContent() {
       modelPersonalityFinderRef.current = model;
     },
     async () => {
+      // Warmup for modelFaceShape
       if (modelFaceShapeRef.current) {
-        modelFaceShapeRef.current.predict(
+        const warmupFace = modelFaceShapeRef.current.predict(
           tf.zeros([1, 224, 224, 3], "float32"),
         );
+
+        tf.dispose([warmupFace]);
       }
+      // Warmup for modelPersonalityFinder
       if (modelPersonalityFinderRef.current) {
-        modelPersonalityFinderRef.current.predict(
+        const warmupPersonality = modelPersonalityFinderRef.current.predict(
           tf.zeros([1, 224, 224, 3], "float32"),
         );
+
+        tf.dispose([warmupPersonality]);
       }
     },
   ];
@@ -136,6 +146,10 @@ function MainContent() {
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
+
+        // Tambahkan delay sebelum inferensi
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         try {
           if (
             modelFaceShapeRef.current &&
@@ -148,6 +162,7 @@ function MainContent() {
               224,
               224,
             );
+
             const predFaceShape = await runTFLiteInference(
               modelFaceShapeRef.current,
               preprocessedImage,
@@ -169,6 +184,11 @@ function MainContent() {
             );
             setInferenceResult(personalityResult);
             setIsInferenceFinished(true);
+            setIsInferenceCompleted(true);
+
+            setTimeout(() => {
+              setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
+            }, 2000);
           }
         } catch (error: any) {
           setIsInferenceFinished(false);
@@ -186,7 +206,7 @@ function MainContent() {
     performInference();
   }, [criterias.isCaptured]);
 
-  if (inferenceResult) {
+  if (inferenceResult && !showScannerAfterInference) {
     return <Result inferenceResult={inferenceResult} />;
   }
 
@@ -195,13 +215,28 @@ function MainContent() {
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
         <div className="absolute inset-0">
-          <VideoStream debugMode={false} />
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-            }}
-          ></div>
+          <>
+            {criterias.isCaptured ? (
+              <>
+                {showScannerAfterInference || !isInferenceCompleted ? (
+                  <Scanner />
+                ) : (
+                  <></>
+                )}
+              </>
+            ) : (
+              <>
+                <VideoStream />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                    zIndex: 0,
+                  }}
+                ></div>
+              </>
+            )}
+          </>
         </div>
         <RecorderStatus />
         <TopNavigation cart={isInferenceFinished} />

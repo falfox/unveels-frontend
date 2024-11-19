@@ -44,6 +44,10 @@ function MainContent() {
   const [inferenceError, setInferenceError] = useState<string | null>(null);
   const [isInferenceRunning, setIsInferenceRunning] = useState<boolean>(false);
 
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
+
   const steps = [
     async () => {
       const vision = await FilesetResolver.forVisionTasks(
@@ -127,6 +131,10 @@ function MainContent() {
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
+
+        // Tambahkan delay sebelum inferensi
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         try {
           if (
             modelFaceShapeRef.current &&
@@ -158,7 +166,9 @@ function MainContent() {
               predPersonality,
               criterias.capturedImage,
             );
+
             setInferenceResult(personalityResult);
+            setIsInferenceCompleted(true);
 
             if (personalityResult != null) {
               console.log("Personality Result:", personalityResult);
@@ -178,6 +188,10 @@ function MainContent() {
                     console.error("Error calling Flutter handler:", error);
                   });
               }
+
+              setTimeout(() => {
+                setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
+              }, 2000);
             }
           }
         } catch (error: any) {
@@ -211,18 +225,25 @@ function MainContent() {
       <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
         <div className="absolute inset-0">
           {criterias.isCaptured ? (
-            <Scanner />
+            <>
+              {showScannerAfterInference || !isInferenceCompleted ? (
+                <Scanner />
+              ) : (
+                <></>
+              )}
+            </>
           ) : (
             <>
-              <VideoStream debugMode={false} />
+              <VideoStream />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                  zIndex: 0,
+                }}
+              ></div>
             </>
           )}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-            }}
-          ></div>
         </div>
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">

@@ -1,11 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+// src/components/scanner.tsx
+import React, { useEffect, useRef, useState } from "react";
 import { useCamera } from "../context/recorder-context";
+import ScannerWorker from "../workers/scannerWorker.ts?worker";
+import { FaceLandmarker } from "@mediapipe/tasks-vision";
 
 export function Scanner() {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const workerRef = useRef<Worker | null>(null);
 
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+
+  useEffect(() => {});
+
+  // Memuat gambar ketika capturedImage berubah
   useEffect(() => {
     if (criterias.capturedImage) {
       const image = new Image();
@@ -16,80 +25,74 @@ export function Scanner() {
     }
   }, [criterias.capturedImage]);
 
+  // Menginisialisasi Web Worker dan OffscreenCanvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !imageLoaded) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      console.error("Gagal mendapatkan konteks 2D untuk overlay canvas.");
-      return;
-    }
+    const dpr = window.devicePixelRatio || 1;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-    let scanPosition = 0;
-    let direction = 1;
-    let animationId: number;
+    // Mengatur ukuran canvas
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
-    const animateScanner = () => {
-      const { innerWidth: width, innerHeight: height } = window;
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, width, height);
+    // Transfer kontrol ke OffscreenCanvas
+    const offscreen = canvas.transferControlToOffscreen();
 
-      const imgAspect = imageLoaded.naturalWidth / imageLoaded.naturalHeight;
-      const canvasAspect = width / height;
-      let drawWidth, drawHeight, offsetX, offsetY;
+    // Membuat ImageBitmap dari gambar yang dimuat
+    createImageBitmap(imageLoaded).then((imageBitmap) => {
+      // Membuat instance Web Worker
+      const worker = new ScannerWorker();
+      workerRef.current = worker;
 
-      if (imgAspect < canvasAspect) {
-        drawWidth = width;
-        drawHeight = width / imgAspect;
-        offsetX = 0;
-        offsetY = (height - drawHeight) / 2;
-      } else {
-        drawWidth = height * imgAspect;
-        drawHeight = height;
-        offsetX = (width - drawWidth) / 2;
-        offsetY = 0;
+      // Mengirim pesan ke worker dengan OffscreenCanvas dan ImageBitmap
+      worker.postMessage(
+        {
+          imageData: imageBitmap,
+          width,
+          height,
+          canvas: offscreen,
+        },
+        [offscreen, imageBitmap],
+      );
+
+      // Opsional: Menangani pesan dari worker jika diperlukan
+      worker.onmessage = (e) => {
+        // Tidak perlu melakukan apapun di sini
+      };
+    });
+
+    return () => {
+      // Membersihkan worker saat komponen di-unmount
+      if (workerRef.current) {
+        workerRef.current.terminate();
       }
-
-      ctx.drawImage(imageLoaded, offsetX, offsetY, drawWidth, drawHeight);
-
-      ctx.fillStyle = "rgba(0, 255, 0, 0.6)";
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = "rgba(0, 255, 0, 1)";
-      ctx.fillRect(0, scanPosition, width, 15);
-
-      ctx.shadowBlur = 0;
-      ctx.shadowColor = "transparent";
-
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, scanPosition + 3, width, 9);
-
-      scanPosition += 5 * direction;
-      if (scanPosition >= height - 15 || scanPosition <= 0) {
-        direction *= -1;
-      }
-
-      animationId = requestAnimationFrame(animateScanner);
     };
-
-    animateScanner();
-
-    return () => cancelAnimationFrame(animationId);
-  }, [imageLoaded, canvasRef]);
+  }, [imageLoaded]);
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center"
-      style={{ zIndex: 1000 }} // Set zIndex lebih tinggi
-    >
-      <canvas
-        ref={canvasRef}
-        className="absolute left-0 top-0 h-full w-full"
-        style={{ zIndex: 1000 }} // Pastikan canvas berada di atas
-      />
-    </div>
+    <>
+      <div
+        className="fixed inset-0 flex items-center justify-center"
+        style={{ zIndex: 1000 }} // Set zIndex lebih tinggi
+      >
+        <canvas
+          ref={canvasRef}
+          className="absolute left-0 top-0 h-full w-full"
+          style={{ zIndex: 1000 }} // Pastikan canvas berada di atas
+        />
+      </div>
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          zIndex: 2000,
+        }}
+      ></div>
+    </>
   );
 }

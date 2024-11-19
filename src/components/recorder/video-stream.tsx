@@ -19,6 +19,7 @@ import {
   calculateOrientation,
   Orientation,
 } from "../../utils/orientationUtils";
+import { Scanner } from "../scanner";
 
 interface VideoStreamProps {
   debugMode?: boolean;
@@ -134,8 +135,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
                 startTimeMs,
               ).detections;
 
-              console.log(detections);
-
               if (detections.length > 0) {
                 const highestScoreDetection = detections.reduce(
                   (max, detection) => {
@@ -185,9 +184,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
                 setPosition({ x: 0, y: 0 });
                 setOrientation({ yaw: 0, pitch: 0 });
                 setLighting(0);
-                console.log(position);
-                console.log(orientation);
-                console.log(lighting);
               }
 
               // Calculate Brightness
