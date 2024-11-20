@@ -224,14 +224,9 @@ function MainContent() {
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
         <div className="absolute inset-0">
+          <Scanner />
           {criterias.isCaptured ? (
-            <>
-              {showScannerAfterInference || !isInferenceCompleted ? (
-                <Scanner />
-              ) : (
-                <></>
-              )}
-            </>
+            <></>
           ) : (
             <>
               <VideoStream />

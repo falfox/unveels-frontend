@@ -1,20 +1,35 @@
-// src/components/scanner.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { useCamera } from "../context/recorder-context";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import ScannerWorker from "../workers/scannerWorker.ts?worker";
-import { FaceLandmarker } from "@mediapipe/tasks-vision";
 
 export function Scanner() {
   const { criterias } = useCamera();
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const workerRef = useRef<Worker | null>(null);
+  const [landmarker, setLandmarker] = useState<FaceLandmarker | null>(null);
 
-  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+  // Initialize MediaPipe Face Landmarker
+  useEffect(() => {
+    async function loadLandmarker() {
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
+      );
+      const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+        },
+        runningMode: "IMAGE",
+        numFaces: 1,
+      });
+      setLandmarker(faceLandmarker);
+    }
+    loadLandmarker();
+  }, []);
 
-  useEffect(() => {});
-
-  // Memuat gambar ketika capturedImage berubah
+  // Load image when capturedImage changes
   useEffect(() => {
     if (criterias.capturedImage) {
       const image = new Image();
@@ -25,65 +40,70 @@ export function Scanner() {
     }
   }, [criterias.capturedImage]);
 
-  // Menginisialisasi Web Worker dan OffscreenCanvas
+  // Initialize canvas and worker when the image is loaded and landmarker is ready
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !imageLoaded) return;
+    if (!canvas || !imageLoaded || !landmarker) return;
 
     const dpr = window.devicePixelRatio || 1;
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    // Mengatur ukuran canvas
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    // Set canvas size before transferring control to OffscreenCanvas
+    if (!canvas.width && !canvas.height) {
+      // Set only if the canvas size has not been initialized
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    }
 
-    // Transfer kontrol ke OffscreenCanvas
-    const offscreen = canvas.transferControlToOffscreen();
-
-    // Membuat ImageBitmap dari gambar yang dimuat
     createImageBitmap(imageLoaded).then((imageBitmap) => {
-      // Membuat instance Web Worker
+      const result = landmarker.detect(imageBitmap);
+
+      // Transfer control to OffscreenCanvas
+      const offscreen = canvas.transferControlToOffscreen();
+
+      // Create a Web Worker instance
       const worker = new ScannerWorker();
       workerRef.current = worker;
 
-      // Mengirim pesan ke worker dengan OffscreenCanvas dan ImageBitmap
+      // Send message to the worker with OffscreenCanvas, ImageBitmap, and landmarks
       worker.postMessage(
         {
           imageData: imageBitmap,
           width,
           height,
           canvas: offscreen,
+          landmarks: result.faceLandmarks[0] || [],
         },
         [offscreen, imageBitmap],
       );
 
-      // Opsional: Menangani pesan dari worker jika diperlukan
+      // Optional: handle messages from the worker if necessary
       worker.onmessage = (e) => {
-        // Tidak perlu melakukan apapun di sini
+        // Handle worker response here, if needed
       };
     });
 
     return () => {
-      // Membersihkan worker saat komponen di-unmount
+      // Clean up the worker when the component is unmounted
       if (workerRef.current) {
         workerRef.current.terminate();
       }
     };
-  }, [imageLoaded]);
+  }, [imageLoaded, landmarker]);
 
   return (
     <>
       <div
         className="fixed inset-0 flex items-center justify-center"
-        style={{ zIndex: 1000 }} // Set zIndex lebih tinggi
+        style={{ zIndex: 1000 }} // Set zIndex higher
       >
         <canvas
           ref={canvasRef}
           className="absolute left-0 top-0 h-full w-full"
-          style={{ zIndex: 1000 }} // Pastikan canvas berada di atas
+          style={{ zIndex: 1000 }} // Ensure canvas is on top
         />
       </div>
       <div
