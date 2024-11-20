@@ -8,7 +8,7 @@ import { VirtualTryOnProductProvider } from "./context/virtual-try-on-product-co
 
 const queryClient = new QueryClient();
 
-function renderApp(containerId: string, skus: string[]) {
+function renderApp(containerId: string, skus?: string[]) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -24,6 +24,8 @@ function renderApp(containerId: string, skus: string[]) {
   );
 }
 
+window.renderUnveelsApp = renderApp;
+
 // Delegated event listener
 document.addEventListener("click", (e) => {
   const target = e.target as Element;
@@ -34,8 +36,11 @@ document.addEventListener("click", (e) => {
     const skus = tryOnButton.getAttribute("data-sku")?.split(",") || [];
     if (skus.length > 0) {
       // Create new container
-      const container = document.createElement("div");
-      container.id = "virtual-try-on-root";
+      let container = document.getElementById("unveels-root");
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "unveels-root";
+      }
       container.style.zIndex = "9999"; // Set z-index to be the most top element
       container.style.position = "fixed";
       container.classList.add("w-full", "h-full", "inset-0");
