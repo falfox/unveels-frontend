@@ -64,14 +64,6 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const testData: ProductRequest[] = [
-    {
-      category: "Makeup",
-      sub_category: "Lip",
-      product_type: "Lipstick",
-    },
-  ];
-
   const [fetchProducts, setFetchProducts] = useState(false);
   const [products, setProducts] = useState<ProductRequest[]>([]);
   const [productData, setProductData] = useState<Product[]>([]);
@@ -126,11 +118,12 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
     try {
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash-002",
+        model: "gemini-1.5-pro-002",
+        generationConfig: { temperature: 1.3 },
         systemInstruction: botPrompt,
       });
       const result = await model.generateContent(prompt);
-      const responseText = await result.response.text(); // Pastikan await di sini jika perlu
+      const responseText = await result.response.text();
       const removeBackticks = responseText.replace(/```/g, "");
       const jsonLabel = removeBackticks.replace(/json/g, "");
       console.log(jsonLabel);

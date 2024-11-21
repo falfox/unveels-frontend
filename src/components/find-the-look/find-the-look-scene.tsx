@@ -2,12 +2,31 @@ import { useEffect, useRef, useState } from "react";
 import { useCamera } from "../../context/recorder-context";
 import { FindTheLookCanvas } from "./find-the-look-canvas";
 import { useFindTheLookContext } from "../../context/find-the-look-context";
+import { FaceLandmarker, ObjectDetector } from "@mediapipe/tasks-vision";
+import { Scanner } from "../scanner";
 
-export function FindTheLookScene() {
+interface FindTheLookSceneProps {
+  models: {
+    faceLandmarker: FaceLandmarker | null;
+    handDetector: ObjectDetector | null;
+    ringDetector: ObjectDetector | null;
+    neckDetector: ObjectDetector | null;
+    earringDetector: ObjectDetector | null;
+    glassDetector: ObjectDetector | null;
+    headDetector: ObjectDetector | null;
+    makeupDetector: ObjectDetector | null;
+  };
+}
+
+export function FindTheLookScene({ models }: FindTheLookSceneProps) {
   const { criterias } = useCamera();
   const findTheLookCanvasRef = useRef<HTMLCanvasElement>(null);
   const [imageLoaded, setImageLoaded] = useState<HTMLImageElement | null>(null);
   const { setTab, setSection } = useFindTheLookContext();
+
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
 
   useEffect(() => {
     if (criterias.capturedImage) {
@@ -51,31 +70,44 @@ export function FindTheLookScene() {
     console.log("Section:", tab);
   };
 
+  const handleDetectDone = (isDetectFinished: boolean) => {
+    setIsInferenceCompleted(isDetectFinished);
+  };
+
   return (
     <>
+      {/* Always render the Scanner */}
+      {!isInferenceCompleted && <Scanner />}
+
+      {/* Always render FindTheLookCanvas but hide it during scanning */}
       {imageLoaded && (
-        <div className="fixed inset-0 flex">
+        <div
+          className="fixed inset-0 flex"
+          style={{
+            display: isInferenceCompleted ? "flex" : "none", // Hide when scanning
+          }}
+        >
           <div
             className="absolute inset-0"
             style={{
               background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-              zIndex: 200, // Lebih rendah dari overlay canvas
-              pointerEvents: "none", // Agar tidak menghalangi klik
+              zIndex: 200,
+              pointerEvents: "none",
             }}
-          >
-            {" "}
-          </div>
+          ></div>
 
           <canvas
             ref={findTheLookCanvasRef}
             className="absolute left-0 top-0 h-full w-screen"
             style={{ zIndex: 100 }}
           >
-            {/* Komponen untuk menggambar gambar di overlay canvas */}
+            {/* Render FindTheLookCanvas */}
             <FindTheLookCanvas
               image={imageLoaded}
               canvasRef={findTheLookCanvasRef}
               onLabelClick={handleLabelClick}
+              onDetectDone={handleDetectDone} // Pass the callback
+              models={models}
             />
           </canvas>
         </div>

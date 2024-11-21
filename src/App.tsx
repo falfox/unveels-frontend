@@ -13,6 +13,7 @@ import { FindTheLook } from "./pages/find-the-look";
 import { FindTheLookWeb } from "./pages/find-the-look-web";
 import { PersonalityFinder } from "./pages/personality-finder";
 import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
+import { SeeImprovement } from "./pages/see-improvement";
 import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
 import { SkinAnalysis } from "./pages/skin-analysis";
 import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
@@ -72,6 +73,7 @@ const routes = [
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
   { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
+  { path: "/see-improvement", element: <SeeImprovement /> },
   {
     path: "/virtual-try-on-product",
     element: <SingleVirtualTryOn />,
@@ -153,6 +155,7 @@ function Home() {
         Virtual Try On Product
       </LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
+      <LinkButton to="/see-improvement">See Improvement</LinkButton>
     </div>
   );
 }

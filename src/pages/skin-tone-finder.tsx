@@ -16,6 +16,8 @@ import {
   Fragment,
   SetStateAction,
   Suspense,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import { skin_tones, tone_types } from "../api/attributes/skin_tone";
@@ -47,6 +49,9 @@ import {
   useInferenceContext,
 } from "../context/inference-context";
 import { TopNavigation } from "../components/top-navigation";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import { useModelLoader } from "../hooks/useModelLoader";
+import { ModelLoadingScreen } from "../components/model-loading-screen";
 
 export function SkinToneFinder() {
   return (
@@ -68,29 +73,65 @@ function Main() {
   const { criterias, status, setRunningMode } = useCamera();
   const [collapsed, setCollapsed] = useState(false);
   const { isInferenceFinished } = useInferenceContext();
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+
+  const steps = [
+    async () => {
+      const filesetResolver = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm",
+      );
+      const faceLandmarkerInstance = await FaceLandmarker.createFromOptions(
+        filesetResolver,
+        {
+          baseOptions: {
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "GPU",
+          },
+          outputFaceBlendshapes: true,
+          runningMode: "IMAGE",
+          numFaces: 1,
+        },
+      );
+      faceLandmarkerRef.current = faceLandmarkerInstance;
+    },
+  ];
+
+  const {
+    progress,
+    isLoading: modelLoading,
+    loadModels,
+  } = useModelLoader(steps);
+
+  useEffect(() => {
+    loadModels();
+  }, []);
 
   return (
-    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
-      <div className="absolute inset-0">
-        <VideoStream debugMode={false} />
-        <SkinToneFinderScene />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          }}
-        ></div>
-      </div>
-      <RecorderStatus />
-      <TopNavigation cart={isInferenceFinished} />
+    <>
+      {modelLoading && <ModelLoadingScreen progress={progress} />}
+      <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+        <div className="absolute inset-0">
+          <VideoStream debugMode={false} />
+          <SkinToneFinderScene faceLandmarker={faceLandmarkerRef.current} />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+            }}
+          ></div>
+        </div>
+        <RecorderStatus />
+        <TopNavigation cart={isInferenceFinished} />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-        {criterias.isCaptured ? "" : <VideoScene />}
-        <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
-        <Footer />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+          {criterias.isCaptured ? "" : <VideoScene />}
+          <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
+          <Footer />
+        </div>
+        {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
       </div>
-      {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
-    </div>
+    </>
   );
 }
 
@@ -239,22 +280,25 @@ function MatchedShades() {
           ></div>
           <span className="text-sm">{skinType}</span>
         </div>
-        <div className="flex w-full min-w-0 pt-2">
-          {tone_types.map((option, index) => (
-            <button
-              key={index}
-              className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
-              data-selected={selectedTne.name === option.name}
-              style={{
-                background: option.color,
-              }}
-              onClick={() => setSelectedTone(option)}
-            >
-              {option.name}
-            </button>
-          ))}
+        <div className="flex w-full justify-center pt-2">
+          <div className="flex w-full max-w-md">
+            {tone_types.map((option, index) => (
+              <button
+                key={index}
+                className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
+                data-selected={selectedTne.name === option.name}
+                style={{
+                  background: option.color,
+                }}
+                onClick={() => setSelectedTone(option)}
+              >
+                {option.name}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="w-full text-right">
+
+        <div className="w-full text-left">
           <button className="py-2 text-[0.625rem] text-white">View all</button>
         </div>
 
@@ -348,7 +392,7 @@ function OtherShades() {
           ></button>
         ))}
       </div>
-      <div className="w-full text-right">
+      <div className="w-full text-left">
         <button className="py-2 text-[0.625rem] text-white">View all</button>
       </div>
 
@@ -389,8 +433,8 @@ function ProductList({ products }: { products: Array<Product> }) {
           <a
             key={index}
             className="block w-[110px] rounded shadow"
-            target="_blank"
-            href={product.sku}
+            // target="_blank"
+            // href={product.sku}
           >
             <div className="relative h-[80px] w-[110px] overflow-hidden">
               <img
