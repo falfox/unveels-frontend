@@ -79,7 +79,7 @@ function Main() {
         <div className="absolute inset-0">
           <VideoStream debugMode={false} />
           <div
-            className="pointer-events-none absolute inset-0"
+            className="absolute inset-0"
             style={{
               background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
             }}
@@ -179,12 +179,6 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <div
-        className="fixed inset-0 h-full w-full"
-        onClick={() => {
-          onClose();
-        }}
-      ></div>
       <div className="relative space-y-2 px-4 pb-4">
         <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
           {tabs.map((problemTab) => {
@@ -308,42 +302,64 @@ function BottomContent() {
 function Slider() {
   const [value, setValue] = useState(50);
 
+  // Labels di atas slider
+  const labels = ["00", 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
   return (
-    <div className="flex w-full flex-col items-center justify-center p-4">
+    <div className="flex w-full flex-col items-center">
+      {/* Labels di atas slider */}
+      <div className="relative mb-1 mt-8 flex w-full max-w-md justify-between">
+        {labels.map((label, index) => (
+          <div
+            key={index}
+            className={`relative text-sm ${
+              value === Number(label)
+                ? "scale-110 font-bold text-white"
+                : "text-gray-400"
+            }`}
+            style={{
+              transform: value === Number(label) ? "translateY(-0.25rem)" : "",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+
       {/* Slider Container */}
-      <div className="relative w-full max-w-lg">
-        {/* Indicator */}
-        <div
-          className="absolute top-[-30px] flex h-14 w-14 translate-x-[-50%] transform flex-col items-center justify-center rounded-full bg-yellow-500 text-center text-sm font-bold text-white shadow-md"
-          style={{ left: `${value}%` }}
-        >
-          <span className="text-lg">{value}</span>
-          <span className="text-xs font-medium">Day</span>
-        </div>
+      <div className="relative w-full max-w-md">
+        {/* Background bar */}
+        <div className="absolute top-1/2 h-2 w-full -translate-y-1/2 transform rounded-full bg-gray-300"></div>
 
-        {/* Slider Input */}
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={value}
-          onChange={(e) => setValue(Number(e.target.value))}
-          className="h-2 w-full appearance-none rounded-lg bg-gray-300 focus:outline-none"
-        />
-
-        {/* Track (Filled) */}
+        {/* Highlighted bar */}
         <div
-          className="pointer-events-none absolute left-0 top-0 h-2 rounded-lg bg-yellow-500"
-          style={{ width: `${value}%` }}
+          className="absolute top-1/2 h-2 -translate-y-1/2 transform rounded-full"
+          style={{
+            width: `${value}%`,
+            background: `linear-gradient(to right, #CA9C43, #916E2B, #6A4F1B, #473209)`,
+          }}
         ></div>
 
-        {/* Scale Labels */}
-        <div className="absolute left-0 right-0 top-6 flex justify-between text-sm text-gray-500">
-          {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((label) => (
-            <span key={label} className="w-6 text-center">
-              {label}
-            </span>
-          ))}
+        {/* Slider track */}
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+          className="relative h-2 w-full cursor-pointer opacity-0"
+        />
+
+        {/* Slider thumb */}
+        <div
+          className="absolute top-1/2 flex h-8 w-8 -translate-y-1/2 translate-x-[-50%] transform items-center justify-center rounded-xl border-2 border-white shadow-lg"
+          style={{
+            left: `${value}%`,
+            background: `linear-gradient(to right, #CA9C43, #916E2B, #6A4F1B, #473209)`,
+          }}
+        >
+          <span className="text-xs font-bold text-white">Day</span>
         </div>
       </div>
     </div>
