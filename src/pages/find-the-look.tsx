@@ -1,4 +1,10 @@
+import {
+  FaceLandmarker,
+  FilesetResolver,
+  ObjectDetector,
+} from "@mediapipe/tasks-vision";
 import clsx from "clsx";
+import { capitalize } from "lodash";
 import {
   ChevronLeft,
   CirclePlay,
@@ -9,6 +15,11 @@ import {
 } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
+  handAccessoriesProductTypeFilter,
+  headAccessoriesProductTypeFilter,
+  neckAccessoriesProductTypeFilter,
+} from "../api/attributes/accessories";
+import {
   getFaceMakeupProductTypeIds,
   getLashMakeupProductTypeIds,
   getLensesProductTypeIds,
@@ -16,37 +27,28 @@ import {
 } from "../api/attributes/makeups";
 import { useProducts } from "../api/get-product";
 import { useLipsProductQuery } from "../api/lips";
+import { FindTheLookMainScreen } from "../components/find-the-look/find-the-look-main-screen";
+import { FindTheLookScene } from "../components/find-the-look/find-the-look-scene";
+import { Footer } from "../components/footer";
+import { Icons } from "../components/icons";
+import { LoadingProducts } from "../components/loading";
+import { ModelLoadingScreen } from "../components/model-loading-screen";
+import { BrandName } from "../components/product/brand";
+import { Rating } from "../components/rating";
+import { VideoScene } from "../components/recorder/recorder";
+import { VideoStream } from "../components/recorder/video-stream";
+import { ShareModal } from "../components/share-modal";
+import { TopNavigation } from "../components/top-navigation";
 import {
   FindTheLookProvider,
   useFindTheLookContext,
 } from "../context/find-the-look-context";
-import { Footer } from "../components/footer";
-import { Icons } from "../components/icons";
-import { LoadingProducts } from "../components/loading";
-import { BrandName } from "../components/product/brand";
-import { Rating } from "../components/rating";
-import { VideoScene } from "../components/recorder/recorder";
 import { CameraProvider, useCamera } from "../context/recorder-context";
-import { VideoStream } from "../components/recorder/video-stream";
-import { ShareModal } from "../components/share-modal";
 import { SkinAnalysisProvider } from "../context/skin-analysis-context";
-import { useRecordingControls } from "../hooks/useRecorder";
-import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
-import { TopNavigation } from "../components/top-navigation";
-import {
-  headAccessoriesProductTypeFilter,
-  neckAccessoriesProductTypeFilter,
-} from "../api/attributes/accessories";
-import { FindTheLookScene } from "../components/find-the-look/find-the-look-scene";
-import { FindTheLookMainScreen } from "../components/find-the-look/find-the-look-main-screen";
-import { FindTheLookItems } from "../types/findTheLookItems";
-import {
-  FaceLandmarker,
-  FilesetResolver,
-  ObjectDetector,
-} from "@mediapipe/tasks-vision";
 import { useModelLoader } from "../hooks/useModelLoader";
-import { ModelLoadingScreen } from "../components/model-loading-screen";
+import { useRecordingControls } from "../hooks/useRecorder";
+import { FindTheLookItems } from "../types/findTheLookItems";
+import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
 
 export function FindTheLook() {
   return (
@@ -399,9 +401,14 @@ function AccessoriesCategories({
   // Update the tab if activeTab changes
   useEffect(() => {
     if (activeTab) {
-      setTab(activeTab);
+      setTab(capitalize(activeTab));
     }
   }, [activeTab]);
+
+  function onTabClick(label: string) {
+    setTab(label);
+    onTabChange(label); // Notify parent of the selected tab
+  }
 
   return (
     <div className="relative space-y-2 px-4 pb-4">
@@ -412,15 +419,14 @@ function AccessoriesCategories({
             <Fragment key={category.section}>
               <button
                 className={clsx(
-                  "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm text-white",
+                  "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm capitalize text-white",
                   {
                     "bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]":
                       isActive,
                   },
                 )}
                 onClick={() => {
-                  setTab(category.label);
-                  onTabChange(category.label); // Notify parent of the selected tab
+                  onTabClick(capitalize(category.label));
                 }}
               >
                 {category.label}
@@ -486,7 +492,7 @@ const mapTypes: {
     attributeName: "head_accessories_product_type",
     values: headAccessoriesProductTypeFilter(["Sunglasses"]),
   },
-  Head_Bands: {
+  "Head Bands": {
     attributeName: "head_accessories_product_type",
     values: headAccessoriesProductTypeFilter(["Head Bands"]),
   },
@@ -496,7 +502,7 @@ const mapTypes: {
   },
   Caps: {
     attributeName: "head_accessories_product_type",
-    values: headAccessoriesProductTypeFilter(["Glasses"]),
+    values: headAccessoriesProductTypeFilter(["Hats"]),
   },
   Hats: {
     attributeName: "head_accessories_product_type",
@@ -513,6 +519,18 @@ const mapTypes: {
   Necklace: {
     attributeName: "neck_accessories_product_type",
     values: headAccessoriesProductTypeFilter(["Necklaces"]),
+  },
+  Scarf: {
+    attributeName: "neck_accessories_product_type",
+    values: neckAccessoriesProductTypeFilter(["Scarves"]),
+  },
+  Bracelet: {
+    attributeName: "hand_accessories_product_type",
+    values: handAccessoriesProductTypeFilter(["Bracelets"]),
+  },
+  Rings: {
+    attributeName: "hand_accessories_product_type",
+    values: handAccessoriesProductTypeFilter(["Rings"]),
   },
 };
 
@@ -711,6 +729,10 @@ function ProductRecommendationsTabs({
   activeTab?: string; // Active tab for initializing the selected tab in categories
 }) {
   const [tab, setTab] = useState<"makeup" | "accessories">(initialSection); // Set initial tab based on initialSection
+
+  console.log({
+    activeTab,
+  });
 
   useEffect(() => {
     setTab(initialSection); // Update tab if initialSection changes
@@ -928,7 +950,7 @@ function ProductHorizontalList({ category }: { category: string }) {
             return (
               <div
                 key={product.id}
-                className="w-[calc(50%-0.5rem)] shrink-0 rounded shadow lg:w-[calc(20%-0.5rem)]"
+                className="w-[calc(50%-0.5rem)] shrink-0 rounded shadow lg:w-[calc(16.667%-0.5rem)]"
               >
                 <div className="relative aspect-square w-full overflow-hidden">
                   <img
@@ -1012,7 +1034,7 @@ function SingleCategoryView({
         <div className="py-4">
           <h2 className="text-base text-[#E6E5E3]">{category}</h2>
         </div>
-        <div className="grid grid-cols-2 gap-2.5 py-4 sm:grid-cols-3 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2.5 py-4 sm:grid-cols-3 xl:grid-cols-6">
           {data
             ? data.items.map((product, index) => {
                 const imageUrl = mediaUrl(
