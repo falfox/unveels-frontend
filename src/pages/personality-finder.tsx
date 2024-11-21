@@ -30,7 +30,7 @@ import { CameraProvider, useCamera } from "../context/recorder-context";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { personalityInference } from "../inference/personalityInference";
 import { Classifier } from "../types/classifier";
-import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
+import { baseApiUrl, getProductAttributes, mediaUrl } from "../utils/apiUtils";
 import { personalityAnalysisResult } from "../utils/constants";
 import {
   loadTFLiteModel,
@@ -629,35 +629,31 @@ function RecommendationsTab({ personality }: { personality: string }) {
         </p>
         {items ? (
           <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
-            {items.items.map((product, index) => {
-              const imageUrl =
-                mediaUrl(product.media_gallery_entries[0].file) ??
-                "https://picsum.photos/id/237/200/300";
-
+            {items.profiles.map((profile, index) => {
+              const imageUrl = baseApiUrl + "/media/" + profile.image;
               return (
-                <div key={product.id} className="w-[150px] rounded">
+                <div key={profile.identifier} className="w-[150px] rounded">
                   <div className="relative h-[150px] w-[150px] overflow-hidden">
                     <img
                       src={imageUrl}
                       alt="Product"
-                      className="rounded object-cover"
+                      className="h-full w-full rounded object-cover"
                     />
                   </div>
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
                       <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
-                        {product.name}
+                        {profile.name}
                       </h3>
-                      <p className="text-[0.625rem] text-white/60">
-                        <BrandName
-                          brandId={getProductAttributes(product, "brand")}
-                        />
-                      </p>
                     </div>
                     <div className="flex flex-wrap items-center justify-end gap-x-1">
                       <span className="text-sm font-bold text-white">
-                        ${product.price}
+                        $
+                        {profile.products.reduce(
+                          (acc, product) => acc + product.price,
+                          0,
+                        )}
                       </span>
                     </div>
                   </div>
