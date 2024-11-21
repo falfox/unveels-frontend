@@ -256,7 +256,7 @@ function ShadesSelector() {
 
 const isShadeSelected = (product: Product, selectedShade: string) => {
   const attribute = getProductAttributes(product, "hexacode");
-  return attribute?.value?.includes(selectedShade ?? "");
+  return attribute?.includes(selectedShade ?? "");
 };
 
 function MatchedShades() {
