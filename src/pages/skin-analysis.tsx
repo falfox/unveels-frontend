@@ -355,13 +355,17 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
             "https://picsum.photos/id/237/200/300";
 
           return (
-            <div key={product.id} className="w-[115px] rounded shadow">
+            <div key={product.id} className="relative w-[115px] rounded shadow">
               <div className="relative h-[80px] w-[115px] overflow-hidden">
                 <img
                   src={imageUrl}
                   alt="Product"
                   className="rounded object-cover"
                 />
+              </div>
+
+              <div className="absolute right-2 top-2">
+                <Heart className="size-4 shrink-0 text-black" />
               </div>
 
               <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
