@@ -26,31 +26,54 @@ function renderApp(containerId: string, skus?: string[]) {
 
 window.renderUnveelsApp = renderApp;
 
+const routes = [
+  "skin-tone-finder",
+  "personality-finder",
+  "face-analyzer",
+  "skin-analysis",
+  "find-the-look",
+  "virtual-try-on",
+];
+
 // Delegated event listener
 document.addEventListener("click", (e) => {
   const target = e.target as Element;
-  const tryOnButton = target.closest(".tryon-button");
 
+  // Handle virtual try-on button
+  const tryOnButton = target.closest(".tryon-button");
   if (tryOnButton) {
     e.preventDefault();
     const skus = tryOnButton.getAttribute("data-sku")?.split(",") || [];
     if (skus.length > 0) {
-      // Create new container
-      let container = document.getElementById("unveels-root");
-      if (!container) {
-        container = document.createElement("div");
-        container.id = "unveels-root";
+      createAndRenderContainer("/virtual-try-on-product", skus);
+    }
+  } else {
+    // Handle other route buttons
+    for (const route of routes) {
+      const routeButton = target.closest(`.${route}`);
+      if (routeButton) {
+        e.preventDefault();
+        createAndRenderContainer(`/${route}`);
+        break;
       }
-      container.style.zIndex = "9999"; // Set z-index to be the most top element
-      container.style.position = "fixed";
-      container.classList.add("w-full", "h-full", "inset-0");
-      document.body.appendChild(container);
-
-      window.__INITIAL_ROUTE__ = "/virtual-try-on-product";
-      renderApp("virtual-try-on-root", skus);
     }
   }
 });
+
+function createAndRenderContainer(initialRoute: string, skus?: string[]) {
+  let container = document.getElementById("unveels-root");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "unveels-root";
+  }
+  container.style.zIndex = "9999";
+  container.style.position = "fixed";
+  container.classList.add("w-full", "h-full", "inset-0");
+  document.body.appendChild(container);
+
+  window.__INITIAL_ROUTE__ = initialRoute;
+  renderApp("unveels-root", skus);
+}
 
 if (window.__INITIAL_ROUTE__) {
   console.log("Initial route", window.__INITIAL_ROUTE__);
@@ -65,15 +88,15 @@ if (window.__INITIAL_ROUTE__) {
   );
 } else {
   if (import.meta.env.DEV) {
-    createRoot(document.getElementById("root")!).render(
-      <StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <VirtualTryOnProductProvider>
-            <App />
-          </VirtualTryOnProductProvider>
-        </QueryClientProvider>
-      </StrictMode>,
-    );
+    // createRoot(document.getElementById("root")!).render(
+    //   <StrictMode>
+    //     <QueryClientProvider client={queryClient}>
+    //       <VirtualTryOnProductProvider>
+    //         <App />
+    //       </VirtualTryOnProductProvider>
+    //     </QueryClientProvider>
+    //   </StrictMode>,
+    // );
 
     console.error("Rendered default route");
   } else {
