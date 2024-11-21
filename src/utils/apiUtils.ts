@@ -1,4 +1,3 @@
-import { getLipsMakeupProductTypeIds } from "../api/attributes/makeups";
 import { defaultHeaders, Product } from "../api/shared";
 
 type Filter = {
@@ -12,6 +11,7 @@ type FilterGroup = {
 };
 
 export const baseApiUrl = "https://magento-1231949-4398885.cloudwaysapps.com";
+export const baseUrl = import.meta.env.PROD ? baseApiUrl : "";
 export const baseMediaUrl =
   "https://magento-1231949-4398885.cloudwaysapps.com/media/catalog/product/cache/df714aaa5e59335a5bf39a17764906ba";
 
@@ -105,7 +105,7 @@ export async function fetchConfigurableProducts(
   ];
 
   const response = await fetch(
-    "/rest/V1/products?" + buildSearchParams(filters),
+    baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
     {
       headers: defaultHeaders,
     },

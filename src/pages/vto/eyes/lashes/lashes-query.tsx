@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
+  baseUrl,
   buildSearchParams,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
@@ -59,7 +60,7 @@ export function useLashesQuery({
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
+        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },

@@ -1,13 +1,10 @@
 import clsx from "clsx";
-import { useState } from "react";
-import { Icons } from "../../../../components/icons";
 
-import { ColorPalette } from "../../../../components/color-palette";
-import { HairColorProvider, useHairColorContext } from "./hair-color-context";
-import { useHairColorQuery } from "./hair-color-query";
+import { colors } from "../../../../api/attributes/color";
 import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
-import { colors } from "../../../../api/attributes/color";
+import { useHairColorContext } from "./hair-color-context";
+import { useHairColorQuery } from "./hair-color-query";
 
 export function HairColorSelector() {
   return (

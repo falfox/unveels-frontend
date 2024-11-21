@@ -151,3 +151,10 @@ export function filterShapes(selectedShapes: String[]) {
   );
   return filteredShapes;
 }
+
+export function filterShapesByValue(selectedShapes: String[]) {
+  const filteredShapes = shapes.filter((shape) =>
+    selectedShapes.includes(shape.value),
+  );
+  return filteredShapes;
+}

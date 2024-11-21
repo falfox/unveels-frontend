@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { buildSearchParams } from "../utils/apiUtils";
+import { baseUrl, buildSearchParams } from "../utils/apiUtils";
 import { defaultHeaders, Product } from "./shared";
 
 const lipsKey = {
@@ -34,7 +34,7 @@ export function useSingleProductQuery({ sku }: { sku: string }) {
       ];
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams(filters),
+        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
         {
           headers: defaultHeaders,
         },
@@ -49,6 +49,42 @@ export function useSingleProductQuery({ sku }: { sku: string }) {
       }
 
       return results.items[0];
+    },
+  });
+}
+
+export function useMultipleProductsQuery({ skus }: { skus: string[] }) {
+  return useQuery({
+    queryKey: ["products", skus],
+    queryFn: async () => {
+      const filters = [
+        {
+          filters: [
+            {
+              field: "sku",
+              value: skus.join(","),
+              condition_type: "in",
+            },
+          ],
+        },
+      ];
+
+      const response = await fetch(
+        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
+        {
+          headers: defaultHeaders,
+        },
+      );
+
+      const results = (await response.json()) as {
+        items: Array<Product>;
+      };
+
+      if (results.items.length === 0) {
+        throw new Error("No products found");
+      }
+
+      return results.items;
     },
   });
 }
@@ -85,7 +121,7 @@ export function useProducts({
       ];
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams(filters),
+        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
         {
           headers: defaultHeaders,
         },

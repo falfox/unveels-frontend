@@ -1,15 +1,23 @@
-import { Children, Suspense } from "react";
-import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
+import { Suspense } from "react";
+import {
+  createMemoryRouter,
+  Link,
+  RouterProvider
+} from "react-router-dom";
 import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
 import "./index.css";
+import { VirtulAssistant } from "./pages/assistant/virtual-assistant";
 import { FaceAnalyzer } from "./pages/face-analyzer";
+import { FindTheLook } from "./pages/find-the-look";
+import { FindTheLookWeb } from "./pages/find-the-look-web";
 import { PersonalityFinder } from "./pages/personality-finder";
 import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
+import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
 import { SkinAnalysis } from "./pages/skin-analysis";
+import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
 import { SkinToneFinder } from "./pages/skin-tone-finder";
 import { SkinToneFinderWeb } from "./pages/skin-tone-finder-web";
-import { VirtulAssistant } from "./pages/assistant/virtual-assistant";
 import { TryOnSelector, VirtualTryOn } from "./pages/virtual-try-on";
 import { EyeLinerSelector } from "./pages/vto/eyes/eye-liners/eye-liner";
 import { EyeShadowSelector } from "./pages/vto/eyes/eye-shadow/eye-shadow";
@@ -43,12 +51,6 @@ import { NailsMode } from "./pages/vto/nails/nails-makeup";
 import { PressOnNailsSelector } from "./pages/vto/nails/press-on-nails/press-on-nails";
 import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear";
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
-import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
-import { FindTheLook } from "./pages/find-the-look";
-import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
-import { FindTheLookWeb } from "./pages/find-the-look-web";
-import { element } from "three/webgpu";
-import { SingleVirtualTryOnDetail } from "./pages/single-virtual-try-on-detail";
 
 // Define routes using object syntax
 const routes = [
@@ -73,7 +75,6 @@ const routes = [
   {
     path: "/virtual-try-on-product",
     element: <SingleVirtualTryOn />,
-    children: [{ path: ":sku", element: <SingleVirtualTryOnDetail /> }],
   },
   {
     path: "/virtual-try-on",
@@ -130,12 +131,6 @@ const routes = [
   },
 ];
 
-// Create a memory router instance
-const router = createBrowserRouter(routes, {
-  // initialEntries: ["/virtual-try-on/makeups"], // Set the initial route
-  // initialIndex: 0,
-});
-
 function Home() {
   useCategoriesQuerySuspense();
   useBrandsQuerySuspense();
@@ -154,7 +149,7 @@ function Home() {
       <LinkButton to="/skin-analysis-web">Skin Analysis Web</LinkButton>
       <LinkButton to="/find-the-look-web">Find The Look Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
-      <LinkButton to="/virtual-try-on-product">
+      <LinkButton to="/virtual-try-on-product/689304331029">
         Virtual Try On Product
       </LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
@@ -162,6 +157,13 @@ function Home() {
   );
 }
 function App() {
+  const router = import.meta.env.DEV
+    ? createMemoryRouter(routes, {
+        initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+      })
+    : createMemoryRouter(routes, {
+        initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+      });
   return <RouterProvider router={router} />;
 }
 

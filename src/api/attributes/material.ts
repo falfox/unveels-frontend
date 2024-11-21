@@ -50,3 +50,9 @@ export function filterMaterials(selectedMaterials: String[]) {
     selectedMaterials.includes(material.label),
   );
 }
+
+export function filterMaterialsByValue(selectedMaterials: String[]) {
+  return materials.filter((material) =>
+    selectedMaterials.includes(material.value),
+  );
+}
