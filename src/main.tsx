@@ -88,15 +88,15 @@ if (window.__INITIAL_ROUTE__) {
   );
 } else {
   if (import.meta.env.DEV) {
-    // createRoot(document.getElementById("root")!).render(
-    //   <StrictMode>
-    //     <QueryClientProvider client={queryClient}>
-    //       <VirtualTryOnProductProvider>
-    //         <App />
-    //       </VirtualTryOnProductProvider>
-    //     </QueryClientProvider>
-    //   </StrictMode>,
-    // );
+    createRoot(document.getElementById("root")!).render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <VirtualTryOnProductProvider>
+            <App />
+          </VirtualTryOnProductProvider>
+        </QueryClientProvider>
+      </StrictMode>,
+    );
 
     console.error("Rendered default route");
   } else {
