@@ -105,7 +105,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.2,
+          scoreThreshold: 0.9,
         },
       );
       modelsRef.current.ringDetector = ringDetectorInstance;

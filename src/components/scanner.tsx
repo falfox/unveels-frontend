@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useCamera } from "../context/recorder-context";
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import ScannerWorker from "../workers/scannerWorker.ts?worker";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export function Scanner() {
   const { criterias } = useCamera();
@@ -12,6 +12,8 @@ export function Scanner() {
 
   // Initialize MediaPipe Face Landmarker
   useEffect(() => {
+    let isMounted = true;
+
     async function loadLandmarker() {
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
@@ -24,12 +26,21 @@ export function Scanner() {
         runningMode: "IMAGE",
         numFaces: 1,
       });
-      setLandmarker(faceLandmarker);
+      if (isMounted) {
+        setLandmarker(faceLandmarker);
+      }
     }
     loadLandmarker();
+
+    return () => {
+      isMounted = false;
+      if (landmarker) {
+        landmarker.close();
+      }
+    };
   }, []);
 
-  // Load image when capturedImage changes
+  // Memuat gambar ketika capturedImage berubah
   useEffect(() => {
     if (criterias.capturedImage) {
       const image = new Image();
@@ -40,57 +51,56 @@ export function Scanner() {
     }
   }, [criterias.capturedImage]);
 
-  // Initialize canvas and worker when the image is loaded and landmarker is ready
+  // Menginisialisasi Web Worker dan OffscreenCanvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !imageLoaded || !landmarker) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const updateCanvasSize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
 
-    // Set canvas size before transferring control to OffscreenCanvas
-    if (!canvas.width && !canvas.height) {
-      // Set only if the canvas size has not been initialized
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
-    }
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+    };
+
+    // Update ukuran canvas saat pertama kali dan ketika ukuran layar berubah
+    updateCanvasSize();
+    window.addEventListener("resize", updateCanvasSize);
+
+    const offscreen = canvas.transferControlToOffscreen();
 
     createImageBitmap(imageLoaded).then((imageBitmap) => {
       const result = landmarker.detect(imageBitmap);
 
-      // Transfer control to OffscreenCanvas
-      const offscreen = canvas.transferControlToOffscreen();
-
-      // Create a Web Worker instance
       const worker = new ScannerWorker();
       workerRef.current = worker;
 
-      // Send message to the worker with OffscreenCanvas, ImageBitmap, and landmarks
       worker.postMessage(
         {
           imageData: imageBitmap,
-          width,
-          height,
+          width: canvas.width,
+          height: canvas.height,
           canvas: offscreen,
           landmarks: result.faceLandmarks[0] || [],
         },
         [offscreen, imageBitmap],
       );
 
-      // Optional: handle messages from the worker if necessary
       worker.onmessage = (e) => {
-        // Handle worker response here, if needed
+        // Optional: Handle worker messages
       };
     });
 
     return () => {
-      // Clean up the worker when the component is unmounted
       if (workerRef.current) {
         workerRef.current.terminate();
       }
+      window.removeEventListener("resize", updateCanvasSize);
     };
   }, [imageLoaded, landmarker]);
 
@@ -98,19 +108,21 @@ export function Scanner() {
     <>
       <div
         className="fixed inset-0 flex items-center justify-center"
-        style={{ zIndex: 1000 }} // Set zIndex higher
+        style={{
+          width: "100vw",
+          height: "100vh",
+        }}
       >
         <canvas
           ref={canvasRef}
           className="absolute left-0 top-0 h-full w-full"
-          style={{ zIndex: 1000 }} // Ensure canvas is on top
+          style={{}}
         />
       </div>
       <div
         className="absolute inset-0"
         style={{
           background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          zIndex: 2000,
         }}
       ></div>
     </>

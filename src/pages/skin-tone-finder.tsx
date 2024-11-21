@@ -280,22 +280,25 @@ function MatchedShades() {
           ></div>
           <span className="text-sm">{skinType}</span>
         </div>
-        <div className="flex w-full min-w-0 pt-2">
-          {tone_types.map((option, index) => (
-            <button
-              key={index}
-              className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
-              data-selected={selectedTne.name === option.name}
-              style={{
-                background: option.color,
-              }}
-              onClick={() => setSelectedTone(option)}
-            >
-              {option.name}
-            </button>
-          ))}
+        <div className="flex w-full justify-center pt-2">
+          <div className="flex w-full max-w-md">
+            {tone_types.map((option, index) => (
+              <button
+                key={index}
+                className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
+                data-selected={selectedTne.name === option.name}
+                style={{
+                  background: option.color,
+                }}
+                onClick={() => setSelectedTone(option)}
+              >
+                {option.name}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="w-full text-right">
+
+        <div className="w-full text-left">
           <button className="py-2 text-[0.625rem] text-white">View all</button>
         </div>
 
@@ -389,7 +392,7 @@ function OtherShades() {
           ></button>
         ))}
       </div>
-      <div className="w-full text-right">
+      <div className="w-full text-left">
         <button className="py-2 text-[0.625rem] text-white">View all</button>
       </div>
 
@@ -430,8 +433,8 @@ function ProductList({ products }: { products: Array<Product> }) {
           <a
             key={index}
             className="block w-[110px] rounded shadow"
-            target="_blank"
-            href={product.sku}
+            // target="_blank"
+            // href={product.sku}
           >
             <div className="relative h-[80px] w-[110px] overflow-hidden">
               <img

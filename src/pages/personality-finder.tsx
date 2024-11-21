@@ -274,12 +274,17 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
     <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button className="size-6">
+        <button className="size-6 flex-shrink-0">
           <ChevronLeft className="h-6 w-6" />
         </button>
+
+        <div className="flex-grow text-center">
+          <RecorderStatus />
+        </div>
+
         <button
           type="button"
-          className="size-6"
+          className="size-6 flex-shrink-0"
           onClick={() => {
             navigate("/");
           }}

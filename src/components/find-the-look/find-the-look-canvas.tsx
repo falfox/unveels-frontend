@@ -102,6 +102,7 @@ export function FindTheLookCanvas({
         try {
           // Tambahkan delay sebelum inferensi
           await new Promise((resolve) => setTimeout(resolve, 2000));
+          console.log("Do Inference");
 
           const resultsHand = await handDetector.detect(image);
           const resultsRing = await ringDetector.detect(image);
@@ -127,8 +128,9 @@ export function FindTheLookCanvas({
             setShowScannerAfterInference(false);
             if (onDetectDone) {
               onDetectDone(true);
+              console.log("inference Finish");
             }
-          }, 3000);
+          }, 1000);
         } catch (error) {
           console.error("Error during detection: ", error);
         }

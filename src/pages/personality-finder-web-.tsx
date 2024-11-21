@@ -133,7 +133,7 @@ function MainContent() {
         setInferenceError(null);
 
         // Tambahkan delay sebelum inferensi
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
 
         try {
           if (
@@ -191,7 +191,7 @@ function MainContent() {
 
               setTimeout(() => {
                 setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
-              }, 2000);
+              }, 3000);
             }
           }
         } catch (error: any) {
@@ -224,9 +224,31 @@ function MainContent() {
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
         <div className="absolute inset-0">
-          <Scanner />
           {criterias.isCaptured ? (
-            <></>
+            <>
+              {showScannerAfterInference || !isInferenceCompleted ? (
+                <Scanner />
+              ) : (
+                <>
+                  {criterias.capturedImage && (
+                    <>
+                      <img
+                        src={criterias.capturedImage}
+                        alt="Captured"
+                        className="h-full w-full object-cover"
+                      />
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                          zIndex: 0,
+                        }}
+                      ></div>
+                    </>
+                  )}
+                </>
+              )}
+            </>
           ) : (
             <>
               <VideoStream />

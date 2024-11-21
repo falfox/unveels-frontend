@@ -49,6 +49,7 @@ import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
 import { FindTheLookWeb } from "./pages/find-the-look-web";
 import { element } from "three/webgpu";
 import { SingleVirtualTryOnDetail } from "./pages/single-virtual-try-on-detail";
+import { SeeImprovement } from "./pages/see-improvement";
 
 // Define routes using object syntax
 const routes = [
@@ -70,6 +71,7 @@ const routes = [
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
   { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
+  { path: "/see-improvement", element: <SeeImprovement /> },
   {
     path: "/virtual-try-on-product",
     element: <SingleVirtualTryOn />,
@@ -158,6 +160,7 @@ function Home() {
         Virtual Try On Product
       </LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
+      <LinkButton to="/see-improvement">See Improvement</LinkButton>
     </div>
   );
 }
