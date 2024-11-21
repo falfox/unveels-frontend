@@ -1,6 +1,10 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Webcam from "react-webcam";
-import { FaceDetector, FilesetResolver } from "@mediapipe/tasks-vision";
+import {
+  FaceDetector,
+  FaceLandmarker,
+  FilesetResolver,
+} from "@mediapipe/tasks-vision";
 import { useCamera } from "../../context/recorder-context";
 import {
   BRIGHTNESS_THRESHOLD,
@@ -8,18 +12,24 @@ import {
   POSITION_THRESHOLD_Y,
   ORIENTATION_THRESHOLD_YAW,
   ORIENTATION_THRESHOLD_PITCH,
+  VIDEO_WIDTH,
+  VIDEO_HEIGHT,
+  faces,
 } from "../../utils/constants";
 import { calculateLighting, cropImage } from "../../utils/imageProcessing";
 import { CountdownOverlay } from "../countdown-overlay";
 import { ErrorOverlay } from "../error-overlay";
 import { useCountdown } from "../../hooks/useCountdown";
-import { processBoundingBox } from "../../utils/boundingBoxUtils";
-import { drawKeypoints } from "../../utils/keypointsUtils";
 import {
   calculateOrientation,
   Orientation,
 } from "../../utils/orientationUtils";
-import { Scanner } from "../scanner";
+import {
+  applyStretchedLandmarks,
+  calculatePosition,
+  clamp,
+  drawConnectorsFromFaces,
+} from "../../utils/scannerUtils";
 
 interface VideoStreamProps {
   debugMode?: boolean;
@@ -30,6 +40,10 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   const [error, setError] = useState<Error | null>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
   const isDetectingRef = useRef<boolean>(false);
+  const faceLandmarRef = useRef<FaceLandmarker | null>(null);
+
+  let glowOffset = 0;
+  const glowSpeed = 0.03;
 
   // Using CameraContext
   const {
@@ -56,34 +70,29 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     pitch: 0,
   });
 
-  // Debug Mode State
-  const [isDebugMode, setIsDebugMode] = useState<boolean>(debugMode);
-
   // State for Captured Image
   const [capturedImageSrc, setCapturedImageSrc] = useState<string | null>(null);
-  // Optional: State for Cropped Image
-  const [croppedImageSrc, setCroppedImageSrc] = useState<string | null>(null);
 
-  // Initialize MediaPipe Face Detector
+  // Initialize Mediapipe Face Landmarker
   useEffect(() => {
-    const initializeFaceDetector = async () => {
+    const initializeFaceLandmarker = async () => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm",
         );
-        const detector = await FaceDetector.createFromOptions(vision, {
+        const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
           baseOptions: {
-            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`,
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
             delegate: "GPU",
           },
           runningMode:
             runningMode == "LIVE_CAMERA" || runningMode == "VIDEO"
               ? "VIDEO"
               : "IMAGE",
-          minDetectionConfidence: 0.9,
-          minSuppressionThreshold: 1,
         });
-        faceDetectorRef.current = detector;
+
+        faceLandmarRef.current = faceLandmarker;
         startDetection();
       } catch (err) {
         console.error("Failed to initialize FaceDetector:", err);
@@ -91,20 +100,20 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
       }
     };
 
-    initializeFaceDetector();
+    initializeFaceLandmarker();
 
-    // Cleanup when component unmounts
     return () => {
-      if (faceDetectorRef.current) {
-        faceDetectorRef.current.close();
+      if (faceLandmarRef.current) {
+        faceLandmarRef.current.close;
       }
       isDetectingRef.current = false;
     };
   }, []);
 
+  // Live Stream
   const detectLiveStream = async () => {
     if (
-      faceDetectorRef.current &&
+      faceLandmarRef.current &&
       webcamRef.current &&
       webcamRef.current.video &&
       webcamRef.current.video.readyState === 4
@@ -112,90 +121,100 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
       const video = webcamRef.current.video;
       const canvas = canvasRef.current;
       if (canvas) {
-        // Get the rendered size and position of the video
-        const videoRect = video.getBoundingClientRect();
-        if (video && video.videoWidth > 0 && video.videoHeight > 0) {
-          // Update canvas size and position to match the video
-          if (
-            canvas.width !== videoRect.width ||
-            canvas.height !== videoRect.height
-          ) {
-            canvas.width = videoRect.width;
-            canvas.height = videoRect.height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const { innerWidth: width, innerHeight: height } = window;
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+          ctx.scale(dpr, dpr);
+
+          const imgAspect = video.videoWidth / video.videoHeight;
+          const canvasAspect = width / height;
+
+          let drawWidth: number;
+          let drawHeight: number;
+          let offsetX: number;
+          let offsetY: number;
+
+          if (imgAspect < canvasAspect) {
+            drawWidth = width;
+            drawHeight = width / imgAspect;
+            offsetX = 0;
+            offsetY = (height - drawHeight) / 2;
+          } else {
+            drawWidth = height * imgAspect;
+            drawHeight = height;
+            offsetX = (width - drawWidth) / 2;
+            offsetY = 0;
           }
 
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.clearRect(0, 0, width, height);
+          ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
 
-            const startTimeMs = performance.now();
-            try {
-              const detections = faceDetectorRef.current.detectForVideo(
-                video,
-                startTimeMs,
-              ).detections;
+          const startTimeMs = performance.now();
 
-              if (detections.length > 0) {
-                const highestScoreDetection = detections.reduce(
-                  (max, detection) => {
-                    return detection.categories[0].score >
-                      max.categories[0].score
-                      ? detection
-                      : max;
-                  },
-                  detections[0],
-                );
+          glowOffset += glowSpeed;
+          if (glowOffset > 1.5) glowOffset = 0;
 
-                const box = highestScoreDetection.boundingBox;
-                const keypoints = highestScoreDetection.keypoints;
+          try {
+            const results = faceLandmarRef.current.detectForVideo(
+              video,
+              startTimeMs,
+            );
 
-                if (box) {
-                  // Refactored: Process Bounding Box
-                  const { relativePosition } = processBoundingBox(
-                    box,
-                    video,
-                    videoRect,
-                    criterias.flipped,
-                    setBoundingBox,
-                    isDebugMode,
-                    ctx,
-                  );
+            if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+              const landmarks = results.faceLandmarks[0];
 
-                  setPosition(relativePosition);
-                }
+              const faceLandmarks = applyStretchedLandmarks(landmarks);
+              const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
 
-                if (isDebugMode) {
-                  // Refactored: Draw Keypoints
-                  drawKeypoints(
-                    keypoints,
-                    video,
-                    videoRect,
-                    criterias.flipped,
-                    canvas,
-                    ctx,
-                  );
-                }
+              // Pastikan semua nilai berada dalam rentang [0, 1]
+              gradient.addColorStop(
+                clamp(glowOffset - 0.1, 0, 1),
+                "rgba(42, 96, 176, 0.1)",
+              );
+              gradient.addColorStop(
+                clamp(glowOffset, 0, 1),
+                "rgba(44, 98, 180, 0.46)",
+              );
+              gradient.addColorStop(
+                clamp(glowOffset + 0.1, 0, 1),
+                "rgba(42, 96, 176, 0.1)",
+              );
 
-                // Calculate Orientation
-                const calculatedOrientation = calculateOrientation(keypoints);
-                setOrientation(calculatedOrientation);
-              } else {
-                // No detections, reset metrics
-                setPosition({ x: 0, y: 0 });
-                setOrientation({ yaw: 0, pitch: 0 });
-                setLighting(0);
-              }
+              drawConnectorsFromFaces(
+                faceLandmarks,
+                gradient,
+                offsetX,
+                offsetY,
+                drawWidth,
+                drawHeight,
+                faces,
+                ctx,
+              );
 
-              // Calculate Brightness
-              if (video.readyState === 4) {
+              // Hitung posisi wajah relatif terhadap layar
+              const position = calculatePosition(
+                landmarks,
+                canvas.width,
+                canvas.height,
+              );
+              setPosition(position);
+
+              // Hitung orientasi kepala
+              const orientation = calculateOrientation(landmarks);
+              setOrientation(orientation);
+
+              if (video.readyState >= 3) {
                 const avgBrightness = await calculateLighting(video);
                 setLighting(avgBrightness);
               }
-            } catch (err) {
-              console.error("Detection error:", err);
-              setError(err as Error);
+            } else {
+              setPosition({ x: 0, y: 0 });
+              setOrientation({ yaw: 0, pitch: 0 });
             }
-          }
+          } catch (error) {}
         }
       } else {
         console.error("Video element is not properly initialized");
@@ -207,94 +226,110 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     }
   };
 
+  // Video Detection Function
   const detectUploadedVideo = async () => {
     if (
-      faceDetectorRef.current &&
+      faceLandmarRef.current &&
       videoRef.current &&
       videoRef.current.readyState >= 3 // HAVE_FUTURE_DATA
     ) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       if (canvas) {
-        // Get the rendered size and position of the video
-        const videoRect = video.getBoundingClientRect();
-        if (video.videoWidth > 0 && video.videoHeight > 0) {
-          // Update canvas size and position to match the video
-          if (
-            canvas.width !== videoRect.width ||
-            canvas.height !== videoRect.height
-          ) {
-            canvas.width = videoRect.width;
-            canvas.height = videoRect.height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const { innerWidth: width, innerHeight: height } = window;
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+          ctx.scale(dpr, dpr);
+
+          const imgAspect = video.videoWidth / video.videoHeight;
+          const canvasAspect = width / height;
+
+          let drawWidth: number;
+          let drawHeight: number;
+          let offsetX: number;
+          let offsetY: number;
+
+          if (imgAspect < canvasAspect) {
+            drawWidth = width;
+            drawHeight = width / imgAspect;
+            offsetX = 0;
+            offsetY = (height - drawHeight) / 2;
+          } else {
+            drawWidth = height * imgAspect;
+            drawHeight = height;
+            offsetX = (width - drawWidth) / 2;
+            offsetY = 0;
           }
 
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.clearRect(0, 0, width, height);
+          ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
 
-            const startTimeMs = performance.now();
-            try {
-              const detections = faceDetectorRef.current.detectForVideo(
-                video,
-                startTimeMs,
-              ).detections;
+          const startTimeMs = performance.now();
 
-              if (detections.length > 0) {
-                const highestScoreDetection = detections.reduce(
-                  (max, detection) =>
-                    detection.categories[0].score > max.categories[0].score
-                      ? detection
-                      : max,
-                  detections[0],
-                );
+          glowOffset += glowSpeed;
+          if (glowOffset > 1.5) glowOffset = 0;
 
-                const box = highestScoreDetection.boundingBox;
-                const keypoints = highestScoreDetection.keypoints;
+          try {
+            const results = faceLandmarRef.current.detectForVideo(
+              video,
+              startTimeMs,
+            );
 
-                if (box) {
-                  const { relativePosition } = processBoundingBox(
-                    box,
-                    video,
-                    videoRect,
-                    criterias.flipped,
-                    setBoundingBox,
-                    isDebugMode,
-                    ctx,
-                  );
+            if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+              const landmarks = results.faceLandmarks[0];
 
-                  setPosition(relativePosition);
-                }
+              const faceLandmarks = applyStretchedLandmarks(landmarks);
+              const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
 
-                if (isDebugMode && keypoints) {
-                  drawKeypoints(
-                    keypoints,
-                    video,
-                    videoRect,
-                    criterias.flipped,
-                    canvas,
-                    ctx,
-                  );
-                }
+              // Pastikan semua nilai berada dalam rentang [0, 1]
+              gradient.addColorStop(
+                clamp(glowOffset - 0.1, 0, 1),
+                "rgba(42, 96, 176, 0.1)",
+              );
+              gradient.addColorStop(
+                clamp(glowOffset, 0, 1),
+                "rgba(44, 98, 180, 0.46)",
+              );
+              gradient.addColorStop(
+                clamp(glowOffset + 0.1, 0, 1),
+                "rgba(42, 96, 176, 0.1)",
+              );
 
-                const calculatedOrientation = calculateOrientation(keypoints);
-                setOrientation(calculatedOrientation);
-              } else {
-                // No detections, reset metrics
-                setPosition({ x: 0, y: 0 });
-                setOrientation({ yaw: 0, pitch: 0 });
-                setLighting(0);
-              }
+              drawConnectorsFromFaces(
+                faceLandmarks,
+                gradient,
+                offsetX,
+                offsetY,
+                drawWidth,
+                drawHeight,
+                faces,
+                ctx,
+              );
 
-              // Calculate Brightness
+              // Hitung posisi wajah relatif terhadap layar
+              const position = calculatePosition(
+                landmarks,
+                canvas.width,
+                canvas.height,
+              );
+              setPosition(position);
+
+              // Hitung orientasi kepala
+              const orientation = calculateOrientation(landmarks);
+              setOrientation(orientation);
+
               if (video.readyState >= 3) {
                 const avgBrightness = await calculateLighting(video);
                 setLighting(avgBrightness);
               }
-            } catch (err) {
-              console.error("Detection error:", err);
-              setError(err as Error);
+            } else {
+              setPosition({ x: 0, y: 0 });
+              setOrientation({ yaw: 0, pitch: 0 });
             }
-          }
+          } catch (error) {}
         }
       } else {
         console.error("Video element is not properly initialized");
@@ -308,82 +343,119 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
 
   // Image Detection Function
   const detectImage = async () => {
-    if (faceDetectorRef.current && imageRef.current) {
+    if (faceLandmarRef.current && imageRef.current) {
       const img = imageRef.current;
-      console.log("Detecting on image:", img.src);
       const canvas = canvasRef.current;
-      if (canvas) {
-        // Set canvas size to match image
-        if (canvas.width !== img.width || canvas.height !== img.height) {
-          canvas.width = img.width;
-          canvas.height = img.height;
-        }
 
+      if (canvas) {
         const ctx = canvas.getContext("2d");
         if (ctx) {
+          const dpr = window.devicePixelRatio || 1;
+
+          // Get the dimensions of the canvas and image
+          const canvasWidth = canvas.clientWidth;
+          const canvasHeight = canvas.clientHeight;
+          canvas.width = canvasWidth * dpr;
+          canvas.height = canvasHeight * dpr;
+          ctx.scale(dpr, dpr);
+
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           try {
-            // For images, use detect instead of detectForVideo
-            const detections = faceDetectorRef.current.detect(img).detections;
-            console.log("Detect: ", detections);
+            // Detect landmarks on the image
+            const results = await faceLandmarRef.current.detect(img);
 
-            if (detections.length > 0) {
-              const highestScoreDetection = detections.reduce(
-                (max, detection) =>
-                  detection.categories[0].score > max.categories[0].score
-                    ? detection
-                    : max,
-                detections[0],
+            // Calculate image and canvas aspect ratio
+            const imgAspect = img.width / img.height;
+            const canvasAspect = canvasWidth / canvasHeight;
+
+            let drawWidth: number,
+              drawHeight: number,
+              offsetX: number,
+              offsetY: number;
+
+            // Maintain aspect ratio and calculate offsets
+            if (imgAspect < canvasAspect) {
+              drawWidth = canvasWidth;
+              drawHeight = canvasWidth / imgAspect;
+              offsetX = 0;
+              offsetY = (canvasHeight - drawHeight) / 2;
+            } else {
+              drawWidth = canvasHeight * imgAspect;
+              drawHeight = canvasHeight;
+              offsetX = (canvasWidth - drawWidth) / 2;
+              offsetY = 0;
+            }
+
+            // Draw the image on the canvas with calculated offsets
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+
+            if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+              const landmarks = results.faceLandmarks[0];
+
+              // Update glowOffset for animation
+              glowOffset += glowSpeed;
+              if (glowOffset > 1) glowOffset = 0;
+
+              // Apply scanner glow effect
+              const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+              gradient.addColorStop(
+                clamp(glowOffset - 0.1, 0, 1),
+                "rgba(42, 96, 176, 0.1)",
+              );
+              gradient.addColorStop(
+                clamp(glowOffset, 0, 1),
+                "rgba(44, 98, 180, 0.46)",
+              );
+              gradient.addColorStop(
+                clamp(glowOffset + 0.1, 0, 1),
+                "rgba(42, 96, 176, 0.1)",
               );
 
-              const box = highestScoreDetection.boundingBox;
-              const keypoints = highestScoreDetection.keypoints;
+              // Draw connectors with scanner effect
+              drawConnectorsFromFaces(
+                landmarks,
+                gradient,
+                offsetX,
+                offsetY,
+                drawWidth,
+                drawHeight,
+                faces,
+                ctx,
+              );
 
-              if (box) {
-                const { relativePosition } = processBoundingBox(
-                  box,
-                  img,
-                  img.getBoundingClientRect(),
-                  criterias.flipped,
-                  setBoundingBox,
-                  isDebugMode,
-                  ctx,
-                );
+              // Calculate face position relative to the canvas
+              const position = calculatePosition(
+                landmarks,
+                drawWidth,
+                drawHeight,
+              );
+              setPosition(position);
 
-                setPosition(relativePosition);
-              }
+              // Calculate head orientation
+              const orientation = calculateOrientation(landmarks);
+              setOrientation(orientation);
 
-              if (isDebugMode && keypoints) {
-                drawKeypoints(
-                  keypoints,
-                  img,
-                  img.getBoundingClientRect(),
-                  criterias.flipped,
-                  canvas,
-                  ctx,
-                );
-              }
-
-              const calculatedOrientation = calculateOrientation(keypoints);
-              setOrientation(calculatedOrientation);
+              // Calculate average brightness
+              const avgBrightness = calculateLighting(img);
+              setLighting(await avgBrightness);
             } else {
-              // No detections, reset metrics
+              // Reset metrics if no face is detected
               setPosition({ x: 0, y: 0 });
               setOrientation({ yaw: 0, pitch: 0 });
               setLighting(0);
             }
-
-            // Calculate Brightness
-            const avgBrightness = calculateLighting(img);
-            setLighting(await avgBrightness);
           } catch (err) {
             console.error("Detection error:", err);
             setError(err as Error);
           }
         }
+      } else {
+        console.error("Canvas element is not properly initialized");
       }
     }
+
+    // Continue animation if runningMode is IMAGE
     if (isDetectingRef.current && runningMode === "IMAGE") {
       requestAnimationFrame(detectImage);
     }
@@ -401,7 +473,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     } else if (runningMode == "IMAGE") {
       detectImage();
     }
-  }, [isDebugMode, criterias.flipped, setBoundingBox]);
+  }, [criterias.flipped]);
 
   // Function to stop detection
   const stopDetection = () => {
@@ -412,7 +484,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   useEffect(() => {
     return () => {
       stopDetection();
-      // Removed countdownIntervalRef references
     };
   }, []);
 
@@ -452,15 +523,14 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
 
     const isPositionGood =
       Math.abs(position.x) < POSITION_THRESHOLD_X &&
-      Math.abs(position.x) > 0 &&
+      Math.abs(position.x) != 0 &&
       Math.abs(position.y) < POSITION_THRESHOLD_Y &&
-      Math.abs(position.y) > 0;
+      Math.abs(position.y) != 0;
 
+    // Evaluasi orientasi kepala
     const isOrientationGood =
-      Math.abs(orientation.yaw) < ORIENTATION_THRESHOLD_YAW &&
-      Math.abs(orientation.yaw) > 0 &&
-      Math.abs(orientation.pitch) < ORIENTATION_THRESHOLD_PITCH &&
-      Math.abs(orientation.pitch) > 0;
+      Math.abs(orientation.yaw + 90) < ORIENTATION_THRESHOLD_YAW && // Yaw di sekitar -90
+      Math.abs(orientation.pitch) < ORIENTATION_THRESHOLD_PITCH;
 
     setCriterias({
       lighting: isBrightnessGood,
@@ -487,43 +557,31 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
    * Function to capture the current frame from the webcam and crop based on bounding box
    */
   const capture = useCallback(async () => {
-    if (webcamRef.current && criterias.lastBoundingBox) {
+    if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
         try {
-          const croppedImage = await cropImage(
-            imageSrc,
-            criterias.lastBoundingBox,
-          );
           captureImage(imageSrc);
-          captureImageCut(croppedImage);
           setCapturedImageSrc(imageSrc);
-          setCroppedImageSrc(croppedImage);
           stopDetection();
         } catch (error) {
           console.error("Error cropping image:", error);
         }
       }
     }
-    if (imageRef.current && criterias.lastBoundingBox) {
+    if (imageRef.current) {
       const imageSrc = imageRef.current.src;
       if (imageSrc) {
         try {
-          const croppedImage = await cropImage(
-            imageSrc,
-            criterias.lastBoundingBox,
-          );
           captureImage(imageSrc);
-          captureImageCut(croppedImage);
           setCapturedImageSrc(imageSrc); // Set the captured image
-          setCroppedImageSrc(croppedImage); // Optional: Set cropped image
           stopDetection(); // Optionally stop detection after capture
         } catch (error) {
           console.error("Error cropping image:", error);
         }
       }
     }
-    if (videoRef.current && criterias.lastBoundingBox) {
+    if (videoRef.current) {
       const video = videoRef.current;
       const canvas = document.createElement("canvas");
       canvas.width = video.videoWidth;
@@ -536,17 +594,10 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
         // Convert canvas content to data URL (base64 encoded image)
         const imageSrc = canvas.toDataURL("image/png");
 
-        if (imageSrc && criterias.lastBoundingBox) {
+        if (imageSrc) {
           try {
-            // Meng-crop image menggunakan bounding box yang ada
-            const croppedImage = await cropImage(
-              imageSrc,
-              criterias.lastBoundingBox,
-            );
             captureImage(imageSrc); // Simpan full image yang di-capture
-            captureImageCut(croppedImage); // Simpan cropped image
             setCapturedImageSrc(imageSrc); // Set full captured image
-            setCroppedImageSrc(croppedImage); // Set cropped captured image
             stopDetection(); // Optionally stop detection after capture
           } catch (error) {
             console.error("Error cropping image:", error);
@@ -564,7 +615,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
     isActive: isCountdownActive,
   } = useCountdown({
     initialCount: 3,
-    onComplete: capture, // Callback when countdown finishes
+    onComplete: capture,
   });
 
   // Use Effect to evaluate criteria and manage countdown
@@ -578,13 +629,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
       // Criteria not met, cancel the countdown
       cancelCountdown();
     }
-  }, [
-    evaluateCriteria,
-    isCountdownActive,
-    criterias.isCaptured,
-    startCountdown,
-    cancelCountdown,
-  ]);
+  }, [evaluateCriteria]);
 
   // Reset Capture state when new image is loaded
   useEffect(() => {
@@ -596,7 +641,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
   }, [criterias.isCaptured]);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="fixed inset-0 flex items-center justify-center">
       {capturedImageSrc ? (
         <div className="relative h-full w-full">
           <img
@@ -614,11 +659,12 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
                 audio={false}
                 ref={webcamRef}
                 screenshotFormat="image/jpeg"
-                mirrored={false} // Mirroring handled via CSS
+                mirrored={false}
                 videoConstraints={{
-                  width: 640,
-                  height: 480,
+                  width: VIDEO_WIDTH,
+                  height: VIDEO_HEIGHT,
                   facingMode: criterias.flipped ? "environment" : "user",
+                  frameRate: { exact: 25, ideal: 25, max: 25 },
                 }}
                 onUserMediaError={(err) =>
                   setError(
@@ -627,9 +673,6 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
                       : new Error("Webcam error occurred."),
                   )
                 }
-                className={`h-full w-full object-cover ${
-                  criterias.flipped ? "scale-x-[-1]" : ""
-                }`}
               />
             </>
           )}
@@ -660,13 +703,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             criterias.runningMode === "IMAGE") && (
             <canvas
               ref={canvasRef}
-              className={`pointer-events-none absolute left-0 top-0 ${
-                isDebugMode ? "block" : "hidden"
-              }`} // Hide canvas if not in debug mode
-              style={{
-                width: "100%",
-                height: "100%",
-              }}
+              className={`pointer-events-none absolute left-0 top-0 h-full w-screen`}
             />
           )}
 
