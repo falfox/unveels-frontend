@@ -74,6 +74,8 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   const {
     status,
     startRecording,
@@ -82,7 +84,7 @@ export const CameraProvider: React.FC<{ children: ReactNode }> = ({
     resumeRecording,
     mediaBlobUrl,
   } = useReactMediaRecorder({
-    screen: true,
+    screen: !isMobile,
   });
 
   const [state, setState] = useState<CameraState>({

@@ -28,19 +28,23 @@ import { useAccesories } from "../../context/accesories-context";
 import HandOccluder from "../three/accesories/hand-occluder";
 import Watch from "../three/accesories/watch";
 import Ring from "../three/accesories/ring";
+import { LoopNode } from "three/webgpu";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
   landmarks: React.RefObject<Landmark[]>;
   handlandmarks: React.RefObject<Landmark[]>;
+  faceTransform: React.RefObject<number[]>;
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   videoRef,
   landmarks,
   handlandmarks,
+  faceTransform,
   ...props
 }) => {
+  const flipped = true;
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
   const [videoTexture, setVideoTexture] = useState<VideoTexture | null>(null);
@@ -213,7 +217,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             />
           </mesh>
 
-          {showFoundation && (
+          <Foundation planeSize={planeSize} landmarks={landmarks} />
+          {/* {showFoundation && (
             <Foundation planeSize={planeSize} landmarks={landmarks} />
           )}
 
@@ -283,7 +288,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showRing && (
             <Ring planeSize={planeSize} handLandmarks={handlandmarks} />
-          )}
+          )} */}
         </>
       )}
     </>

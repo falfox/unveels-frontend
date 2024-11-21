@@ -118,16 +118,18 @@ export function FindTheLookMainScreenWeb({
       <div className="space-y-4 p-3.5">
         {/* Section Live Camera */}
         <div
-          className="cursor-pointer rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
+          className="cursor-pointer rounded-3xl bg-[#252525] p-5 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
           onClick={() => handleSectionClick("liveCamera")}
         >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-5 lg:w-2/3">
               <div className="flex items-center space-x-2">
                 <Icons.liveCamera className="size-8 shrink-0" />
-                <h3 className="text-2xl font-bold">Live Camera</h3>
+                <h3 className="truncate text-lg font-bold lg:text-2xl">
+                  Live Camera
+                </h3>
               </div>
-              <p>
+              <p className="overflow-hidden text-ellipsis text-sm leading-relaxed lg:text-base">
                 Capture the essence of elegance in real-time with our live
                 camera feature.
               </p>
@@ -139,13 +141,23 @@ export function FindTheLookMainScreenWeb({
                     </span>
                     <h4 className="font-semibold">Steps to Follow</h4>
                   </div>
-                  <ul className="list-disc space-y-1 pl-5 text-sm text-white">
-                    <li>Hold the camera parallel to the face...</li>
-                    <li>Ensure the entire face is centered in the frame.</li>
-                    <li>Position the camera at eye level with the face.</li>
-                    <li>Keep the camera steady and avoid tilting.</li>
-                    <li>Ensure the area is well-lit for clear detection.</li>
-                    <li>
+                  <ul className="list-disc space-y-1 pl-5 text-xs text-white lg:text-sm">
+                    <li className="whitespace-normal">
+                      Hold the camera parallel to the face.
+                    </li>
+                    <li className="whitespace-normal">
+                      Ensure the entire face is centered in the frame.
+                    </li>
+                    <li className="whitespace-normal">
+                      Position the camera at eye level with the face.
+                    </li>
+                    <li className="whitespace-normal">
+                      Keep the camera steady and avoid tilting.
+                    </li>
+                    <li className="whitespace-normal">
+                      Ensure the area is well-lit for clear detection.
+                    </li>
+                    <li className="whitespace-normal">
                       Avoid shadows on the face by using soft, even lighting.
                     </li>
                   </ul>
@@ -155,7 +167,7 @@ export function FindTheLookMainScreenWeb({
             {activeSection === "liveCamera" && (
               <button
                 onClick={() => handleLiveCamera()}
-                className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-40 py-3 font-semibold text-white shadow-lg lg:w-auto"
+                className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-10 py-3 font-semibold text-white shadow-lg lg:w-auto"
               >
                 USE LIVE CAMERA
               </button>
@@ -165,16 +177,18 @@ export function FindTheLookMainScreenWeb({
 
         {/* Section Take a Snapshot */}
         <div
-          className="cursor-pointer rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
+          className="cursor-pointer rounded-3xl bg-[#252525] p-5 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
           onClick={() => handleSectionClick("takeSnapshot")}
         >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-5 lg:w-2/3">
               <div className="flex items-center space-x-2">
                 <Icons.takeSnapshot className="size-8 shrink-0" />
-                <h3 className="text-2xl font-bold">Take a Snapshot</h3>
+                <h3 className="truncate text-lg font-bold lg:text-2xl">
+                  Take a Snapshot
+                </h3>
               </div>
-              <p>
+              <p className="overflow-hidden text-ellipsis text-sm leading-relaxed lg:text-base">
                 Unveil the potential of your favorite images with our photo
                 upload feature.
               </p>
@@ -186,17 +200,17 @@ export function FindTheLookMainScreenWeb({
                     </span>
                     <h4 className="font-semibold">Steps to Follow</h4>
                   </div>
-                  <ul className="list-disc space-y-1 pl-5 text-sm text-white">
-                    <li>
+                  <ul className="list-disc space-y-1 pl-5 text-xs text-white lg:text-sm">
+                    <li className="whitespace-normal">
                       Take a clear, high-resolution photo for the best results.
                     </li>
-                    <li>
+                    <li className="whitespace-normal">
                       Make sure the entire upper body is visible in the photo.
                     </li>
-                    <li>
+                    <li className="whitespace-normal">
                       Take a photo with even lighting and minimal shadows.
                     </li>
-                    <li>
+                    <li className="whitespace-normal">
                       Ensure the photo contains only one individual for accurate
                       analysis.
                     </li>
@@ -205,30 +219,30 @@ export function FindTheLookMainScreenWeb({
               )}
             </div>
             {activeSection === "takeSnapshot" && (
-              <div>
-                <button
-                  onClick={() => snapshotUploadRef.current?.click()}
-                  className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-40 py-3 font-semibold text-white shadow-lg lg:w-auto"
-                >
-                  UPLOAD PHOTO
-                </button>
-              </div>
+              <button
+                onClick={() => snapshotUploadRef.current?.click()}
+                className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-10 py-3 font-semibold text-white shadow-lg lg:w-auto"
+              >
+                UPLOAD PHOTO
+              </button>
             )}
           </div>
         </div>
 
         {/* Section Upload Photo or Video */}
         <div
-          className="cursor-pointer rounded-3xl bg-[#252525] p-7 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
+          className="cursor-pointer rounded-3xl bg-[#252525] p-5 text-white shadow-[inset_5.2px_5.2px_19.5px_rgba(255,255,255,0.1)] lg:p-16"
           onClick={() => handleSectionClick("uploadPhotoOrVideo")}
         >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-5 lg:w-2/3">
               <div className="flex items-center space-x-2">
                 <Icons.uploadPhotoOrVideo className="size-8 shrink-0" />
-                <h3 className="text-2xl font-bold">Upload Photo Or Video</h3>
+                <h3 className="truncate text-lg font-bold lg:text-2xl">
+                  Upload Photo Or Video
+                </h3>
               </div>
-              <p>
+              <p className="overflow-hidden text-ellipsis text-sm leading-relaxed lg:text-base">
                 Immerse yourself in the luxury of transformation with our video
                 upload feature.
               </p>
@@ -240,17 +254,21 @@ export function FindTheLookMainScreenWeb({
                     </span>
                     <h4 className="font-semibold">Steps to Follow</h4>
                   </div>
-                  <ul className="list-disc space-y-1 pl-5 text-sm text-white">
-                    <li>
+                  <ul className="list-disc space-y-1 pl-5 text-xs text-white lg:text-sm">
+                    <li className="whitespace-normal">
                       Choose a high-quality photo or video for upper body only.
                     </li>
-                    <li>Ensure the photo or video is stable and not shaky.</li>
-                    <li>Make sure the entire look is visible.</li>
-                    <li>
+                    <li className="whitespace-normal">
+                      Ensure the photo or video is stable and not shaky.
+                    </li>
+                    <li className="whitespace-normal">
+                      Make sure the entire look is visible.
+                    </li>
+                    <li className="whitespace-normal">
                       Opt for a photo or video with bright, even lighting and
                       minimal shadows.
                     </li>
-                    <li>
+                    <li className="whitespace-normal">
                       Ensure the photo or video contains only one individual for
                       precise detection.
                     </li>
@@ -259,31 +277,16 @@ export function FindTheLookMainScreenWeb({
               )}
             </div>
             {activeSection === "uploadPhotoOrVideo" && (
-              <div>
-                <button
-                  onClick={() => photoVideoUploadRef.current?.click()}
-                  className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-40 py-3 font-semibold text-white shadow-lg lg:w-auto"
-                >
-                  UPLOAD PHOTO/VIDEO
-                </button>
-              </div>
+              <button
+                onClick={() => photoVideoUploadRef.current?.click()}
+                className="mt-6 w-full bg-gradient-to-r from-[#473209] to-[#CA9C43] px-10 py-3 font-semibold text-white shadow-lg lg:w-auto"
+              >
+                UPLOAD PHOTO/VIDEO
+              </button>
             )}
           </div>
         </div>
       </div>
-      {/* Uploaded Image */}
-      <img
-        ref={uploadedImageRef}
-        alt="Uploaded Image"
-        style={{ width: "300px", marginTop: "10px", display: "none" }} // Hide it, will be displayed in VideoStream
-      />
-
-      {/* Uploaded Video */}
-      <video
-        ref={uploadedVideoRef}
-        controls
-        style={{ width: "300px", marginTop: "10px", display: "none" }} // Hide it, will be displayed in VideoStream
-      />
     </div>
   );
 }

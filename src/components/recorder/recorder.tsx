@@ -72,42 +72,49 @@ function RecorderGuide() {
   }
 
   return (
-    <div className="select-none px-2 pb-4 text-center text-white">
-      <p className="pb-9">{filteredHints[currentHintIndex]}</p>
+    <div className="flex select-none justify-center px-4 pb-4 text-center text-white">
+      <div className="w-full max-w-md">
+        <p className="pb-4">{filteredHints[currentHintIndex]}</p>
 
-      <div className="grid grid-cols-3 gap-5 text-xs text-white/50">
-        <div
-          className={clsx(
-            "flex items-center justify-between rounded-lg border px-2.5 py-2",
-            facePosition
-              ? "border-white text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]"
-              : "border-dashed border-white/50",
-          )}
-        >
-          Face Position
-          <ScanFace className="size-6" />
-        </div>
-        <div
-          className={clsx(
-            "flex items-center justify-between rounded-lg border px-2.5 py-2",
-            lighting
-              ? "border-white text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]"
-              : "border-dashed border-white/50",
-          )}
-        >
-          Lighting
-          <Lightbulb className="size-6" />
-        </div>
-        <div
-          className={clsx(
-            "flex items-center justify-between rounded-lg border px-2.5 py-2",
-            orientation
-              ? "border-white text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]"
-              : "border-dashed border-white/50",
-          )}
-        >
-          Orientation
-          <Scan className="size-6" />
+        <div className="grid grid-cols-3 gap-3 text-xs text-white/50">
+          {/* Face Position */}
+          <div
+            className={clsx(
+              "flex items-center justify-between whitespace-nowrap rounded-lg border px-1.5 py-1 text-[9px] md:px-2.5 md:py-2 md:text-xs",
+              facePosition
+                ? "border-white text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]"
+                : "border-dashed border-white/50",
+            )}
+          >
+            <span className="truncate md:whitespace-normal">Face Position</span>
+            <ScanFace className="size-5 md:size-6" />
+          </div>
+
+          {/* Lighting */}
+          <div
+            className={clsx(
+              "flex items-center justify-between whitespace-nowrap rounded-lg border px-1.5 py-1 text-[9px] md:px-2.5 md:py-2 md:text-xs",
+              lighting
+                ? "border-white text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]"
+                : "border-dashed border-white/50",
+            )}
+          >
+            <span className="truncate md:whitespace-normal">Lighting</span>
+            <Lightbulb className="size-5 md:size-6" />
+          </div>
+
+          {/* Orientation */}
+          <div
+            className={clsx(
+              "flex items-center justify-between whitespace-nowrap rounded-lg border px-1.5 py-1 text-[9px] md:px-2.5 md:py-2 md:text-xs",
+              orientation
+                ? "border-white text-white [background:linear-gradient(90deg,_#CA9C43_0%,_#916E2B_27.4%,_#6A4F1B_59.4%,_#473209_100%);]"
+                : "border-dashed border-white/50",
+            )}
+          >
+            <span className="truncate md:whitespace-normal">Orientation</span>
+            <Scan className="size-5 md:size-6" />
+          </div>
         </div>
       </div>
     </div>

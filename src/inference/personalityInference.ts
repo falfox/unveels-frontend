@@ -25,6 +25,9 @@ import { extractSkinColor } from "../utils/imageProcessing";
 import { base64ToImage } from "../utils/imageProcessing";
 import { Classifier } from "../types/classifier";
 import { TFLiteModel } from "@tensorflow/tfjs-tflite";
+import * as tf from "@tensorflow/tfjs-core";
+import "@tensorflow/tfjs-backend-webgl";
+import * as tflite from "@tensorflow/tfjs-tflite";
 
 const classifiers: Classifier[] = [
   {
@@ -232,49 +235,14 @@ function getAverageColor(
 }
 
 export const personalityInference = async (
-  modelFaceShape: TFLiteModel,
-  modelPersonalityFinder: TFLiteModel,
   faceLandmarker: FaceLandmarker,
+  pred: tf.Tensor<tf.Rank> | tf.Tensor<tf.Rank>[] | tf.NamedTensorMap,
+  predPersonality:
+    | tf.Tensor<tf.Rank>
+    | tf.Tensor<tf.Rank>[]
+    | tf.NamedTensorMap,
   imageData: string,
-  w: number,
-  h: number,
 ): Promise<Classifier[]> => {
-  // Preprocess gambar
-  const preprocessedImage = await preprocessTFLiteImage(imageData, w, h);
-
-  const pred = await runTFLiteInference(
-    modelFaceShape,
-    preprocessedImage,
-    w,
-    h,
-  );
-
-  const predPersonality = await runTFLiteInference(
-    modelPersonalityFinder,
-    preprocessedImage,
-    w,
-    h,
-  );
-
-  classifiers.forEach(async (classifier) => {
-    const classifierTensor = pred[classifier.outputName];
-    const classifierData = await classifierTensor.data();
-    const label = classifier.labels[findMaxIndexFaceAanalyzer(classifierData)];
-    classifier.outputLabel = label;
-  });
-
-  const classifierPersonalityData = await predPersonality.data();
-  const labelPersonality =
-    classifiers[15].labels[findMaxIndex(classifierPersonalityData)];
-
-  classifiers[15].outputLabel = labelPersonality;
-  classifiers[15].outputData = classifierPersonalityData;
-
-  classifiers[15].outputScore =
-    classifierPersonalityData[findMaxIndex(classifierPersonalityData)];
-
-  classifiers[15].outputIndex = findMaxIndex(classifierPersonalityData);
-
   try {
     // Konversi base64 ke Image
     const image: HTMLImageElement = await base64ToImage(imageData);
@@ -298,9 +266,25 @@ export const personalityInference = async (
     // Deteksi landmark wajah
     const results = faceLandmarker.detect(imageDataCanvas);
 
-    if (!results || results.faceLandmarks[0].length === 0) {
-      throw new Error("Tidak ada wajah yang terdeteksi.");
-    }
+    classifiers.forEach(async (classifier) => {
+      const classifierTensor = pred[classifier.outputName];
+      const classifierData = await classifierTensor.data();
+      const label =
+        classifier.labels[findMaxIndexFaceAanalyzer(classifierData)];
+      classifier.outputLabel = label;
+    });
+
+    const classifierPersonalityData = await predPersonality.data();
+    const labelPersonality =
+      classifiers[15].labels[findMaxIndex(classifierPersonalityData)];
+
+    classifiers[15].outputLabel = labelPersonality;
+    classifiers[15].outputData = classifierPersonalityData;
+
+    classifiers[15].outputScore =
+      classifierPersonalityData[findMaxIndex(classifierPersonalityData)];
+
+    classifiers[15].outputIndex = findMaxIndex(classifierPersonalityData);
 
     const landmarks = results.faceLandmarks[0];
 

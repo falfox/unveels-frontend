@@ -98,8 +98,8 @@ if (window.__INITIAL_ROUTE__) {
       </StrictMode>,
     );
 
-    console.error("Rendered default route");
+    console.log("Rendered default route");
   } else {
-    console.error("No initial route found");
+    console.log("No initial route found");
   }
 }

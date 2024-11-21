@@ -25,6 +25,7 @@ export function VirtualTryOnScene() {
   const [error, setError] = useState<Error | null>(null);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const handLandmarkerRef = useRef<HandLandmarker | null>(null);
+  const faceTransformRef = useRef<number[] | null>(null);
   const landmarksRef = useRef<Landmark[]>([]);
   const handLandmarksRef = useRef<Landmark[]>([]);
   const isDetectingRef = useRef<boolean>(false);
@@ -54,6 +55,8 @@ export function VirtualTryOnScene() {
             minFaceDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5,
             minFacePresenceConfidence: 0.5,
+            outputFaceBlendshapes: true,
+            outputFacialTransformationMatrixes: true,
           },
         );
 
@@ -158,6 +161,10 @@ export function VirtualTryOnScene() {
                 startTimeMs,
               );
 
+              if (results.facialTransformationMatrixes.length > 0) {
+                faceTransformRef.current =
+                  results.facialTransformationMatrixes[0].data;
+              }
               if (handResults.landmarks && handResults.landmarks.length > 0) {
                 handLandmarksRef.current = handResults.landmarks[0];
               }
@@ -204,6 +211,7 @@ export function VirtualTryOnScene() {
           videoRef={webcamRef}
           landmarks={landmarksRef}
           handlandmarks={handLandmarksRef}
+          faceTransform={faceTransformRef}
         />
       </Canvas>
 
