@@ -410,6 +410,7 @@ function OtherShades() {
 function ProductList({ products }: { products: Array<Product> }) {
   const { scrollContainerRef, handleMouseDown } = useScrollContainer();
   const { data } = useBrandsQuerySuspense();
+  const [selected, setSelected] = useState(null as Product | null);
 
   return (
     <div
@@ -430,32 +431,48 @@ function ProductList({ products }: { products: Array<Product> }) {
         );
 
         return (
-          <a
+          <button
             key={index}
-            className="block w-[110px] rounded shadow"
-            // target="_blank"
-            // href={product.sku}
+            className="relative block w-[110px] text-left shadow"
+            onClick={() => {
+              setSelected(product);
+            }}
           >
             <div className="relative h-[80px] w-[110px] overflow-hidden">
               <img
                 src={imageUrl}
                 alt="Product"
-                className="rounded object-cover"
+                className="h-full w-full rounded object-cover"
               />
             </div>
 
-            <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-              {product.name}
-            </h3>
-            <div className="flex items-center justify-between">
-              <p className="text-[0.5rem] text-white/60">{brand}</p>
-              <div className="flex flex-wrap items-center justify-end gap-x-1">
-                <span className="text-[0.625rem] font-bold text-white">
-                  ${product.price.toFixed(2)}
-                </span>
+            <div className="px-2 pb-1">
+              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+                {product.name}
+              </h3>
+              <div className="flex items-center justify-between">
+                <p className="text-[0.5rem] text-white/60">{brand}</p>
+                <div className="flex flex-wrap items-center justify-end gap-x-1">
+                  <span className="text-[0.625rem] font-bold text-white">
+                    ${product.price.toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
-          </a>
+
+            {selected?.id === product.id ? (
+              <div
+                className="absolute inset-0 border-4 border-transparent"
+                style={{
+                  borderImage:
+                    "linear-gradient(90deg, #CA9C43 0%, #916E2B 27.4%, #6A4F1B 59.4%, #473209 100%) 1",
+                  borderWidth: "4px",
+                  borderStyle: "solid",
+                  // padding: "4px",
+                }}
+              />
+            ) : null}
+          </button>
         );
       })}
     </div>
