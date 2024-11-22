@@ -22,14 +22,21 @@ import { useSkincareProductQuery } from "../api/skin-care";
 import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
 import { BrandName } from "../components/product/brand";
 import { LoadingProducts } from "../components/loading";
+import SkinImprovementScene from "../components/skin-improvement/skin-improvement-scene";
+import {
+  SkinImprovementProvider,
+  useSkinImprovement,
+} from "../context/see-improvement-context";
 
 export function SeeImprovement() {
   return (
     <CameraProvider>
       <SkinAnalysisProvider>
-        <div className="h-full min-h-dvh">
-          <Main />
-        </div>
+        <SkinImprovementProvider>
+          <div className="h-full min-h-dvh">
+            <Main />
+          </div>
+        </SkinImprovementProvider>
       </SkinAnalysisProvider>
     </CameraProvider>
   );
@@ -77,7 +84,11 @@ function Main() {
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
         <div className="absolute inset-0">
-          <VideoStream debugMode={false} />
+          {criterias.capturedImage ? (
+            <SkinImprovementScene />
+          ) : (
+            <VideoStream debugMode={false} />
+          )}
           <div
             className="absolute inset-0"
             style={{
@@ -212,7 +223,7 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
           })}
         </div>
 
-        <Slider />
+        {tab && <Slider valueSlider={50} />}
         {tab && <ProductList skinConcern={tab} />}
       </div>
     </>
@@ -299,8 +310,21 @@ function BottomContent() {
   return <VideoScene />;
 }
 
-function Slider() {
-  const [value, setValue] = useState(50);
+function Slider({ valueSlider }: { valueSlider: number }) {
+  const [value, setValue] = useState(valueSlider); // Nilai slider (0-100)
+  const { smoothingStrength, setSmoothingStrength } = useSkinImprovement(); // Ambil nilai smoothingStrength dan setSmoothingStrength dari context
+
+  // Rentang nilai smoothingStrength
+  const minSmoothing = 0.01;
+  const maxSmoothing = 1.25;
+
+  // Hitung nilai smoothingStrength berdasarkan nilai slider
+  useEffect(() => {
+    const mappedValue =
+      minSmoothing + ((value - 0) / (100 - 0)) * (maxSmoothing - minSmoothing);
+    setSmoothingStrength(mappedValue);
+    console.log(smoothingStrength);
+  }, [value]);
 
   // Labels di atas slider
   const labels = ["00", 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
