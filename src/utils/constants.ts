@@ -1,10 +1,10 @@
 import { SkinAnalysisItem } from "../types/skinAnalysisItem";
 
-export const BRIGHTNESS_THRESHOLD = 60; // Brightness > 60
-export const POSITION_THRESHOLD_X = 40; // X position within ±50 pixels from center
-export const POSITION_THRESHOLD_Y = 40; // Y position within ±50 pixels from center
-export const ORIENTATION_THRESHOLD_YAW = 10; // Yaw between -10° and +10°
-export const ORIENTATION_THRESHOLD_PITCH = 10; // Pitch between -10° and +10°
+export const BRIGHTNESS_THRESHOLD = 60;
+export const POSITION_THRESHOLD_X = 0.1;
+export const POSITION_THRESHOLD_Y = 0.1;
+export const ORIENTATION_THRESHOLD_YAW = 2;
+export const ORIENTATION_THRESHOLD_PITCH = 0.005;
 
 export const VIDEO_WIDTH = 480;
 export const VIDEO_HEIGHT = 480;

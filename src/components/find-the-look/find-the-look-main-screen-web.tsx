@@ -287,6 +287,19 @@ export function FindTheLookMainScreenWeb({
           </div>
         </div>
       </div>
+      {/* Uploaded Image */}
+      <img
+        ref={uploadedImageRef}
+        alt="Uploaded Image"
+        style={{ width: "300px", marginTop: "10px", display: "none" }} // Hide it, will be displayed in VideoStream
+      />
+
+      {/* Uploaded Video */}
+      <video
+        ref={uploadedVideoRef}
+        controls
+        style={{ width: "300px", marginTop: "10px", display: "none" }} // Hide it, will be displayed in VideoStream
+      />
     </div>
   );
 }

@@ -213,10 +213,7 @@ function SkinToneFinderInnerScene({
                     console.error("Error calling Flutter handler:", error);
                   });
               }
-
-              setTimeout(() => {
-                setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
-              }, 3000);
+              setShowScannerAfterInference(false);
             }
           }
         } catch (error) {
