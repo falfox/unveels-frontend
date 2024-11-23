@@ -10,9 +10,15 @@ import {
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
 
-export function useBronzerQuery({ texture }: { texture: string | null }) {
+export function useBronzerQuery({
+  texture,
+  hexacode,
+}: {
+  hexacode: string | null;
+  texture: string | null;
+}) {
   return useQuery({
-    queryKey: ["products", "bronzers", texture],
+    queryKey: ["products", "bronzers", hexacode, texture],
     queryFn: async () => {
       const baseFilters = [
         {
@@ -41,7 +47,9 @@ export function useBronzerQuery({ texture }: { texture: string | null }) {
       }
 
       const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
+        baseUrl +
+          "/rest/V1/products?" +
+          buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },
@@ -51,7 +59,20 @@ export function useBronzerQuery({ texture }: { texture: string | null }) {
         items: Array<Product>;
       };
 
-      return await fetchConfigurableProducts(results);
+      // di configurable bronzer gk ada hexacode, adanya di child, sedangkan di parent ada texture, di child gk ada
+      if (hexacode) {
+        filters.push({
+          filters: [
+            {
+              field: "hexacode",
+              value: hexacode,
+              condition_type: "finset",
+            },
+          ],
+        });
+      }
+
+      return await fetchConfigurableProducts(results, filters);
     },
   });
 }

@@ -47,7 +47,7 @@ function ColorSelector() {
   } = useMakeup();
 
   const { data, isLoading } = useFaceHighlighterQuery({
-    color: null,
+    hexacode: null,
     texture: null,
   });
 
@@ -191,7 +191,7 @@ function ProductList() {
   const { selectedTexture, selectedColor } = useHighlighterContext();
 
   const { data, isLoading } = useFaceHighlighterQuery({
-    color: selectedColor,
+    hexacode: selectedColor,
     texture: selectedTexture,
   });
 

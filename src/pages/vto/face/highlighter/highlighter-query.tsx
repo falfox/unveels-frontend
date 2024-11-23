@@ -5,13 +5,13 @@ import { baseUrl, buildSearchParams } from "../../../../utils/apiUtils";
 
 export function useFaceHighlighterQuery({
   texture,
-  color,
+  hexacode,
 }: {
   texture: string | null;
-  color: string | null;
+  hexacode: string | null;
 }) {
   return useQuery({
-    queryKey: ["products", "facehighlighter", color, texture],
+    queryKey: ["products", "facehighlighter", hexacode, texture],
     queryFn: async () => {
       const filters = [
         {
@@ -34,12 +34,12 @@ export function useFaceHighlighterQuery({
         },
       ];
 
-      if (color) {
+      if (hexacode) {
         filters.push({
           filters: [
             {
               field: "hexacode",
-              value: color,
+              value: hexacode,
               condition_type: "finset",
             },
           ],
