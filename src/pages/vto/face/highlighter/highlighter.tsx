@@ -13,6 +13,7 @@ import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups
 import {
   baseUrl,
   buildSearchParams,
+  extractUniqueCustomAttributes,
   getProductAttributes,
   mediaUrl,
 } from "../../../../utils/apiUtils";
@@ -20,83 +21,11 @@ import { defaultHeaders, Product } from "../../../../api/shared";
 import { BrandName } from "../../../../components/product/brand";
 import { LoadingProducts } from "../../../../components/loading";
 import { filterTextures } from "../../../../api/attributes/texture";
-
-function useFaceHighlighterQuery({
-  texture,
-  color,
-}: {
-  texture: string | null;
-  color: string | null;
-}) {
-  return useQuery({
-    queryKey: ["products", "facehighlighter", color, texture],
-    queryFn: async () => {
-      const filters = [
-        {
-          filters: [
-            {
-              field: "type_id",
-              value: "simple",
-              condition_type: "eq",
-            },
-          ],
-        },
-        {
-          filters: [
-            {
-              field: "face_makeup_product_type",
-              value: faceMakeupProductTypesFilter(["Highlighter"]),
-              condition_type: "in",
-            },
-          ],
-        },
-      ];
-
-      if (color) {
-        filters.push({
-          filters: [
-            {
-              field: "color",
-              value: color,
-              condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      if (texture) {
-        filters.push({
-          filters: [
-            {
-              field: "texture",
-              value: texture,
-              condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      console.log("filters", filters);
-
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
-        {
-          headers: defaultHeaders,
-        },
-      );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return results;
-    },
-  });
-}
+import { useFaceHighlighterQuery } from "./highlighter-query";
 
 export function HighlighterSelector() {
   return (
-    <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
       <ColorSelector />
 
       <TextureSelector />
@@ -108,18 +37,6 @@ export function HighlighterSelector() {
   );
 }
 
-const colors = [
-  "#342112",
-  "#3D2B1F",
-  "#483C32",
-  "#4A2912",
-  "#4F300D",
-  "#5C4033",
-  "#6A4B3A",
-  "#7B3F00",
-  "#8B4513",
-];
-
 function ColorSelector() {
   const { selectedColor, setSelectedColor } = useHighlighterContext();
   const {
@@ -128,6 +45,16 @@ function ColorSelector() {
     showHighlighter,
     setShowHighlighter,
   } = useMakeup();
+
+  const { data, isLoading } = useFaceHighlighterQuery({
+    color: null,
+    texture: null,
+  });
+
+  const extracted_sub_colors = extractUniqueCustomAttributes(
+    data?.items ?? [],
+    "hexacode",
+  ).flatMap((color) => color.split(","));
 
   function reset() {
     if (showHighlighter) {
@@ -147,19 +74,23 @@ function ColorSelector() {
   }
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             reset();
           }}
         >
           <Icons.empty className="size-10" />
         </button>
-        {colors.map((color, index) => (
-          <button type="button" key={index} onClick={() => setColor(color)}>
+        {extracted_sub_colors.map((color, index) => (
+          <button
+            type="button"
+            key={index}
+            onClick={() => setSelectedColor(color)}
+          >
             <ColorPalette
               key={index}
               size="large"
@@ -194,8 +125,8 @@ function TextureSelector() {
   }
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
@@ -234,8 +165,8 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {highlighters.map((path, index) => (
           <button
             key={index}
@@ -248,7 +179,7 @@ function ShapeSelector() {
             )}
             onClick={() => setPattern(index, index.toString())}
           >
-            <img src={path} alt="Highlighter" className="rounded size-12" />
+            <img src={path} alt="Highlighter" className="size-12 rounded" />
           </button>
         ))}
       </div>
@@ -257,10 +188,10 @@ function ShapeSelector() {
 }
 
 function ProductList() {
-  const { selectedTexture } = useHighlighterContext();
+  const { selectedTexture, selectedColor } = useHighlighterContext();
 
   const { data, isLoading } = useFaceHighlighterQuery({
-    color: null,
+    color: selectedColor,
     texture: selectedTexture,
   });
 
@@ -304,7 +235,7 @@ function ProductList() {
   ];
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (
@@ -319,7 +250,7 @@ function ProductList() {
                 <img
                   src={imageUrl}
                   alt="Product"
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
 
@@ -329,7 +260,7 @@ function ProductList() {
               <p className="text-[0.625rem] text-white/60">
                 <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
               </p>
-              <div className="flex items-end justify-between pt-1 space-x-1">
+              <div className="flex items-end justify-between space-x-1 pt-1">
                 <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
                   $15
                 </div>

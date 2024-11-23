@@ -27,7 +27,7 @@ export function useFaceHighlighterQuery({
           filters: [
             {
               field: "face_makeup_product_type",
-              value: faceMakeupProductTypesFilter(["Highlighter"]),
+              value: faceMakeupProductTypesFilter(["Highlighters"]),
               condition_type: "in",
             },
           ],
@@ -38,9 +38,9 @@ export function useFaceHighlighterQuery({
         filters.push({
           filters: [
             {
-              field: "color",
+              field: "hexacode",
               value: color,
-              condition_type: "eq",
+              condition_type: "finset",
             },
           ],
         });
