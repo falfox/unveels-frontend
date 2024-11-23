@@ -1,9 +1,5 @@
 import { Suspense } from "react";
-import {
-  createMemoryRouter,
-  Link,
-  RouterProvider
-} from "react-router-dom";
+import { createMemoryRouter, Link, RouterProvider } from "react-router-dom";
 import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
 import "./index.css";
@@ -52,6 +48,9 @@ import { NailsMode } from "./pages/vto/nails/nails-makeup";
 import { PressOnNailsSelector } from "./pages/vto/nails/press-on-nails/press-on-nails";
 import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear";
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
+import { Path } from "three";
+import { element } from "three/webgpu";
+import { VirtualAvatar } from "./pages/virtual-avatar";
 
 // Define routes using object syntax
 const routes = [
@@ -73,6 +72,7 @@ const routes = [
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
   { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
+  { path: "/virtual-avatar-web", element: <VirtualAvatar /> },
   { path: "/see-improvement", element: <SeeImprovement /> },
   {
     path: "/virtual-try-on-product",
@@ -150,6 +150,7 @@ function Home() {
       <LinkButton to="/skin-tone-finder-web">Skin Tone Finder Web</LinkButton>
       <LinkButton to="/skin-analysis-web">Skin Analysis Web</LinkButton>
       <LinkButton to="/find-the-look-web">Find The Look Web</LinkButton>
+      <LinkButton to="/virtual-avatar-web">Virtual Avatar Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
       <LinkButton to="/virtual-try-on-product/689304331029">
         Virtual Try On Product
