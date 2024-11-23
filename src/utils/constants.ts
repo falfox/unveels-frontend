@@ -1559,6 +1559,9 @@ export const HEADBAND = "/assets/headband/hb.glb";
 // necklace
 export const NECKLACE = "/assets/necklace/neck.glb";
 
+//facecap
+export const FACECAP = "/assets/facecap/new.glb";
+
 // hdr acc
 export const HDR_ACCESORIES = "/assets/light/hotel_room_1k.hdr";
 

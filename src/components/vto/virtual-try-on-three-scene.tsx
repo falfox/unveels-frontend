@@ -29,12 +29,15 @@ import HandOccluder from "../three/accesories/hand-occluder";
 import Watch from "../three/accesories/watch";
 import Ring from "../three/accesories/ring";
 import { LoopNode } from "three/webgpu";
+import FoundationNew from "../three/makeup/foundation-new";
+import { Blendshape } from "../../types/blendshape";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
   landmarks: React.RefObject<Landmark[]>;
   handlandmarks: React.RefObject<Landmark[]>;
   faceTransform: React.RefObject<number[]>;
+  blendshape: React.RefObject<Blendshape[]>;
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
@@ -42,6 +45,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   landmarks,
   handlandmarks,
   faceTransform,
+  blendshape,
   ...props
 }) => {
   const flipped = true;
@@ -217,7 +221,11 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             />
           </mesh>
 
-          <Foundation planeSize={planeSize} landmarks={landmarks} />
+          <FoundationNew
+            planeSize={planeSize}
+            landmarks={landmarks}
+            blendshape={blendshape}
+          />
           {/* {showFoundation && (
             <Foundation planeSize={planeSize} landmarks={landmarks} />
           )}

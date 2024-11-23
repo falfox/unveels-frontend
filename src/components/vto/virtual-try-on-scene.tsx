@@ -18,6 +18,8 @@ import VirtualTryOnThreeScene from "./virtual-try-on-three-scene";
 import { Landmark } from "../../types/landmark";
 import { useAccesories } from "../../context/accesories-context";
 import HDREnvironment from "../three/hdr-environment";
+import { result } from "lodash";
+import { Blendshape } from "../../types/blendshape";
 
 export function VirtualTryOnScene() {
   const webcamRef = useRef<Webcam>(null);
@@ -28,6 +30,7 @@ export function VirtualTryOnScene() {
   const faceTransformRef = useRef<number[] | null>(null);
   const landmarksRef = useRef<Landmark[]>([]);
   const handLandmarksRef = useRef<Landmark[]>([]);
+  const blendshapeRef = useRef<Blendshape[]>([]);
   const isDetectingRef = useRef<boolean>(false);
 
   // Using CameraContext
@@ -165,6 +168,11 @@ export function VirtualTryOnScene() {
                 faceTransformRef.current =
                   results.facialTransformationMatrixes[0].data;
               }
+
+              if (results.faceBlendshapes.length > 0) {
+                blendshapeRef.current = results.faceBlendshapes[0].categories;
+              }
+
               if (handResults.landmarks && handResults.landmarks.length > 0) {
                 handLandmarksRef.current = handResults.landmarks[0];
               }
@@ -212,6 +220,7 @@ export function VirtualTryOnScene() {
           landmarks={landmarksRef}
           handlandmarks={handLandmarksRef}
           faceTransform={faceTransformRef}
+          blendshape={blendshapeRef}
         />
       </Canvas>
 
