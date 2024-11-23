@@ -52,7 +52,8 @@ export function useConcealerQuery({ skin_tone }: { skin_tone: string | null }) {
         items: Array<Product>;
       };
 
-      return await fetchConfigurableProducts(results, filters);
+      // concealer skin_tone gk ada di child products
+      return await fetchConfigurableProducts(results, []);
     },
   });
 }
