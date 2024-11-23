@@ -44,12 +44,12 @@ export const Icons = {
           y2="6.05847"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#CA9C43" />
-          <stop offset="0.33" stop-color="#C79A42" />
-          <stop offset="0.56" stop-color="#BE923E" />
-          <stop offset="0.77" stop-color="#AE8638" />
-          <stop offset="0.96" stop-color="#98752F" />
-          <stop offset="1" stop-color="#92702D" />
+          <stop stopColor="#CA9C43" />
+          <stop offset="0.33" stopColor="#C79A42" />
+          <stop offset="0.56" stopColor="#BE923E" />
+          <stop offset="0.77" stopColor="#AE8638" />
+          <stop offset="0.96" stopColor="#98752F" />
+          <stop offset="1" stopColor="#92702D" />
         </linearGradient>
       </defs>
     </svg>

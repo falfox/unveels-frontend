@@ -5,7 +5,7 @@ import {
   lipsMakeupProductTypesFilter,
 } from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
-import { buildSearchParams, fetchConfigurableProducts } from "../../../../utils/apiUtils";
+import { baseUrl, buildSearchParams, fetchConfigurableProducts } from "../../../../utils/apiUtils";
 
 export function useLipLinerQuery({
   color,
@@ -58,7 +58,7 @@ export function useLipLinerQuery({
       }
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams([...baseFilters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
+        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
         {
           headers: defaultHeaders,
         },

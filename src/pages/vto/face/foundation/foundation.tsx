@@ -7,6 +7,7 @@ import { useMakeup } from "../../../../context/makeup-context";
 import { FoundationProvider, useFoundationContext } from "./foundation-context";
 import { useQuery } from "@tanstack/react-query";
 import {
+  baseUrl,
   buildSearchParams,
   extractUniqueCustomAttributes,
   getProductAttributes,
@@ -87,7 +88,7 @@ function useFaceFoundationQuery({
       console.log("filters", filters);
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams(filters),
+        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
         {
           headers: defaultHeaders,
         },

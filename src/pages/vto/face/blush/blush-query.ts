@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
-import { buildSearchParams } from "../../../../utils/apiUtils";
+import { baseUrl, buildSearchParams } from "../../../../utils/apiUtils";
 import { defaultHeaders, Product } from "../../../../api/shared";
 
 export function useBlushQuery({ texture }: { texture: string | null }) {
@@ -43,7 +43,7 @@ export function useBlushQuery({ texture }: { texture: string | null }) {
       console.log("filters", filters);
 
       const response = await fetch(
-        "/rest/V1/products?" + buildSearchParams(filters),
+        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
         {
           headers: defaultHeaders,
         },

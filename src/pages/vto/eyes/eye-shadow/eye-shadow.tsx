@@ -11,19 +11,17 @@ import { useEyeshadowsQuery } from "./eye-shadow-query";
 
 export function EyeShadowSelector() {
   return (
-    <EyeShadowProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <div>
-          <ColorSelector />
-        </div>
-
-        <TextureSelector />
-
-        <ModeSelector />
-
-        <ProductList />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <div>
+        <ColorSelector />
       </div>
-    </EyeShadowProvider>
+
+      <TextureSelector />
+
+      <ModeSelector />
+
+      <ProductList />
+    </div>
   );
 }
 

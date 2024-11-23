@@ -64,3 +64,7 @@ export const fabrics = [
 export function filterFabrics(selectedFabrics: string[]) {
   return fabrics.filter((fabric) => selectedFabrics.includes(fabric.label));
 }
+
+export function filterFabricsByValue(selectedFabrics: string[]) {
+  return fabrics.filter((fabric) => selectedFabrics.includes(fabric.value));
+}

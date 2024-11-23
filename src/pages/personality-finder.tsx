@@ -1,5 +1,6 @@
-import { ReactNode, useState, useEffect } from "react";
-import { Icons } from "../components/icons";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import * as tf from "@tensorflow/tfjs-core";
+import * as tflite from "@tensorflow/tfjs-tflite";
 import clsx from "clsx";
 import {
   ChevronLeft,
@@ -8,34 +9,38 @@ import {
   StopCircle,
   X,
 } from "lucide-react";
-import { CircularProgressRings } from "../components/circle-progress-rings";
-import { Footer } from "../components/footer";
-import { Rating } from "../components/rating";
-import { VideoScene } from "../components/recorder/recorder";
-import { CameraProvider, useCamera } from "../context/recorder-context";
-import { VideoStream } from "../components/recorder/video-stream";
-import { useRecordingControls } from "../hooks/useRecorder";
-import { personalityInference } from "../inference/personalityInference";
-import { Classifier } from "../types/classifier";
-import { personalityAnalysisResult } from "../utils/constants";
-import { usePage } from "../hooks/usePage";
-import { useFragrancesProductQuery } from "../api/fragrances";
-import { LoadingProducts } from "../components/loading";
-import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
-import { BrandName } from "../components/product/brand";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useFragrancesProductQuery } from "../api/fragrances";
 import { useLipsProductQuery } from "../api/lips";
 import { useLookbookProductQuery } from "../api/lookbook";
+import { CircularProgressRings } from "../components/circle-progress-rings";
+import { Footer } from "../components/footer";
+import { Icons } from "../components/icons";
+import { LoadingProducts } from "../components/loading";
+import { BrandName } from "../components/product/brand";
+import { Rating } from "../components/rating";
+import { VideoScene } from "../components/recorder/recorder";
+import { VideoStream } from "../components/recorder/video-stream";
 import {
   InferenceProvider,
   useInferenceContext,
 } from "../context/inference-context";
+import { CameraProvider, useCamera } from "../context/recorder-context";
+import { useRecordingControls } from "../hooks/useRecorder";
+import { personalityInference } from "../inference/personalityInference";
+import { Classifier } from "../types/classifier";
+import { baseApiUrl, getProductAttributes, mediaUrl } from "../utils/apiUtils";
+import { personalityAnalysisResult } from "../utils/constants";
+import {
+  loadTFLiteModel,
+  preprocessTFLiteImage,
+  runTFLiteInference,
+} from "../utils/tfliteInference";
 import { TopNavigation } from "./virtual-try-on";
+import { useModelLoader } from "../hooks/useModelLoader";
+import { ModelLoadingScreen } from "../components/model-loading-screen";
 import { Scanner } from "../components/scanner";
-import * as tf from "@tensorflow/tfjs-core";
-import * as tflite from "@tensorflow/tfjs-tflite";
-import { loadTFLiteModel } from "../utils/tfliteInference";
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export function PersonalityFinder() {
   return (
@@ -50,15 +55,9 @@ export function PersonalityFinder() {
 }
 
 function MainContent() {
-  const [modelFaceShape, setModelFaceShape] =
-    useState<tflite.TFLiteModel | null>(null);
-
-  const [modelPersonalityFinder, setModelPersonalityFinder] =
-    useState<tflite.TFLiteModel | null>(null);
-
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
-    null,
-  );
+  const modelFaceShapeRef = useRef<tflite.TFLiteModel | null>(null);
+  const modelPersonalityFinderRef = useRef<tflite.TFLiteModel | null>(null);
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
 
   const { criterias } = useCamera();
   const {
@@ -68,19 +67,22 @@ function MainContent() {
     setInferenceError,
     setIsInferenceRunning,
   } = useInferenceContext();
-  const [inferenceResult, setInferenceResult] = useState<Classifier[] | null>();
+  const [inferenceResult, setInferenceResult] = useState<Classifier[] | null>(
+    null,
+  );
 
-  useEffect(() => {
-    let isMounted = true;
-    const dummyInput = tf.zeros([1, 224, 224, 3], "float32");
+  const [isInferenceCompleted, setIsInferenceCompleted] = useState(false);
+  const [showScannerAfterInference, setShowScannerAfterInference] =
+    useState(true);
 
-    const loadModel = async () => {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
-        );
-
-        const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+  const steps = [
+    async () => {
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
+      );
+      const faceLandmarkerInstance = await FaceLandmarker.createFromOptions(
+        vision,
+        {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
             delegate: "GPU",
@@ -91,43 +93,50 @@ function MainContent() {
           minTrackingConfidence: 0.7,
           runningMode: "IMAGE",
           numFaces: 1,
-        });
-
-        setModelFaceShape(
-          await loadTFLiteModel(
-            "/models/personality-finder/face-analyzer.tflite",
-          ),
+        },
+      );
+      faceLandmarkerRef.current = faceLandmarkerInstance;
+    },
+    async () => {
+      const model = await loadTFLiteModel(
+        "/models/personality-finder/face-analyzer.tflite",
+      );
+      modelFaceShapeRef.current = model;
+    },
+    async () => {
+      const model = await loadTFLiteModel(
+        "/models/personality-finder/personality_finder.tflite",
+      );
+      modelPersonalityFinderRef.current = model;
+    },
+    async () => {
+      // Warmup for modelFaceShape
+      if (modelFaceShapeRef.current) {
+        const warmupFace = modelFaceShapeRef.current.predict(
+          tf.zeros([1, 224, 224, 3], "float32"),
         );
-        setModelPersonalityFinder(
-          await loadTFLiteModel(
-            "/models/personality-finder/personality_finder.tflite",
-          ),
+
+        tf.dispose([warmupFace]);
+      }
+      // Warmup for modelPersonalityFinder
+      if (modelPersonalityFinderRef.current) {
+        const warmupPersonality = modelPersonalityFinderRef.current.predict(
+          tf.zeros([1, 224, 224, 3], "float32"),
         );
 
-        if (isMounted) {
-          setFaceLandmarker(faceLandmarker);
-          // warmup
-          modelFaceShape?.predict(dummyInput);
-          modelPersonalityFinder?.predict(dummyInput);
-          modelFaceShape?.predict(dummyInput);
-          modelPersonalityFinder?.predict(dummyInput);
-        }
-      } catch (error) {
-        console.error("Failed to initialize: ", error);
+        tf.dispose([warmupPersonality]);
       }
-    };
+    },
+  ];
 
-    loadModel();
+  const {
+    progress,
+    isLoading: modelLoading,
+    loadModels,
+  } = useModelLoader(steps);
 
-    return () => {
-      isMounted = false;
-      if (faceLandmarker) {
-        faceLandmarker.close();
-      }
-      if (modelPersonalityFinder && modelFaceShape) {
-        dummyInput.dispose();
-      }
-    };
+  useEffect(() => {
+    loadModels();
   }, []);
 
   useEffect(() => {
@@ -136,18 +145,49 @@ function MainContent() {
         setIsInferenceRunning(true);
         setIsLoading(true);
         setInferenceError(null);
+
+        // Tambahkan delay sebelum inferensi
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         try {
-          if (modelFaceShape && modelPersonalityFinder && faceLandmarker) {
-            const personalityResult: Classifier[] = await personalityInference(
-              modelFaceShape,
-              modelPersonalityFinder,
-              faceLandmarker,
+          if (
+            modelFaceShapeRef.current &&
+            modelPersonalityFinderRef.current &&
+            faceLandmarkerRef.current
+          ) {
+            // Preprocess gambar
+            const preprocessedImage = await preprocessTFLiteImage(
               criterias.capturedImage,
               224,
               224,
             );
+
+            const predFaceShape = await runTFLiteInference(
+              modelFaceShapeRef.current,
+              preprocessedImage,
+              224,
+              224,
+            );
+            const predPersonality = await runTFLiteInference(
+              modelPersonalityFinderRef.current,
+              preprocessedImage,
+              224,
+              224,
+            );
+
+            const personalityResult: Classifier[] = await personalityInference(
+              faceLandmarkerRef.current,
+              predFaceShape,
+              predPersonality,
+              criterias.capturedImage,
+            );
             setInferenceResult(personalityResult);
             setIsInferenceFinished(true);
+            setIsInferenceCompleted(true);
+
+            setTimeout(() => {
+              setShowScannerAfterInference(false); // Hentikan scanner setelah 2 detik
+            }, 2000);
           }
         } catch (error: any) {
           setIsInferenceFinished(false);
@@ -165,36 +205,47 @@ function MainContent() {
     performInference();
   }, [criterias.isCaptured]);
 
-  if (inferenceResult) {
+  if (inferenceResult && !showScannerAfterInference) {
     return <Result inferenceResult={inferenceResult} />;
   }
 
   return (
-    <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
-      <div className="absolute inset-0">
-        <VideoStream debugMode={false} />
-        {/* {criterias.isCaptured ? (
-          <Scanner />
-        ) : (
+    <>
+      {modelLoading && <ModelLoadingScreen progress={progress} />}
+      <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
+        <div className="absolute inset-0">
           <>
-            
+            {criterias.isCaptured ? (
+              <>
+                {showScannerAfterInference || !isInferenceCompleted ? (
+                  <Scanner />
+                ) : (
+                  <></>
+                )}
+              </>
+            ) : (
+              <>
+                <VideoStream />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                    zIndex: 0,
+                  }}
+                ></div>
+              </>
+            )}
           </>
-        )} */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          }}
-        ></div>
-      </div>
-      <RecorderStatus />
-      <TopNavigation cart={isInferenceFinished} />
+        </div>
+        <RecorderStatus />
+        <TopNavigation cart={isInferenceFinished} />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-        <VideoScene />
-        <Footer />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+          <VideoScene />
+          <Footer />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -213,7 +264,6 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
 
   const [selectedTab, setTab] = useState(tabs[0].title);
 
-  const { setPage } = usePage();
   const { criterias } = useCamera();
 
   const navigate = useNavigate();
@@ -222,12 +272,17 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
     <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button className="size-6">
+        <button className="size-6 flex-shrink-0">
           <ChevronLeft className="h-6 w-6" />
         </button>
+
+        <div className="flex-grow text-center">
+          <RecorderStatus />
+        </div>
+
         <button
           type="button"
-          className="size-6"
+          className="size-6 flex-shrink-0"
           onClick={() => {
             navigate("/");
           }}
@@ -574,35 +629,31 @@ function RecommendationsTab({ personality }: { personality: string }) {
         </p>
         {items ? (
           <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
-            {items.items.map((product, index) => {
-              const imageUrl =
-                mediaUrl(product.media_gallery_entries[0].file) ??
-                "https://picsum.photos/id/237/200/300";
-
+            {items.profiles.map((profile, index) => {
+              const imageUrl = baseApiUrl + "/media/" + profile.image;
               return (
-                <div key={product.id} className="w-[150px] rounded">
+                <div key={profile.identifier} className="w-[150px] rounded">
                   <div className="relative h-[150px] w-[150px] overflow-hidden">
                     <img
                       src={imageUrl}
                       alt="Product"
-                      className="rounded object-cover"
+                      className="h-full w-full rounded object-cover"
                     />
                   </div>
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
                       <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
-                        {product.name}
+                        {profile.name}
                       </h3>
-                      <p className="text-[0.625rem] text-white/60">
-                        <BrandName
-                          brandId={getProductAttributes(product, "brand")}
-                        />
-                      </p>
                     </div>
                     <div className="flex flex-wrap items-center justify-end gap-x-1">
                       <span className="text-sm font-bold text-white">
-                        ${product.price}
+                        $
+                        {profile.products.reduce(
+                          (acc, product) => acc + product.price,
+                          0,
+                        )}
                       </span>
                     </div>
                   </div>

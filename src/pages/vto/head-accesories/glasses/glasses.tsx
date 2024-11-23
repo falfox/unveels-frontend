@@ -12,7 +12,6 @@ import { filterMaterials } from "../../../../api/attributes/material";
 
 export function GlassesSelector() {
   return (
-    <GlassesProvider>
       <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
         <FamilyColorSelector />
 
@@ -22,7 +21,6 @@ export function GlassesSelector() {
 
         <ProductList />
       </div>
-    </GlassesProvider>
   );
 }
 

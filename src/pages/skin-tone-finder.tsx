@@ -16,6 +16,8 @@ import {
   Fragment,
   SetStateAction,
   Suspense,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import { skin_tones, tone_types } from "../api/attributes/skin_tone";
@@ -47,6 +49,9 @@ import {
   useInferenceContext,
 } from "../context/inference-context";
 import { TopNavigation } from "../components/top-navigation";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import { useModelLoader } from "../hooks/useModelLoader";
+import { ModelLoadingScreen } from "../components/model-loading-screen";
 
 export function SkinToneFinder() {
   return (
@@ -68,29 +73,65 @@ function Main() {
   const { criterias, status, setRunningMode } = useCamera();
   const [collapsed, setCollapsed] = useState(false);
   const { isInferenceFinished } = useInferenceContext();
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+
+  const steps = [
+    async () => {
+      const filesetResolver = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm",
+      );
+      const faceLandmarkerInstance = await FaceLandmarker.createFromOptions(
+        filesetResolver,
+        {
+          baseOptions: {
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "GPU",
+          },
+          outputFaceBlendshapes: true,
+          runningMode: "IMAGE",
+          numFaces: 1,
+        },
+      );
+      faceLandmarkerRef.current = faceLandmarkerInstance;
+    },
+  ];
+
+  const {
+    progress,
+    isLoading: modelLoading,
+    loadModels,
+  } = useModelLoader(steps);
+
+  useEffect(() => {
+    loadModels();
+  }, []);
 
   return (
-    <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
-      <div className="absolute inset-0">
-        <VideoStream debugMode={false} />
-        <SkinToneFinderScene />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-          }}
-        ></div>
-      </div>
-      <RecorderStatus />
-      <TopNavigation cart={isInferenceFinished} />
+    <>
+      {modelLoading && <ModelLoadingScreen progress={progress} />}
+      <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
+        <div className="absolute inset-0">
+          <VideoStream debugMode={false} />
+          <SkinToneFinderScene faceLandmarker={faceLandmarkerRef.current} />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+            }}
+          ></div>
+        </div>
+        <RecorderStatus />
+        <TopNavigation cart={isInferenceFinished} />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
-        {criterias.isCaptured ? "" : <VideoScene />}
-        <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
-        <Footer />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
+          {criterias.isCaptured ? "" : <VideoScene />}
+          <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
+          <Footer />
+        </div>
+        {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
       </div>
-      {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
-    </div>
+    </>
   );
 }
 
@@ -215,7 +256,7 @@ function ShadesSelector() {
 
 const isShadeSelected = (product: Product, selectedShade: string) => {
   const attribute = getProductAttributes(product, "hexacode");
-  return attribute?.value?.includes(selectedShade ?? "");
+  return attribute?.includes(selectedShade ?? "");
 };
 
 function MatchedShades() {
@@ -239,22 +280,25 @@ function MatchedShades() {
           ></div>
           <span className="text-sm">{skinType}</span>
         </div>
-        <div className="flex w-full min-w-0 pt-2">
-          {tone_types.map((option, index) => (
-            <button
-              key={index}
-              className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
-              data-selected={selectedTne.name === option.name}
-              style={{
-                background: option.color,
-              }}
-              onClick={() => setSelectedTone(option)}
-            >
-              {option.name}
-            </button>
-          ))}
+        <div className="flex w-full justify-center pt-2">
+          <div className="flex w-full max-w-md">
+            {tone_types.map((option, index) => (
+              <button
+                key={index}
+                className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
+                data-selected={selectedTne.name === option.name}
+                style={{
+                  background: option.color,
+                }}
+                onClick={() => setSelectedTone(option)}
+              >
+                {option.name}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="w-full text-right">
+
+        <div className="w-full text-left">
           <button className="py-2 text-[0.625rem] text-white">View all</button>
         </div>
 
@@ -348,7 +392,7 @@ function OtherShades() {
           ></button>
         ))}
       </div>
-      <div className="w-full text-right">
+      <div className="w-full text-left">
         <button className="py-2 text-[0.625rem] text-white">View all</button>
       </div>
 
@@ -366,6 +410,7 @@ function OtherShades() {
 function ProductList({ products }: { products: Array<Product> }) {
   const { scrollContainerRef, handleMouseDown } = useScrollContainer();
   const { data } = useBrandsQuerySuspense();
+  const [selected, setSelected] = useState(null as Product | null);
 
   return (
     <div
@@ -386,32 +431,48 @@ function ProductList({ products }: { products: Array<Product> }) {
         );
 
         return (
-          <a
+          <button
             key={index}
-            className="block w-[110px] rounded shadow"
-            target="_blank"
-            href={product.sku}
+            className="relative block w-[110px] text-left shadow"
+            onClick={() => {
+              setSelected(product);
+            }}
           >
             <div className="relative h-[80px] w-[110px] overflow-hidden">
               <img
                 src={imageUrl}
                 alt="Product"
-                className="rounded object-cover"
+                className="h-full w-full rounded object-cover"
               />
             </div>
 
-            <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-              {product.name}
-            </h3>
-            <div className="flex items-center justify-between">
-              <p className="text-[0.5rem] text-white/60">{brand}</p>
-              <div className="flex flex-wrap items-center justify-end gap-x-1">
-                <span className="text-[0.625rem] font-bold text-white">
-                  ${product.price.toFixed(2)}
-                </span>
+            <div className="px-2 pb-1">
+              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+                {product.name}
+              </h3>
+              <div className="flex items-center justify-between">
+                <p className="text-[0.5rem] text-white/60">{brand}</p>
+                <div className="flex flex-wrap items-center justify-end gap-x-1">
+                  <span className="text-[0.625rem] font-bold text-white">
+                    ${product.price.toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
-          </a>
+
+            {selected?.id === product.id ? (
+              <div
+                className="absolute inset-0 border-4 border-transparent"
+                style={{
+                  borderImage:
+                    "linear-gradient(90deg, #CA9C43 0%, #916E2B 27.4%, #6A4F1B 59.4%, #473209 100%) 1",
+                  borderWidth: "4px",
+                  borderStyle: "solid",
+                  // padding: "4px",
+                }}
+              />
+            ) : null}
+          </button>
         );
       })}
     </div>

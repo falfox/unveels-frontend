@@ -15,21 +15,19 @@ const colorFamilies = filterColors(["Brown", "Black"]);
 
 export function EyebrowsSelector() {
   return (
-    <EyebrowsProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <div>
-          <FamilyColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <div>
+        <FamilyColorSelector />
 
-          <ColorSelector />
-        </div>
-
-        <PatternSelector />
-
-        <BrightnessSlider />
-
-        <ProductList />
+        <ColorSelector />
       </div>
-    </EyebrowsProvider>
+
+      <PatternSelector />
+
+      <BrightnessSlider />
+
+      <ProductList />
+    </div>
   );
 }
 

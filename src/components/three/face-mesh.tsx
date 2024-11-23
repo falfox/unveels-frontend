@@ -10,6 +10,26 @@ import { useFrame } from "@react-three/fiber";
 import { faces, uvs, positions } from "../../utils/constants";
 import { Landmark } from "../../types/landmark";
 
+const applyStretchedLandmarks = (faceLandmarks: Landmark[]) => {
+  return faceLandmarks.map((landmark, index) => {
+    const isForehead = [54, 103, 67, 109, 10, 338, 297, 332, 284].includes(
+      index,
+    );
+
+    if (isForehead) {
+      const foreheadShiftY = 0.06;
+      const foreheadShiftZ = 0.1;
+
+      return {
+        x: landmark.x,
+        y: landmark.y - foreheadShiftY,
+        z: landmark.z + foreheadShiftZ,
+      };
+    }
+    return landmark;
+  });
+};
+
 interface FaceMeshProps {
   planeSize: [number, number];
   landmarks: React.RefObject<Landmark[]>;
@@ -24,9 +44,8 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
   flipHorizontal = false,
 }) => {
   const geometryRef = useRef<BufferGeometry | null>(null);
-  const meshRef = useRef<Mesh>(null); // Ref for the mesh
+  const meshRef = useRef<Mesh>(null);
 
-  // Initialize geometry without modifying face indices
   const geometry = useMemo(() => {
     const geom = new BufferGeometry();
     const vertices = new Float32Array(positions.length * 3);
@@ -63,7 +82,6 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
     }
   }, [geometry]);
 
-  // Update vertex positions based on landmarks
   useFrame(() => {
     if (
       geometryRef.current &&
@@ -76,10 +94,11 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
 
       const outputWidth = planeSize[0];
       const outputHeight = planeSize[1];
-      const minCount = Math.min(landmarks.current.length, position.count);
+      const modifiedLandmarks = applyStretchedLandmarks(landmarks.current);
+      const minCount = Math.min(modifiedLandmarks.length, position.count);
 
       for (let i = 0; i < minCount; i++) {
-        const landmark = landmarks.current[i];
+        const landmark = modifiedLandmarks[i];
         const x = (landmark.x - 0.5) * outputWidth;
         const y = -(landmark.y - 0.5) * outputHeight;
         const z = -landmark.z;
@@ -90,7 +109,6 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
       geometryRef.current.computeVertexNormals();
     }
 
-    // Flip mesh horizontally by setting scale.x to -1 if flipHorizontal is true
     if (meshRef.current) {
       meshRef.current.scale.set(flipHorizontal ? -1 : 1, 1, 1);
     }
@@ -103,7 +121,7 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
       ref={(mesh) => {
         if (mesh) {
           geometryRef.current = mesh.geometry;
-          meshRef.current = mesh; // Store reference to mesh for scale adjustment
+          meshRef.current = mesh;
         }
       }}
     />

@@ -13,15 +13,13 @@ import { useMakeup } from "../../../../context/makeup-context";
 
 export function LenseSelector() {
   return (
-    <LenseProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <FamilyColorSelector />
 
-        <ColorSelector />
+      <ColorSelector />
 
-        <ProductList />
-      </div>
-    </LenseProvider>
+      <ProductList />
+    </div>
   );
 }
 

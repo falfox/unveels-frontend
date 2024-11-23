@@ -16,14 +16,12 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 
 export function EarringsSelector() {
   return (
-    <EarringsProvider>
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
-        <ColorSelector />
-        <ShapeSelector />
-        <ProductList />
-      </div>
-    </EarringsProvider>
+    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+      <FamilyColorSelector />
+      <ColorSelector />
+      <ShapeSelector />
+      <ProductList />
+    </div>
   );
 }
 
