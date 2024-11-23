@@ -112,12 +112,14 @@ const Avatar = ({
                 ),
               ];
               setClips(newClips);
+              // Tambahkan delay 1 detik sebelum menetapkan audio source
+              setTimeout(() => {
+                const audioSource = host + filename;
+                setAudioSource(audioSource);
 
-              const audioSource = host + filename;
-              setAudioSource(audioSource);
-
-              talkAction.reset().setLoop(THREE.LoopRepeat, Infinity);
-              talkAction.clampWhenFinished = true;
+                talkAction.reset().setLoop(THREE.LoopRepeat, Infinity);
+                talkAction.clampWhenFinished = true;
+              }, 1000); // Delay 1 detik (1000 milidetik)
             }
           })
           .catch((err) => {
