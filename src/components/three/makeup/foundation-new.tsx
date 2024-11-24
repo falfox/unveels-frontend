@@ -84,7 +84,7 @@ const FoundationNewInner: React.FC<FoundationNewProps> = React.memo(
 
     const { scaleMultiplier } = useMemo(() => {
       if (viewport.width > 1200) {
-        return { scaleMultiplier: 800 };
+        return { scaleMultiplier: 2750 };
       }
       return { scaleMultiplier: 900 };
     }, [viewport.width]);
