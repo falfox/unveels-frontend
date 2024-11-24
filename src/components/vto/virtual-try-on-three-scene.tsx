@@ -8,6 +8,7 @@ import { Landmark } from "../../types/landmark";
 import Foundation from "../three/makeup/foundation";
 import { useMakeup } from "../../context/makeup-context";
 import Blush from "../three/makeup/blush";
+import EyeShadow from "../three/makeup/eyeshadow";
 import Concealer from "../three/makeup/concealer";
 import Highlighter from "../three/makeup/highlighter";
 import Contour from "../three/makeup/contour";
@@ -47,6 +48,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   const {
     showFoundation,
     showBlush,
+    showEyeShadow,
     showConcealer,
     showHighlighter,
     showContour,
@@ -253,6 +255,10 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showEyebrows && (
             <Eyebrows planeSize={planeSize} landmarks={landmarks} />
+          )}
+
+          {showEyeShadow && (
+            <EyeShadow planeSize={planeSize} landmarks={landmarks} />
           )}
 
           <HeadOccluder planeSize={planeSize} landmarks={landmarks} />

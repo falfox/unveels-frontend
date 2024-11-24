@@ -2,12 +2,14 @@
 import React, { createContext, ReactNode, useContext, useState } from "react";
 
 interface MakeupContextProps {
+  //foundation
   foundationColor: string;
   setFoundationColor: (color: string) => void;
 
   showFoundation: boolean;
   setShowFoundation: (show: boolean) => void;
 
+  //blush
   blushColor: string[];
   setBlushColor: (color: string[]) => void;
 
@@ -22,7 +24,23 @@ interface MakeupContextProps {
 
   blushMode: "One" | "Dual" | "Tri";
   setBlushMode: (mode: "One" | "Dual" | "Tri") => void;
+  //Eyeshadow
+  eyeshadowColor: string[];
+  setEyeShadowColor: (color: string[]) => void;
 
+  eyeshadowPattern: number;
+  setEyeShadowPattern: (pattern: number) => void;
+
+  eyeshadowMaterial: number;
+  setEyeShadowMaterial: (material: number) => void;
+
+  showEyeShadow: boolean;
+  setShowEyeShadow: (show: boolean) => void;
+
+  eyeshadowMode: "One" | "Dual" | "Tri" | "Quad" | "Penta";
+  setEyeShadowMode: (mode: "One" | "Dual" | "Tri" | "Quad" | "Penta") => void;
+
+  //Concealer
   showConcealer: boolean;
   setShowConcealer: (show: boolean) => void;
 
@@ -116,6 +134,12 @@ type MakeupSelectables =
   | "blushPattern"
   | "blushMaterial"
   | "blushMode"
+  // Eyeshadow
+  | "eyeshadowColor"
+  | "eyeshadowPattern"
+  | "eyeshadowMaterial"
+  | "showEyeShadow"
+  | "eyeshadowMode"
   // Concealer
   | "showBlush"
   | "showConcealer"
@@ -157,7 +181,7 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
   const [showFoundation, setShowFoundation] = useState(
     initialValues?.showFoundation ?? false,
   );
-
+  //Blush
   const [blushColor, setBlushColor] = useState(initialValues?.blushColor ?? []);
   const [showBlush, setShowBlush] = useState(initialValues?.showBlush ?? false);
   const [blushPattern, setBlushPattern] = useState(
@@ -170,7 +194,31 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
   const [blushMode, setBlushMode] = useState<"One" | "Dual" | "Tri">(
     (initialValues?.blushMode as "One" | "Dual" | "Tri") ?? "One",
   );
+  //Eyeshadow
+  const [eyeshadowColor, setEyeShadowColor] = useState(
+    initialValues?.eyeshadowColor ?? [],
+  );
+  const [showEyeShadow, setShowEyeShadow] = useState(
+    initialValues?.showEyeShadow ?? false,
+  );
+  const [eyeshadowPattern, setEyeShadowPattern] = useState(
+    initialValues?.eyeshadowPattern ?? 0,
+  );
+  const [eyeshadowMaterial, setEyeShadowMaterial] = useState(
+    initialValues?.eyeshadowMaterial ?? 0,
+  );
 
+  const [eyeshadowMode, setEyeShadowMode] = useState<
+    "One" | "Dual" | "Tri" | "Quad" | "Penta"
+  >(
+    (initialValues?.eyeshadowMode as
+      | "One"
+      | "Dual"
+      | "Tri"
+      | "Quad"
+      | "Penta") ?? "One",
+  );
+  //Concealer
   const [showConcealer, setShowConcealer] = useState(
     initialValues?.showConcealer ?? false,
   );
@@ -190,7 +238,7 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
   const [highlighterMaterial, setHighlighterMaterial] = useState(
     initialValues?.highlighterMaterial ?? 0,
   );
-
+  // Countoer
   const [showContour, setShowContour] = useState(
     initialValues?.showContour ?? false,
   );
@@ -266,6 +314,21 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
 
         blushMode,
         setBlushMode,
+
+        eyeshadowColor,
+        setEyeShadowColor,
+
+        eyeshadowPattern,
+        setEyeShadowPattern,
+
+        eyeshadowMaterial,
+        setEyeShadowMaterial,
+
+        showEyeShadow,
+        setShowEyeShadow,
+
+        eyeshadowMode,
+        setEyeShadowMode,
 
         showConcealer,
         setShowConcealer,
