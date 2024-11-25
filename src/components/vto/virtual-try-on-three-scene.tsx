@@ -1,6 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { MeshProps, useFrame, useThree } from "@react-three/fiber";
-import { LinearFilter, RGBFormat, VideoTexture, DoubleSide } from "three";
+import {
+  LinearFilter,
+  RGBFormat,
+  VideoTexture,
+  DoubleSide,
+  DataTexture,
+  RGBAFormat,
+  UnsignedByteType,
+  Texture,
+  TextureLoader,
+} from "three";
 import { ShaderMaterial, Vector2 } from "three";
 import { FaceShader } from "../../shaders/FaceShader";
 import Webcam from "react-webcam";
@@ -38,6 +48,7 @@ interface VirtualTryOnThreeSceneProps extends MeshProps {
   handlandmarks: React.RefObject<Landmark[]>;
   faceTransform: React.RefObject<number[]>;
   blendshape: React.RefObject<Blendshape[]>;
+  hairMask: React.RefObject<ImageData>; // Tambahkan prop dataNew
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
@@ -46,12 +57,17 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   handlandmarks,
   faceTransform,
   blendshape,
+  hairMask,
   ...props
 }) => {
   const flipped = true;
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
   const [videoTexture, setVideoTexture] = useState<VideoTexture | null>(null);
+  const hairMaskTextureRef = useRef<Texture | null>(null);
+
+  const [maskOpacity, setMaskOpacity] = useState(0.5);
+
   const {
     showFoundation,
     showBlush,
@@ -64,6 +80,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     showBronzer,
     showLens,
     showEyebrows,
+    showHair,
   } = useMakeup();
 
   const {
@@ -84,6 +101,40 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   const [pinchFactor, setPinchFactor] = useState(0.1);
   const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(0);
   const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
+
+  // Konversi ImageData menjadi RGBA dengan transparansi
+  const processImageDataWithTransparency = (
+    imageData: ImageData,
+  ): ImageData => {
+    const data = new Uint8ClampedArray(imageData.data); // Salin data
+    for (let i = 0; i < data.length; i += 4) {
+      const maskValue = data[i]; // Nilai mask disimpan di channel Red
+      if (maskValue === 0) {
+        // Jika bukan bagian mask, buat transparan
+        data[i + 3] = 0; // Alpha = 0
+      } else {
+        // Jika bagian mask, pastikan alpha penuh
+        data[i + 3] = 255; // Alpha = 255
+      }
+    }
+    return new ImageData(data, imageData.width, imageData.height);
+  };
+
+  const imageDataToImage = (imageData: ImageData): HTMLImageElement => {
+    const processedImageData = processImageDataWithTransparency(imageData);
+    const canvas = document.createElement("canvas");
+    canvas.width = processedImageData.width;
+    canvas.height = processedImageData.height;
+
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.putImageData(processedImageData, 0, 0);
+      const img = new Image();
+      img.src = canvas.toDataURL();
+      return img;
+    }
+    return new Image();
+  };
 
   // Handle video readiness and create texture
   useEffect(() => {
@@ -138,17 +189,34 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     }
   }, [videoTexture, viewport, videoRef]);
 
-  // Dispose of the texture on unmount
+  // Dispose textures on unmount
   useEffect(() => {
     return () => {
-      if (videoTexture) {
-        videoTexture.dispose();
-        console.log("VideoTexture disposed");
-      }
+      videoTexture?.dispose();
+      hairMaskTextureRef.current?.dispose();
     };
   }, [videoTexture]);
 
   useFrame(() => {
+    if (hairMask.current) {
+      const image = imageDataToImage(hairMask.current);
+      const loader = new TextureLoader();
+
+      loader.load(image.src, (texture) => {
+        if (!hairMaskTextureRef.current) {
+          hairMaskTextureRef.current = texture;
+        } else {
+          hairMaskTextureRef.current.image = texture.image;
+          hairMaskTextureRef.current.needsUpdate = true;
+        }
+      });
+    }
+
+    // Pastikan material diperbarui
+    if (hairMaskTextureRef.current) {
+      hairMaskTextureRef.current.needsUpdate = true;
+    }
+
     if (filterRef.current && landmarks.current) {
       const uniforms = filterRef.current.uniforms;
 
@@ -221,12 +289,28 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             />
           </mesh>
 
-          <FoundationNew
-            planeSize={planeSize}
-            landmarks={landmarks}
-            blendshape={blendshape}
-          />
-          {/* {showFoundation && (
+          {showHair && (
+            <>
+              {hairMaskTextureRef.current && (
+                <mesh
+                  position={[0, 0, -499]}
+                  scale={[-1, 1, 1]} // Flip horizontal menggunakan scale
+                  {...props}
+                  renderOrder={3}
+                >
+                  <planeGeometry args={[planeSize[0], planeSize[1]]} />
+                  <meshBasicMaterial
+                    map={hairMaskTextureRef.current}
+                    side={DoubleSide} // Pastikan kedua sisi terlihat
+                    transparent
+                    opacity={maskOpacity}
+                  />
+                </mesh>
+              )}
+            </>
+          )}
+
+          {showFoundation && (
             <Foundation planeSize={planeSize} landmarks={landmarks} />
           )}
 
@@ -296,7 +380,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showRing && (
             <Ring planeSize={planeSize} handLandmarks={handlandmarks} />
-          )} */}
+          )}
         </>
       )}
     </>
