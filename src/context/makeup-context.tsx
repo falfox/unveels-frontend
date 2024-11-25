@@ -103,6 +103,12 @@ interface MakeupContextProps {
 
   eyebrowsColor: string;
   setEyebrowsColor: (color: string) => void;
+
+  showHair: boolean;
+  setShowHair: (show: boolean) => void;
+
+  hairColor: string;
+  setHairColor: (color: string) => void;
 }
 
 const MakeupContext = createContext<MakeupContextProps | undefined>(undefined);
@@ -140,7 +146,10 @@ type MakeupSelectables =
   // Lip Color
   | "showLipColor"
   | "lipColorMode"
-  | "lipColors";
+  | "lipColors"
+  // Hair
+  | "showHair"
+  | "hairColor";
 
 interface MakeupProviderProps {
   initialValues?: Partial<Pick<MakeupContextProps, MakeupSelectables>>;
@@ -229,6 +238,11 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
   );
   const [lipColors, setLipColors] = useState<string[]>(
     initialValues?.lipColors ?? [],
+  );
+
+  const [showHair, setShowHair] = useState(initialValues?.showHair ?? false);
+  const [hairColor, setHairColor] = useState(
+    initialValues?.hairColor ?? "#FFFF",
   );
 
   const [showBronzer, setShowBronzer] = useState(false);
@@ -347,6 +361,12 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
 
         eyebrowsColor,
         setEyebrowsColor,
+
+        showHair,
+        setShowHair,
+
+        hairColor,
+        setHairColor,
       }}
     >
       {children}

@@ -48,7 +48,7 @@ import { SkinAnalysisProvider } from "../context/skin-analysis-context";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { FindTheLookItems } from "../types/findTheLookItems";
-import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
+import { baseApiUrl, getProductAttributes, mediaUrl } from "../utils/apiUtils";
 
 export function FindTheLook() {
   return (
@@ -139,7 +139,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.5,
+          scoreThreshold: 0.8,
         },
       );
       modelsRef.current.ringDetector = ringDetectorInstance;
@@ -156,7 +156,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.7,
+          scoreThreshold: 0.8,
         },
       );
       modelsRef.current.neckDetector = neckDetectorInstance;
@@ -207,7 +207,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.63,
+          scoreThreshold: 0.8,
         },
       );
       modelsRef.current.headDetector = headDetectorInstance;
@@ -273,7 +273,7 @@ function Main() {
             )}
           </div>
           <RecorderStatus />
-          <TopNavigation item={false} />
+          <TopNavigation cart={true} />
 
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
             <MainContent />
@@ -549,7 +549,16 @@ function ProductList({ product_type }: { product_type: string }) {
             "https://picsum.photos/id/237/200/300";
 
           return (
-            <div key={product.id} className="w-[115px] rounded shadow">
+            <div
+              key={product.id}
+              className="w-[115px] rounded shadow"
+              onClick={() => {
+                window.open(
+                  `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                  "_blank",
+                );
+              }}
+            >
               <div className="relative h-[80px] w-[115px] overflow-hidden">
                 <img
                   src={imageUrl}
@@ -573,6 +582,9 @@ function ProductList({ product_type }: { product_type: string }) {
                 <button
                   type="button"
                   className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                 >
                   Add to cart
                 </button>
@@ -951,6 +963,12 @@ function ProductHorizontalList({ category }: { category: string }) {
               <div
                 key={product.id}
                 className="w-[calc(50%-0.5rem)] shrink-0 rounded shadow lg:w-[calc(16.667%-0.5rem)]"
+                onClick={() => {
+                  window.open(
+                    `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                    "_blank",
+                  );
+                }}
               >
                 <div className="relative aspect-square w-full overflow-hidden">
                   <img
@@ -1041,7 +1059,16 @@ function SingleCategoryView({
                   product.media_gallery_entries[0].file,
                 ) as string;
                 return (
-                  <div key={product.id} className="w-full rounded shadow">
+                  <div
+                    key={product.id}
+                    className="w-full rounded shadow"
+                    onClick={() => {
+                      window.open(
+                        `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                        "_blank",
+                      );
+                    }}
+                  >
                     <div className="relative aspect-square overflow-hidden">
                       <img
                         src={imageUrl}

@@ -19,7 +19,7 @@ import {
 import clsx from "clsx";
 import { labelsDescription } from "../utils/constants";
 import { useSkincareProductQuery } from "../api/skin-care";
-import { getProductAttributes, mediaUrl } from "../utils/apiUtils";
+import { baseApiUrl, getProductAttributes, mediaUrl } from "../utils/apiUtils";
 import { BrandName } from "../components/product/brand";
 import { LoadingProducts } from "../components/loading";
 import SkinImprovementScene from "../components/skin-improvement/skin-improvement-scene";
@@ -244,7 +244,16 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
             "https://picsum.photos/id/237/200/300";
 
           return (
-            <div key={product.id} className="w-[115px] rounded shadow">
+            <div
+              key={product.id}
+              className="w-[115px] rounded shadow"
+              onClick={() => {
+                window.open(
+                  `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                  "_blank",
+                );
+              }}
+            >
               <div className="relative h-[80px] w-[115px] overflow-hidden">
                 <img
                   src={imageUrl}
@@ -273,12 +282,18 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
                 <button
                   type="button"
                   className="flex h-7 w-full items-center justify-center border border-white text-[0.375rem] font-semibold text-white"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                 >
                   ADD TO CART
                 </button>
                 <button
                   type="button"
                   className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.45rem] font-semibold text-black"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                 >
                   SEE IMPROVEMENT
                 </button>

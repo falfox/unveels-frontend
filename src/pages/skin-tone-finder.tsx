@@ -39,6 +39,7 @@ import { SkinToneFinderScene } from "../components/skin-tone-finder-scene/skin-t
 import { useRecordingControls } from "../hooks/useRecorder";
 import { useScrollContainer } from "../hooks/useScrollContainer";
 import {
+  baseApiUrl,
   extractUniqueCustomAttributes,
   getProductAttributes,
   mediaUrl,
@@ -321,7 +322,7 @@ function OtherShades() {
 
   const { setHexColor } = useSkinColor();
 
-  const { setFoundationColor } = useMakeup();
+  const { setFoundationColor, setShowFoundation } = useMakeup();
 
   const { data } = useSkinToneProductQuery({
     skintone: selectedTone.id,
@@ -345,6 +346,14 @@ function OtherShades() {
     setSelectedShade(option);
     setHexColor(option);
     setFoundationColor(option);
+    setShowFoundation(true);
+  }
+
+  function resetColor() {
+    setShowFoundation(false);
+    setSelectedShade(null);
+    setHexColor("#FFFF");
+    setFoundationColor("#FFFF");
   }
 
   return (
@@ -374,7 +383,7 @@ function OtherShades() {
           type="button"
           className="flex size-8 shrink-0 items-center justify-center transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white"
           data-selected={selectedShade === null}
-          onClick={() => setSelectedShade(null)}
+          onClick={() => resetColor()}
         >
           <Icons.unselect className="size-7 text-white" />
         </button>
@@ -436,6 +445,10 @@ function ProductList({ products }: { products: Array<Product> }) {
             className="relative block w-[110px] text-left shadow"
             onClick={() => {
               setSelected(product);
+              window.open(
+                `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                "_blank",
+              );
             }}
           >
             <div className="relative h-[80px] w-[110px] overflow-hidden">

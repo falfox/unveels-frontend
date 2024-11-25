@@ -5,6 +5,7 @@ import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { useHairColorContext } from "./hair-color-context";
 import { useHairColorQuery } from "./hair-color-query";
+import { useMakeup } from "../../../../context/makeup-context";
 
 export function HairColorSelector() {
   return (
@@ -25,7 +26,7 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
@@ -63,11 +64,32 @@ const haircolors = [
   "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 8.png",
 ];
 
+const colorList = [
+  "#d9be95",
+  "#784405",
+  "#403007",
+  "#403007",
+  "#181305",
+  "#181305",
+  "#b7a189",
+  "#483209",
+];
+
 function ColorSelector() {
+  const { hairColor, setHairColor, showHair, setShowHair } = useMakeup();
   const { selectedColor, setSelectedColor } = useHairColorContext();
+
+  function setColor(color: number) {
+    if (!showHair) {
+      setShowHair(true);
+    }
+    setSelectedColor(color.toString());
+    setHairColor(colorList[color]);
+  }
+
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {haircolors.map((path, index) => (
           <button
             key={index}
@@ -78,9 +100,9 @@ function ColorSelector() {
                 "border-white/80": selectedColor === index.toString(),
               },
             )}
-            onClick={() => setSelectedColor(index.toString())}
+            onClick={() => setColor(index)}
           >
-            <img src={path} alt="Hair Color" className="h-12 rounded w-14" />
+            <img src={path} alt="Hair Color" className="h-12 w-14 rounded" />
           </button>
         ))}
       </div>
@@ -97,7 +119,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (
