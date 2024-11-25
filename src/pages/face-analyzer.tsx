@@ -265,19 +265,9 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
   return (
     <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
-      <div className="flex items-center justify-between px-4 py-2">
-        <button className="size-6">
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-        <button
-          type="button"
-          className="size-6"
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          <X className="h-6 w-6" />
-        </button>
+      <div className="mb-14">
+        <RecorderStatus />
+        <TopNavigation cart={inferenceResult.length > 0} />
       </div>
 
       {/* Profile Section */}
@@ -406,7 +396,16 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                 "https://picsum.photos/id/237/200/300";
 
               return (
-                <div key={product.id} className="w-[150px] rounded">
+                <div
+                  key={product.id}
+                  className="w-[150px] rounded"
+                  onClick={() => {
+                    window.open(
+                      `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                      "_blank",
+                    );
+                  }}
+                >
                   <div className="relative h-[150px] w-[150px] overflow-hidden">
                     <img
                       src={imageUrl}
@@ -439,12 +438,18 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                     <button
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                      }}
                     >
                       ADD TO CART
                     </button>
                     <button
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                      }}
                     >
                       SEE IMPROVEMENT
                     </button>

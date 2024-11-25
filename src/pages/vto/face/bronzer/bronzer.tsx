@@ -112,24 +112,13 @@ export function BronzerSelector() {
   );
 }
 
-const colors = [
-  "#342112",
-  "#3D2B1F",
-  "#483C32",
-  "#4A2912",
-  "#4F300D",
-  "#5C4033",
-  "#6A4B3A",
-  "#7B3F00",
-  "#8B4513",
-];
-
 function ColorSelector() {
   const { selectedColor, setSelectedColor } = useBronzerContext();
   const { setBronzerColor, showBronzer, setShowBronzer } = useMakeup();
 
   const { data } = useBronzerQuery({
     texture: null,
+    hexacode: null,
   });
 
   const extracted_sub_colors = extractUniqueCustomAttributes(
@@ -268,9 +257,10 @@ function TextureSelector() {
 }
 
 function ProductList() {
-  const { selectedTexture } = useBronzerContext();
+  const { selectedTexture, selectedColor } = useBronzerContext();
 
   const { data, isLoading } = useBronzerQuery({
+    hexacode: selectedColor,
     texture: selectedTexture,
   });
 
