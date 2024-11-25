@@ -86,10 +86,12 @@ export function FindTheLookCanvas({
   );
   const [faceLandmark, setFaceLandmark] = useState<Landmark[] | null>(null);
 
-  // Run detection
   useEffect(() => {
+    let isInferenceRunning = false; // Flag untuk memastikan inferensi tidak berjalan dua kali
+
     const detectObjects = async () => {
       if (
+        !isInferenceRunning && // Periksa apakah inferensi sudah berjalan
         handDetector &&
         ringDetector &&
         neckDetector &&
@@ -99,10 +101,10 @@ export function FindTheLookCanvas({
         makeupDetector &&
         faceLandmarker
       ) {
+        isInferenceRunning = true; // Set flag saat inferensi dimulai
         try {
-          // Tambahkan delay sebelum inferensi
+          // Tambahkan delay 2 detik
           await new Promise((resolve) => setTimeout(resolve, 2000));
-          console.log("Do Inference");
 
           const resultsHand = await handDetector.detect(image);
           const resultsRing = await ringDetector.detect(image);
@@ -128,16 +130,22 @@ export function FindTheLookCanvas({
             setShowScannerAfterInference(false);
             if (onDetectDone) {
               onDetectDone(true);
-              console.log("inference Finish");
+              console.log("Inference Finished");
             }
           }, 1000);
         } catch (error) {
           console.error("Error during detection: ", error);
+        } finally {
+          isInferenceRunning = false; // Reset flag jika inferensi selesai atau terjadi error
         }
       }
     };
 
     detectObjects();
+
+    return () => {
+      isInferenceRunning = false; // Reset flag saat komponen di-unmount
+    };
   }, [
     handDetector,
     ringDetector,
