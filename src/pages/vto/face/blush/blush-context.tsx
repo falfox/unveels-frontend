@@ -5,7 +5,7 @@ interface BlushContextType {
   setSelectedColor: (color: string | null) => void;
   selectedColors: string[];
   setSelectedColors: (colors: string[]) => void;
-  selectedShape: string;
+  selectedShape: string | null;
   setSelectedShape: (shape: string) => void;
   selectedTexture: string | null;
   setSelectedTexture: (mode: string | null) => void;
@@ -22,7 +22,7 @@ const BlushContext = createContext<BlushContextType | undefined>(undefined);
 export function BlushProvider({ children }: { children: React.ReactNode }) {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [selectedShape, setSelectedShape] = useState<string>("0");
+  const [selectedShape, setSelectedShape] = useState<string | null>(null);
   const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
   const [selectedMode, setSelectedMode] = useState<"One" | "Dual" | "Tri">(
     "One",

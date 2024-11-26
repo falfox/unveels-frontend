@@ -1,22 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
-import { baseUrl, buildSearchParams } from "../../../../utils/apiUtils";
+import {
+  baseUrl,
+  buildSearchParams,
+  fetchConfigurableProducts,
+} from "../../../../utils/apiUtils";
 import { defaultHeaders, Product } from "../../../../api/shared";
 
 export function useBlushQuery({ texture }: { texture: string | null }) {
   return useQuery({
     queryKey: ["products", "faceblush", texture],
     queryFn: async () => {
-      const filters = [
-        {
-          filters: [
-            {
-              field: "type_id",
-              value: "simple",
-              condition_type: "eq",
-            },
-          ],
-        },
+      const baseFilters = [
         {
           filters: [
             {
@@ -27,6 +22,8 @@ export function useBlushQuery({ texture }: { texture: string | null }) {
           ],
         },
       ];
+
+      const filters = [];
 
       if (texture) {
         filters.push({
@@ -39,11 +36,10 @@ export function useBlushQuery({ texture }: { texture: string | null }) {
           ],
         });
       }
-
       console.log("filters", filters);
 
       const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
+        baseUrl + "/rest/V1/products?" + buildSearchParams(baseFilters),
         {
           headers: defaultHeaders,
         },
@@ -53,7 +49,7 @@ export function useBlushQuery({ texture }: { texture: string | null }) {
         items: Array<Product>;
       };
 
-      return results;
+      return fetchConfigurableProducts(results, filters);
     },
   });
 }

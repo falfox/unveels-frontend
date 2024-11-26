@@ -15,7 +15,7 @@ import { filterMaterials } from "../../../../api/attributes/material";
 
 export function WatchesSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <FamilyColorSelector />
       <ColorSelector />
       <ModeSelector />
@@ -36,7 +36,7 @@ function FamilyColorSelector() {
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80 h-5",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -49,7 +49,7 @@ function FamilyColorSelector() {
               background: item.hex,
             }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -70,7 +70,7 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full !border-t-0 pb-4 lg:max-w-xl">
+    <div className="mx-auto w-full !border-t-0 pb-4">
       <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
@@ -79,14 +79,14 @@ function ColorSelector() {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -113,7 +113,7 @@ function ModeSelector() {
     <>
       <div className="flex items-center justify-between w-full h-10 text-center">
         <button
-          className={clsx("relative h-10 grow text-lg", {
+          className={clsx("relative grow text-base", {
             "text-white": selectedMode === "shapes",
             "text-white/60": selectedMode !== "shapes",
           })}
@@ -123,7 +123,7 @@ function ModeSelector() {
         </button>
         <div className="h-5 border-r border-white"></div>
         <button
-          className={clsx("relative h-10 grow text-lg", {
+          className={clsx("relative grow text-base", {
             "text-white": selectedMode === "material",
             "text-white/60": selectedMode !== "material",
           })}

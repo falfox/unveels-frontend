@@ -21,86 +21,9 @@ import { LoadingProducts } from "../../../../components/loading";
 import { useBronzerQuery } from "./bronzer-query";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 
-const colorFamilies = [
-  { name: "Light Skin", value: "#FAD4B4" },
-  { name: "Medium Skin", value: "#D18B59" },
-  { name: "Dark Skin", value: "#4B2F1B" },
-];
-
-function useFaceBronzerQuery({
-  texture,
-  color,
-}: {
-  texture: string | null;
-  color: string | null;
-}) {
-  return useQuery({
-    queryKey: ["products", "facebronzer", color, texture],
-    queryFn: async () => {
-      const filters = [
-        {
-          filters: [
-            {
-              field: "type_id",
-              value: "simple",
-              condition_type: "eq",
-            },
-          ],
-        },
-        {
-          filters: [
-            {
-              field: "face_makeup_product_type",
-              value: faceMakeupProductTypesFilter(["Bronzers"]),
-              condition_type: "in",
-            },
-          ],
-        },
-      ];
-
-      if (color) {
-        filters.push({
-          filters: [
-            {
-              field: "color",
-              value: color,
-              condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      if (texture) {
-        filters.push({
-          filters: [
-            {
-              field: "texture",
-              value: texture,
-              condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
-        {
-          headers: defaultHeaders,
-        },
-      );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return results;
-    },
-  });
-}
-
 export function BronzerSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <ColorSelector />
 
       <ShapeSelector />
@@ -140,35 +63,28 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             reset();
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
-        {extracted_sub_colors
-          ? extracted_sub_colors.map((color, index) => (
-              <button
-                type="button"
-                key={index}
-                onClick={() => {
-                  setColor(color);
-                }}
-                className={clsx("cursor-pointer")}
-              >
-                <ColorPalette
-                  size="large"
-                  palette={{ color }}
-                  selected={selectedColor === color}
-                />
-              </button>
-            ))
-          : null}
+        {extracted_sub_colors.map((color, index) => (
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
+            selected={selectedColor === color}
+            onClick={() => {
+              setColor(color);
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -192,8 +108,8 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         {bronzers.map((path, index) => (
           <button
             key={index}
@@ -233,8 +149,8 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}

@@ -25,7 +25,7 @@ import { useFaceHighlighterQuery } from "./highlighter-query";
 
 export function HighlighterSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <ColorSelector />
 
       <TextureSelector />
@@ -74,32 +74,27 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             reset();
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
-          <button
-            type="button"
-            key={index}
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{
+              color: color,
+            }}
+            selected={selectedColor === color}
             onClick={() => setSelectedColor(color)}
-          >
-            <ColorPalette
-              key={index}
-              size="large"
-              palette={{
-                color: color,
-              }}
-              selected={selectedColor === color}
-            />
-          </button>
+          />
         ))}
       </div>
     </div>
@@ -125,8 +120,8 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
@@ -165,8 +160,8 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         {highlighters.map((path, index) => (
           <button
             key={index}

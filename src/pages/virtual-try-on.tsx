@@ -218,13 +218,13 @@ function MainContent() {
 }
 
 export function TryOnSelector() {
-  const [tab, setTab] = useState(null as "makeup" | "accessories" | null);
+  const [tab, setTab] = useState("makeup" as "makeup" | "accessories" | null);
 
   const activeClassNames =
     "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text text-transparent";
 
   return (
-    <div className="mx-auto w-full space-y-2 px-4 lg:max-w-xl">
+    <div className="mx-auto w-full max-w-lg space-y-2 px-4">
       <div className="flex h-10 w-full items-center justify-between border-b border-gray-600 text-center">
         {["makeup", "accessories"].map((shadeTab) => {
           const isActive = tab === shadeTab;
@@ -232,7 +232,7 @@ export function TryOnSelector() {
             <Fragment key={shadeTab}>
               <button
                 key={shadeTab}
-                className={`relative h-10 grow border-b text-lg ${
+                className={`relative h-10 grow border-b text-[12.6px] sm:text-lg lg:text-2xl font-luxury ${
                   isActive
                     ? activeClassNames
                     : "border-transparent text-gray-500"
@@ -250,23 +250,18 @@ export function TryOnSelector() {
                         activeClassNames,
                       )}
                     >
-                      <span className="text-center text-lg">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
+                      <span className="text-center text-lg capitalize">
+                        {shadeTab}
                       </span>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-center text-lg text-white/70">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
+                      <span className="text-center text-lg capitalize text-white/70">
+                        {shadeTab}
                       </span>
                     </div>
                   </>
                 ) : null}
               </button>
-              {shadeTab === "matched" && (
-                <div className="h-10 px-px py-2">
-                  <div className="h-full border-r border-white"></div>
-                </div>
-              )}
             </Fragment>
           );
         })}
@@ -308,7 +303,7 @@ export function Makeups() {
   return (
     <>
       <div className="flex flex-col items-start">
-        <div className="flex w-full min-w-0 justify-between py-4 peer-has-[data-mode]:hidden">
+        <div className="flex w-full min-w-0 justify-around gap-x-4 py-4 peer-has-[data-mode]:hidden">
           {shadeOptions.map((option, index) => (
             <button
               key={index}
@@ -318,7 +313,7 @@ export function Makeups() {
             >
               <div
                 className={clsx(
-                  "relative flex w-12 shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all",
+                  "text-dm relative flex w-12 shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all",
                   {
                     "bg-gradient-to-r from-[#CA9C43] via-[#916E2B] to-[#473209]":
                       selectedMakeup === option.name,
@@ -342,7 +337,9 @@ export function Makeups() {
                   }
                 />
               </div>
-              <div className="text-white">{option.name}</div>
+              <div className="text-center text-sm !leading-4 text-white lg:text-lg">
+                {option.name}
+              </div>
             </button>
           ))}
         </div>
@@ -390,17 +387,17 @@ export function Accessories() {
   return (
     <>
       <div className="flex flex-col items-start">
-        <div className="flex w-full min-w-0 justify-between py-4 peer-has-[data-mode]:hidden">
+        <div className="flex w-full min-w-0 justify-around gap-x-4 py-4 peer-has-[data-mode]:hidden">
           {shadeOptions.map((option, index) => (
             <button
               key={index}
-              className="flex flex-col items-center space-y-2"
+              className="flex flex-col items-center justify-center space-y-2"
               data-selected={selectedAccessory === option.name}
               onClick={() => setSelectedAccessory(option.name)}
             >
               <div
                 className={clsx(
-                  "relative flex w-12 shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all",
+                  "relative flex h-[34px] w-[42px] shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all sm:h-[44.2px] sm:w-[54.6px]",
                   {
                     "bg-gradient-to-r from-[#CA9C43] via-[#916E2B] to-[#473209]":
                       selectedAccessory === option.name,
@@ -424,7 +421,9 @@ export function Accessories() {
                   }
                 />
               </div>
-              <div className="text-white">{option.name}</div>
+              <div className="text-center text-[9.8px] !leading-4 text-white sm:text-sm lg:text-lg">
+                {option.name}
+              </div>
             </button>
           ))}
         </div>

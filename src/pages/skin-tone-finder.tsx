@@ -363,7 +363,7 @@ function OtherShades() {
           <div
             key={index}
             className={clsx(
-              "inline-flex shrink-0 grow items-center gap-x-2 rounded-full border px-2 py-1 text-white",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border px-2 py-1 text-white",
               selectedTone.name === tone.name
                 ? "border-white"
                 : "border-transparent",

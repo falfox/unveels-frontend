@@ -2,110 +2,20 @@ import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 
 import { skin_tones } from "../../../../api/attributes/skin_tone";
-import { ColorPalette } from "../../../../components/color-palette";
-import { useMakeup } from "../../../../context/makeup-context";
-import { FoundationProvider, useFoundationContext } from "./foundation-context";
-import { useQuery } from "@tanstack/react-query";
-import {
-  baseUrl,
-  buildSearchParams,
-  extractUniqueCustomAttributes,
-  getProductAttributes,
-  mediaUrl,
-} from "../../../../utils/apiUtils";
-import { defaultHeaders, Product } from "../../../../api/shared";
-import {
-  faceMakeupProductTypesFilter,
-  faceMakeupProductTypesMap,
-} from "../../../../api/attributes/makeups";
 import { textures } from "../../../../api/attributes/texture";
-import { BrandName } from "../../../../components/product/brand";
+import { ColorPalette } from "../../../../components/color-palette";
 import { LoadingProducts } from "../../../../components/loading";
-import { useFoundationQuery } from "./foundation-query";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
-
-const colorFamilies = [
-  { name: "Light Skin", value: "#FAD4B4" },
-  { name: "Medium Skin", value: "#D18B59" },
-  { name: "Dark Skin", value: "#4B2F1B" },
-];
-
-function useFaceFoundationQuery({
-  texture,
-  color,
-}: {
-  texture: string | null;
-  color: string | null;
-}) {
-  return useQuery({
-    queryKey: ["products", "faceblush", color, texture],
-    queryFn: async () => {
-      const filters = [
-        {
-          filters: [
-            {
-              field: "type_id",
-              value: "simple",
-              condition_type: "eq",
-            },
-          ],
-        },
-        {
-          filters: [
-            {
-              field: "face_makeup_product_type",
-              value: faceMakeupProductTypesFilter(["Foundations"]),
-              condition_type: "in",
-            },
-          ],
-        },
-      ];
-
-      if (color) {
-        filters.push({
-          filters: [
-            {
-              field: "color",
-              value: color,
-              condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      if (texture) {
-        filters.push({
-          filters: [
-            {
-              field: "texture",
-              value: texture,
-              condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      console.log("filters", filters);
-
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
-        {
-          headers: defaultHeaders,
-        },
-      );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return results;
-    },
-  });
-}
+import { useMakeup } from "../../../../context/makeup-context";
+import {
+  extractUniqueCustomAttributes
+} from "../../../../utils/apiUtils";
+import { useFoundationContext } from "./foundation-context";
+import { useFoundationQuery } from "./foundation-query";
 
 export function FoundationSelector() {
   return (
-    <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <FamilyColorSelector />
 
@@ -124,14 +34,14 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {skin_tones.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-[0.625rem] text-white/80",
             {
               "border-white/80": colorFamily === item.id,
             },
@@ -180,31 +90,28 @@ function ColorSelector() {
   }
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             resetFoundation();
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
-        {extracted_sub_colors
-          ? extracted_sub_colors.map((color, index) => (
-              <button type="button" key={index} onClick={() => setColor(color)}>
-                <ColorPalette
-                  key={index}
-                  size="large"
-                  palette={{
-                    color: color,
-                  }}
-                  selected={selectedColor === color}
-                />
-              </button>
-            ))
-          : null}
+        {extracted_sub_colors.map((color, index) => (
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{
+              color: color,
+            }}
+            selected={selectedColor === color}
+            onClick={() => setColor(color)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -227,8 +134,8 @@ function TextureSelector() {
   }
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
@@ -258,7 +165,7 @@ function ProductList() {
     texture: selectedTexture,
   });
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

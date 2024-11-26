@@ -1,9 +1,7 @@
 import clsx from "clsx";
 import { cloneElement } from "react";
 import { colors } from "../../../../api/attributes/color";
-import {
-  filterShapesByValue
-} from "../../../../api/attributes/shape";
+import { filterShapesByValue } from "../../../../api/attributes/shape";
 import { Product } from "../../../../api/shared";
 import { Icons } from "../../../../components/icons";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
@@ -12,7 +10,7 @@ import { useEarringsContext } from "./earrings-context";
 
 export function SingleEarringsSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <FamilyColorSelector />
         <ColorSelector product={product} />
@@ -33,7 +31,7 @@ function FamilyColorSelector() {
           key={item.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-[0.625rem] text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -44,7 +42,7 @@ function FamilyColorSelector() {
             className="size-2.5 shrink-0 rounded-full"
             style={{ background: item.hex }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -72,21 +70,21 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
             key={index}
             type="button"
             className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },

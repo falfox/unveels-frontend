@@ -10,7 +10,7 @@ import { LoadingProducts } from "../components/loading";
 export function SingleVirtualTryOnDetail() {
   const {} = useParams();
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <ColorSelector />
       </div>
@@ -46,24 +46,22 @@ function ColorSelector() {
   const handleClearSelection = () => {};
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
         {sub_color.map((color, index) => (
-          <button
-            type="button"
-            key={index}
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
             onClick={() => handleColorClick()}
-            className={clsx("cursor-pointer")}
-          >
-            <ColorPalette size="large" palette={{ color }} />
-          </button>
+          />
         ))}
       </div>
       {/* Removed the error message since all buttons are enabled */}
@@ -83,8 +81,8 @@ function TextureSelector() {
 
   const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textureProducts.map((texture, index) => (
           <button
             key={texture.label}
@@ -128,8 +126,8 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
         {blushes.map((path, index) => (
           <button
             key={index}
@@ -168,7 +166,7 @@ const modes = [
 export function Mode() {
   const navigate = useNavigate();
   return (
-    <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
       {modes.map((mode, index) => (
         <button
           key={mode.path}
