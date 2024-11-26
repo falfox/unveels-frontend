@@ -289,6 +289,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             />
           </mesh>
 
+          <Watch planeSize={planeSize} handLandmarks={handlandmarks} />
+
           {showHair && (
             <>
               {hairMaskTextureRef.current && (
