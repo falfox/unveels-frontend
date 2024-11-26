@@ -562,86 +562,188 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           Detected Skin Problems
         </h2>
 
-        <div className="relative pt-8">
-          <CircularProgressRings
-            className="mx-auto size-96"
-            data={[
-              { percentage: getTotalScoreByLabel("acne"), color: "#F72585" },
-              { percentage: getTotalScoreByLabel("texture"), color: "#E9A0DD" },
-              { percentage: getTotalScoreByLabel("pore"), color: "#F4EB24" },
-              { percentage: getTotalScoreByLabel("spots"), color: "#0F38CC" },
-              { percentage: getTotalScoreByLabel("eyebag"), color: "#00E0FF" },
-              {
-                percentage: getTotalScoreByLabel("dark circle"),
-                color: "#6B13B1",
-              },
-              {
-                percentage: getTotalScoreByLabel("wrinkles"),
-                color: "#00FF38",
-              },
-            ]}
-          />
+        <div className="md:hidden">
+          <div className="relative pt-8">
+            <CircularProgressRings
+              className="mx-auto size-96"
+              data={[
+                { percentage: getTotalScoreByLabel("acne"), color: "#F72585" },
+                {
+                  percentage: getTotalScoreByLabel("texture"),
+                  color: "#E9A0DD",
+                },
+                { percentage: getTotalScoreByLabel("pore"), color: "#F4EB24" },
+                { percentage: getTotalScoreByLabel("spots"), color: "#0F38CC" },
+                {
+                  percentage: getTotalScoreByLabel("eyebag"),
+                  color: "#00E0FF",
+                },
+                {
+                  percentage: getTotalScoreByLabel("dark circle"),
+                  color: "#6B13B1",
+                },
+                {
+                  percentage: getTotalScoreByLabel("wrinkles"),
+                  color: "#00FF38",
+                },
+              ]}
+            />
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
-            <div className="text-xl font-bold">
-              {calculateAverageSkinProblemsScore()}%
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
+              <div className="text-xl font-bold">
+                {calculateAverageSkinProblemsScore()}%
+              </div>
+              <div className="">Skin Problems</div>
             </div>
-            <div className="">Skin Problems</div>
+          </div>
+
+          <div className="flex items-center justify-between space-x-4 bg-black px-10 text-white">
+            {/* Left Column */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00FF38] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("texture")}%
+                </div>
+                <span>Texture</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#6B13B1] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("dark circle")}%
+                </div>
+                <span>Dark Circles</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00E0FF] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("eyebag")}%
+                </div>
+                <span>Eyebags</span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#0F38CC] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("wrinkles")}%
+                </div>
+                <span>Wrinkles</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F4EB24] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("pore")}%
+                </div>
+                <span>Pores</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#E9A0DD] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("spots")}%
+                </div>
+                <span>Spots</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("acne")}%
+                </div>
+                <span>Acne</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
-          {/* Left Column */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00FF38] text-sm font-bold text-white">
-                {getTotalScoreByLabel("texture")}%
+        <div className="mx-auto hidden w-full max-w-3xl items-center md:flex">
+          <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#0F38CC] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("wrinkles")}%
+                </div>
+                <span>Wrinkles</span>
               </div>
-              <span>Texture</span>
-            </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#6B13B1] text-sm font-bold text-white">
-                {getTotalScoreByLabel("dark circle")}%
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F4EB24] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("pore")}%
+                </div>
+                <span>Pores</span>
               </div>
-              <span>Dark Circles</span>
-            </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00E0FF] text-sm font-bold text-white">
-                {getTotalScoreByLabel("eyebag")}%
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#E9A0DD] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("spots")}%
+                </div>
+                <span>Spots</span>
               </div>
-              <span>Eyebags</span>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("acne")}%
+                </div>
+                <span>Acne</span>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#0F38CC] text-sm font-bold text-white">
-                {getTotalScoreByLabel("wrinkles")}%
-              </div>
-              <span>Wrinkles</span>
-            </div>
+          <div className="relative pt-8">
+            <CircularProgressRings
+              className="mx-auto size-96"
+              data={[
+                { percentage: getTotalScoreByLabel("acne"), color: "#F72585" },
+                {
+                  percentage: getTotalScoreByLabel("texture"),
+                  color: "#E9A0DD",
+                },
+                { percentage: getTotalScoreByLabel("pore"), color: "#F4EB24" },
+                { percentage: getTotalScoreByLabel("spots"), color: "#0F38CC" },
+                {
+                  percentage: getTotalScoreByLabel("eyebag"),
+                  color: "#00E0FF",
+                },
+                {
+                  percentage: getTotalScoreByLabel("dark circle"),
+                  color: "#6B13B1",
+                },
+                {
+                  percentage: getTotalScoreByLabel("wrinkles"),
+                  color: "#00FF38",
+                },
+              ]}
+            />
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F4EB24] text-sm font-bold text-white">
-                {getTotalScoreByLabel("pore")}%
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
+              <div className="text-xl font-bold">
+                {calculateAverageSkinProblemsScore()}%
               </div>
-              <span>Pores</span>
+              <div className="">Skin Problems</div>
             </div>
+          </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#E9A0DD] text-sm font-bold text-white">
-                {getTotalScoreByLabel("spots")}%
+          <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
+            {/* Left Column */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00FF38] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("texture")}%
+                </div>
+                <span>Texture</span>
               </div>
-              <span>Spots</span>
-            </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
-                {getTotalScoreByLabel("acne")}%
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#6B13B1] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("dark circle")}%
+                </div>
+                <span>Dark Circles</span>
               </div>
-              <span>Acne</span>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#00E0FF] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("eyebag")}%
+                </div>
+                <span>Eyebags</span>
+              </div>
             </div>
           </div>
         </div>
@@ -650,98 +752,200 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           Detected Skin Condition
         </h2>
 
-        <div className="relative pt-8">
-          <CircularProgressRings
-            className="mx-auto size-96"
-            data={[
-              {
-                percentage: getTotalScoreByLabel("moistures"),
-                color: "#4CC9F0",
-              },
-              {
-                percentage: getTotalScoreByLabel("skinredness"),
-                color: "#BD8EFF",
-              },
-              { percentage: getTotalScoreByLabel("oily"), color: "#B5179E" },
-              {
-                percentage: getTotalScoreByLabel("moistures"),
-                color: "#5DD400",
-              },
-              {
-                percentage: getTotalScoreByLabel("droopy eyelid lower"),
-                color: "#14A086",
-              },
-              {
-                percentage: getTotalScoreByLabel("droopy eyelid upper"),
-                color: "#F72585",
-              },
-              {
-                percentage: getTotalScoreByLabel("firmness"),
-                color: "#F1B902",
-              },
-            ]}
-          />
+        <div className="md:hidden">
+          <div className="relative pt-8">
+            <CircularProgressRings
+              className="mx-auto size-96"
+              data={[
+                {
+                  percentage: getTotalScoreByLabel("moistures"),
+                  color: "#4CC9F0",
+                },
+                {
+                  percentage: getTotalScoreByLabel("skinredness"),
+                  color: "#BD8EFF",
+                },
+                { percentage: getTotalScoreByLabel("oily"), color: "#B5179E" },
+                {
+                  percentage: getTotalScoreByLabel("moistures"),
+                  color: "#5DD400",
+                },
+                {
+                  percentage: getTotalScoreByLabel("droopy eyelid lower"),
+                  color: "#14A086",
+                },
+                {
+                  percentage: getTotalScoreByLabel("droopy eyelid upper"),
+                  color: "#F72585",
+                },
+                {
+                  percentage: getTotalScoreByLabel("firmness"),
+                  color: "#F1B902",
+                },
+              ]}
+            />
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
-            <div className="text-xl font-bold">
-              {calculateAverageSkinConditionScore()}%
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
+              <div className="text-xl font-bold">
+                {calculateAverageSkinConditionScore()}%
+              </div>
+              <div className="">Skin Problems</div>
             </div>
-            <div className="">Skin Problems</div>
+          </div>
+
+          <div className="flex items-center justify-between space-x-4 bg-black px-10 text-white">
+            {/* Left Column */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F1B902] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("firmness")}%
+                </div>
+                <span>Firmness</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("droopy eyelid upper")}%
+                </div>
+                <span>Droopy Upper Eyelid</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#14A086] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("droopy eyelid lower")}%
+                </div>
+                <span>Droopy Lower Eyelid</span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5DD400] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("moistures")}%
+                </div>
+                <span>Moisture Level</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("oily")}%
+                </div>
+                <span>Oiliness</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#BD8EFF] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("skinredness")}%
+                </div>
+                <span>Redness</span>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("moistures")}%
+                </div>
+                <span>Radiance</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
-          {/* Left Column */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F1B902] text-sm font-bold text-white">
-                {getTotalScoreByLabel("firmness")}%
+        <div className="mx-auto hidden w-full max-w-3xl items-center md:flex">
+          <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5DD400] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("moistures")}%
+                </div>
+                <span>Moisture Level</span>
               </div>
-              <span>Firmness</span>
-            </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
-                {getTotalScoreByLabel("droopy eyelid upper")}%
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("oily")}%
+                </div>
+                <span>Oiliness</span>
               </div>
-              <span>Droopy Upper Eyelid</span>
-            </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#14A086] text-sm font-bold text-white">
-                {getTotalScoreByLabel("droopy eyelid lower")}%
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#BD8EFF] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("skinredness")}%
+                </div>
+                <span>Redness</span>
               </div>
-              <span>Droopy Lower Eyelid</span>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("moistures")}%
+                </div>
+                <span>Radiance</span>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5DD400] text-sm font-bold text-white">
-                {getTotalScoreByLabel("moistures")}%
-              </div>
-              <span>Moisture Level</span>
-            </div>
+          <div className="relative pt-8">
+            <CircularProgressRings
+              className="mx-auto size-96"
+              data={[
+                {
+                  percentage: getTotalScoreByLabel("moistures"),
+                  color: "#4CC9F0",
+                },
+                {
+                  percentage: getTotalScoreByLabel("skinredness"),
+                  color: "#BD8EFF",
+                },
+                { percentage: getTotalScoreByLabel("oily"), color: "#B5179E" },
+                {
+                  percentage: getTotalScoreByLabel("moistures"),
+                  color: "#5DD400",
+                },
+                {
+                  percentage: getTotalScoreByLabel("droopy eyelid lower"),
+                  color: "#14A086",
+                },
+                {
+                  percentage: getTotalScoreByLabel("droopy eyelid upper"),
+                  color: "#F72585",
+                },
+                {
+                  percentage: getTotalScoreByLabel("firmness"),
+                  color: "#F1B902",
+                },
+              ]}
+            />
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
-                {getTotalScoreByLabel("oily")}%
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
+              <div className="text-xl font-bold">
+                {calculateAverageSkinConditionScore()}%
               </div>
-              <span>Oiliness</span>
+              <div className="">Skin Problems</div>
             </div>
+          </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#BD8EFF] text-sm font-bold text-white">
-                {getTotalScoreByLabel("skinredness")}%
+          <div className="flex items-center justify-between space-x-4 bg-black px-10 text-white">
+            {/* Left Column */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F1B902] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("firmness")}%
+                </div>
+                <span>Firmness</span>
               </div>
-              <span>Redness</span>
-            </div>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
-                {getTotalScoreByLabel("moistures")}%
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("droopy eyelid upper")}%
+                </div>
+                <span>Droopy Upper Eyelid</span>
               </div>
-              <span>Radiance</span>
+
+              <div className="flex items-center space-x-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#14A086] text-sm font-bold text-white">
+                  {getTotalScoreByLabel("droopy eyelid lower")}%
+                </div>
+                <span>Droopy Lower Eyelid</span>
+              </div>
             </div>
           </div>
         </div>
@@ -879,7 +1083,9 @@ function ProblemSection({
       </div>
 
       <div className="py-8">
-        <h2 className="pb-4 text-xl font-bold">Recommended products</h2>
+        <h2 className="pb-4 text-xl font-bold lg:text-2xl">
+          Recommended products
+        </h2>
 
         <ProductList skinConcern={title} />
       </div>

@@ -14,7 +14,7 @@ import {
 
 export function SingleNailPolishSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <FamilyColorSelector />
         <ColorSelector product={product} />
@@ -29,13 +29,13 @@ function FamilyColorSelector() {
   const { colorFamily, setColorFamily } = useNailPolishContext();
 
   return (
-    <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
       {colors.map((item) => (
         <button
           key={item.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-[0.625rem] text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -46,7 +46,7 @@ function FamilyColorSelector() {
             className="size-2.5 shrink-0 rounded-full"
             style={{ background: item.hex }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -78,26 +78,21 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((color) => color.split(","));
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
-          <button
-            key={index}
-            type="button"
-            className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
-              {
-                "border-white/80": selectedColor === color,
-              },
-            )}
-            style={{ background: color }}
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
+            selected={selectedColor === color}
             onClick={() => handleColorSelection(color)}
           />
         ))}
@@ -116,8 +111,8 @@ function TextureSelector({ product }: { product: Product }) {
   const filteredTextures = filterTexturesByValue(productTextures);
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {filteredTextures.map((texture, index) => (
           <button
             key={texture.value}

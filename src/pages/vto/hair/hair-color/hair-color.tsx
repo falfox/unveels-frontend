@@ -9,7 +9,7 @@ import { useMakeup } from "../../../../context/makeup-context";
 
 export function HairColorSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <FamilyColorSelector />
 
@@ -26,14 +26,14 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 py-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80 text-sm",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -46,7 +46,7 @@ function FamilyColorSelector() {
               background: item.hex,
             }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -54,14 +54,14 @@ function FamilyColorSelector() {
 }
 
 const haircolors = [
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 1.png",
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 2.png",
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 3.png",
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 4.png",
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 5.png",
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 6.png",
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 7.png",
-  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 8.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 1.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 2.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 3.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 4.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 5.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 6.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 7.png",
+  "/media/unveels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 8.png",
 ];
 
 const colorList = [
@@ -88,8 +88,8 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
         {haircolors.map((path, index) => (
           <button
             key={index}

@@ -7,10 +7,11 @@ import { useMakeup } from "../../../../context/makeup-context";
 import { filterTextures } from "../../../../api/attributes/texture";
 import { Product } from "../../../../api/shared";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
+import { ColorPalette } from "../../../../components/color-palette";
 
 export function SingleEyeShadowSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <ColorSelector product={product} />
       </div>
@@ -70,26 +71,21 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((color) => color.split(","));
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
-          <button
-            key={index}
-            type="button"
-            className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
-              {
-                "border-white/80": selectedColors.includes(color),
-              },
-            )}
-            style={{ background: color }}
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
+            selected={selectedColors.includes(color)}
             onClick={() => handleColorClick(color)}
           />
         ))}
@@ -106,8 +102,8 @@ function TextureSelector({ product }: { product: Product }) {
   const textures = filterTextures(["Metallic", "Matte", "Shimmer"]);
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
@@ -153,14 +149,14 @@ function ModeSelector() {
 
   return (
     <>
-      <div className="mx-auto w-full py-2 lg:max-w-xl">
-        <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+      <div className="mx-auto w-full py-2">
+        <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
           {modes.map((mode) => (
             <button
               key={mode.name}
               type="button"
               className={clsx(
-                "relative inline-flex items-center gap-x-2 rounded-full px-3 py-1 text-center text-sm transition-transform",
+                "relative inline-flex items-center gap-x-2 rounded-full px-1 py-1 text-center text-sm transition-transform",
                 {
                   "-translate-y-0.5 text-white": selectedMode === mode.name,
                   "text-white/80": selectedMode !== mode.name,
@@ -180,8 +176,8 @@ function ModeSelector() {
         </div>
       </div>
       {currentMode && (
-        <div className="mx-auto w-full py-2 lg:max-w-xl">
-          <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+        <div className="mx-auto w-full py-2">
+          <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
             {[...Array(currentMode.count)].map((_, index) => (
               <button
                 key={index}

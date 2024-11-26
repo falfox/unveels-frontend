@@ -17,8 +17,6 @@ const baseRoutes = [
   "/skin-analysis-web",
   "/virtual-try-on-product",
   "/virtual-try-on",
-  "/virtual-avatar-web",
-  "/see-improvement",
 ];
 
 function generateHtmlFromTemplate(route: string) {
