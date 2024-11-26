@@ -352,9 +352,9 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             <Eyebrows planeSize={planeSize} landmarks={landmarks} />
           )}
 
-          <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
+          {/* <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
           <NeckOccluder planeSize={planeSize} landmarks={landmarks} />
-          <HandOccluder planeSize={planeSize} handLandmarks={handlandmarks} />
+          <HandOccluder planeSize={planeSize} handLandmarks={handlandmarks} /> */}
 
           {showHat && <Hat planeSize={planeSize} landmarks={landmarks} />}
 

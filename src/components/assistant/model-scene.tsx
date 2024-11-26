@@ -50,7 +50,7 @@ const ModelScene = ({
         </Suspense>
         <Suspense fallback={null}>
           <Avatar
-            avatar_url="/sarahkarakter.glb"
+            avatar_url="/media/unveels/3d/sarahkarakter.glb"
             speak={speak}
             text={text}
             playing={playing}

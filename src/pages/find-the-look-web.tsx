@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { FindTheLookMainScreen } from "../components/find-the-look/find-the-look-main-screen";
 import { FindTheLookProvider } from "../context/find-the-look-context";
 import { CameraProvider, useCamera } from "../context/recorder-context";
 import { SkinAnalysisProvider } from "../context/skin-analysis-context";
-import { FindTheLook } from "./find-the-look";
+
 import { FindTheLookScene } from "../components/find-the-look/find-the-look-scene";
 import { VideoStream } from "../components/recorder/video-stream";
 import { FindTheLookMainScreenWeb } from "../components/find-the-look/find-the-look-main-screen-web";
@@ -83,7 +82,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/hand.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/hand.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -100,7 +99,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/rings.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/rings.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -117,7 +116,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/neck.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/neck.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -134,7 +133,8 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/earrings.tflite",
+            modelAssetPath:
+              "/media/unveels/models/find-the-look/earrings.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -151,7 +151,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/glass.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/glass.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -168,7 +168,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/head.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/head.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -185,7 +185,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/makeup.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/makeup.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",

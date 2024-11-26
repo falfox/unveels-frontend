@@ -117,7 +117,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/hand.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/hand.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -134,7 +134,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/rings.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/rings.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -151,7 +151,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/neck.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/neck.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -168,7 +168,8 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/earrings.tflite",
+            modelAssetPath:
+              "/media/unveels/models/find-the-look/earrings.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -185,7 +186,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/glass.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/glass.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -202,7 +203,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/head.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/head.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",
@@ -219,7 +220,7 @@ function Main() {
         ),
         {
           baseOptions: {
-            modelAssetPath: "/models/find-the-look/makeup.tflite",
+            modelAssetPath: "/media/unveels/models/find-the-look/makeup.tflite",
             delegate: "GPU",
           },
           runningMode: "IMAGE",

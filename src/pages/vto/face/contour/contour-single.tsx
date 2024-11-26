@@ -145,12 +145,12 @@ function ModeSelector() {
 }
 
 const contours = [
-  "/contours/contour-1.png",
-  "/contours/contour-2.png",
-  "/contours/contour-3.png",
-  "/contours/contour-4.png",
-  "/contours/contour-5.png",
-  "/contours/contour-6.png",
+  "/media/unveels/vto/contours/contour-1.png",
+  "/media/unveels/vto/contours/contour-2.png",
+  "/media/unveels/vto/contours/contour-3.png",
+  "/media/unveels/vto/contours/contour-4.png",
+  "/media/unveels/vto/contours/contour-5.png",
+  "/media/unveels/vto/contours/contour-6.png",
 ];
 
 function ShapeSelector() {

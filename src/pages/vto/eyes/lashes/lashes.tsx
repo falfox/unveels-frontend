@@ -46,7 +46,7 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colorFamilies.map((item, index) => (
@@ -75,11 +75,11 @@ function FamilyColorSelector() {
 
 function ColorSelector() {
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full pb-2 space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto pb-2 no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
         >
           <Icons.empty className="size-10" />
         </button>
@@ -101,22 +101,22 @@ function ColorSelector() {
 }
 
 const eyelashes = [
-  "/eyelashesh/eyelashes-1.png",
-  "/eyelashesh/eyelashes-2.png",
-  "/eyelashesh/eyelashes-3.png",
-  "/eyelashesh/eyelashes-4.png",
-  "/eyelashesh/eyelashes-5.png",
-  "/eyelashesh/eyelashes-6.png",
-  "/eyelashesh/eyelashes-7.png",
-  "/eyelashesh/eyelashes-8.png",
-  "/eyelashesh/eyelashes-9.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-1.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-2.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-3.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-4.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-5.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-6.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-7.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-8.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-9.png",
 ];
 
 function ShapeSelector() {
   const { selectedPattern, setSelectedPattern } = useLashesContext();
   return (
-    <div className="mx-auto w-full !border-t-0 pt-4 pb-2 lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full !border-t-0 pb-2 pt-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {patterns.eyelashes.map((pattern, index) => (
           <button
             key={index}
@@ -138,7 +138,7 @@ function ShapeSelector() {
             <img
               src={eyelashes[index % eyelashes.length]}
               alt="Eyebrow"
-              className="rounded size-12"
+              className="size-12 rounded"
             />
           </button>
         ))}
@@ -156,7 +156,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

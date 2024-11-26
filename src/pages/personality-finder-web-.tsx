@@ -72,13 +72,13 @@ function MainContent() {
     },
     async () => {
       const model = await loadTFLiteModel(
-        "/models/personality-finder/face-analyzer.tflite",
+        "/media/unveels/models/personality-finder/face-analyzer.tflite",
       );
       modelFaceShapeRef.current = model;
     },
     async () => {
       const model = await loadTFLiteModel(
-        "/models/personality-finder/personality_finder.tflite",
+        "/media/unveels/models/personality-finder/personality_finder.tflite",
       );
       modelPersonalityFinderRef.current = model;
     },

@@ -116,10 +116,10 @@ function ShapeSelector() {
   const { selectedShape, setSelectedShape } = useHighlighterContext();
   const { setHighlighterPattern } = useMakeup();
   const highlighters = [
-    "/highlighters/highlighter-1.png",
-    "/highlighters/highlighter-2.png",
-    "/highlighters/highlighter-3.png",
-    "/highlighters/highlighter-4.png",
+    "/media/unveels/vto/highlighters/highlighter-1.png",
+    "/media/unveels/vto/highlighters/highlighter-2.png",
+    "/media/unveels/vto/highlighters/highlighter-3.png",
+    "/media/unveels/vto/highlighters/highlighter-4.png",
   ];
 
   return (

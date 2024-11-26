@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { VirtualTryOnProductProvider } from "./context/virtual-try-on-product-context.tsx";
+import { CartProvider } from "./context/cart-context.tsx";
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,9 @@ function renderApp(containerId: string, skus?: string[]) {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <VirtualTryOnProductProvider initialSkus={skus}>
-          <App />
+          <CartProvider>
+            <App />
+          </CartProvider>
         </VirtualTryOnProductProvider>
       </QueryClientProvider>
     </StrictMode>,
@@ -83,7 +86,9 @@ if (window.__INITIAL_ROUTE__) {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <VirtualTryOnProductProvider>
-          <App />
+          <CartProvider>
+            <App />
+          </CartProvider>
         </VirtualTryOnProductProvider>
       </QueryClientProvider>
     </StrictMode>,
@@ -94,7 +99,9 @@ if (window.__INITIAL_ROUTE__) {
       <StrictMode>
         <QueryClientProvider client={queryClient}>
           <VirtualTryOnProductProvider>
-            <App />
+            <CartProvider>
+              <App />
+            </CartProvider>
           </VirtualTryOnProductProvider>
         </QueryClientProvider>
       </StrictMode>,

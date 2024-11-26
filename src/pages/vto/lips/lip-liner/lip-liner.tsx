@@ -156,7 +156,7 @@ function SizeSelector() {
             onClick={() => setPattern(index, size)}
           >
             <img
-              src={`/lipliners/lipliner ${size.toLowerCase()}.png`}
+              src={`/media/unveels/vto/lipliners/lipliner ${size.toLowerCase()}.png`}
               alt={size}
               className="size-12"
             />
