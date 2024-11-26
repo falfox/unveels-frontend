@@ -175,11 +175,11 @@ function ColorSelector() {
 }
 
 const bronzers = [
-  "/bronzers/bronzer-1.png",
-  "/bronzers/bronzer-2.png",
-  "/bronzers/bronzer-3.png",
-  "/bronzers/bronzer-4.png",
-  "/bronzers/bronzer-5.png",
+  "/media/unveels/vto/bronzers/bronzer-1.png",
+  "/media/unveels/vto/bronzers/bronzer-2.png",
+  "/media/unveels/vto/bronzers/bronzer-3.png",
+  "/media/unveels/vto/bronzers/bronzer-4.png",
+  "/media/unveels/vto/bronzers/bronzer-5.png",
 ];
 
 function ShapeSelector() {

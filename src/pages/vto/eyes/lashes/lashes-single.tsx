@@ -77,15 +77,15 @@ function ColorSelector() {
 }
 
 const eyelashes = [
-  "/eyelashesh/eyelashes-1.png",
-  "/eyelashesh/eyelashes-2.png",
-  "/eyelashesh/eyelashes-3.png",
-  "/eyelashesh/eyelashes-4.png",
-  "/eyelashesh/eyelashes-5.png",
-  "/eyelashesh/eyelashes-6.png",
-  "/eyelashesh/eyelashes-7.png",
-  "/eyelashesh/eyelashes-8.png",
-  "/eyelashesh/eyelashes-9.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-1.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-2.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-3.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-4.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-5.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-6.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-7.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-8.png",
+  "/media/unveels/vto/eyelashesh/eyelashes-9.png",
 ];
 
 function ShapeSelector() {

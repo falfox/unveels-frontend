@@ -54,14 +54,14 @@ function FamilyColorSelector() {
 }
 
 const haircolors = [
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 1.png",
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 2.png",
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 3.png",
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 4.png",
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 5.png",
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 6.png",
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 7.png",
-  "/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 8.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 1.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 2.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 3.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 4.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 5.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 6.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 7.png",
+  "/media/unvvels/vto/haircolors/fcb451ec-5284-476f-9872-5b749dfee8d9 8.png",
 ];
 
 const colorList = [

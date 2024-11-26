@@ -35,7 +35,7 @@ function FamilyColorSelector() {
   const { colorFamily, setColorFamily } = useEyebrowsContext();
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colorFamilies.map((item, index) => (
@@ -92,11 +92,11 @@ function ColorSelector() {
   );
 
   return (
-    <div className="w-full py-2 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             reset();
           }}
@@ -134,8 +134,8 @@ function PatternSelector() {
     setEyebrowsPattern(pattern);
   }
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {[...Array(14)].map((_, index) => (
           <button
             key={index}
@@ -149,9 +149,9 @@ function PatternSelector() {
             onClick={() => setPattern(index, index.toString())}
           >
             <img
-              src={`/eyebrows/${index % 8}.png`}
+              src={`/media/unveels/vto/eyebrows/${index % 8}.png`}
               alt="Eyebrow"
-              className="h-5 rounded w-14"
+              className="h-5 w-14 rounded"
             />
           </button>
         ))}
@@ -163,7 +163,7 @@ function PatternSelector() {
 function BrightnessSlider() {
   const { setEyebrowsVisibility, eyebrowsVisibility } = useMakeup();
   return (
-    <div className="pt-4 pb-2">
+    <div className="pb-2 pt-4">
       <input
         id="minmax-range"
         type="range"
@@ -199,7 +199,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

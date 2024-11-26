@@ -103,20 +103,20 @@ function ColorSelector({ product }: { product: Product }) {
 }
 
 const eyeliners = [
-  "/eyeliners/eyeliners_arabic-down 1.png",
-  "/eyeliners/eyeliners_arabic-light 1.png",
-  "/eyeliners/eyeliners_arabic-up 1.png",
-  "/eyeliners/eyeliners_double-mod 1.png",
-  "/eyeliners/eyeliners_down-basic 1.png",
-  "/eyeliners/eyeliners_down-bold 1.png",
-  "/eyeliners/eyeliners_down-light 1.png",
-  "/eyeliners/eyeliners_middle-basic 1.png",
-  "/eyeliners/eyeliners_middle-bold 1.png",
-  "/eyeliners/eyeliners_middle-light 1.png",
-  "/eyeliners/eyeliners_open-wings 1.png",
-  "/eyeliners/eyeliners_up-basic 1.png",
-  "/eyeliners/eyeliners_up-bold 1.png",
-  "/eyeliners/eyeliners_up-light 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_arabic-down 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_arabic-light 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_arabic-up 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_double-mod 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_down-basic 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_down-bold 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_down-light 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_middle-basic 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_middle-bold 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_middle-light 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_open-wings 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_up-basic 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_up-bold 1.png",
+  "/media/unveels/vto/eyeliners/eyeliners_up-light 1.png",
 ];
 
 function ShapeSelector() {

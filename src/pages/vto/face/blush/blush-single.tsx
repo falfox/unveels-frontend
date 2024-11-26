@@ -132,11 +132,11 @@ function TextureSelector({ product }: { product: Product }) {
 }
 
 const blushes = [
-  "/blushes/blusher-1.png",
-  "/blushes/blusher-2.png",
-  "/blushes/blusher-3.png",
-  "/blushes/blusher-4.png",
-  "/blushes/blusher-5.png",
+  "/media/unveels/vto/blushes/blusher-1.png",
+  "/media/unveels/vto/blushes/blusher-2.png",
+  "/media/unveels/vto/blushes/blusher-3.png",
+  "/media/unveels/vto/blushes/blusher-4.png",
+  "/media/unveels/vto/blushes/blusher-5.png",
 ];
 
 function ShapeSelector() {

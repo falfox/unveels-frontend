@@ -39,6 +39,7 @@ import {
   preprocessTFLiteImage,
   runTFLiteInference,
 } from "../utils/tfliteInference";
+import { useCartContext } from "../context/cart-context";
 
 export function FaceAnalyzer() {
   return (
@@ -98,13 +99,13 @@ function MainContent() {
     },
     async () => {
       const model = await loadTFLiteModel(
-        "/models/personality-finder/face-analyzer.tflite",
+        "/media/unveels/models/personality-finder/face-analyzer.tflite",
       );
       modelFaceShapeRef.current = model;
     },
     async () => {
       const model = await loadTFLiteModel(
-        "/models/personality-finder/personality_finder.tflite",
+        "/media/unveels/models/personality-finder/personality_finder.tflite",
       );
       modelPersonalityFinderRef.current = model;
     },
@@ -236,7 +237,7 @@ function MainContent() {
           </>
         </div>
         <RecorderStatus />
-        <TopNavigation cart={isInferenceFinished} />
+        <TopNavigation />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
           <VideoScene />
@@ -384,6 +385,23 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
     faceShape,
   });
 
+  const { guestCartId, addItemToCart } = useCartContext(); // Mengakses CartContext
+
+  // Fungsi untuk menambahkan item ke keranjang
+  const handleAddToCart = async (sku: string) => {
+    if (!guestCartId) {
+      console.log("Guest Cart ID is not available. Please try again.");
+      return;
+    }
+
+    try {
+      await addItemToCart(sku); // Memanggil fungsi dari CartContext
+      console.log(`Product ${sku} added to cart!`);
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
+    }
+  };
+
   return (
     <div className="w-full overflow-auto px-4 py-8">
       <div className="pb-14">
@@ -440,6 +458,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
                       onClick={(event) => {
                         event.stopPropagation();
+                        handleAddToCart(product.sku);
                       }}
                     >
                       ADD TO CART
@@ -569,6 +588,10 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                     <button
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleAddToCart(product.sku);
+                      }}
                     >
                       ADD TO CART
                     </button>

@@ -25,7 +25,7 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full py-2 space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
@@ -67,10 +67,10 @@ function ColorSelector() {
 
   return (
     <div className="mx-auto w-full !border-t-0 pb-4 lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColor(null);
           }}
@@ -107,7 +107,7 @@ function ModeSelector() {
 
   return (
     <>
-      <div className="flex items-center justify-between w-full h-10 text-center">
+      <div className="flex h-10 w-full items-center justify-between text-center">
         <button
           className={clsx("relative h-10 grow text-lg", {
             "text-white": selectedMode === "occasions",
@@ -164,15 +164,18 @@ function OccasionSelector() {
 const materials = [
   {
     name: "Pearls",
-    image: "/tiara-materials/e4108386-f7a9-4342-ba51-c163dd965967 1.png",
+    image:
+      "/media/unveels/vto/tiara-materials/e4108386-f7a9-4342-ba51-c163dd965967 1.png",
   },
   {
     name: "Crystals",
-    image: "/tiara-materials/7a9885af-a00a-4a07-8a3b-b8f8e5eb059d 1.png",
+    image:
+      "/media/unveels/vto/tiara-materials/7a9885af-a00a-4a07-8a3b-b8f8e5eb059d 1.png",
   },
   {
     name: "Rubies",
-    image: "/tiara-materials/d9dbfba7-fa55-4aa9-9281-908381b4296e 1.png",
+    image:
+      "/media/unveels/vto/tiara-materials/d9dbfba7-fa55-4aa9-9281-908381b4296e 1.png",
   },
 ];
 
@@ -216,7 +219,7 @@ function TiaraProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

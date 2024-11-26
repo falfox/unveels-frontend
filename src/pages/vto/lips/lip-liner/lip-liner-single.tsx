@@ -40,7 +40,7 @@ function ColorSelector({ product }: { product: Product }) {
 
   const extracted_sub_colors = extractUniqueCustomAttributes(
     [product],
-    "hexacode"
+    "hexacode",
   ).flatMap((color) => color.split(","));
 
   return (
@@ -62,7 +62,7 @@ function ColorSelector({ product }: { product: Product }) {
               "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
-              }
+              },
             )}
             style={{ background: color }}
           />
@@ -74,11 +74,11 @@ function ColorSelector({ product }: { product: Product }) {
 
 const lipLinerSizes = [
   "Small",
-  "Upper Lip", 
+  "Upper Lip",
   "Large Lower",
   "Large Narrower",
   "Large & Full",
-  "Wider"
+  "Wider",
 ];
 
 function SizeSelector({ product }: { product: Product }) {
@@ -101,12 +101,12 @@ function SizeSelector({ product }: { product: Product }) {
               "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
               {
                 "border-white/80": selectedSize === size,
-              }
+              },
             )}
             onClick={() => handleSizeClick(index, size)}
           >
             <img
-              src={`/lipliners/lipliner ${size.toLowerCase()}.png`}
+              src={`/media/unveels/vto/lipliners/lipliner ${size.toLowerCase()}.png`}
               alt={size}
               className="size-12"
             />

@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createMemoryRouter, Link, RouterProvider } from "react-router-dom";
 import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
@@ -51,6 +51,8 @@ import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
 import { Path } from "three";
 import { element } from "three/webgpu";
 import { VirtualAvatar } from "./pages/virtual-avatar";
+import { createGuestCart } from "./api/create-guest-cart";
+import { useCartContext } from "./context/cart-context";
 
 // Define routes using object syntax
 const routes = [
@@ -161,6 +163,23 @@ function Home() {
   );
 }
 function App() {
+  const { guestCartId, setGuestCartId } = useCartContext();
+
+  useEffect(() => {
+    const initializeCart = async () => {
+      if (!guestCartId) {
+        try {
+          const cartId = await createGuestCart();
+          setGuestCartId(cartId);
+        } catch (error) {
+          console.error("Failed to initialize guest cart:", error);
+        }
+      }
+    };
+
+    initializeCart();
+  }, [guestCartId, setGuestCartId]);
+
   const router = import.meta.env.DEV
     ? createMemoryRouter(routes, {
         initialEntries: [window.__INITIAL_ROUTE__ || "/"],

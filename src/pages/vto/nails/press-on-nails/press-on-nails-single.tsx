@@ -103,9 +103,9 @@ function ColorSelector({ product }: { product: Product }) {
 }
 
 const nailshapes = [
-  "/nailshapes/press on nails-1.png",
-  "/nailshapes/press on nails-2.png",
-  "/nailshapes/press on nails-3.png",
+  "/media/unveels/vto/nailshapes/press on nails-1.png",
+  "/media/unveels/vto/nailshapes/press on nails-2.png",
+  "/media/unveels/vto/nailshapes/press on nails-3.png",
 ];
 
 const shapes = filterShapes(["Triangle", "Square", "Oval"]);

@@ -28,7 +28,7 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
@@ -62,11 +62,11 @@ function FamilyColorSelector() {
 }
 
 const lenses = [
-  "/lenses/Group-4.png",
-  "/lenses/Group.png",
-  "/lenses/Group-1.png",
-  "/lenses/Group-2.png",
-  "/lenses/Group-3.png",
+  "/media/unveels/vto/lenses/Group-4.png",
+  "/media/unveels/vto/lenses/Group.png",
+  "/media/unveels/vto/lenses/Group-1.png",
+  "/media/unveels/vto/lenses/Group-2.png",
+  "/media/unveels/vto/lenses/Group-3.png",
 ];
 
 function ColorSelector() {
@@ -87,11 +87,11 @@ function ColorSelector() {
   }
 
   return (
-    <div className="w-full pt-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full pt-4 lg:max-w-xl">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             reset();
           }}
@@ -110,7 +110,7 @@ function ColorSelector() {
             )}
             onClick={() => setPattern(index, index.toString())}
           >
-            <img src={path} alt="Eyebrow" className="rounded size-12" />
+            <img src={path} alt="Eyebrow" className="size-12 rounded" />
           </button>
         ))}
       </div>
@@ -119,7 +119,7 @@ function ColorSelector() {
 }
 
 function ProductList() {
-  const { colorFamily,  } = useLenseContext();
+  const { colorFamily } = useLenseContext();
 
   const { data, isLoading } = useLenseQuery({
     color: colorFamily,
@@ -128,7 +128,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

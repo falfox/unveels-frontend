@@ -92,7 +92,8 @@ export function VirtualTryOnScene() {
           filesetResolver,
           {
             baseOptions: {
-              modelAssetPath: "/models/hair/hair_segmenter.tflite",
+              modelAssetPath:
+                "/media/unveels/models/hair/hair_segmenter.tflite",
               delegate: "GPU",
             },
             runningMode: "VIDEO",
