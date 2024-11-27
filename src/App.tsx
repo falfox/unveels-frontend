@@ -53,6 +53,7 @@ import { element } from "three/webgpu";
 import { VirtualAvatar } from "./pages/virtual-avatar";
 import { createGuestCart } from "./api/create-guest-cart";
 import { useCartContext } from "./context/cart-context";
+import { SeeImprovementWeb } from "./pages/see-improvement-web";
 
 // Define routes using object syntax
 const routes = [
@@ -75,6 +76,7 @@ const routes = [
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
   { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
   { path: "/virtual-avatar-web", element: <VirtualAvatar /> },
+  { path: "/see-improvement-web", element: <SeeImprovementWeb /> },
   { path: "/see-improvement", element: <SeeImprovement /> },
   {
     path: "/virtual-try-on-product",
@@ -153,6 +155,7 @@ function Home() {
       <LinkButton to="/skin-analysis-web">Skin Analysis Web</LinkButton>
       <LinkButton to="/find-the-look-web">Find The Look Web</LinkButton>
       <LinkButton to="/virtual-avatar-web">Virtual Avatar Web</LinkButton>
+      <LinkButton to="/see-improvement-web">See Improvement Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
       <LinkButton to="/virtual-try-on-product?sku=689304331029">
         Virtual Try On Product
