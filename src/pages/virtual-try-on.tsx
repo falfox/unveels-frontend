@@ -156,8 +156,8 @@ function Main() {
           }}
         ></div>
       </div>
-      <RecorderStatus />
-      <TopNavigation />
+      {/* <RecorderStatus /> */}
+      <TopNavigation item={false} cart={false} />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         <Sidebar />
@@ -232,7 +232,7 @@ export function TryOnSelector() {
             <Fragment key={shadeTab}>
               <button
                 key={shadeTab}
-                className={`relative h-10 grow border-b text-[12.6px] sm:text-lg lg:text-2xl font-luxury ${
+                className={`relative h-10 grow border-b font-luxury text-[12.6px] sm:text-lg lg:text-2xl ${
                   isActive
                     ? activeClassNames
                     : "border-transparent text-gray-500"
@@ -539,33 +539,6 @@ export function TopNavigation({
         >
           <X className="size-6 text-white" />
         </Link>
-        <div className="relative -m-0.5 p-0.5">
-          <div
-            className="absolute inset-0 rounded-full border-2 border-transparent"
-            style={
-              {
-                background: `linear-gradient(148deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.77) 100%) border-box`,
-                "-webkit-mask": `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                mask: `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                "-webkit-mask-composite": "destination-out",
-                "mask-composite": "exclude",
-              } as CSSProperties
-            }
-          />
-          <button
-            type="button"
-            className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-            onClick={flipCamera}
-          >
-            <Icons.flipCamera className="size-6 text-white" />
-          </button>
-        </div>
-        <button
-          type="button"
-          className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-        >
-          <Icons.myCart className="size-6 text-white" />
-        </button>
       </div>
     </div>
   );
@@ -590,23 +563,23 @@ function Sidebar() {
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
           <button className="">
-            <Icons.camera className="size-6 text-white" />
+            <Icons.camera className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.flipCamera className="size-6 text-white" />
+            <Icons.flipCamera className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.expand className="size-6 text-white" />
+            <Icons.expand className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.compare className="size-6 text-white" />
+            <Icons.compare className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.reset className="size-6 text-white" />
+            <Icons.reset className="size-4 text-white sm:size-6" />
           </button>
           <UploadMediaDialog />
           <button>
-            <Icons.share className="size-6 text-white" />
+            <Icons.share className="size-4 text-white sm:size-6" />
           </button>
         </div>
       </div>
@@ -619,7 +592,7 @@ function UploadMediaDialog() {
     <Dialog.Root>
       <Dialog.Trigger asChild>
         <button type="button" className="flex items-center justify-center">
-          <Icons.upload className="size-6 text-white" />
+          <Icons.upload className="size-4 text-white sm:size-6" />
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>

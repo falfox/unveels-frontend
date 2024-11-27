@@ -46,7 +46,7 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((color) => color.split(","));
 
   return (
-    <div className="mx-auto w-full py-2">
+    <div className="mx-auto w-full py-1 sm:py-2">
       <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
         <button
           type="button"
@@ -80,7 +80,7 @@ function TextureSelector({ product }: { product: Product }) {
   const productTextures = extractUniqueCustomAttributes([product], "texture");
 
   return (
-    <div className="mx-auto w-full py-2">
+    <div className="mx-auto w-full py-1 sm:py-2">
       <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
@@ -112,7 +112,7 @@ function TextureSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

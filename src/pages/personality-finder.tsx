@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFragrancesProductQuery } from "../api/fragrances";
 import { useLipsProductQuery } from "../api/lips";
 import { useLookbookProductQuery } from "../api/lookbook";
@@ -214,32 +214,30 @@ function MainContent() {
     <>
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
-        <div className="absolute inset-0">
-          <>
-            {criterias.isCaptured ? (
-              <>
-                {showScannerAfterInference || !isInferenceCompleted ? (
-                  <Scanner />
-                ) : (
-                  <></>
-                )}
-              </>
-            ) : (
-              <>
-                <VideoStream />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-                    zIndex: 0,
-                  }}
-                ></div>
-              </>
-            )}
-          </>
-        </div>
-        <RecorderStatus />
-        <TopNavigation />
+        <>
+          {criterias.isCaptured ? (
+            <>
+              {showScannerAfterInference || !isInferenceCompleted ? (
+                <Scanner />
+              ) : (
+                <></>
+              )}
+            </>
+          ) : (
+            <>
+              <VideoStream />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                  zIndex: 0,
+                }}
+              ></div>
+              <RecorderStatus />
+              <TopNavigation />
+            </>
+          )}
+        </>
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
           <VideoScene />
@@ -273,8 +271,19 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
     <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
       <div className="mb-14">
-        <RecorderStatus />
-        <TopNavigation cart={inferenceResult.length > 0} />
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+          <button className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl">
+            <ChevronLeft className="size-6 text-white" />
+          </button>
+
+          <Link
+            type="button"
+            className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl"
+            to="/"
+          >
+            <X className="size-6 text-white" />
+          </Link>
+        </div>
       </div>
 
       {/* Profile Section */}
@@ -283,7 +292,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
           <div className="flex items-center justify-center rounded-full bg-gradient-to-b from-[#CA9C43] to-[#644D21] p-1">
             {criterias.capturedImage ? (
               <img
-                className="size-24 rounded-full object-fill"
+                className="size-20 rounded-full object-fill sm:size-24"
                 src={criterias.capturedImage}
                 alt="Captured Profile"
               />
@@ -305,7 +314,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
             <Icons.hashtagCircle className="size-4" />
             <div className="text-sm">AI Personality Analysis :</div>
           </div>
-          <div className="mt-1 pl-5 pr-8 text-xs lg:pl-0 lg:pt-7">
+          <div className="mt-1 pl-5 pr-8 text-[10.8px] sm:text-xs lg:pl-0 lg:pt-7">
             {inferenceResult?.[15]?.outputIndex !== undefined
               ? personalityAnalysisResult[inferenceResult[15].outputIndex]
               : ""}
@@ -356,7 +365,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
   }
 
   return (
-    <div className="flex-1 space-y-6 overflow-auto px-10 py-6">
+    <div className="flex-1 space-y-6 overflow-auto px-5 md:px-10 py-6">
       <h2 className="text-center text-xl font-medium">
         Main 5 Personality Traits
       </h2>
@@ -395,7 +404,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                   { percentage: 30, color: "#4CC9F0" }, // Openness to Experience
                 ]
           }
-          className="mx-auto size-96"
+          className="mx-auto max-w-96 w-full"
         />
         <div className="flex items-center justify-between space-x-4 bg-black text-white">
           {/* Left Column */}
@@ -456,8 +465,8 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
         </div>
       </div>
 
-      <div className="mx-auto hidden w-full max-w-3xl items-center md:flex">
-        <div className="flex items-center justify-between space-x-4 bg-black text-white">
+      <div className="mx-auto hidden w-full max-w-3xl items-center md:flex gap-x-4">
+        <div className="flex items-center justify-between space-x-4 bg-black text-white flex-1">
           {/* Right Column */}
           <div className="space-y-4">
             {/* Agreeableness */}
@@ -518,7 +527,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
           className="mx-auto size-96"
         />
 
-        <div className="flex items-center justify-between space-x-4 bg-black text-white">
+        <div className="flex items-center justify-between space-x-4 bg-black text-white flex-1">
           {/* Left Column */}
           <div className="space-y-4">
             {/* Extraversion */}
@@ -993,7 +1002,7 @@ function FeatureSection({
   }[];
 }) {
   return (
-    <div className="h-full border-white/50 md:even:border-l md:even:pl-4 flex flex-col">
+    <div className="flex h-full flex-col border-white/50 md:even:border-l md:even:pl-4">
       <div className="flex flex-col space-y-2">
         <div className="flex items-center space-x-2 pb-5">
           <span className="text-2xl">{icon}</span>

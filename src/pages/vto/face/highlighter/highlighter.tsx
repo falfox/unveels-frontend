@@ -74,7 +74,7 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-2">
+    <div className="mx-auto w-full py-1 sm:py-2">
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
@@ -120,7 +120,7 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-2">
+    <div className="mx-auto w-full py-1 sm:py-2">
       <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
@@ -160,7 +160,7 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-2">
+    <div className="mx-auto w-full py-1 sm:py-2">
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         {highlighters.map((path, index) => (
           <button
@@ -230,7 +230,7 @@ function ProductList() {
   ];
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

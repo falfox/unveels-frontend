@@ -127,10 +127,10 @@ function Main() {
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
           {criterias.isCaptured ? "" : <VideoScene />}
+          {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
           <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
           <Footer />
         </div>
-        {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
       </div>
     </>
   );
@@ -197,7 +197,7 @@ function ShadesSelector() {
   const [tab, setTab] = useState("matched" as "matched" | "other");
 
   const activeClassNames =
-    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text text-transparent";
+    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text";
 
   return (
     <div className="space-y-2 px-4">
@@ -208,33 +208,35 @@ function ShadesSelector() {
             <Fragment key={shadeTab}>
               <button
                 key={shadeTab}
-                className={`relative h-10 grow border-b text-lg ${
+                className={`relative h-10 grow border-b text-sm md:text-lg ${
                   isActive
                     ? activeClassNames
                     : "border-transparent text-gray-500"
                 }`}
                 onClick={() => setTab(shadeTab as "matched" | "other")}
               >
-                <span className={isActive ? "text-white/70 blur-sm" : ""}>
-                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)} Shades
+                <span
+                  className={clsx("capitalize", {
+                    "text-white/70 blur-sm": isActive,
+                  })}
+                >
+                  {shadeTab} Shades
                 </span>
                 {isActive ? (
                   <>
                     <div
                       className={clsx(
-                        "absolute inset-0 flex items-center justify-center text-lg blur-sm",
+                        "absolute inset-0 flex items-center justify-center blur-sm",
                         activeClassNames,
                       )}
                     >
-                      <span className="text-center text-lg">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        Shades
+                      <span className="text-center text-sm capitalize md:text-lg">
+                        {shadeTab} Shades
                       </span>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-center text-lg text-white/70">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        Shades
+                      <span className="text-center text-sm capitalize text-white/70 md:text-lg">
+                        {shadeTab} Shades
                       </span>
                     </div>
                   </>
@@ -274,7 +276,7 @@ function MatchedShades() {
   return (
     <>
       <div className="flex flex-col items-start">
-        <div className="inline-flex items-center gap-x-2 rounded-full border border-white/80 px-2 py-1 text-white/80">
+        <div className="inline-flex h-6 items-center gap-x-2 rounded-full border border-white/80 px-2 py-1 text-white/80">
           <div
             className="size-3 rounded-full"
             style={{ backgroundColor: hexSkin }}
@@ -285,8 +287,8 @@ function MatchedShades() {
           <div className="flex w-full max-w-md">
             {tone_types.map((option, index) => (
               <button
-                key={index}
-                className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
+                key={option.id}
+                className={`flex h-[26px] w-full items-center justify-center border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
                 data-selected={selectedTne.name === option.name}
                 style={{
                   background: option.color,
@@ -300,7 +302,7 @@ function MatchedShades() {
         </div>
 
         <div className="w-full text-left">
-          <button className="py-2 text-[0.625rem] text-white">View all</button>
+          <button className="sm:py-2 text-[0.625rem] text-white">View all</button>
         </div>
 
         {data ? (
@@ -357,13 +359,13 @@ function OtherShades() {
   }
 
   return (
-    <div className="flex w-full flex-col items-start gap-2">
+    <div className="flex w-full flex-col items-start gap-1">
       <div className="flex w-full items-center gap-3 overflow-x-auto no-scrollbar">
         {skin_tones.map((tone, index) => (
           <div
             key={index}
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border px-2 py-1 text-white",
+              "inline-flex h-[26px] shrink-0 items-center gap-x-2 rounded-full border px-2 py-1 text-white",
               selectedTone.name === tone.name
                 ? "border-white"
                 : "border-transparent",
@@ -402,7 +404,7 @@ function OtherShades() {
         ))}
       </div>
       <div className="w-full text-left">
-        <button className="py-2 text-[0.625rem] text-white">View all</button>
+        <button className="sm:py-2 text-[0.625rem] text-white">View all</button>
       </div>
 
       {data ? (
@@ -442,7 +444,7 @@ function ProductList({ products }: { products: Array<Product> }) {
         return (
           <button
             key={index}
-            className="relative block w-[110px] text-left shadow"
+            className="relative block w-[80px] text-left shadow sm:w-[110px]"
             onClick={() => {
               setSelected(product);
               window.open(
@@ -451,7 +453,7 @@ function ProductList({ products }: { products: Array<Product> }) {
               );
             }}
           >
-            <div className="relative h-[80px] w-[110px] overflow-hidden">
+            <div className="relative h-[58px] w-[80px] overflow-hidden sm:h-[80px] sm:w-[110px]">
               <img
                 src={imageUrl}
                 alt="Product"
@@ -556,7 +558,7 @@ interface SidebarProps {
 function Sidebar({ setCollapsed }: SidebarProps) {
   const { flipCamera, compareCapture, resetCapture, screenShoot } = useCamera();
   return (
-    <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
+    <div className="pointer-events-none flex flex-col items-center justify-center place-self-end pb-4 pr-5 [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
         <div
           className="absolute inset-0 rounded-full border-2 border-transparent"
@@ -573,28 +575,28 @@ function Sidebar({ setCollapsed }: SidebarProps) {
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
           <button className="" onClick={screenShoot}>
-            <Icons.camera className="size-6 text-white" />
+            <Icons.camera className="size-4 sm:size-6 text-white" />
           </button>
           <button className="" onClick={flipCamera}>
-            <Icons.flipCamera className="size-6 text-white" />
+            <Icons.flipCamera className="size-4 sm:size-6 text-white" />
           </button>
           <button
             className=""
             onClick={() => setCollapsed((prevState) => !prevState)}
           >
-            <Icons.expand className="size-6 text-white" />
+            <Icons.expand className="size-4 sm:size-6 text-white" />
           </button>
           <button className="" onClick={compareCapture}>
-            <Icons.compare className="size-6 text-white" />
+            <Icons.compare className="size-4 sm:size-6 text-white" />
           </button>
           <button className="">
-            <Icons.reset onClick={resetCapture} className="size-6 text-white" />
+            <Icons.reset onClick={resetCapture} className="size-4 sm:size-6 text-white" />
           </button>
           <button className="hidden">
-            <Icons.upload className="size-6 text-white" />
+            <Icons.upload className="size-4 sm:size-6 text-white" />
           </button>
           <button className="hidden">
-            <Icons.share className="size-6 text-white" />
+            <Icons.share className="size-4 sm:size-6 text-white" />
           </button>
         </div>
       </div>

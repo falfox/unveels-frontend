@@ -263,6 +263,9 @@ const tabs = [
 function SkinProblems({ onClose }: { onClose: () => void }) {
   const { tab, setTab, getTotalScoreByLabel } = useSkinAnalysis();
 
+  const activeClassNames =
+    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text";
+
   return (
     <>
       <div
@@ -271,7 +274,7 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
           onClose();
         }}
       ></div>
-      <div className="relative space-y-2 px-4 pb-4">
+      <div className="relative space-y-1 px-4 pb-2 sm:space-y-2">
         <div className="flex w-full items-center space-x-3.5 overflow-x-auto overflow-y-visible pt-7 no-scrollbar">
           {tabs.map((problemTab) => {
             const isActive = tab === problemTab;
@@ -280,7 +283,7 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
                 <button
                   key={problemTab}
                   className={clsx(
-                    "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm text-white",
+                    "relative flex h-6 shrink-0 items-center rounded-full border border-white px-3 py-1 text-xs capitalize text-white sm:text-sm",
                     {
                       "bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]":
                         isActive,
@@ -289,6 +292,26 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
                   onClick={() => setTab(problemTab)}
                 >
                   {problemTab}
+
+                  {isActive ? (
+                    <>
+                      <div
+                        className={clsx(
+                          "absolute inset-0 flex items-center justify-center blur-sm",
+                          activeClassNames,
+                        )}
+                      >
+                        <span className="text-center text-sm capitalize md:text-lg">
+                          {problemTab}
+                        </span>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-center text-sm capitalize text-white/70 md:text-lg">
+                          {problemTab}
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
 
                   <div
                     className={clsx(
@@ -319,10 +342,10 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
 function DescriptionText({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="py-5">
-      <h4 className="pb-1 text-xl font-bold text-white">Description</h4>
+    <div className="py-2">
+      <h4 className="pb-1 font-bold text-white sm:text-xl">Description</h4>
       <p
-        className={clsx("text-sm text-white", {
+        className={clsx("text-[9.4px] text-white sm:text-sm", {
           "line-clamp-3": !expanded,
         })}
       >
@@ -330,12 +353,12 @@ function DescriptionText({ text }: { text: string }) {
       </p>
       <button
         type="button"
-        className="inline-block text-sm text-[#CA9C43]"
+        className="inline-block text-[9.4px] text-[#CA9C43] sm:text-sm"
         onClick={() => {
           setExpanded(!expanded);
         }}
       >
-        {expanded ? "Less" : "Read more"}
+        {expanded ? "Less" : "More"}
       </button>
     </div>
   );
@@ -357,7 +380,7 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
           return (
             <div
               key={product.id}
-              className="relative w-[115px] rounded shadow"
+              className="relative w-[88.55px] rounded shadow sm:w-[115px]"
               onClick={() => {
                 window.open(
                   `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
@@ -365,7 +388,7 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
                 );
               }}
             >
-              <div className="relative h-[80px] w-[115px] overflow-hidden">
+              <div className="relative h-[53.9px] w-[88.55px] overflow-hidden sm:h-[70px] sm:w-[115px]">
                 <img
                   src={imageUrl}
                   alt="Product"
@@ -377,26 +400,23 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
                 <Heart className="size-4 shrink-0 text-black" />
               </div>
 
-              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+              <h3 className="line-clamp-2 h-5 text-[0.48125rem] font-semibold text-white sm:h-10 sm:py-2 sm:text-[0.625rem]">
                 {product.name}
               </h3>
               <div className="flex items-center justify-between">
-                <p className="text-[0.5rem] text-white/60">
+                <p className="text-[0.385rem] text-white/60 sm:text-[0.5rem]">
                   <BrandName brandId={getProductAttributes(product, "brand")} />
                 </p>
                 <div className="flex flex-wrap items-center justify-end gap-x-1">
-                  <span className="text-[0.625rem] font-bold text-white">
+                  <span className="text-[0.48125rem] font-bold text-white sm:text-[0.625rem]">
                     ${product.price.toFixed(2)}
                   </span>
-                  {/* <span className="text-[0.5rem] text-white/50 line-through">
-              ${product.originalPrice.toFixed(2)}
-            </span> */}
                 </div>
               </div>
               <div className="flex space-x-1 pt-1">
                 <button
                   type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white text-[0.375rem] font-semibold text-white"
+                  className="flex h-4 w-full items-center justify-center border border-white text-[0.28875rem] font-semibold text-white sm:h-5 sm:text-[0.375rem]"
                   onClick={(event) => {
                     event.stopPropagation();
                   }}
@@ -405,7 +425,7 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
                 </button>
                 <button
                   type="button"
-                  className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.45rem] font-semibold text-black"
+                  className="flex h-4 w-full items-center justify-center border border-white bg-white text-[0.3465rem] font-semibold leading-none text-black sm:h-5 sm:text-[0.45rem]"
                   onClick={(event) => {
                     event.stopPropagation();
                   }}
@@ -565,7 +585,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
         <div className="md:hidden">
           <div className="relative pt-8">
             <CircularProgressRings
-              className="mx-auto size-96"
+              className="mx-auto w-full max-w-96"
               data={[
                 { percentage: getTotalScoreByLabel("acne"), color: "#F72585" },
                 {
@@ -654,8 +674,8 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="mx-auto hidden w-full max-w-3xl items-center md:flex">
-          <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
+        <div className="mx-auto hidden w-full max-w-3xl items-center gap-x-4 md:flex">
+          <div className="flex flex-1 items-start justify-between space-x-4 bg-black px-10 text-white">
             <div className="space-y-4">
               <div className="flex items-center space-x-2.5">
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#0F38CC] text-sm font-bold text-white">
@@ -721,7 +741,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
+          <div className="flex flex-1 items-start justify-between space-x-4 bg-black px-10 text-white">
             {/* Left Column */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2.5">
@@ -755,7 +775,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
         <div className="md:hidden">
           <div className="relative pt-8">
             <CircularProgressRings
-              className="mx-auto size-96"
+              className="mx-auto w-full max-w-96"
               data={[
                 {
                   percentage: getTotalScoreByLabel("moistures"),
@@ -850,8 +870,8 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="mx-auto hidden w-full max-w-3xl items-center md:flex">
-          <div className="flex items-start justify-between space-x-4 bg-black px-10 text-white">
+        <div className="mx-auto hidden w-full max-w-3xl items-center gap-x-4 md:flex">
+          <div className="flex flex-1 items-start justify-between space-x-4 bg-black px-10 text-white">
             <div className="space-y-4">
               <div className="flex items-center space-x-2.5">
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5DD400] text-sm font-bold text-white">
@@ -923,7 +943,7 @@ function AnalysisResults({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between space-x-4 bg-black px-10 text-white">
+          <div className="flex flex-1 items-center justify-between space-x-4 bg-black px-10 text-white">
             {/* Left Column */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2.5">
@@ -1061,7 +1081,7 @@ function ProblemSection({
       <div className="flex items-center space-x-2 pb-6">
         <Icons.personalityTriangle className="size-8 shrink-0" />
 
-        <h2 className="text-3xl font-bold text-white">{title}</h2>
+        <h2 className="text-3xl font-bold capitalize text-white">{title}</h2>
       </div>
       <span className="text-xl font-bold">Detected</span>
       <p className="pb-6 pt-1 text-sm">{detected}</p>

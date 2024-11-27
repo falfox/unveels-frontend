@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFragrancesProductQuery } from "../api/fragrances";
 import { useLipsProductQuery } from "../api/lips";
 import { useLookbookProductQuery } from "../api/lookbook";
@@ -267,8 +267,19 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
     <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
       <div className="mb-14">
-        <RecorderStatus />
-        <TopNavigation cart={inferenceResult.length > 0} />
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+          <button className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl">
+            <ChevronLeft className="size-6 text-white" />
+          </button>
+
+          <Link
+            type="button"
+            className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl"
+            to="/"
+          >
+            <X className="size-6 text-white" />
+          </Link>
+        </div>
       </div>
 
       {/* Profile Section */}
@@ -436,7 +447,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-1 text-xsfont-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {product.name}
                       </h3>
                       <p className="text-[0.625rem] text-white/60">
@@ -505,7 +516,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-1 text-xsfont-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {profile.name}
                       </h3>
                     </div>
@@ -568,7 +579,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-1 text-xsfont-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {product.name}
                       </h3>
                       <p className="text-[0.625rem] text-white/60">
@@ -726,7 +737,9 @@ function FeatureSection({
               ></div>
             ) : (
               <ul>
-                <li className="text-sm list-disc list-inside">{feature.value}</li>
+                <li className="list-inside list-disc text-sm">
+                  {feature.value}
+                </li>
               </ul>
             )}
           </div>
