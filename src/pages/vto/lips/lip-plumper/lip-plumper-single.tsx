@@ -9,10 +9,11 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { useLipPlumperContext } from "./lip-plumper-context";
 import { Product } from "../../../../api/shared";
+import { ColorPalette } from "../../../../components/color-palette";
 
 export function SingleLipPlumperSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <ColorSelector product={product} />
       </div>
@@ -49,14 +50,14 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((color) => color.split(","));
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
 
         {extracted_sub_colors.map((color, index) => (
@@ -64,12 +65,22 @@ function ColorSelector({ product }: { product: Product }) {
             key={index}
             type="button"
             className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
             )}
             style={{ background: color }}
+            onClick={() => handleColorSelection(color)}
+          />
+        ))}
+
+        {extracted_sub_colors.map((color, index) => (
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
+            selected={selectedColor === color}
             onClick={() => handleColorSelection(color)}
           />
         ))}
@@ -86,8 +97,8 @@ function TextureSelector({ product }: { product: Product }) {
   const textures = filterTexturesByValue(productTextures);
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textures.map((texture) => (
           <button
             key={texture.label}
@@ -117,7 +128,7 @@ function TextureSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFragrancesProductQuery } from "../api/fragrances";
 import { useLipsProductQuery } from "../api/lips";
 import { useLookbookProductQuery } from "../api/lookbook";
@@ -214,32 +214,30 @@ function MainContent() {
     <>
       {modelLoading && <ModelLoadingScreen progress={progress} />}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-pink-950">
-        <div className="absolute inset-0">
-          <>
-            {criterias.isCaptured ? (
-              <>
-                {showScannerAfterInference || !isInferenceCompleted ? (
-                  <Scanner />
-                ) : (
-                  <></>
-                )}
-              </>
-            ) : (
-              <>
-                <VideoStream />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
-                    zIndex: 0,
-                  }}
-                ></div>
-              </>
-            )}
-          </>
-        </div>
-        <RecorderStatus />
-        <TopNavigation />
+        <>
+          {criterias.isCaptured ? (
+            <>
+              {showScannerAfterInference || !isInferenceCompleted ? (
+                <Scanner />
+              ) : (
+                <></>
+              )}
+            </>
+          ) : (
+            <>
+              <VideoStream />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+                  zIndex: 0,
+                }}
+              ></div>
+              <RecorderStatus />
+              <TopNavigation />
+            </>
+          )}
+        </>
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
           <VideoScene />
@@ -273,8 +271,19 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
     <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
       <div className="mb-14">
-        <RecorderStatus />
-        <TopNavigation cart={inferenceResult.length > 0} />
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+          <button className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl">
+            <ChevronLeft className="size-6 text-white" />
+          </button>
+
+          <Link
+            type="button"
+            className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl"
+            to="/"
+          >
+            <X className="size-6 text-white" />
+          </Link>
+        </div>
       </div>
 
       {/* Profile Section */}
@@ -283,7 +292,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
           <div className="flex items-center justify-center rounded-full bg-gradient-to-b from-[#CA9C43] to-[#644D21] p-1">
             {criterias.capturedImage ? (
               <img
-                className="size-24 rounded-full object-fill"
+                className="size-20 rounded-full object-fill sm:size-24"
                 src={criterias.capturedImage}
                 alt="Captured Profile"
               />
@@ -305,7 +314,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
             <Icons.hashtagCircle className="size-4" />
             <div className="text-sm">AI Personality Analysis :</div>
           </div>
-          <div className="mt-1 pl-5 pr-8 text-xs">
+          <div className="mt-1 pl-5 pr-8 text-[10.8px] sm:text-xs lg:pl-0 lg:pt-7">
             {inferenceResult?.[15]?.outputIndex !== undefined
               ? personalityAnalysisResult[inferenceResult[15].outputIndex]
               : ""}
@@ -324,7 +333,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
                 "w-full translate-y-0.5 border-b-2 py-2",
                 tab.title === selectedTab
                   ? "border-[#CA9C43] bg-gradient-to-r from-[#92702D] to-[#CA9C43] bg-clip-text text-transparent"
-                  : "border-transparent",
+                  : "border-transparent text-[#9E9E9E]",
               )}
               onClick={() => setTab(tab.title)}
             >
@@ -356,85 +365,200 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
   }
 
   return (
-    <div className="flex-1 space-y-6 overflow-auto px-10 py-6">
+    <div className="flex-1 space-y-6 overflow-auto px-5 md:px-10 py-6">
       <h2 className="text-center text-xl font-medium">
         Main 5 Personality Traits
       </h2>
 
-      <CircularProgressRings
-        data={
-          data[15].outputData !== undefined
-            ? [
-                { percentage: data[15].outputData[0] * 100, color: "#B5179E" }, // Cyan
-                { percentage: data[15].outputData[1] * 100, color: "#5ED400" }, // Magenta
-                { percentage: data[15].outputData[2] * 100, color: "#4CC9F0" }, // Yellow
-                { percentage: data[15].outputData[3] * 100, color: "#F72585" }, // Green
-                { percentage: data[15].outputData[4] * 100, color: "#FFC300" }, // Magenta
-              ]
-            : [
-                { percentage: 90, color: "#B5179E" }, // Cyan
-                { percentage: 75, color: "#5ED400" }, // Magenta
-                { percentage: 60, color: "#4CC9F0" }, // Yellow
-                { percentage: 45, color: "#F72585" }, // Green
-                { percentage: 30, color: "#FFC300" }, // Magenta
-              ]
-        }
-        className="mx-auto size-96"
-      />
-      <div className="flex items-start justify-between space-x-4 bg-black text-white">
-        {/* Left Column */}
-        <div className="space-y-4">
-          {/* Extraversion */}
-          <div className="flex items-center space-x-2.5">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFC300] text-sm font-bold text-white">
-              {data?.[15]?.outputData !== undefined
-                ? (data[15].outputData[0] * 100).toFixed(1)
-                : ""}
+      <div className="md:hidden">
+        <CircularProgressRings
+          data={
+            data[15].outputData !== undefined
+              ? [
+                  {
+                    percentage: data[15].outputData[0] * 100,
+                    color: "#FFC300",
+                  }, // Extraversion
+                  {
+                    percentage: data[15].outputData[1] * 100,
+                    color: "#B5179E",
+                  }, // Neuroticism
+                  {
+                    percentage: data[15].outputData[2] * 100,
+                    color: "#5ED400",
+                  }, // Agreeableness
+                  {
+                    percentage: data[15].outputData[3] * 100,
+                    color: "#F72585",
+                  }, // Conscientiousness
+                  {
+                    percentage: data[15].outputData[4] * 100,
+                    color: "#4CC9F0",
+                  }, // Openness to Experience
+                ]
+              : [
+                  { percentage: 90, color: "#FFC300" }, // Extraversion
+                  { percentage: 75, color: "#B5179E" }, // Neuroticism
+                  { percentage: 60, color: "#5ED400" }, // Agreeableness
+                  { percentage: 45, color: "#F72585" }, // Conscientiousness
+                  { percentage: 30, color: "#4CC9F0" }, // Openness to Experience
+                ]
+          }
+          className="mx-auto max-w-96 w-full"
+        />
+        <div className="flex items-center justify-between space-x-4 bg-black text-white">
+          {/* Left Column */}
+          <div className="space-y-4">
+            {/* Extraversion */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFC300] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[0] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Extraversion</span>
             </div>
-            <span>Extraversion</span>
+
+            {/* Conscientiousness */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[3] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Conscientiousness</span>
+            </div>
+
+            {/* Openness to Experience */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[4] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Openness to Experience</span>
+            </div>
           </div>
 
-          {/* Conscientiousness */}
-          <div className="flex items-center space-x-2.5">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
-              {data?.[15]?.outputData !== undefined
-                ? (data[15].outputData[3] * 100).toFixed(1)
-                : ""}
+          {/* Right Column */}
+          <div className="space-y-4">
+            {/* Agreeableness */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5ED400] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[2] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Agreeableness</span>
             </div>
-            <span>Conscientiousness</span>
-          </div>
 
-          {/* Openness to Experience */}
-          <div className="flex items-center space-x-2.5">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
-              {data?.[15]?.outputData !== undefined
-                ? (data[15].outputData[4] * 100).toFixed(1)
-                : ""}
+            {/* Neuroticism */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[1] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Neuroticism</span>
             </div>
-            <span>Openness to Experience</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto hidden w-full max-w-3xl items-center md:flex gap-x-4">
+        <div className="flex items-center justify-between space-x-4 bg-black text-white flex-1">
+          {/* Right Column */}
+          <div className="space-y-4">
+            {/* Agreeableness */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5ED400] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[2] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Agreeableness</span>
+            </div>
+
+            {/* Neuroticism */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[1] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Neuroticism</span>
+            </div>
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-4">
-          {/* Agreeableness */}
-          <div className="flex items-center space-x-2.5">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#5DD400] text-sm font-bold text-white">
-              {data?.[15]?.outputData !== undefined
-                ? (data[15].outputData[2] * 100).toFixed(1)
-                : ""}
-            </div>
-            <span>Agreeableness</span>
-          </div>
+        <CircularProgressRings
+          data={
+            data[15].outputData !== undefined
+              ? [
+                  {
+                    percentage: data[15].outputData[0] * 100,
+                    color: "#FFC300",
+                  }, // Extraversion
+                  {
+                    percentage: data[15].outputData[1] * 100,
+                    color: "#B5179E",
+                  }, // Neuroticism
+                  {
+                    percentage: data[15].outputData[2] * 100,
+                    color: "#5ED400",
+                  }, // Agreeableness
+                  {
+                    percentage: data[15].outputData[3] * 100,
+                    color: "#F72585",
+                  }, // Conscientiousness
+                  {
+                    percentage: data[15].outputData[4] * 100,
+                    color: "#4CC9F0",
+                  }, // Openness to Experience
+                ]
+              : [
+                  { percentage: 90, color: "#FFC300" }, // Extraversion
+                  { percentage: 75, color: "#B5179E" }, // Neuroticism
+                  { percentage: 60, color: "#5ED400" }, // Agreeableness
+                  { percentage: 45, color: "#F72585" }, // Conscientiousness
+                  { percentage: 30, color: "#4CC9F0" }, // Openness to Experience
+                ]
+          }
+          className="mx-auto size-96"
+        />
 
-          {/* Neuroticism */}
-          <div className="flex items-center space-x-2.5">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#B5179E] text-sm font-bold text-white">
-              {data?.[15]?.outputData !== undefined
-                ? (data[15].outputData[1] * 100).toFixed(1)
-                : ""}
+        <div className="flex items-center justify-between space-x-4 bg-black text-white flex-1">
+          {/* Left Column */}
+          <div className="space-y-4">
+            {/* Extraversion */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFC300] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[0] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Extraversion</span>
             </div>
-            <span>Neuroticism</span>
+
+            {/* Conscientiousness */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F72585] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[3] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Conscientiousness</span>
+            </div>
+
+            {/* Openness to Experience */}
+            <div className="flex items-center space-x-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4CC9F0] text-sm font-bold text-white">
+                {data?.[15]?.outputData !== undefined
+                  ? (data[15].outputData[4] * 100).toFixed(1)
+                  : ""}
+              </div>
+              <span>Openness to Experience</span>
+            </div>
           </div>
         </div>
       </div>
@@ -464,7 +588,7 @@ You're obsessed with discovering new cultures, concepts, and opportunities, and 
           description="People with an Agreeable personality reveal their kind-hearted and compassionate nature; characterized by a strong desire to maintain harmonious relationships. People, high in agreeableness, are often cooperative, empathetic, and considerate towards others; making them valuable team players and supportive friends. They prioritize the needs of others and are willing to go out of their way to help and support those around them. Their warm and nurturing behaviour makes them approachable and easy to get along with, fostering a sense of trust and camaraderie in their social interactions. In short, your agreeable personality is a key aspect of your character and it influences your interactions and relationships with others. Unveels has prepared a customized recommendation list based on your agreeable personality."
           score={
             data?.[15]?.outputData !== undefined
-              ? parseFloat((data[15].outputData[3] * 100).toFixed(1))
+              ? parseFloat((data[15].outputData[2] * 100).toFixed(1))
               : 0
           }
         />
@@ -482,7 +606,7 @@ You're obsessed with discovering new cultures, concepts, and opportunities, and 
           description="Conscientiousness is a key personality trait that reflects an individual's tendency to be organized, responsible, and goal-oriented. People high in conscientiousness are known for their reliability, diligence, and attention to detail; moreover, they're often diligent in their work, follow through on tasks, and are typically well-prepared. Unveels has unveiled the Conscientious side of your personality; and here's your recommended list based on it."
           score={
             data?.[15]?.outputData !== undefined
-              ? parseFloat((data[15].outputData[2] * 100).toFixed(1))
+              ? parseFloat((data[15].outputData[3] * 100).toFixed(1))
               : 0
           }
         />
@@ -564,9 +688,11 @@ function RecommendationsTab({ personality }: { personality: string }) {
   return (
     <div className="w-full overflow-auto px-4 py-8">
       <div className="pb-14">
-        <h2 className="pb-4 text-xl font-bold">Perfumes Recommendations</h2>
+        <h2 className="pb-4 text-xl font-bold lg:text-2xl">
+          Perfumes Recommendations
+        </h2>
         {fragrances ? (
-          <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
+          <div className="flex w-full gap-4 overflow-x-auto no-scrollbar lg:gap-x-14">
             {fragrances.items.map((product, index) => {
               const imageUrl =
                 mediaUrl(product.media_gallery_entries[0].file) ??
@@ -593,7 +719,7 @@ function RecommendationsTab({ personality }: { personality: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {product.name}
                       </h3>
                       <p className="text-[0.625rem] text-white/60">
@@ -602,7 +728,7 @@ function RecommendationsTab({ personality }: { personality: string }) {
                         />
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                    <div className="flex flex-wrap items-center justify-end gap-x-1 pt-1">
                       <span className="text-sm font-bold text-white">
                         ${product.price}
                       </span>
@@ -659,11 +785,11 @@ function RecommendationsTab({ personality }: { personality: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {profile.name}
                       </h3>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                    <div className="flex flex-wrap items-center justify-end gap-x-1 pt-1">
                       <span className="text-sm font-bold text-white">
                         $
                         {profile.products.reduce(
@@ -731,7 +857,7 @@ function RecommendationsTab({ personality }: { personality: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {product.name}
                       </h3>
                       <p className="text-[0.625rem] text-white/60">
@@ -740,7 +866,7 @@ function RecommendationsTab({ personality }: { personality: string }) {
                         />
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                    <div className="flex flex-wrap items-center justify-end gap-x-1 pt-1">
                       <span className="text-sm font-bold text-white">
                         ${product.price}
                       </span>
@@ -788,7 +914,7 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
   }
 
   return (
-    <div className="grid flex-1 grid-cols-1 gap-4 space-y-6 overflow-auto px-10 py-6 md:grid-cols-2">
+    <div className="grid flex-1 grid-cols-1 gap-4 space-y-6 overflow-auto px-10 py-6 md:grid-cols-2 md:space-y-0">
       <FeatureSection
         icon={<Icons.face className="size-12" />}
         title="Face"
@@ -876,25 +1002,31 @@ function FeatureSection({
   }[];
 }) {
   return (
-    <div className="flex flex-col space-y-2">
-      <div className="flex items-center space-x-2 pb-5">
-        <span className="text-2xl">{icon}</span>
-        <h2 className="text-3xl font-semibold">{title}</h2>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        {features.map((feature, index) => (
-          <div key={index} className="">
-            <div className="text-xl font-bold">{feature.name}</div>
-            {feature.color ? (
-              <div
-                className="w-ful h-6"
-                style={{ backgroundColor: feature.hex }}
-              ></div>
-            ) : (
-              <div className="text-sm">{feature.value}</div>
-            )}
-          </div>
-        ))}
+    <div className="flex h-full flex-col border-white/50 md:even:border-l md:even:pl-4">
+      <div className="flex flex-col space-y-2">
+        <div className="flex items-center space-x-2 pb-5">
+          <span className="text-2xl">{icon}</span>
+          <h2 className="text-3xl font-semibold">{title}</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {features.map((feature, index) => (
+            <div key={index} className="">
+              <div className="text-xl font-bold">{feature.name}</div>
+              {feature.color ? (
+                <div
+                  className="w-ful h-6"
+                  style={{ backgroundColor: feature.hex }}
+                ></div>
+              ) : (
+                <ul>
+                  <li className="list-inside list-disc text-sm">
+                    {feature.value}
+                  </li>
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="flex-1 border-b border-white/50 py-4"></div>
     </div>

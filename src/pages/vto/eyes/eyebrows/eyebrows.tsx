@@ -15,7 +15,7 @@ const colorFamilies = filterColors(["Brown", "Black"]);
 
 export function EyebrowsSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <FamilyColorSelector />
 
@@ -42,7 +42,7 @@ function FamilyColorSelector() {
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80 h-5",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -55,7 +55,7 @@ function FamilyColorSelector() {
               background: item.hex,
             }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -92,8 +92,8 @@ function ColorSelector() {
   );
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-2 mx-auto">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
           className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
@@ -101,7 +101,7 @@ function ColorSelector() {
             reset();
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
 
         {extracted_sub_colors
@@ -110,7 +110,7 @@ function ColorSelector() {
                 key={color}
                 type="button"
                 className={clsx(
-                  "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+                  "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
                   {
                     "border-white/80": selectedColor === color,
                   },
@@ -134,8 +134,8 @@ function PatternSelector() {
     setEyebrowsPattern(pattern);
   }
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="w-full py-4 mx-auto">
+      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {[...Array(14)].map((_, index) => (
           <button
             key={index}
@@ -199,7 +199,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

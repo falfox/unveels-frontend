@@ -12,21 +12,21 @@ import { useMascaraQuery } from "./mascara-query";
 
 export function MascaraSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <FamilyColorSelector />
 
       <ColorSelector />
 
       <div className="flex h-10 w-full items-center justify-between text-center">
         <Link
-          className={`relative h-10 grow text-lg`}
+          className={`relative grow text-base`}
           to="/virtual-try-on/lashes"
         >
           <span className={"text-white/60"}>Lashes</span>
         </Link>
         <div className="h-5 border-r border-white"></div>
         <Link
-          className={`relative h-10 grow text-lg`}
+          className={`relative grow text-base`}
           to="/virtual-try-on/mascara"
         >
           <span className={"text-white"}>Mascara</span>
@@ -43,14 +43,14 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 py-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-[0.625rem] text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -63,25 +63,12 @@ function FamilyColorSelector() {
               background: item.hex,
             }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
   );
 }
-
-// const colors = [
-//   "#FFFFFF",
-//   "#342112",
-//   "#3D2B1F",
-//   "#483C32",
-//   "#4A2912",
-//   "#4F300D",
-//   "#5C4033",
-//   "#6A4B3A",
-//   "#7B3F00",
-//   "#8B4513",
-// ];
 
 function ColorSelector() {
   const { colorFamily, selectedColor, setSelectedColor } = useMascaraContext();
@@ -96,34 +83,26 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-4">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
-        {extracted_sub_colors
-          ? extracted_sub_colors.map((color, index) => (
-              <button
-                type="button"
-                key={index}
-                onClick={() => setSelectedColor(color)}
-              >
-                <ColorPalette
-                  size="large"
-                  palette={{
-                    color: color,
-                  }}
-                  selected={selectedColor === color}
-                />
-              </button>
-            ))
-          : null}
+        {extracted_sub_colors.map((color, index) => (
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
+            selected={selectedColor === color}
+            onClick={() => setSelectedColor(color)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -138,7 +117,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

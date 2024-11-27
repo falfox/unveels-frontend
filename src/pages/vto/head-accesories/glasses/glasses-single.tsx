@@ -10,10 +10,11 @@ import {
 } from "../../../../api/attributes/shape";
 import { filterMaterials } from "../../../../api/attributes/material";
 import { Product } from "../../../../api/shared";
+import { ColorPalette } from "../../../../components/color-palette";
 
 export function SingleGlassesSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <FamilyColorSelector />
         <ColorSelector product={product} />
@@ -34,7 +35,7 @@ function FamilyColorSelector() {
           key={item.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-[0.625rem] text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -45,7 +46,7 @@ function FamilyColorSelector() {
             className="size-2.5 shrink-0 rounded-full"
             style={{ background: item.hex }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -73,26 +74,21 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
-          <button
-            key={index}
-            type="button"
-            className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
-              {
-                "border-white/80": selectedColor === color,
-              },
-            )}
-            style={{ background: color }}
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
+            selected={selectedColor === color}
             onClick={() => handleColorSelection(color)}
           />
         ))}
@@ -108,7 +104,7 @@ function ModeSelector({ product }: { product: Product }) {
     <>
       <div className="flex h-10 w-full items-center justify-between text-center">
         <button
-          className={clsx("relative h-10 grow text-lg", {
+          className={clsx("relative grow text-base", {
             "text-white": selectedMode === "shapes",
             "text-white/60": selectedMode !== "shapes",
           })}
@@ -118,7 +114,7 @@ function ModeSelector({ product }: { product: Product }) {
         </button>
         <div className="h-5 border-r border-white"></div>
         <button
-          className={clsx("relative h-10 grow text-lg", {
+          className={clsx("relative grow text-base", {
             "text-white": selectedMode === "material",
             "text-white/60": selectedMode !== "material",
           })}
@@ -194,7 +190,7 @@ function MaterialSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

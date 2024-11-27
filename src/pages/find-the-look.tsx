@@ -49,6 +49,7 @@ import { useModelLoader } from "../hooks/useModelLoader";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { FindTheLookItems } from "../types/findTheLookItems";
 import { baseApiUrl, getProductAttributes, mediaUrl } from "../utils/apiUtils";
+import { VTOProductCard } from "../components/vto/vto-product-card";
 
 export function FindTheLook() {
   return (
@@ -342,14 +343,14 @@ function MakeupCategories({
 
   return (
     <div className="relative space-y-2 px-4 pb-4">
-      <div className="flex w-full items-center space-x-3.5 overflow-x-auto pt-7 no-scrollbar">
+      <div className="flex w-full items-center space-x-2.5 overflow-x-auto pt-4 no-scrollbar sm:pt-7">
         {makeups.map((category) => {
-          const isActive = tab === category.label;
+          const isActive = capitalize(tab) === capitalize(category.label);
           return (
             <Fragment key={category.section}>
               <button
                 className={clsx(
-                  "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm text-white",
+                  "relative flex h-[18px] shrink-0 items-center rounded-full border border-white px-2 text-[9.8px] text-white sm:h-7 sm:px-3 sm:py-1 sm:text-sm",
                   {
                     "bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]":
                       isActive,
@@ -367,10 +368,10 @@ function MakeupCategories({
         })}
       </div>
 
-      <div className="pb-2 text-right">
+      <div className="text-right">
         <button
           type="button"
-          className="text-white"
+          className="text-[10px] text-white sm:text-sm"
           onClick={() => {
             setView("all_categories");
           }}
@@ -395,7 +396,7 @@ function AccessoriesCategories({
   onTabChange: (label: string) => void;
 }) {
   const [tab, setTab] = useState<string | undefined>(
-    activeTab ?? accessories[0]?.label,
+    activeTab ?? capitalize(accessories[0]?.label),
   );
   const { setView } = useFindTheLookContext();
 
@@ -413,14 +414,14 @@ function AccessoriesCategories({
 
   return (
     <div className="relative space-y-2 px-4 pb-4">
-      <div className="flex w-full items-center space-x-3.5 overflow-x-auto pt-7 no-scrollbar">
+      <div className="flex w-full items-center space-x-2.5 overflow-x-auto pt-4 no-scrollbar sm:pt-7">
         {accessories.map((category) => {
-          const isActive = tab === category.label;
+          const isActive = capitalize(tab) === capitalize(category.label);
           return (
             <Fragment key={category.section}>
               <button
                 className={clsx(
-                  "overflow relative shrink-0 rounded-full border border-white px-3 py-1 text-sm capitalize text-white",
+                  "relative flex h-[18px] shrink-0 items-center rounded-full border border-white px-2 text-[9.8px] text-white sm:h-7 sm:px-3 sm:py-1 sm:text-sm",
                   {
                     "bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)]":
                       isActive,
@@ -437,10 +438,10 @@ function AccessoriesCategories({
         })}
       </div>
 
-      <div className="pb-2 text-right">
+      <div className="text-right">
         <button
           type="button"
-          className="text-white"
+          className="text-[10px] text-white sm:text-sm"
           onClick={() => {
             setView("all_categories");
           }}
@@ -568,7 +569,7 @@ function ProductList({ product_type }: { product_type: string }) {
                 />
               </div>
 
-              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
+              <h3 className="line-clamp-2 py-1 text-[0.625rem] font-semibold text-white sm:h-10 sm:py-2">
                 {product.name}
               </h3>
 
@@ -582,7 +583,7 @@ function ProductList({ product_type }: { product_type: string }) {
                 </div>
                 <button
                   type="button"
-                  className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
+                  className="flex h-5 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white sm:h-7"
                   onClick={(event) => {
                     event.stopPropagation();
                   }}
@@ -751,23 +752,53 @@ function ProductRecommendationsTabs({
     setTab(initialSection); // Update tab if initialSection changes
   }, [initialSection]);
 
+  const activeClassNames =
+    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text";
+
   return (
     <>
       <div className="fixed inset-0 h-full w-full" onClick={onClose}></div>
       <div className="mx-auto w-full space-y-2 px-4 lg:max-w-xl">
-        <div className="flex h-10 w-full items-center justify-between border-b border-gray-600 text-center">
-          {["makeup", "accessories"].map((shadeTab) => {
-            const isActive = tab === shadeTab;
+        <div className="flex h-6 w-full items-center justify-between border-b border-gray-600 text-center sm:h-10">
+          {["makeup", "accessories"].map((section) => {
+            const isActive = tab.toLowerCase() === section;
             return (
-              <Fragment key={shadeTab}>
+              <Fragment key={section}>
                 <button
-                  key={shadeTab}
-                  className={`relative h-10 grow border-b text-lg ${
-                    isActive ? "text-white" : "text-gray-500"
+                  key={section}
+                  className={`relative h-full grow border-b font-luxury text-sm sm:text-lg ${
+                    isActive
+                      ? activeClassNames
+                      : "border-transparent text-gray-500"
                   }`}
-                  onClick={() => setTab(shadeTab as "makeup" | "accessories")}
+                  onClick={() => setTab(section as "makeup" | "accessories")}
                 >
-                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}
+                  <span
+                    className={clsx("capitalize", {
+                      "text-white/70 blur-sm": isActive,
+                    })}
+                  >
+                    {section}
+                  </span>
+                  {isActive ? (
+                    <>
+                      <div
+                        className={clsx(
+                          "absolute inset-0 flex items-center justify-center blur-sm",
+                          activeClassNames,
+                        )}
+                      >
+                        <span className="text-center text-sm capitalize md:text-lg">
+                          {section}
+                        </span>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-center text-sm capitalize text-white/70 md:text-lg">
+                          {section}
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
                 </button>
               </Fragment>
             );

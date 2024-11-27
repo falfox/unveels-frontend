@@ -154,7 +154,7 @@ function Home() {
       <LinkButton to="/find-the-look-web">Find The Look Web</LinkButton>
       <LinkButton to="/virtual-avatar-web">Virtual Avatar Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
-      <LinkButton to="/virtual-try-on-product/689304331029">
+      <LinkButton to="/virtual-try-on-product?sku=689304331029">
         Virtual Try On Product
       </LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>
