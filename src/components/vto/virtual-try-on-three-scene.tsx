@@ -289,7 +289,11 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             />
           </mesh>
 
-          <Watch planeSize={planeSize} handLandmarks={handlandmarks} />
+          <FoundationNew
+            planeSize={planeSize}
+            landmarks={landmarks}
+            blendshape={blendshape}
+          />
 
           {showHair && (
             <>
