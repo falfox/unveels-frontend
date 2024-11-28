@@ -36,7 +36,7 @@ const routes = [
   "skin-analysis",
   "find-the-look",
   "virtual-try-on",
-  "virtual-avatar-web",
+  "virtual-assistant",
   "see-imrprovement",
 ];
 
