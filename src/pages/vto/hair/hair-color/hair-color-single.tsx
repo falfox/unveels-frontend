@@ -1,12 +1,8 @@
 import clsx from "clsx";
+import { Product } from "../../../../api/shared";
 import { Icons } from "../../../../components/icons";
-import { useMakeup } from "../../../../context/makeup-context";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { useHairColorContext } from "./hair-color-context";
-import { colors } from "../../../../api/attributes/color";
-import { Product } from "../../../../api/shared";
-import { filterTexturesByValue } from "../../../../api/attributes/texture";
-import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 
 export function SingleHairColorSelector({ product }: { product: Product }) {
   return (
@@ -52,13 +48,13 @@ function ColorSelector({ product }: { product: Product }) {
 
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
+      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto no-scrollbar py-2 sm:py-2.5">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {haircolors.map((path, index) => (
           <button

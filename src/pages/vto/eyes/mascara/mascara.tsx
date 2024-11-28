@@ -17,16 +17,16 @@ export function MascaraSelector() {
 
       <ColorSelector />
 
-      <div className="flex h-10 w-full items-center justify-between text-center">
+      <div className="flex h-[35px] w-full items-center justify-between text-center sm:h-10">
         <Link
-          className={`relative grow text-base`}
+          className={`relative grow text-[11.2px] sm:text-base lg:text-[20.8px]`}
           to="/virtual-try-on/lashes"
         >
           <span className={"text-white/60"}>Lashes</span>
         </Link>
         <div className="h-5 border-r border-white"></div>
         <Link
-          className={`relative grow text-base`}
+          className={`relative grow text-[11.2px] sm:text-base lg:text-[20.8px]`}
           to="/virtual-try-on/mascara"
         >
           <span className={"text-white"}>Mascara</span>
@@ -43,7 +43,7 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex w-full items-center space-x-2 py-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
@@ -83,16 +83,16 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full py-4">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -117,7 +117,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

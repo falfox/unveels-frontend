@@ -31,7 +31,7 @@ function FamilyColorSelector() {
           key={item.name}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80 h-5",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
             {
               "border-white/80": colorFamily === item.name,
             },
@@ -42,7 +42,7 @@ function FamilyColorSelector() {
             className="size-2.5 shrink-0 rounded-full"
             style={{ background: item.value }}
           />
-          <span className="text-sm">{item.name}</span>
+          <span className="text-[9.8px] sm:text-sm">{item.name}</span>
         </button>
       ))}
     </div>
@@ -52,12 +52,12 @@ function FamilyColorSelector() {
 function ColorSelector() {
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto pb-2 no-scrollbar">
+      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto py-2 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {["#000000"].map((color, index) => (
           <button type="button" key={index}>
@@ -90,11 +90,10 @@ const eyelashes = [
 
 function ShapeSelector() {
   const { selectedPattern, setSelectedPattern } = useLashesContext();
-  // const { setLashesPattern } = useMakeup();
 
   return (
-    <div className="mx-auto w-full !border-t-0 pb-2 pt-4">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
+    <div className="mx-auto w-full !border-t-0 py-2">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         {patterns.eyelashes.map((pattern, index) => (
           <button
             key={index}
@@ -117,7 +116,7 @@ function ShapeSelector() {
             <img
               src={eyelashes[index % eyelashes.length]}
               alt="Lashes shape"
-              className="size-12 rounded"
+              className="size-[35px] rounded sm:size-[50px] lg:size-[65px]"
             />
           </button>
         ))}
@@ -128,7 +127,7 @@ function ShapeSelector() {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

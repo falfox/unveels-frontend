@@ -29,9 +29,9 @@ function ModeSelector() {
 
   return (
     <>
-      <div className="flex items-center justify-between w-full h-10 text-center">
+      <div className="flex items-center justify-between w-full h-[35px] sm:h-10 text-center">
         <button
-          className={clsx("relative grow text-base", {
+          className={clsx("relative grow text-[11.2px] sm:text-base lg:text-[20.8px]", {
             "text-white": selectedMode === "shapes",
             "text-white/60": selectedMode !== "shapes",
           })}
@@ -41,7 +41,7 @@ function ModeSelector() {
         </button>
         <div className="h-5 border-r border-white"></div>
         <button
-          className={clsx("relative grow text-base", {
+          className={clsx("relative grow text-[11.2px] sm:text-base lg:text-[20.8px]", {
             "text-white": selectedMode === "material",
             "text-white/60": selectedMode !== "material",
           })}
@@ -103,7 +103,7 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="w-full py-4 mx-auto">
+    <div className="w-full mx-auto">
       <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
@@ -112,14 +112,14 @@ function ColorSelector() {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -166,7 +166,7 @@ function ShapeSelector() {
           key={shape.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedShape === shape.value,
@@ -174,7 +174,7 @@ function ShapeSelector() {
           )}
           onClick={() => setSelectedShape(shape.value)}
         >
-          <span className="text-sm">{shape.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{shape.label}</span>
         </button>
       ))}
     </div>
@@ -193,7 +193,7 @@ function MaterialSelector() {
           key={material.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedMaterial === material.value,
@@ -201,7 +201,7 @@ function MaterialSelector() {
           )}
           onClick={() => setSelectedMaterial(material.value)}
         >
-          <span className="text-sm">{material.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{material.label}</span>
         </button>
       ))}
     </div>

@@ -26,14 +26,14 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex w-full items-center space-x-2 py-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80 text-sm",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-sm text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -88,8 +88,8 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
+    <div className="mx-auto w-full">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         {haircolors.map((path, index) => (
           <button
             key={index}
@@ -102,7 +102,11 @@ function ColorSelector() {
             )}
             onClick={() => setColor(index)}
           >
-            <img src={path} alt="Hair Color" className="h-12 w-14 rounded" />
+            <img
+              src={path}
+              alt="Hair Color"
+              className="h-[31.5px] w-[41.3px] rounded sm:h-[45px] sm:w-[59px] lg:h-[58.5px] lg:w-[76.7px] object-cover"
+            />
           </button>
         ))}
       </div>
@@ -119,7 +123,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

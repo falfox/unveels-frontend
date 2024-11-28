@@ -74,10 +74,10 @@ function ColorSelector({ product }: { product: Product }) {
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -106,7 +106,7 @@ function FabricSelector({ product }: { product: Product }) {
           key={fabric.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
             {
               "bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedFabric === fabric.value,
@@ -114,7 +114,7 @@ function FabricSelector({ product }: { product: Product }) {
           )}
           onClick={() => setSelectedFabric(fabric.value)}
         >
-          <span className="text-sm">{fabric.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{fabric.label}</span>
         </button>
       ))}
     </div>

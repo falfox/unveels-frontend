@@ -101,15 +101,15 @@ function ColorSelector() {
 
   return (
     <div className="mx-auto w-full max-w-xl lg:max-w-none">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
+      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto no-scrollbar py-2 sm:py-2.5">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             resetColor();
           }}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -145,14 +145,14 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4">
+    <div className="mx-auto w-full py-2">
       <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -160,7 +160,7 @@ function TextureSelector() {
             )}
             onClick={() => setMaterial(index, texture)}
           >
-            <span className="text-sm">{texture.label}</span>
+            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -186,7 +186,7 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4">
+    <div className="mx-auto w-full py-2">
       <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {blushes.map((path, index) => (
           <button
@@ -200,7 +200,7 @@ function ShapeSelector() {
             )}
             onClick={() => setPattern(index, index.toString())}
           >
-            <img src={path} alt="Highlighter" className="size-12 rounded" />
+            <img src={path} alt="Highlighter" className="size-[35px] sm:size-[50px] lg:size-[65px] rounded" />
           </button>
         ))}
       </div>
@@ -233,7 +233,7 @@ function ShadesSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-4">
+    <div className="mx-auto w-full py-2">
       <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         {shades.map((shade, index) => (
           <button
@@ -253,7 +253,7 @@ function ShadesSelector() {
                 {shade}
               </div>
             ) : null}
-            <span className="relative text-sm">{shade}</span>
+            <span className="relative text-[9.8px] sm:text-sm">{shade}</span>
           </button>
         ))}
 

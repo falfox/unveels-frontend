@@ -92,10 +92,10 @@ function ColorSelector() {
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -152,7 +152,7 @@ function ModeSelector() {
                 {mode}
               </div>
             ) : null}
-            <span className="relative text-sm">{mode}</span>
+            <span className="relative text-[9.8px] sm:text-sm">{mode}</span>
           </button>
         ))}
 
@@ -195,7 +195,7 @@ function ShapeSelector() {
             )}
             onClick={() => setShape(index.toString())}
           >
-            <img src={path} alt="Eyebrow" className="size-12 rounded" />
+            <img src={path} alt="Eyebrow" className="size-[35px] sm:size-[50px] lg:size-[65px] rounded" />
           </button>
         ))}
       </div>
@@ -222,14 +222,14 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -237,7 +237,7 @@ function TextureSelector() {
             )}
             onClick={() => setMaterial(index, texture)}
           >
-            <span className="text-sm">{texture.label}</span>
+            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
           </button>
         ))}
       </div>
