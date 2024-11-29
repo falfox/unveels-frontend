@@ -82,12 +82,12 @@ function ColorSelector() {
       <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] sm:size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
 
         {extracted_sub_colors.map((color, index) => (
@@ -95,7 +95,7 @@ function ColorSelector() {
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -126,7 +126,7 @@ const shapes = filterShapes(["Triangle", "Square", "Oval"]);
 function ShapeSelector() {
   const { selectedShape, setSelectedShape } = usePressOnNailsContext();
   return (
-    <div className="w-full py-4 mx-auto">
+    <div className="w-full py-2 mx-auto">
       <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         {shapes.map((shape, index) => (
           <button
@@ -143,7 +143,7 @@ function ShapeSelector() {
             <img
               src={nailshapes[index]}
               alt="Highlighter"
-              className="size-12 rounded"
+              className="size-[35px] sm:size-[50px] lg:size-[65px] rounded"
             />
           </button>
         ))}

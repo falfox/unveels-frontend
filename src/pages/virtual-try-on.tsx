@@ -239,23 +239,28 @@ export function TryOnSelector() {
                 }`}
                 onClick={() => setTab(shadeTab as "makeup" | "accessories")}
               >
-                <span className={isActive ? "text-white/70 blur-sm" : ""}>
-                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}
+                <span
+                  className={clsx(
+                    "capitalize",
+                    isActive ? "text-white/70 blur-sm" : "",
+                  )}
+                >
+                  {shadeTab}
                 </span>
                 {isActive ? (
                   <>
                     <div
                       className={clsx(
-                        "absolute inset-0 flex items-center justify-center text-lg blur-sm",
+                        "absolute inset-0 flex items-center justify-center text-[12.6px] blur-sm sm:text-lg lg:text-2xl",
                         activeClassNames,
                       )}
                     >
-                      <span className="text-center text-lg capitalize">
+                      <span className="text-center text-[12.6px] capitalize sm:text-lg lg:text-2xl">
                         {shadeTab}
                       </span>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-center text-lg capitalize text-white/70">
+                      <span className="text-center text-[12.6px] capitalize text-white/70 sm:text-lg lg:text-2xl">
                         {shadeTab}
                       </span>
                     </div>

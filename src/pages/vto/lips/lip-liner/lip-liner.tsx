@@ -90,13 +90,13 @@ function ColorSelector() {
 
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2.5">
+      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto no-scrollbar py-2 sm:py-2.5">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={resetColor}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -149,7 +149,7 @@ function SizeSelector() {
             <img
               src={`/media/unveels/vto/lipliners/lipliner ${size.toLowerCase()}.png`}
               alt={size}
-              className="size-12 shrink-0"
+              className="size-[35px] sm:size-[50px] lg:size-[65px] shrink-0"
             />
           </button>
         ))}

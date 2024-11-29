@@ -22,10 +22,11 @@ import { BrandName } from "../../../../components/product/brand";
 import { LoadingProducts } from "../../../../components/loading";
 import { filterTextures } from "../../../../api/attributes/texture";
 import { useFaceHighlighterQuery } from "./highlighter-query";
+import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 
 export function HighlighterSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4">
+    <div className="mx-auto w-full px-4">
       <ColorSelector />
 
       <TextureSelector />
@@ -74,16 +75,16 @@ function ColorSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-1 sm:py-2">
+    <div className="mx-auto w-full border-b">
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             reset();
           }}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -120,14 +121,14 @@ function TextureSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full border-b">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -135,7 +136,7 @@ function TextureSelector() {
             )}
             onClick={() => setMaterial(index, texture)}
           >
-            <span className="text-sm">{texture.label}</span>
+            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -160,7 +161,7 @@ function ShapeSelector() {
   }
 
   return (
-    <div className="mx-auto w-full py-1 sm:py-2">
+    <div className="mx-auto w-full">
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         {highlighters.map((path, index) => (
           <button
@@ -174,7 +175,11 @@ function ShapeSelector() {
             )}
             onClick={() => setPattern(index, index.toString())}
           >
-            <img src={path} alt="Highlighter" className="size-12 rounded" />
+            <img
+              src={path}
+              alt="Highlighter"
+              className="size-[35px] rounded sm:size-[50px] lg:size-[65px]"
+            />
           </button>
         ))}
       </div>
@@ -190,84 +195,13 @@ function ProductList() {
     texture: selectedTexture,
   });
 
-  const products = [
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Double Wear Stay-in-Place Foundation",
-      brand: "Estée Lauder",
-      price: 52,
-      originalPrice: 60,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-    {
-      name: "Tom Ford Item name Tom Ford",
-      brand: "Brand name",
-      price: 15,
-      originalPrice: 23,
-    },
-  ];
-
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          const imageUrl =
-            mediaUrl(product.media_gallery_entries[0].file) ??
-            "https://picsum.photos/id/237/200/300";
-
-          return (
-            <div key={index} className="w-[100px] rounded shadow">
-              <div className="relative h-[70px] w-[100px] overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt="Product"
-                  className="rounded object-cover"
-                />
-              </div>
-
-              <h3 className="line-clamp-2 h-10 py-2 text-[0.625rem] font-semibold text-white">
-                {product.name}
-              </h3>
-              <p className="text-[0.625rem] text-white/60">
-                <BrandName brandId={getProductAttributes(product, "brand")} />{" "}
-              </p>
-              <div className="flex items-end justify-between space-x-1 pt-1">
-                <div className="bg-gradient-to-r from-[#CA9C43] to-[#92702D] bg-clip-text text-[0.625rem] text-transparent">
-                  $15
-                </div>
-                <button
-                  type="button"
-                  className="flex h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white"
-                >
-                  Add to cart
-                </button>
-              </div>
-            </div>
-          );
+          return <VTOProductCard product={product} key={product.id} />;
         })
       )}
     </div>

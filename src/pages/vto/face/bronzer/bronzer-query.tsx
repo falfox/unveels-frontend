@@ -7,6 +7,7 @@ import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   baseUrl,
   buildSearchParams,
+  createSimpleAndConfigurableFilters,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
 
@@ -20,19 +21,74 @@ export function useBronzerQuery({
   return useQuery({
     queryKey: ["products", "bronzers", hexacode, texture],
     queryFn: async () => {
-      const baseFilters = [
-        {
+      const { simpleFilters, configurableFilters } =
+        createSimpleAndConfigurableFilters([
+          {
+            filters: [
+              {
+                field: "face_makeup_product_type",
+                value: faceMakeupProductTypesFilter(["Bronzers"]),
+                condition_type: "in",
+              },
+            ],
+          },
+        ]);
+
+      if (texture) {
+        simpleFilters.push({
           filters: [
             {
-              field: "face_makeup_product_type",
-              value: faceMakeupProductTypesFilter(["Bronzers"]),
-              condition_type: "in",
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
             },
           ],
-        },
+        });
+      }
+
+      const [simpleResponse, configurableResponse] = await Promise.all([
+        fetch(
+          baseUrl + "/rest/V1/products?" + buildSearchParams(simpleFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+        fetch(
+          baseUrl +
+            "/rest/V1/products?" +
+            buildSearchParams(configurableFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+      ]);
+
+      const simpleResults = (await simpleResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const configurableResults = (await configurableResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const combinedResults = [
+        ...simpleResults.items,
+        ...configurableResults.items,
       ];
 
       const filters = [];
+
+      if (hexacode) {
+        filters.push({
+          filters: [
+            {
+              field: "hexacode",
+              value: hexacode,
+              condition_type: "finset",
+            },
+          ],
+        });
+      }
 
       if (texture) {
         filters.push({
@@ -46,33 +102,12 @@ export function useBronzerQuery({
         });
       }
 
-      const response = await fetch(
-        baseUrl +
-          "/rest/V1/products?" +
-          buildSearchParams([...baseFilters, ...filters]),
+      return fetchConfigurableProducts(
         {
-          headers: defaultHeaders,
+          items: combinedResults,
         },
+        filters,
       );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      // di configurable bronzer gk ada hexacode, adanya di child, sedangkan di parent ada texture, di child gk ada
-      if (hexacode) {
-        filters.push({
-          filters: [
-            {
-              field: "hexacode",
-              value: hexacode,
-              condition_type: "finset",
-            },
-          ],
-        });
-      }
-
-      return await fetchConfigurableProducts(results, filters);
     },
   });
 }

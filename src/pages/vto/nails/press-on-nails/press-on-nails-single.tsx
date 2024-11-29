@@ -79,10 +79,10 @@ function ColorSelector({ product }: { product: Product }) {
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -127,7 +127,7 @@ function ShapeSelector() {
             <img
               src={nailshapes[index]}
               alt="Nail shape"
-              className="size-12 rounded"
+              className="size-[35px] sm:size-[50px] lg:size-[65px] rounded"
             />
           </button>
         ))}

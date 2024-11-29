@@ -14,7 +14,7 @@ export function VTOProductCard({ product }: { product: Product }) {
       <h3 className="line-clamp-2 h-6 sm:h-10 py-1 sm:py-2 text-[0.425rem] sm:text-[0.625rem] font-semibold text-white">
         {product.name}
       </h3>
-      <p className="text-[0.625rem] text-white/60">
+      <p className="text-[0.425rem] sm:text-[0.625rem] h-3 sm:h-4 text-white/60">
         <BrandName brandId={getProductAttributes(product, "brand")} />
       </p>
       <div className="flex items-end justify-between space-x-1 pt-1">
@@ -23,7 +23,7 @@ export function VTOProductCard({ product }: { product: Product }) {
         </div>
         <button
           type="button"
-          className="flex sm:h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-1.5 h-4 sm:px-2.5 text-[0.4rem] sm:text-[0.625rem] font-semibold text-white"
+          className="flex sm:h-7 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-0.5 sm:px-1.5 h-4 text-[0.4rem] sm:text-[0.625rem] font-semibold text-white"
         >
           Add to cart
         </button>

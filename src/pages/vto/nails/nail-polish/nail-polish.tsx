@@ -86,7 +86,7 @@ function ColorSelector() {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
 
         {extracted_sub_colors.map((color, index) => (
@@ -94,7 +94,7 @@ function ColorSelector() {
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -119,14 +119,14 @@ const textures = filterTextures(["Glossy", "Matte", "Shimmer"]);
 function TextureSelector() {
   const { selectedTexture, setSelectedTexture } = useNailPolishContext();
   return (
-    <div className="w-full py-4 mx-auto">
+    <div className="w-full py-2 mx-auto">
       <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -140,7 +140,7 @@ function TextureSelector() {
               }
             }}
           >
-            <span className="text-sm">{texture.label}</span>
+            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
           </button>
         ))}
       </div>

@@ -61,7 +61,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         {!isUser && (
           <img
             alt="Agent"
-            className="h-12 w-12 rounded-full"
+            className="size-[38.5px] rounded-full sm:size-[55px]"
             src={SarahAvatar}
           />
         )}
@@ -101,7 +101,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               </div>
             </div>
           ) : (
-            <p className="w-full text-sm">{message.text}</p>
+            <p className="lg w-full text-[9.8px] sm:text-sm">{message.text}</p>
           )}
         </div>
 

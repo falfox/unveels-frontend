@@ -18,16 +18,13 @@ export function LashesSelector() {
 
       <ColorSelector />
 
-      <div className="flex h-10 w-full items-center justify-between text-center">
-        <Link
-          className={`relative grow text-base`}
-          to="/virtual-try-on/lashes"
-        >
+      <div className="flex h-[35px] sm:h-10 w-full items-center justify-between text-center">
+        <Link className={`relative grow text-[11.2px] sm:text-base lg:text-[20.8px]`} to="/virtual-try-on/lashes">
           <span className={"text-white"}>Lashes</span>
         </Link>
         <div className="h-5 border-r border-white"></div>
         <Link
-          className={`relative grow text-base`}
+          className={`relative grow text-[11.2px] sm:text-base lg:text-[20.8px]`}
           to="/virtual-try-on/mascara"
         >
           <span className={"text-white/60"}>Mascara</span>
@@ -46,14 +43,14 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar py-2"
+      className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
       {colorFamilies.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80 h-5",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
             {
               "border-white/80": colorFamily === item.name,
             },
@@ -66,7 +63,7 @@ function FamilyColorSelector() {
               background: item.value,
             }}
           />
-          <span className="text-sm">{item.name}</span>
+          <span className="text-[9.8px] sm:text-sm">{item.name}</span>
         </button>
       ))}
     </div>
@@ -75,25 +72,23 @@ function FamilyColorSelector() {
 
 function ColorSelector() {
   return (
-    <div className="w-full py-2 mx-auto">
-      <div className="flex items-center w-full py-2 space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {["#000000"].map((color, index) => (
-          <button type="button" key={index}>
-            <ColorPalette
-              key={index}
-              size="large"
-              palette={{
-                color: color,
-              }}
-              selected={true}
-            />
-          </button>
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{
+              color: color,
+            }}
+            selected={true}
+          />
         ))}
       </div>
     </div>
@@ -115,8 +110,8 @@ const eyelashes = [
 function ShapeSelector() {
   const { selectedPattern, setSelectedPattern } = useLashesContext();
   return (
-    <div className="mx-auto w-full !border-t-0 pt-4 pb-2">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full !border-t-0 py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {patterns.eyelashes.map((pattern, index) => (
           <button
             key={index}
@@ -138,7 +133,7 @@ function ShapeSelector() {
             <img
               src={eyelashes[index % eyelashes.length]}
               alt="Eyebrow"
-              className="size-12 rounded"
+              className="size-[35px] rounded sm:size-[50px] lg:size-[65px]"
             />
           </button>
         ))}
@@ -156,7 +151,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

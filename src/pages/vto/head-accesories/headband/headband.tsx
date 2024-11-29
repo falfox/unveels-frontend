@@ -66,7 +66,7 @@ function HeadbandColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full !border-t-0 pb-4">
+    <div className="mx-auto w-full !border-t-0">
       <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
@@ -75,14 +75,14 @@ function HeadbandColorSelector() {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-[1.875rem]" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -114,7 +114,7 @@ function HeadbandFabricSelector() {
           key={material.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedFabric === material.value,
@@ -122,7 +122,7 @@ function HeadbandFabricSelector() {
           )}
           onClick={() => setSelectedFabric(material.value)}
         >
-          <span className="text-sm">{material.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{material.label}</span>
         </button>
       ))}
     </div>

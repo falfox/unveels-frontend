@@ -4,6 +4,7 @@ import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   baseUrl,
   buildSearchParams,
+  createSimpleAndConfigurableFilters,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
 
@@ -19,24 +20,78 @@ export function useLipColorQuery({
   return useQuery({
     queryKey: ["products", "lipcolor", color, sub_color, texture],
     queryFn: async () => {
-      const baseFilters = [
-        {
+      const { simpleFilters, configurableFilters } =
+        createSimpleAndConfigurableFilters([
+          {
+            filters: [
+              {
+                field: "lips_makeup_product_type",
+                value: lipsMakeupProductTypesFilter([
+                  "Lipsticks",
+                  "Lip Stains",
+                  "Lip Tints",
+                  "Lip Balms",
+                ]),
+                condition_type: "in",
+              },
+            ],
+          },
+        ]);
+
+      if (color) {
+        simpleFilters.push({
           filters: [
             {
-              field: "lips_makeup_product_type",
-              value: lipsMakeupProductTypesFilter([
-                "Lipsticks",
-                "Lip Stains",
-                "Lip Tints",
-                "Lip Balms",
-              ]),
-              condition_type: "in",
+              field: "color",
+              value: color,
+              condition_type: "eq",
             },
           ],
-        },
+        });
+      }
+
+      if (texture) {
+        simpleFilters.push({
+          filters: [
+            {
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      const [simpleResponse, configurableResponse] = await Promise.all([
+        fetch(
+          baseUrl + "/rest/V1/products?" + buildSearchParams(simpleFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+        fetch(
+          baseUrl +
+            "/rest/V1/products?" +
+            buildSearchParams(configurableFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+      ]);
+
+      const simpleResults = (await simpleResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const configurableResults = (await configurableResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const combinedResults = [
+        ...simpleResults.items,
+        ...configurableResults.items,
       ];
 
-      // Skip filter ini karena, lips_makeup_product_type tidak bisa di filter dengan color
       const filters = [];
 
       if (color) {
@@ -63,18 +118,12 @@ export function useLipColorQuery({
         });
       }
 
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
+      return fetchConfigurableProducts(
         {
-          headers: defaultHeaders,
+          items: combinedResults,
         },
+        filters,
       );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return await fetchConfigurableProducts(results, filters);
     },
   });
 }
