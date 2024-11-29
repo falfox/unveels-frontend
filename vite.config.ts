@@ -18,6 +18,7 @@ const baseRoutes = [
   "/virtual-try-on-product",
   "/virtual-try-on",
   "/see-improvement-web",
+  "/see-improvement",
 ];
 
 function generateHtmlFromTemplate(route: string) {
