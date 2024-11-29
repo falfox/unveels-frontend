@@ -33,6 +33,7 @@ function FamilyColorSelector() {
     >
       {skin_tones.map((item, index) => (
         <button
+          key={item.id}
           type="button"
           className={clsx(
             "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-[0.625rem] text-white/80",
@@ -119,7 +120,7 @@ function ProductList() {
     skin_tone: colorFamily,
   });
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

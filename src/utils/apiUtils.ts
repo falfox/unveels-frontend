@@ -124,3 +124,33 @@ export async function fetchConfigurableProducts(
     items: [...filteredResults, ...configrableResponse.items],
   };
 }
+
+export function createSimpleAndConfigurableFilters(filters: FilterGroup[]) {
+  const simpleFilters = [
+    ...filters,
+    {
+      filters: [
+        {
+          field: "type_id",
+          value: "simple",
+          condition_type: "eq",
+        },
+      ],
+    },
+  ];
+
+  const configurableFilters = [
+    ...filters,
+    {
+      filters: [
+        {
+          field: "type_id",
+          value: "configurable",
+          condition_type: "eq",
+        },
+      ],
+    },
+  ];
+
+  return { simpleFilters, configurableFilters };
+}

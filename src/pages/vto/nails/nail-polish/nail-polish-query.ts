@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  getNailPolishProductTypeIds,
-  lipsMakeupProductTypesFilter,
-} from "../../../../api/attributes/makeups";
+import { getNailPolishProductTypeIds } from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   baseUrl,
   buildSearchParams,
+  createSimpleAndConfigurableFilters,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
 
@@ -20,23 +18,77 @@ export function useNailPolishQuery({
   return useQuery({
     queryKey: ["products", "nailpolish", color, texture],
     queryFn: async () => {
-      const baseFilters = [
-        {
+      const { simpleFilters, configurableFilters } =
+        createSimpleAndConfigurableFilters([
+          {
+            filters: [
+              {
+                field: "nail_polish_product_type",
+                value: getNailPolishProductTypeIds([
+                  "Nail Color",
+                  "Gel Color",
+                  "Breathable Polishes",
+                ]).join(","),
+                condition_type: "in",
+              },
+            ],
+          },
+        ]);
+
+      if (color) {
+        simpleFilters.push({
           filters: [
             {
-              field: "nail_polish_product_type",
-              value: getNailPolishProductTypeIds([
-                "Nail Color",
-                "Gel Color",
-                "Breathable Polishes",
-              ]).join(","),
-              condition_type: "in",
+              field: "color",
+              value: color,
+              condition_type: "eq",
             },
           ],
-        },
+        });
+      }
+
+      if (texture) {
+        simpleFilters.push({
+          filters: [
+            {
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      const [simpleResponse, configurableResponse] = await Promise.all([
+        fetch(
+          baseUrl + "/rest/V1/products?" + buildSearchParams(simpleFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+        fetch(
+          baseUrl +
+            "/rest/V1/products?" +
+            buildSearchParams(configurableFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+      ]);
+
+      const simpleResults = (await simpleResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const configurableResults = (await configurableResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const combinedResults = [
+        ...simpleResults.items,
+        ...configurableResults.items,
       ];
 
-      // Skip filter ini karena, lips_makeup_product_type tidak bisa di filter dengan color
       const filters = [];
 
       if (color) {
@@ -63,18 +115,12 @@ export function useNailPolishQuery({
         });
       }
 
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
+      return fetchConfigurableProducts(
         {
-          headers: defaultHeaders,
+          items: combinedResults,
         },
+        filters,
       );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return await fetchConfigurableProducts(results, filters);
     },
   });
 }
