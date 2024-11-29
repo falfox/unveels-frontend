@@ -94,7 +94,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           text: respond.chat,
           sender: "agent",
           type: "chat",
-          mode: "audio-connection",
+          mode: "text-connection",
           timestamp,
         },
       ]);
@@ -125,7 +125,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           id: Date.now() + 1,
           text: message,
           sender: "user",
-          mode: "audio-connection",
+          mode: "text-connection",
           type: "audio",
           timestamp,
           audioURL: audioURL,
@@ -139,7 +139,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           text: message,
           type: "chat",
           sender: "user",
-          mode: "audio-connection",
+          mode: "text-connection",
           timestamp,
           audioURL: null,
         },
@@ -159,17 +159,6 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     audioPlayer.current?.audioEl.current?.play();
     setPlaying(true);
     const timestamp = getCurrentTimestamp();
-    setChats((prev) => [
-      ...prev,
-      {
-        id: Date.now() + 1,
-        text: text,
-        sender: "agent",
-        mode: "audio-connection",
-        timestamp,
-        type: "chat",
-      },
-    ]);
   }
 
   useEffect(() => {

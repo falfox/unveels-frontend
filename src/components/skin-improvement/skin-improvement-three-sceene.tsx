@@ -31,6 +31,9 @@ const SkinImprovementThreeScene: React.FC<SkinImprovementThreeSceneProps> = ({
 
   const filterRef = useRef<ShaderMaterial>(null);
 
+  // State for shader parameters
+  const { sigmaSpatial, sigmaColor, smoothingStrength } = useSkinImprovement();
+
   // State for window size and DPR
   const [windowSize, setWindowSize] = useState<{
     width: number;
@@ -56,6 +59,28 @@ const SkinImprovementThreeScene: React.FC<SkinImprovementThreeSceneProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    const handleSmoothingStrengthChange = (event: any) => {
+      if (filterRef.current) {
+        filterRef.current.uniforms.smoothingStrength.value =
+          event.detail.smoothingStrength;
+        filterRef.current.needsUpdate = true;
+      }
+    };
+
+    window.addEventListener(
+      "updateSmoothingStrength",
+      handleSmoothingStrengthChange,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "updateSmoothingStrength",
+        handleSmoothingStrengthChange,
+      );
+    };
+  }, []);
+
   // Calculate plane size based on image aspect ratio and viewport
   useEffect(() => {
     if (!texture.image) return;
@@ -78,9 +103,6 @@ const SkinImprovementThreeScene: React.FC<SkinImprovementThreeSceneProps> = ({
 
     setPlaneSize([planeWidth, planeHeight]);
   }, [texture, viewport]);
-
-  // State for shader parameters
-  const { sigmaSpatial, sigmaColor, smoothingStrength } = useSkinImprovement();
 
   // Create mask texture based on landmarks and window size
   const maskTexture = useMemo(() => {

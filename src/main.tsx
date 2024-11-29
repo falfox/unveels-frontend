@@ -37,7 +37,7 @@ const routes = [
   "find-the-look",
   "virtual-try-on",
   "virtual-assistant",
-  "see-imrprovement",
+  "see-improvement",
 ];
 
 // Delegated event listener

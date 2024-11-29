@@ -289,6 +289,12 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             />
           </mesh>
 
+          <FoundationNew
+            planeSize={planeSize}
+            landmarks={landmarks}
+            blendshape={blendshape}
+          />
+
           {showHair && (
             <>
               {hairMaskTextureRef.current && (
