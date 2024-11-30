@@ -114,7 +114,7 @@ function TextureSelector({ product }: { product: Product }) {
             key={texture.label}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -193,7 +193,7 @@ function ShadesSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((product, index) => {
         return <VTOProductCard product={product} key={product.id} />;
       })}

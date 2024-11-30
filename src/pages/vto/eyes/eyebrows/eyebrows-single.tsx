@@ -78,7 +78,7 @@ function ColorSelector({ product }: { product: Product }) {
 
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto no-scrollbar py-2 sm:py-2.5">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         <button
           type="button"
           className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
@@ -125,7 +125,7 @@ function PatternSelector() {
             <img
               src={`/media/unveels/vto/eyebrows/${index % 8}.png`}
               alt="Eyebrow"
-              className="w-[38.5px] h-[14px] sm:h-5 sm:w-14 rounded"
+              className="h-[14px] w-[38.5px] rounded sm:h-5 sm:w-14"
             />
           </button>
         ))}
@@ -165,7 +165,7 @@ function BrightnessSlider() {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

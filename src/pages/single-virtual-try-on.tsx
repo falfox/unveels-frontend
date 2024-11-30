@@ -346,7 +346,7 @@ function Main({ product }: { product: Product }) {
       <RecorderStatus />
       <TopNavigation />
 
-      <div className="absolute inset-x-0 top-24 px-5 space-y-2.5">
+      <div className="absolute inset-x-0 top-24 space-y-2.5 px-5">
         <div className="flex items-center">
           <button
             type="button"

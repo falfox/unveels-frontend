@@ -43,7 +43,7 @@ function FamilyColorSelector() {
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80 h-5",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -78,11 +78,11 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="w-full py-2 mx-auto">
-      <div className="flex items-center w-full space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-[1.875rem] sm:size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80 sm:size-10"
           onClick={() => {
             setSelectedColor(null);
           }}
@@ -126,8 +126,8 @@ const shapes = filterShapes(["Triangle", "Square", "Oval"]);
 function ShapeSelector() {
   const { selectedShape, setSelectedShape } = usePressOnNailsContext();
   return (
-    <div className="w-full py-2 mx-auto">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {shapes.map((shape, index) => (
           <button
             key={index}
@@ -143,7 +143,7 @@ function ShapeSelector() {
             <img
               src={nailshapes[index]}
               alt="Highlighter"
-              className="size-[35px] sm:size-[50px] lg:size-[65px] rounded"
+              className="size-[35px] rounded sm:size-[50px] lg:size-[65px]"
             />
           </button>
         ))}
@@ -161,7 +161,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

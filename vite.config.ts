@@ -14,6 +14,7 @@ const baseRoutes = [
   "/find-the-look-web",
   "/skin-tone-finder-web",
   "/virtual-assistant",
+  "/virtual-avatar-web",
   "/skin-analysis-web",
   "/virtual-try-on-product",
   "/virtual-try-on",
@@ -68,7 +69,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/rest": {
-        target: "https://magento-1231949-4398885.cloudwaysapps.com",
+        target: "http://ec2-13-53-99-251.eu-north-1.compute.amazonaws.com/",
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/rest/, "/en/rest"),

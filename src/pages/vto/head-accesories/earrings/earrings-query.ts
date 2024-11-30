@@ -60,7 +60,9 @@ export function useEarringsQuery({
       }
 
       const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
+        baseUrl +
+          "/rest/V1/products?" +
+          buildSearchParams([...baseFilters, ...filters]),
         {
           headers: defaultHeaders,
         },

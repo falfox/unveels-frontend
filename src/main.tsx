@@ -38,6 +38,7 @@ const routes = [
   "virtual-try-on",
   "virtual-assistant",
   "see-improvement",
+  "virtual-avatar-web",
 ];
 
 // Delegated event listener

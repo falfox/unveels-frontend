@@ -89,7 +89,7 @@ export function usePressOnNailsQuery({
         ...configurableResults.items,
       ];
 
-      const filters = []
+      const filters = [];
 
       if (color) {
         filters.push({

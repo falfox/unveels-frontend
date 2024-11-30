@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 
-
 import { colors } from "../../../../api/attributes/color";
 import { filterFabrics } from "../../../../api/attributes/fabric";
 import { LoadingProducts } from "../../../../components/loading";
@@ -26,14 +25,14 @@ function HeadbandFamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full py-2 space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80 h-5",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -67,10 +66,10 @@ function HeadbandColorSelector() {
 
   return (
     <div className="mx-auto w-full !border-t-0">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColor(null);
           }}
@@ -108,13 +107,13 @@ function HeadbandFabricSelector() {
   const { selectedFabric, setSelectedFabric } = useHeadbandContext();
 
   return (
-    <div className="flex items-center w-full py-2 space-x-2 overflow-x-auto no-scrollbar">
+    <div className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar">
       {fabrics.map((material, index) => (
         <button
           key={material.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedFabric === material.value,
@@ -138,7 +137,7 @@ function HeadbandProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

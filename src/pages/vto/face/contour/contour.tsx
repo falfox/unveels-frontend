@@ -195,7 +195,11 @@ function ShapeSelector() {
             )}
             onClick={() => setShape(index.toString())}
           >
-            <img src={path} alt="Eyebrow" className="size-[35px] sm:size-[50px] lg:size-[65px] rounded" />
+            <img
+              src={path}
+              alt="Eyebrow"
+              className="size-[35px] rounded sm:size-[50px] lg:size-[65px]"
+            />
           </button>
         ))}
       </div>
@@ -223,13 +227,13 @@ function TextureSelector() {
 
   return (
     <div className="mx-auto w-full">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2 no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -252,7 +256,7 @@ function ProductList() {
     texture: selectedTexture,
   });
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (
