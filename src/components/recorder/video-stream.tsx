@@ -278,20 +278,16 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
               const landmarks = results.faceLandmarks[0];
 
               const faceLandmarks = applyStretchedLandmarks(landmarks);
-              const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+              const gradient = ctx.createLinearGradient(canvas.width, 0, 0, 0);
 
-              // Pastikan semua nilai berada dalam rentang [0, 1]
               gradient.addColorStop(
-                clamp(glowOffset - 0.1, 0, 1),
-                "rgba(42, 96, 176, 0.1)",
+                Math.max(0, glowOffset - 0.1),
+                "rgba(254, 238, 192, 0.1)",
               );
+              gradient.addColorStop(glowOffset, "rgba(255, 220, 0, 0.5)");
               gradient.addColorStop(
-                clamp(glowOffset, 0, 1),
-                "rgba(44, 98, 180, 0.46)",
-              );
-              gradient.addColorStop(
-                clamp(glowOffset + 0.1, 0, 1),
-                "rgba(42, 96, 176, 0.1)",
+                Math.min(1, glowOffset + 0.1),
+                "rgba(245, 209, 86, 0.1)",
               );
 
               drawConnectorsFromFaces(
@@ -393,19 +389,16 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
               glowOffset += glowSpeed;
               if (glowOffset > 1) glowOffset = 0;
 
-              // Apply scanner glow effect
-              const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+              const gradient = ctx.createLinearGradient(canvas.width, 0, 0, 0);
+
               gradient.addColorStop(
-                clamp(glowOffset - 0.1, 0, 1),
-                "rgba(42, 96, 176, 0.1)",
+                Math.max(0, glowOffset - 0.1),
+                "rgba(254, 238, 192, 0.1)",
               );
+              gradient.addColorStop(glowOffset, "rgba(255, 220, 0, 0.5)");
               gradient.addColorStop(
-                clamp(glowOffset, 0, 1),
-                "rgba(44, 98, 180, 0.46)",
-              );
-              gradient.addColorStop(
-                clamp(glowOffset + 0.1, 0, 1),
-                "rgba(42, 96, 176, 0.1)",
+                Math.min(1, glowOffset + 0.1),
+                "rgba(245, 209, 86, 0.1)",
               );
 
               // Draw connectors with scanner effect
