@@ -19,18 +19,22 @@ export function VirtualAvatar() {
     console.log("Data received from Flutter:", incomingText, incomingLanguage);
     setText(incomingText);
     setLanguage(incomingLanguage);
-    setSpeak(true); // Mulai berbicara
+    setSpeak(true);
   };
 
+  // Menambahkan fungsi ke window setelah komponen dimuat
   useEffect(() => {
-    // Tambahkan fungsi ke window
+    console.log("VirtualAvatar component is mounted");
+
+    // Menambahkan receiveTextAndLanguage ke window setelah komponen dimuat
     (window as any).receiveTextAndLanguage = receiveTextAndLanguage;
 
+    // Pembersihan komponen: menghapus fungsi dari window saat komponen di-unmount
     return () => {
-      // Membersihkan fungsi dari window ketika komponen di-unmount
+      console.log("Cleanup: removing receiveTextAndLanguage from window");
       (window as any).receiveTextAndLanguage = undefined;
     };
-  }, []);
+  }, []); // Efek ini hanya berjalan sekali, setelah komponen dimuat
 
   function playerEnded() {
     setAudioSource(null);

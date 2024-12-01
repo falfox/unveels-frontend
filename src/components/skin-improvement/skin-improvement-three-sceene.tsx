@@ -32,7 +32,8 @@ const SkinImprovementThreeScene: React.FC<SkinImprovementThreeSceneProps> = ({
   const filterRef = useRef<ShaderMaterial>(null);
 
   // State for shader parameters
-  const { sigmaSpatial, sigmaColor, smoothingStrength } = useSkinImprovement();
+  const { sigmaSpatial, sigmaColor, smoothingStrength, setSmoothingStrength } =
+    useSkinImprovement();
 
   // State for window size and DPR
   const [windowSize, setWindowSize] = useState<{
@@ -59,27 +60,43 @@ const SkinImprovementThreeScene: React.FC<SkinImprovementThreeSceneProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Fungsi untuk mengupdate smoothingStrength berdasarkan pesan yang diterima
+  const updateSmoothingStrength = (newSmoothingStrength: number) => {
+    console.log("Smoothing Strength updated to:", newSmoothingStrength);
+    setSmoothingStrength(newSmoothingStrength);
+  };
+
   useEffect(() => {
-    const handleSmoothingStrengthChange = (event: any) => {
-      if (filterRef.current) {
-        filterRef.current.uniforms.smoothingStrength.value =
-          event.detail.smoothingStrength;
-        filterRef.current.needsUpdate = true;
+    // Handler untuk menerima pesan dari Flutter atau browser
+    const handleMessage = (event: MessageEvent) => {
+      console.log("Message received:", event); // Tambahkan log untuk event itu sendiri
+
+      // Periksa data yang diterima
+      if (event.data) {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("Parsed data:", data); // Log data setelah parsing
+
+          // Memperbarui smoothingStrength jika data yang diterima valid
+          if (data.smoothingStrength !== undefined) {
+            updateSmoothingStrength(data.smoothingStrength);
+          }
+        } catch (error) {
+          console.error("Error parsing message:", error);
+        }
+      } else {
+        console.warn("No data received in message event");
       }
     };
 
-    window.addEventListener(
-      "updateSmoothingStrength",
-      handleSmoothingStrengthChange,
-    );
+    // Menambahkan event listener untuk mendengarkan pesan
+    window.addEventListener("message", handleMessage);
 
+    // Membersihkan event listener saat komponen unmount
     return () => {
-      window.removeEventListener(
-        "updateSmoothingStrength",
-        handleSmoothingStrengthChange,
-      );
+      window.removeEventListener("message", handleMessage);
     };
-  }, []);
+  }, []); // Efek ini hanya dipanggil sekali saat komponen dimuat
 
   // Calculate plane size based on image aspect ratio and viewport
   useEffect(() => {
