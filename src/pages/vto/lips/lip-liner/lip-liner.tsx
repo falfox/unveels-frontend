@@ -29,7 +29,7 @@ function FamilyColorSelector() {
   const { colorFamily, setColorFamily } = useLipLinerContext();
   return (
     <div
-      className="flex w-full items-center space-x-2 py-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
@@ -90,7 +90,7 @@ function ColorSelector() {
 
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto no-scrollbar py-2 sm:py-2.5">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         <button
           type="button"
           className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
@@ -149,7 +149,7 @@ function SizeSelector() {
             <img
               src={`/media/unveels/vto/lipliners/lipliner ${size.toLowerCase()}.png`}
               alt={size}
-              className="size-[35px] sm:size-[50px] lg:size-[65px] shrink-0"
+              className="size-[35px] shrink-0 sm:size-[50px] lg:size-[65px]"
             />
           </button>
         ))}
@@ -168,7 +168,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

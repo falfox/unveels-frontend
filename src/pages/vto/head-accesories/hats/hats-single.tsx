@@ -99,22 +99,28 @@ function ModeSelector({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="flex h-[35px] sm:h-10 w-full items-center justify-between text-center">
+      <div className="flex h-[35px] w-full items-center justify-between text-center sm:h-10">
         <button
-          className={clsx("relative grow text-[11.2px] sm:text-base lg:text-[20.8px]", {
-            "text-white": selectedMode === "shapes",
-            "text-white/60": selectedMode !== "shapes",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "shapes",
+              "text-white/60": selectedMode !== "shapes",
+            },
+          )}
           onClick={() => setSelectedMode("shapes")}
         >
           Shapes
         </button>
         <div className="h-5 border-r border-white"></div>
         <button
-          className={clsx("relative grow text-[11.2px] sm:text-base lg:text-[20.8px]", {
-            "text-white": selectedMode === "fabrics",
-            "text-white/60": selectedMode !== "fabrics",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "fabrics",
+              "text-white/60": selectedMode !== "fabrics",
+            },
+          )}
           onClick={() => setSelectedMode("fabrics")}
         >
           Fabrics
@@ -142,7 +148,7 @@ function OccassionSelector({ product }: { product: Product }) {
           key={occasion.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedOccasion === occasion.value,
@@ -170,7 +176,7 @@ function FabricSelector({ product }: { product: Product }) {
           key={fabric.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedFabric === fabric.value,
@@ -187,7 +193,7 @@ function FabricSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

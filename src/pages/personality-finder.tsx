@@ -365,7 +365,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
   }
 
   return (
-    <div className="flex-1 space-y-6 overflow-auto px-5 md:px-10 py-6">
+    <div className="flex-1 space-y-6 overflow-auto px-5 py-6 md:px-10">
       <h2 className="text-center text-xl font-medium">
         Main 5 Personality Traits
       </h2>
@@ -404,7 +404,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
                   { percentage: 30, color: "#4CC9F0" }, // Openness to Experience
                 ]
           }
-          className="mx-auto max-w-96 w-full"
+          className="mx-auto w-full max-w-96"
         />
         <div className="flex items-center justify-between space-x-4 bg-black text-white">
           {/* Left Column */}
@@ -465,8 +465,8 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
         </div>
       </div>
 
-      <div className="mx-auto hidden w-full max-w-3xl items-center md:flex gap-x-4">
-        <div className="flex items-center justify-between space-x-4 bg-black text-white flex-1">
+      <div className="mx-auto hidden w-full max-w-3xl items-center gap-x-4 md:flex">
+        <div className="flex flex-1 items-center justify-between space-x-4 bg-black text-white">
           {/* Right Column */}
           <div className="space-y-4">
             {/* Agreeableness */}
@@ -527,7 +527,7 @@ function PersonalityTab({ data }: { data: Classifier[] | null }) {
           className="mx-auto size-96"
         />
 
-        <div className="flex items-center justify-between space-x-4 bg-black text-white flex-1">
+        <div className="flex flex-1 items-center justify-between space-x-4 bg-black text-white">
           {/* Left Column */}
           <div className="space-y-4">
             {/* Extraversion */}

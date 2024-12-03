@@ -42,7 +42,7 @@ function ColorSelector({ product }: { product: Product }) {
 
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto no-scrollbar py-2 sm:py-2.5">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         <button
           type="button"
           className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
@@ -83,7 +83,7 @@ function MaterialSelector() {
             key={material.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 sm:px-3 sm:py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedMaterial === material.value,
@@ -107,7 +107,7 @@ function MaterialSelector() {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

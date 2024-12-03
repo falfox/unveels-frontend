@@ -78,7 +78,9 @@ export function useGlassesQuery({
       }
 
       const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
+        baseUrl +
+          "/rest/V1/products?" +
+          buildSearchParams([...baseFilters, ...filters]), // Hanya apply baseFilters karena filter color tidak bisa di apply
         {
           headers: defaultHeaders,
         },

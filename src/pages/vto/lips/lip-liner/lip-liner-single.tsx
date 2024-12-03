@@ -45,7 +45,7 @@ function ColorSelector({ product }: { product: Product }) {
 
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-3 sm:space-x-4 overflow-x-auto no-scrollbar py-2 sm:py-2.5">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         <button
           type="button"
           className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
@@ -98,7 +98,7 @@ function SizeSelector({ product }: { product: Product }) {
             key={size}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80 h-5",
+              "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
               {
                 "border-white/80": selectedSize === size,
               },
@@ -119,7 +119,7 @@ function SizeSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((item) => (
         <VTOProductCard product={item} key={item.id} />
       ))}

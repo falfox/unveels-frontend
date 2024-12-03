@@ -139,7 +139,7 @@ function ShapeSelector() {
             <img
               src={eyeliners[index % eyeliners.length]}
               alt="Eyebrow"
-              className="size-[35px] sm:size-[50px] lg:size-[65px] rounded"
+              className="size-[35px] rounded sm:size-[50px] lg:size-[65px]"
             />
           </button>
         ))}
@@ -157,7 +157,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 sm:gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

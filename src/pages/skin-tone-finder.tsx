@@ -302,7 +302,9 @@ function MatchedShades() {
         </div>
 
         <div className="w-full text-left">
-          <button className="sm:py-2 text-[0.625rem] text-white">View all</button>
+          <button className="text-[0.625rem] text-white sm:py-2">
+            View all
+          </button>
         </div>
 
         {data ? (
@@ -404,7 +406,7 @@ function OtherShades() {
         ))}
       </div>
       <div className="w-full text-left">
-        <button className="sm:py-2 text-[0.625rem] text-white">View all</button>
+        <button className="text-[0.625rem] text-white sm:py-2">View all</button>
       </div>
 
       {data ? (
@@ -575,28 +577,31 @@ function Sidebar({ setCollapsed }: SidebarProps) {
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
           <button className="" onClick={screenShoot}>
-            <Icons.camera className="size-4 sm:size-6 text-white" />
+            <Icons.camera className="size-4 text-white sm:size-6" />
           </button>
           <button className="" onClick={flipCamera}>
-            <Icons.flipCamera className="size-4 sm:size-6 text-white" />
+            <Icons.flipCamera className="size-4 text-white sm:size-6" />
           </button>
           <button
             className=""
             onClick={() => setCollapsed((prevState) => !prevState)}
           >
-            <Icons.expand className="size-4 sm:size-6 text-white" />
+            <Icons.expand className="size-4 text-white sm:size-6" />
           </button>
           <button className="" onClick={compareCapture}>
-            <Icons.compare className="size-4 sm:size-6 text-white" />
+            <Icons.compare className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.reset onClick={resetCapture} className="size-4 sm:size-6 text-white" />
+            <Icons.reset
+              onClick={resetCapture}
+              className="size-4 text-white sm:size-6"
+            />
           </button>
           <button className="hidden">
-            <Icons.upload className="size-4 sm:size-6 text-white" />
+            <Icons.upload className="size-4 text-white sm:size-6" />
           </button>
           <button className="hidden">
-            <Icons.share className="size-4 sm:size-6 text-white" />
+            <Icons.share className="size-4 text-white sm:size-6" />
           </button>
         </div>
       </div>

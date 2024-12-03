@@ -16,9 +16,14 @@ import { Landmark } from "../../../types/landmark";
 interface LipColorProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
-const LipColorInner: React.FC<LipColorProps> = ({ landmarks, planeSize }) => {
+const LipColorInner: React.FC<LipColorProps> = ({
+  landmarks,
+  planeSize,
+  isFlipped,
+}) => {
   const { lipColorMode, lipColors } = useMakeup();
 
   useEffect(() => {
@@ -123,6 +128,7 @@ const LipColorInner: React.FC<LipColorProps> = ({ landmarks, planeSize }) => {
               landmarks={landmarks}
               material={dualStandardMaterial}
               planeSize={planeSize}
+              flipHorizontal={isFlipped}
             />
           )}
           {lipColors[1] && (
@@ -130,6 +136,7 @@ const LipColorInner: React.FC<LipColorProps> = ({ landmarks, planeSize }) => {
               landmarks={landmarks}
               material={dualHighMaterial}
               planeSize={planeSize}
+              flipHorizontal={isFlipped}
             />
           )}
         </>

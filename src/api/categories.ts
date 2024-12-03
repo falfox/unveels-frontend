@@ -8,7 +8,8 @@ const categoriesKey = {
 
 async function fetchCategories() {
   const response = await fetch(
-    baseUrl + "/rest/V1/categories/list?" +
+    baseUrl +
+      "/rest/V1/categories/list?" +
       buildSearchParams([
         {
           filters: [
