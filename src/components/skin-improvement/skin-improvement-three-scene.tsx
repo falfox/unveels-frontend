@@ -96,7 +96,7 @@ const SkinImprovementThreeScene: React.FC<SkinImprovementThreeSceneProps> = ({
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, []); // Efek ini hanya dipanggil sekali saat komponen dimuat
+  }, []);
 
   // Calculate plane size based on image aspect ratio and viewport
   useEffect(() => {

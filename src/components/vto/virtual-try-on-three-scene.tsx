@@ -289,11 +289,11 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
             />
           </mesh>
 
-          <FoundationNew
+          {/* <FoundationNew
             planeSize={planeSize}
             landmarks={landmarks}
             blendshape={blendshape}
-          />
+          /> */}
 
           {showHair && (
             <>
@@ -343,7 +343,11 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           )}
 
           {showLipColor && (
-            <LipColor planeSize={planeSize} landmarks={landmarks} />
+            <LipColor
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={true}
+            />
           )}
 
           {showBronzer && (

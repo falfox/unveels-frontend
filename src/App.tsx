@@ -54,6 +54,7 @@ import { VirtualAvatar } from "./pages/virtual-avatar";
 import { createGuestCart } from "./api/create-guest-cart";
 import { useCartContext } from "./context/cart-context";
 import { SeeImprovementWeb } from "./pages/see-improvement-web";
+import { VirtualTryOnWeb } from "./pages/virtual-try-on-web";
 
 // Define routes using object syntax
 const routes = [
@@ -78,6 +79,7 @@ const routes = [
   { path: "/virtual-avatar-web", element: <VirtualAvatar /> },
   { path: "/see-improvement-web", element: <SeeImprovementWeb /> },
   { path: "/see-improvement", element: <SeeImprovement /> },
+  { path: "/virtual-try-on-web", element: <VirtualTryOnWeb /> },
   {
     path: "/virtual-try-on-product",
     element: <SingleVirtualTryOn />,
@@ -156,6 +158,7 @@ function Home() {
       <LinkButton to="/find-the-look-web">Find The Look Web</LinkButton>
       <LinkButton to="/virtual-avatar-web">Virtual Avatar Web</LinkButton>
       <LinkButton to="/see-improvement-web">See Improvement Web</LinkButton>
+      <LinkButton to="/virtual-try-on-web">Virtual Try On Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
       <LinkButton to="/virtual-try-on-product?sku=689304331029">
         Virtual Try On Product
