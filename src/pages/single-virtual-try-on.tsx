@@ -3,8 +3,10 @@ import {
   ChevronLeft,
   CirclePlay,
   Heart,
+  HeartIcon,
   PauseCircle,
   Plus,
+  PlusIcon,
   StopCircle,
   X,
 } from "lucide-react";
@@ -66,6 +68,7 @@ import { SingleNailPolishSelector } from "./vto/nails/nail-polish/nail-polish-si
 import { SinglePressOnNailsSelector } from "./vto/nails/press-on-nails/press-on-nails-single";
 import { SingleNeckwearSelector } from "./vto/neck-accessories/neckwear/neckwear-single";
 import { SingleScarvesSelector } from "./vto/neck-accessories/scarves/scarves-single";
+import { BrandName } from "../components/product/brand";
 
 export const productTypeCheckers = {
   isLipColorProduct: (data: Product) => {
@@ -220,14 +223,32 @@ export function SingleVirtualTryOn() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">Loading...</div>
+      <div className="absolute inset-0">
+        <div className="flex h-full items-center justify-center">
+          Loading...
+        </div>
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          }}
+        ></div>
+      </div>
     );
   }
 
   if (!data?.length) {
     return (
-      <div className="flex h-full items-center justify-center">
-        No products found
+      <div className="absolute inset-0">
+        <div className="flex h-full items-center justify-center">
+          No products found
+        </div>
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)`,
+          }}
+        ></div>
       </div>
     );
   }
@@ -278,7 +299,7 @@ export function SKUSelector({
 }) {
   return (
     <div className="pointer-events-none fixed inset-y-0 left-0 z-10 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
-      <div className="flex h-full max-h-64 flex-col items-center justify-center gap-4 overflow-y-auto rounded-lg bg-black/25 p-4 backdrop-blur-3xl">
+      <div className="flex max-h-64 flex-col items-center justify-center gap-4 overflow-y-auto rounded-lg bg-black/25 p-4 backdrop-blur-3xl">
         <div className="flex flex-col items-center justify-center gap-4">
           {skus.map((sku) => {
             const imageUrl = mediaUrl(sku.media_gallery_entries[0].file);
@@ -324,6 +345,34 @@ function Main({ product }: { product: Product }) {
       </div>
       <RecorderStatus />
       <TopNavigation />
+
+      <div className="absolute inset-x-0 top-24 space-y-2.5 px-5">
+        <div className="flex items-center">
+          <button
+            type="button"
+            className="flex size-[1.875rem] items-center justify-center rounded-full bg-black/25 backdrop-blur-3xl"
+          >
+            <HeartIcon className="size-4 text-white" />
+          </button>
+          <div className="w-full pl-4">
+            <div className="font-semibold text-white">{product.name}</div>
+            <div className="text-white/60">
+              <BrandName brandId={getProductAttributes(product, "brand")} />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center">
+          <button
+            type="button"
+            className="flex size-[1.875rem] items-center justify-center rounded-full bg-black/25 backdrop-blur-3xl"
+          >
+            <PlusIcon className="size-4 text-white" />
+          </button>
+          <div className="w-full pl-4">
+            <div className="font-medium text-white">${product.price}</div>
+          </div>
+        </div>
+      </div>
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         <Sidebar />

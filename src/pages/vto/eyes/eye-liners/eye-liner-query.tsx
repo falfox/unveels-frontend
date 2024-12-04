@@ -3,6 +3,7 @@ import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   baseUrl,
   buildSearchParams,
+  createSimpleAndConfigurableFilters,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
 import { getEyeMakeupProductTypeIds } from "../../../../api/attributes/makeups";
@@ -17,16 +18,71 @@ export function useEyelinerQuery({
   return useQuery({
     queryKey: ["products", "eyeliners", color, pattern],
     queryFn: async () => {
-      const baseFilters = [
-        {
+      const { simpleFilters, configurableFilters } =
+        createSimpleAndConfigurableFilters([
+          {
+            filters: [
+              {
+                field: "eye_makeup_product_type",
+                value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
+                condition_type: "in",
+              },
+            ],
+          },
+        ]);
+
+      if (color) {
+        simpleFilters.push({
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeliners"]).join(","),
-              condition_type: "in",
+              field: "color",
+              value: color,
+              condition_type: "eq",
             },
           ],
-        },
+        });
+      }
+
+      if (pattern) {
+        simpleFilters.push({
+          filters: [
+            {
+              field: "pattern",
+              value: pattern,
+              condition_type: "finset",
+            },
+          ],
+        });
+      }
+
+      const [simpleResponse, configurableResponse] = await Promise.all([
+        fetch(
+          baseUrl + "/rest/V1/products?" + buildSearchParams(simpleFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+        fetch(
+          baseUrl +
+            "/rest/V1/products?" +
+            buildSearchParams(configurableFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+      ]);
+
+      const simpleResults = (await simpleResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const configurableResults = (await configurableResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const combinedResults = [
+        ...simpleResults.items,
+        ...configurableResults.items,
       ];
 
       const filters = [];
@@ -55,18 +111,12 @@ export function useEyelinerQuery({
         });
       }
 
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+      return fetchConfigurableProducts(
         {
-          headers: defaultHeaders,
+          items: combinedResults,
         },
+        filters,
       );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return await fetchConfigurableProducts(results, filters);
     },
   });
 }

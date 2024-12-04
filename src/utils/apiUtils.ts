@@ -10,10 +10,11 @@ type FilterGroup = {
   filters: Filter[];
 };
 
-export const baseApiUrl = "https://magento-1231949-4398885.cloudwaysapps.com";
+export const baseApiUrl =
+  "http://ec2-13-53-99-251.eu-north-1.compute.amazonaws.com/";
 export const baseUrl = import.meta.env.PROD ? baseApiUrl : "";
 export const baseMediaUrl =
-  "https://magento-1231949-4398885.cloudwaysapps.com/media/catalog/product/cache/df714aaa5e59335a5bf39a17764906ba";
+  "http://ec2-13-53-99-251.eu-north-1.compute.amazonaws.com//media/catalog/product/cache/df714aaa5e59335a5bf39a17764906ba";
 
 export function mediaUrl(imagePath: string | undefined) {
   if (!imagePath) {
@@ -123,4 +124,34 @@ export async function fetchConfigurableProducts(
   return {
     items: [...filteredResults, ...configrableResponse.items],
   };
+}
+
+export function createSimpleAndConfigurableFilters(filters: FilterGroup[]) {
+  const simpleFilters = [
+    ...filters,
+    {
+      filters: [
+        {
+          field: "type_id",
+          value: "simple",
+          condition_type: "eq",
+        },
+      ],
+    },
+  ];
+
+  const configurableFilters = [
+    ...filters,
+    {
+      filters: [
+        {
+          field: "type_id",
+          value: "configurable",
+          condition_type: "eq",
+        },
+      ],
+    },
+  ];
+
+  return { simpleFilters, configurableFilters };
 }

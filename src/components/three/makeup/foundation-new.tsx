@@ -1,6 +1,12 @@
 import { MeshProps, useFrame, useThree } from "@react-three/fiber";
 import React, { useMemo, useRef, Suspense, useEffect } from "react";
-import { Mesh, MeshStandardMaterial, Object3D, WebGLRenderer } from "three";
+import {
+  FrontSide,
+  Mesh,
+  MeshStandardMaterial,
+  Object3D,
+  WebGLRenderer,
+} from "three";
 import { Landmark } from "../../../types/landmark";
 import { FACECAP, GLASESS, HAT } from "../../../utils/constants";
 import { useAccesories } from "../../../context/accesories-context";
@@ -86,7 +92,7 @@ const FoundationNewInner: React.FC<FoundationNewProps> = React.memo(
       if (viewport.width > 1200) {
         return { scaleMultiplier: 2750 };
       }
-      return { scaleMultiplier: 900 };
+      return { scaleMultiplier: 800 };
     }, [viewport.width]);
 
     useEffect(() => {
@@ -102,6 +108,9 @@ const FoundationNewInner: React.FC<FoundationNewProps> = React.memo(
               const mesh = child as Mesh;
               if (mesh.material instanceof MeshStandardMaterial) {
                 mesh.material.envMap = envMapAccesories;
+                mesh.material.side = FrontSide;
+                mesh.material.depthTest = false;
+                mesh.material.depthWrite = false;
                 mesh.material.needsUpdate = true;
               }
 
@@ -130,7 +139,7 @@ const FoundationNewInner: React.FC<FoundationNewProps> = React.memo(
       if (!landmarks.current || !foundationRef.current || !blendshape.current)
         return;
 
-      const centerEye = landmarks.current[6];
+      const centerEye = landmarks.current[4];
 
       // Scale coordinates proportionally with the viewport
       const scaleX = viewport.width / outputWidth;
@@ -143,8 +152,8 @@ const FoundationNewInner: React.FC<FoundationNewProps> = React.memo(
       const centerEyeZ = -centerEye.z * 100;
 
       const faceSize = calculateDistance(
-        landmarks.current[162],
-        landmarks.current[389],
+        landmarks.current[366],
+        landmarks.current[93],
       );
 
       // Set position and scale

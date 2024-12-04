@@ -9,7 +9,7 @@ import { Product } from "../../../../api/shared";
 
 export function SingleLipLinerSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <ColorSelector product={product} />
       </div>
@@ -44,14 +44,14 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((color) => color.split(","));
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
@@ -59,7 +59,7 @@ function ColorSelector({ product }: { product: Product }) {
             key={index}
             onClick={() => handleColorClick(color)}
             className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -91,14 +91,14 @@ function SizeSelector({ product }: { product: Product }) {
   };
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {lipLinerSizes.map((size, index) => (
           <button
             key={size}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+              "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
               {
                 "border-white/80": selectedSize === size,
               },
@@ -119,7 +119,7 @@ function SizeSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((item) => (
         <VTOProductCard product={item} key={item.id} />
       ))}

@@ -7,10 +7,11 @@ import { Icons } from "../../../../components/icons";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { useHatsContext } from "./hats-context";
+import { ColorPalette } from "../../../../components/color-palette";
 
 export function SingleHatsSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <FamilyColorSelector />
         <ColorSelector product={product} />
@@ -31,7 +32,7 @@ function FamilyColorSelector() {
           key={item.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-[0.625rem] text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -42,7 +43,7 @@ function FamilyColorSelector() {
             className="size-2.5 shrink-0 rounded-full"
             style={{ background: item.hex }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -70,26 +71,21 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
-          <button
-            key={index}
-            type="button"
-            className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
-              {
-                "border-white/80": selectedColor === color,
-              },
-            )}
-            style={{ background: color }}
+          <ColorPalette
+            key={color}
+            size="large"
+            palette={{ color }}
+            selected={selectedColor === color}
             onClick={() => handleColorSelection(color)}
           />
         ))}
@@ -103,22 +99,28 @@ function ModeSelector({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="flex h-10 w-full items-center justify-between text-center">
+      <div className="flex h-[35px] w-full items-center justify-between text-center sm:h-10">
         <button
-          className={clsx("relative h-10 grow text-lg", {
-            "text-white": selectedMode === "shapes",
-            "text-white/60": selectedMode !== "shapes",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "shapes",
+              "text-white/60": selectedMode !== "shapes",
+            },
+          )}
           onClick={() => setSelectedMode("shapes")}
         >
           Shapes
         </button>
         <div className="h-5 border-r border-white"></div>
         <button
-          className={clsx("relative h-10 grow text-lg", {
-            "text-white": selectedMode === "fabrics",
-            "text-white/60": selectedMode !== "fabrics",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "fabrics",
+              "text-white/60": selectedMode !== "fabrics",
+            },
+          )}
           onClick={() => setSelectedMode("fabrics")}
         >
           Fabrics
@@ -146,7 +148,7 @@ function OccassionSelector({ product }: { product: Product }) {
           key={occasion.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedOccasion === occasion.value,
@@ -154,7 +156,7 @@ function OccassionSelector({ product }: { product: Product }) {
           )}
           onClick={() => setSelectedOccasion(occasion.value)}
         >
-          <span className="text-sm">{occasion.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{occasion.label}</span>
         </button>
       ))}
     </div>
@@ -174,7 +176,7 @@ function FabricSelector({ product }: { product: Product }) {
           key={fabric.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedFabric === fabric.value,
@@ -182,7 +184,7 @@ function FabricSelector({ product }: { product: Product }) {
           )}
           onClick={() => setSelectedFabric(fabric.value)}
         >
-          <span className="text-sm">{fabric.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{fabric.label}</span>
         </button>
       ))}
     </div>
@@ -191,7 +193,7 @@ function FabricSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((item) => (
         <VTOProductCard key={item.id} product={item} />
       ))}

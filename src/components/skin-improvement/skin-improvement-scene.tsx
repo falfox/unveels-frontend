@@ -4,7 +4,7 @@ import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { Canvas } from "@react-three/fiber";
 import { Landmark } from "../../types/landmark";
 import { SRGBColorSpace } from "three";
-import SkinImprovementThreeScene from "./skin-improvement-three-sceene";
+import SkinImprovementThreeScene from "./skin-improvement-three-scene";
 
 export function SkinImprovementScene() {
   const { criterias } = useCamera();

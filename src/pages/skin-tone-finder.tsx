@@ -127,10 +127,10 @@ function Main() {
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
           {criterias.isCaptured ? "" : <VideoScene />}
+          {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
           <MainContent collapsed={collapsed} setCollapsed={setCollapsed} />
           <Footer />
         </div>
-        {isInferenceFinished && <Sidebar setCollapsed={setCollapsed} />}
       </div>
     </>
   );
@@ -197,7 +197,7 @@ function ShadesSelector() {
   const [tab, setTab] = useState("matched" as "matched" | "other");
 
   const activeClassNames =
-    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text text-transparent";
+    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text";
 
   return (
     <div className="space-y-2 px-4">
@@ -208,33 +208,35 @@ function ShadesSelector() {
             <Fragment key={shadeTab}>
               <button
                 key={shadeTab}
-                className={`relative h-10 grow border-b text-lg ${
+                className={`md:text-lg relative h-10 grow border-b text-sm ${
                   isActive
                     ? activeClassNames
                     : "border-transparent text-gray-500"
                 }`}
                 onClick={() => setTab(shadeTab as "matched" | "other")}
               >
-                <span className={isActive ? "text-white/70 blur-sm" : ""}>
-                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)} Shades
+                <span
+                  className={clsx("capitalize", {
+                    "text-white/70 blur-sm": isActive,
+                  })}
+                >
+                  {shadeTab} Shades
                 </span>
                 {isActive ? (
                   <>
                     <div
                       className={clsx(
-                        "absolute inset-0 flex items-center justify-center text-lg blur-sm",
+                        "absolute inset-0 flex items-center justify-center blur-sm",
                         activeClassNames,
                       )}
                     >
-                      <span className="text-center text-lg">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        Shades
+                      <span className="md:text-lg text-center text-sm capitalize">
+                        {shadeTab} Shades
                       </span>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-center text-lg text-white/70">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
-                        Shades
+                      <span className="md:text-lg text-center text-sm capitalize text-white/70">
+                        {shadeTab} Shades
                       </span>
                     </div>
                   </>
@@ -274,7 +276,7 @@ function MatchedShades() {
   return (
     <>
       <div className="flex flex-col items-start">
-        <div className="inline-flex items-center gap-x-2 rounded-full border border-white/80 px-2 py-1 text-white/80">
+        <div className="inline-flex h-6 items-center gap-x-2 rounded-full border border-white/80 px-2 py-1 text-white/80">
           <div
             className="size-3 rounded-full"
             style={{ backgroundColor: hexSkin }}
@@ -285,8 +287,8 @@ function MatchedShades() {
           <div className="flex w-full max-w-md">
             {tone_types.map((option, index) => (
               <button
-                key={index}
-                className={`w-full border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
+                key={option.id}
+                className={`flex h-[26px] w-full items-center justify-center border border-transparent py-2 text-xs text-white transition-all data-[selected=true]:scale-[1.15] data-[selected=true]:border-white`}
                 data-selected={selectedTne.name === option.name}
                 style={{
                   background: option.color,
@@ -300,7 +302,9 @@ function MatchedShades() {
         </div>
 
         <div className="w-full text-left">
-          <button className="py-2 text-[0.625rem] text-white">View all</button>
+          <button className="sm:py-2 text-[0.625rem] text-white">
+            View all
+          </button>
         </div>
 
         {data ? (
@@ -357,13 +361,13 @@ function OtherShades() {
   }
 
   return (
-    <div className="flex w-full flex-col items-start gap-2">
+    <div className="flex w-full flex-col items-start gap-1">
       <div className="flex w-full items-center gap-3 overflow-x-auto no-scrollbar">
         {skin_tones.map((tone, index) => (
           <div
             key={index}
             className={clsx(
-              "inline-flex shrink-0 grow items-center gap-x-2 rounded-full border px-2 py-1 text-white",
+              "inline-flex h-[26px] shrink-0 items-center gap-x-2 rounded-full border px-2 py-1 text-white",
               selectedTone.name === tone.name
                 ? "border-white"
                 : "border-transparent",
@@ -402,7 +406,7 @@ function OtherShades() {
         ))}
       </div>
       <div className="w-full text-left">
-        <button className="py-2 text-[0.625rem] text-white">View all</button>
+        <button className="sm:py-2 text-[0.625rem] text-white">View all</button>
       </div>
 
       {data ? (
@@ -442,7 +446,7 @@ function ProductList({ products }: { products: Array<Product> }) {
         return (
           <button
             key={index}
-            className="relative block w-[110px] text-left shadow"
+            className="sm:w-[110px] relative block w-[80px] text-left shadow"
             onClick={() => {
               setSelected(product);
               window.open(
@@ -451,7 +455,7 @@ function ProductList({ products }: { products: Array<Product> }) {
               );
             }}
           >
-            <div className="relative h-[80px] w-[110px] overflow-hidden">
+            <div className="sm:h-[80px] sm:w-[110px] relative h-[58px] w-[80px] overflow-hidden">
               <img
                 src={imageUrl}
                 alt="Product"
@@ -510,26 +514,26 @@ function RecorderStatus() {
   const { finish } = useCamera();
 
   return (
-    <div className="another:top-14 ipse:top-10 absolute inset-x-0 flex items-center justify-center gap-4">
+    <div className="absolute inset-x-0 flex items-center justify-center gap-4 ipse:top-10 another:top-14">
       <button
-        className="ipse:size-5 another:size-8 flex items-center justify-center"
+        className="flex items-center justify-center ipse:size-5 another:size-8"
         onClick={handleStartPause}
       >
         {isPaused ? (
-          <CirclePlay className="ipse:size-4 another:size-6 text-white" />
+          <CirclePlay className="text-white ipse:size-4 another:size-6" />
         ) : isRecording ? (
-          <PauseCircle className="ipse:size-4 another:size-6 text-white" />
+          <PauseCircle className="text-white ipse:size-4 another:size-6" />
         ) : null}
       </button>
-      <span className="ipse:size-2 another:size-4 relative flex">
+      <span className="relative flex ipse:size-2 another:size-4">
         {isRecording ? (
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
         ) : null}
-        <span className="ipse:size-2 another:size-4 relative inline-flex rounded-full bg-red-500"></span>
+        <span className="relative inline-flex rounded-full bg-red-500 ipse:size-2 another:size-4"></span>
       </span>
       <div className="font-serif text-white">{formattedTime}</div>
       <button
-        className="ipse:size-5 another:size-8 flex items-center justify-center"
+        className="flex items-center justify-center ipse:size-5 another:size-8"
         onClick={
           isRecording
             ? () => {
@@ -540,9 +544,9 @@ function RecorderStatus() {
         }
       >
         {isRecording || isPaused ? (
-          <StopCircle className="ipse:size-4 another:size-6 text-white" />
+          <StopCircle className="text-white ipse:size-4 another:size-6" />
         ) : (
-          <CirclePlay className="ipse:size-4 another:size-6 text-white" />
+          <CirclePlay className="text-white ipse:size-4 another:size-6" />
         )}
       </button>
     </div>
@@ -556,7 +560,7 @@ interface SidebarProps {
 function Sidebar({ setCollapsed }: SidebarProps) {
   const { flipCamera, compareCapture, resetCapture, screenShoot } = useCamera();
   return (
-    <div className="another:bottom-96 ipse:mb-5 another:mb-0 ipse:bottom-80 ipse:right-7 ipse:-mr-1 another:right-5 another:-mr-1 pointer-events-none absolute flex flex-col items-center justify-center [&_button]:pointer-events-auto">
+    <div className="pointer-events-none flex flex-col items-center justify-center place-self-end pb-4 pr-5 [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
         <div
           className="absolute inset-0 rounded-full border-2 border-transparent"
@@ -571,33 +575,33 @@ function Sidebar({ setCollapsed }: SidebarProps) {
           }
         />
 
-        <div className="ipse:px-1 ipse:py-1.5 another:px-1.5 another:py-2 flex flex-col gap-4 rounded-full bg-black/25 backdrop-blur-md">
+        <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
           <button className="" onClick={screenShoot}>
-            <Icons.camera className="ipse:size-4 another:size-6 text-white" />
+            <Icons.camera className="sm:size-6 size-4 text-white" />
           </button>
           <button className="" onClick={flipCamera}>
-            <Icons.flipCamera className="ipse:size-4 another:size-6 text-white" />
+            <Icons.flipCamera className="sm:size-6 size-4 text-white" />
           </button>
           <button
             className=""
             onClick={() => setCollapsed((prevState) => !prevState)}
           >
-            <Icons.expand className="ipse:size-4 another:size-6 text-white" />
+            <Icons.expand className="sm:size-6 size-4 text-white" />
           </button>
           <button className="" onClick={compareCapture}>
-            <Icons.compare className="ipse:size-4 another:size-6 text-white" />
+            <Icons.compare className="sm:size-6 size-4 text-white" />
           </button>
           <button className="">
             <Icons.reset
               onClick={resetCapture}
-              className="ipse:size-4 another:size-6 text-white"
+              className="sm:size-6 size-4 text-white"
             />
           </button>
           <button className="hidden">
-            <Icons.upload className="ipse:size-4 another:size-6 text-white" />
+            <Icons.upload className="sm:size-6 size-4 text-white" />
           </button>
           <button className="hidden">
-            <Icons.share className="ipse:size-4 another:size-6 text-white" />
+            <Icons.share className="sm:size-6 size-4 text-white" />
           </button>
         </div>
       </div>

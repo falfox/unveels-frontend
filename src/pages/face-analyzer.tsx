@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFragrancesProductQuery } from "../api/fragrances";
 import { useLipsProductQuery } from "../api/lips";
 import { useLookbookProductQuery } from "../api/lookbook";
@@ -267,8 +267,19 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
     <div className="flex h-screen flex-col bg-black font-sans text-white">
       {/* Navigation */}
       <div className="mb-14">
-        <RecorderStatus />
-        <TopNavigation cart={inferenceResult.length > 0} />
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+          <button className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl">
+            <ChevronLeft className="size-6 text-white" />
+          </button>
+
+          <Link
+            type="button"
+            className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl"
+            to="/"
+          >
+            <X className="size-6 text-white" />
+          </Link>
+        </div>
       </div>
 
       {/* Profile Section */}
@@ -309,7 +320,7 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
                 "w-full translate-y-0.5 border-b-2 py-2",
                 tab.title === selectedTab
                   ? "border-[#CA9C43] bg-gradient-to-r from-[#92702D] to-[#CA9C43] bg-clip-text text-transparent"
-                  : "border-transparent",
+                  : "border-transparent text-[#9E9E9E]",
               )}
               onClick={() => setTab(tab.title)}
             >
@@ -405,7 +416,9 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
   return (
     <div className="w-full overflow-auto px-4 py-8">
       <div className="pb-14">
-        <h2 className="pb-4 text-xl font-bold">Perfumes Recommendations</h2>
+        <h2 className="pb-4 text-xl font-bold lg:text-2xl">
+          Perfumes Recommendations
+        </h2>
         {fragrances ? (
           <div className="flex w-full gap-4 overflow-x-auto no-scrollbar">
             {fragrances.items.map((product, index) => {
@@ -434,7 +447,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {product.name}
                       </h3>
                       <p className="text-[0.625rem] text-white/60">
@@ -443,7 +456,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                         />
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                    <div className="flex flex-wrap items-center justify-end gap-x-1 pt-1">
                       <span className="text-sm font-bold text-white">
                         ${product.price}
                       </span>
@@ -503,11 +516,11 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {profile.name}
                       </h3>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                    <div className="flex flex-wrap items-center justify-end gap-x-1 pt-1">
                       <span className="text-sm font-bold text-white">
                         $
                         {profile.products.reduce(
@@ -566,7 +579,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
 
                   <div className="flex items-start justify-between py-2">
                     <div className="w-full">
-                      <h3 className="line-clamp-2 h-10 text-sm font-semibold text-white">
+                      <h3 className="text-xsfont-semibold line-clamp-1 text-white">
                         {product.name}
                       </h3>
                       <p className="text-[0.625rem] text-white/60">
@@ -575,7 +588,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                         />
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-x-1">
+                    <div className="flex flex-wrap items-center justify-end gap-x-1 pt-1">
                       <span className="text-sm font-bold text-white">
                         ${product.price}
                       </span>
@@ -620,7 +633,7 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
   }
 
   return (
-    <div className="grid flex-1 grid-cols-1 gap-4 space-y-6 overflow-auto px-10 py-6 md:grid-cols-2">
+    <div className="grid flex-1 grid-cols-1 gap-4 space-y-6 overflow-auto px-10 py-6 md:grid-cols-2 md:space-y-0">
       <FeatureSection
         icon={<Icons.face className="size-12" />}
         title="Face"
@@ -677,7 +690,7 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
       <FeatureSection
         icon={<Icons.cheekbones className="size-12" />}
         title="Cheekbones"
-        features={[{ name: "cheekbones", value: data[0].outputLabel }]}
+        features={[{ name: "Cheekbones", value: data[0].outputLabel }]}
       />
       <FeatureSection
         icon={<Icons.nose className="size-12" />}
@@ -723,7 +736,11 @@ function FeatureSection({
                 style={{ backgroundColor: feature.hex }}
               ></div>
             ) : (
-              <div className="text-sm">{feature.value}</div>
+              <ul>
+                <li className="list-inside list-disc text-sm">
+                  {feature.value}
+                </li>
+              </ul>
             )}
           </div>
         ))}

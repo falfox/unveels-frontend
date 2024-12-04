@@ -4,6 +4,7 @@ import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   baseUrl,
   buildSearchParams,
+  createSimpleAndConfigurableFilters,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
 
@@ -19,16 +20,71 @@ export function useEyeshadowsQuery({
   return useQuery({
     queryKey: ["products", "eyeshadows", color, hexcodes, texture],
     queryFn: async () => {
-      const baseFilters = [
-        {
+      const { simpleFilters, configurableFilters } =
+        createSimpleAndConfigurableFilters([
+          {
+            filters: [
+              {
+                field: "eye_makeup_product_type",
+                value: getEyeMakeupProductTypeIds(["Eyeshadows"]).join(","),
+                condition_type: "in",
+              },
+            ],
+          },
+        ]);
+
+      if (color) {
+        simpleFilters.push({
           filters: [
             {
-              field: "eye_makeup_product_type",
-              value: getEyeMakeupProductTypeIds(["Eyeshadows"]).join(","),
-              condition_type: "in",
+              field: "color",
+              value: color,
+              condition_type: "eq",
             },
           ],
-        },
+        });
+      }
+
+      if (texture) {
+        simpleFilters.push({
+          filters: [
+            {
+              field: "texture",
+              value: texture,
+              condition_type: "eq",
+            },
+          ],
+        });
+      }
+
+      const [simpleResponse, configurableResponse] = await Promise.all([
+        fetch(
+          baseUrl + "/rest/V1/products?" + buildSearchParams(simpleFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+        fetch(
+          baseUrl +
+            "/rest/V1/products?" +
+            buildSearchParams(configurableFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+      ]);
+
+      const simpleResults = (await simpleResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const configurableResults = (await configurableResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const combinedResults = [
+        ...simpleResults.items,
+        ...configurableResults.items,
       ];
 
       const filters = [];
@@ -40,18 +96,6 @@ export function useEyeshadowsQuery({
               field: "color",
               value: color,
               condition_type: "eq",
-            },
-          ],
-        });
-      }
-
-      if (hexcodes) {
-        filters.push({
-          filters: [
-            {
-              field: "hexacode",
-              value: hexcodes.join(","),
-              condition_type: "finset",
             },
           ],
         });
@@ -69,18 +113,12 @@ export function useEyeshadowsQuery({
         });
       }
 
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters]),
+      return fetchConfigurableProducts(
         {
-          headers: defaultHeaders,
+          items: combinedResults,
         },
+        filters,
       );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return await fetchConfigurableProducts(results, filters);
     },
   });
 }

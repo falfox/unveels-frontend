@@ -8,10 +8,11 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { EyeShadowProvider, useEyeShadowContext } from "./eye-shadow-context";
 import { useEyeshadowsQuery } from "./eye-shadow-query";
+import { ColorPalette } from "../../../../components/color-palette";
 
 export function EyeShadowSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <ColorSelector />
       </div>
@@ -77,32 +78,27 @@ function ColorSelector() {
   }, [selectedMode, selectedColors, setSelectedColors]);
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColors([]);
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {/* {renderPaletteItems()} */}
         {extracted_sub_colors
           ? extracted_sub_colors.map((color, index) => (
-              <button
+              <ColorPalette
                 key={color}
-                type="button"
-                className={clsx(
-                  "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
-                  {
-                    "border-white/80": selectedColors.includes(color),
-                  },
-                )}
-                style={{ background: color }}
+                size="large"
+                selected={selectedColors.includes(color)}
+                palette={{ color }}
                 onClick={() => handleColorClick(color)}
-              ></button>
+              />
             ))
           : null}
       </div>
@@ -115,14 +111,14 @@ const textures = filterTextures(["Metallic", "Matte", "Shimmer"]);
 function TextureSelector() {
   const { selectedTexture, setSelectedTexture } = useEyeShadowContext();
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-1 no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -136,7 +132,7 @@ function TextureSelector() {
               }
             }}
           >
-            <span className="text-sm">{texture.label}</span>
+            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -160,14 +156,14 @@ function ModeSelector() {
 
   return (
     <>
-      <div className="mx-auto w-full py-2 lg:max-w-xl">
-        <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+      <div className="mx-auto w-full py-1 sm:py-2">
+        <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
           {modes.map((mode, index) => (
             <button
               key={mode.name}
               type="button"
               className={clsx(
-                "relative inline-flex items-center gap-x-2 rounded-full px-3 py-1 text-center text-sm transition-transform",
+                "relative inline-flex items-center gap-x-2 rounded-full px-1 py-1 text-center text-sm transition-transform",
                 {
                   "-translate-y-0.5 text-white": selectedMode === mode.name,
                   "text-white/80": selectedMode !== mode.name,
@@ -180,7 +176,9 @@ function ModeSelector() {
                   {mode.name}
                 </div>
               ) : null}
-              <span className="relative text-sm">{mode.name}</span>
+              <span className="relative text-[9.8px] sm:text-sm">
+                {mode.name}
+              </span>
             </button>
           ))}
 
@@ -188,7 +186,7 @@ function ModeSelector() {
         </div>
       </div>
       {currentMode ? (
-        <div className="mx-auto w-full py-2 lg:max-w-xl">
+        <div className="mx-auto w-full py-1 sm:py-2">
           <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
             {[...Array(currentMode.count)].map((_, index) => (
               <button
@@ -204,9 +202,9 @@ function ModeSelector() {
                 onClick={() => setSelectModeIndex(index)}
               >
                 <img
-                  src={`/eyeshadows/eyeshadow-${currentMode.name.toLowerCase()}-${index + 1}.png`}
+                  src={`/media/unveels/vto/eyeshadows/eyeshadow-${currentMode.name.toLowerCase()}-${index + 1}.png`}
                   alt="Eye shadow"
-                  className="size-12 shrink-0"
+                  className="size-[35px] shrink-0 sm:size-[50px] lg:size-[65px]"
                 />
               </button>
             ))}
@@ -227,7 +225,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

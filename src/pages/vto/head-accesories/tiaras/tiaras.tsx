@@ -11,7 +11,7 @@ import { colors } from "../../../../api/attributes/color";
 
 export function TiaraSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <FamilyColorSelector />
       <ColorSelector />
       <ModeSelector />
@@ -32,7 +32,7 @@ function FamilyColorSelector() {
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -45,7 +45,7 @@ function FamilyColorSelector() {
               background: item.hex,
             }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -66,23 +66,23 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full !border-t-0 pb-4 lg:max-w-xl">
+    <div className="mx-auto w-full !border-t-0">
       <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex size-[1.875rem] shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80 sm:size-10"
           onClick={() => {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -107,22 +107,28 @@ function ModeSelector() {
 
   return (
     <>
-      <div className="flex h-10 w-full items-center justify-between text-center">
+      <div className="flex h-[35px] w-full items-center justify-between text-center sm:h-10">
         <button
-          className={clsx("relative h-10 grow text-lg", {
-            "text-white": selectedMode === "occasions",
-            "text-white/60": selectedMode !== "occasions",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "occasions",
+              "text-white/60": selectedMode !== "occasions",
+            },
+          )}
           onClick={() => setSelectedMode("occasions")}
         >
           Occasion
         </button>
         <div className="h-5 border-r border-white"></div>
         <button
-          className={clsx("relative h-10 grow text-lg", {
-            "text-white": selectedMode === "materials",
-            "text-white/60": selectedMode !== "materials",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "materials",
+              "text-white/60": selectedMode !== "materials",
+            },
+          )}
           onClick={() => setSelectedMode("materials")}
         >
           Material
@@ -146,7 +152,7 @@ function OccasionSelector() {
           key={occasion.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedOccasion === occasion.value,
@@ -154,7 +160,7 @@ function OccasionSelector() {
           )}
           onClick={() => setSelectedOccasion(occasion.value)}
         >
-          <span className="text-sm">{occasion.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{occasion.label}</span>
         </button>
       ))}
     </div>
@@ -189,7 +195,7 @@ function FabricSelector() {
           key={material.name}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedMaterial === material.name,
@@ -202,7 +208,7 @@ function FabricSelector() {
             alt={material.name}
             className="size-6 shrink-0"
           />
-          <span className="text-sm">{material.name}</span>
+          <span className="text-[9.8px] sm:text-sm">{material.name}</span>
         </button>
       ))}
     </div>
@@ -219,7 +225,7 @@ function TiaraProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (

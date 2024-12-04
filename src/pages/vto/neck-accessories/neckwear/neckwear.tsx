@@ -35,7 +35,7 @@ function useActiveNeckwear(): "Chokers" | "Necklaces" | "Pendants" {
 
 export function NeckwearSelector() {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <FamilyColorSelector />
       <ColorSelector />
       <NeckwearProductList />
@@ -48,14 +48,14 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full py-2 space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -68,7 +68,7 @@ function FamilyColorSelector() {
               background: item.hex,
             }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -88,23 +88,23 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="mx-auto w-full !border-t-0 pb-4 lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full !border-t-0">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -133,7 +133,7 @@ function NeckwearProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

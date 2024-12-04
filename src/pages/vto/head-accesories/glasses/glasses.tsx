@@ -12,15 +12,15 @@ import { filterMaterials } from "../../../../api/attributes/material";
 
 export function GlassesSelector() {
   return (
-      <div className="w-full px-4 mx-auto divide-y lg:max-w-xl">
-        <FamilyColorSelector />
+    <div className="mx-auto w-full divide-y px-4">
+      <FamilyColorSelector />
 
-        <ColorSelector />
+      <ColorSelector />
 
-        <ModeSelector />
+      <ModeSelector />
 
-        <ProductList />
-      </div>
+      <ProductList />
+    </div>
   );
 }
 
@@ -29,22 +29,28 @@ function ModeSelector() {
 
   return (
     <>
-      <div className="flex items-center justify-between w-full h-10 text-center">
+      <div className="flex h-[35px] w-full items-center justify-between text-center sm:h-10">
         <button
-          className={clsx("relative h-10 grow text-lg", {
-            "text-white": selectedMode === "shapes",
-            "text-white/60": selectedMode !== "shapes",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "shapes",
+              "text-white/60": selectedMode !== "shapes",
+            },
+          )}
           onClick={() => setSelectedMode("shapes")}
         >
           Shapes
         </button>
         <div className="h-5 border-r border-white"></div>
         <button
-          className={clsx("relative h-10 grow text-lg", {
-            "text-white": selectedMode === "material",
-            "text-white/60": selectedMode !== "material",
-          })}
+          className={clsx(
+            "relative grow text-[11.2px] sm:text-base lg:text-[20.8px]",
+            {
+              "text-white": selectedMode === "material",
+              "text-white/60": selectedMode !== "material",
+            },
+          )}
           onClick={() => setSelectedMode("material")}
         >
           Material
@@ -61,14 +67,14 @@ function FamilyColorSelector() {
 
   return (
     <div
-      className="flex items-center w-full py-2 space-x-2 overflow-x-auto no-scrollbar"
+      className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
       {colors.map((item, index) => (
         <button
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent px-3 py-1 text-white/80",
+            "inline-flex h-5 shrink-0 items-center gap-x-2 rounded-full border border-transparent px-2 py-1 text-white/80",
             {
               "border-white/80": colorFamily === item.value,
             },
@@ -81,7 +87,7 @@ function FamilyColorSelector() {
               background: item.hex,
             }}
           />
-          <span className="text-sm">{item.label}</span>
+          <span className="text-[0.625rem]">{item.label}</span>
         </button>
       ))}
     </div>
@@ -103,23 +109,23 @@ function ColorSelector() {
   ).flatMap((item) => item.split(","));
 
   return (
-    <div className="w-full py-4 mx-auto lg:max-w-xl">
-      <div className="flex items-center w-full space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className="inline-flex items-center border border-transparent rounded-full size-10 shrink-0 gap-x-2 text-white/80"
+          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={() => {
             setSelectedColor(null);
           }}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <button
             key={color}
             type="button"
             className={clsx(
-              "inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80",
               {
                 "border-white/80": selectedColor === color,
               },
@@ -166,7 +172,7 @@ function ShapeSelector() {
           key={shape.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedShape === shape.value,
@@ -174,7 +180,7 @@ function ShapeSelector() {
           )}
           onClick={() => setSelectedShape(shape.value)}
         >
-          <span className="text-sm">{shape.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{shape.label}</span>
         </button>
       ))}
     </div>
@@ -193,7 +199,7 @@ function MaterialSelector() {
           key={material.value}
           type="button"
           className={clsx(
-            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+            "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
             {
               "selectedShape-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                 selectedMaterial === material.value,
@@ -201,7 +207,7 @@ function MaterialSelector() {
           )}
           onClick={() => setSelectedMaterial(material.value)}
         >
-          <span className="text-sm">{material.label}</span>
+          <span className="text-[9.8px] sm:text-sm">{material.label}</span>
         </button>
       ))}
     </div>
@@ -218,7 +224,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-4 pt-4 pb-2 overflow-x-auto no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

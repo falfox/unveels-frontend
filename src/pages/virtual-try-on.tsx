@@ -156,8 +156,8 @@ function Main() {
           }}
         ></div>
       </div>
-      <RecorderStatus />
-      <TopNavigation />
+      {/* <RecorderStatus /> */}
+      <TopNavigation item={false} cart={false} />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
         <Sidebar />
@@ -218,13 +218,13 @@ function MainContent() {
 }
 
 export function TryOnSelector() {
-  const [tab, setTab] = useState(null as "makeup" | "accessories" | null);
+  const [tab, setTab] = useState("makeup" as "makeup" | "accessories" | null);
 
   const activeClassNames =
     "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text text-transparent";
 
   return (
-    <div className="mx-auto w-full space-y-2 px-4 lg:max-w-xl">
+    <div className="mx-auto w-full max-w-lg space-y-2 px-4">
       <div className="flex h-10 w-full items-center justify-between border-b border-gray-600 text-center">
         {["makeup", "accessories"].map((shadeTab) => {
           const isActive = tab === shadeTab;
@@ -232,41 +232,41 @@ export function TryOnSelector() {
             <Fragment key={shadeTab}>
               <button
                 key={shadeTab}
-                className={`relative h-10 grow border-b text-lg ${
+                className={`relative h-10 grow border-b font-luxury text-[12.6px] sm:text-lg lg:text-2xl ${
                   isActive
                     ? activeClassNames
                     : "border-transparent text-gray-500"
                 }`}
                 onClick={() => setTab(shadeTab as "makeup" | "accessories")}
               >
-                <span className={isActive ? "text-white/70 blur-sm" : ""}>
-                  {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}
+                <span
+                  className={clsx(
+                    "capitalize",
+                    isActive ? "text-white/70 blur-sm" : "",
+                  )}
+                >
+                  {shadeTab}
                 </span>
                 {isActive ? (
                   <>
                     <div
                       className={clsx(
-                        "absolute inset-0 flex items-center justify-center text-lg blur-sm",
+                        "absolute inset-0 flex items-center justify-center text-[12.6px] blur-sm sm:text-lg lg:text-2xl",
                         activeClassNames,
                       )}
                     >
-                      <span className="text-center text-lg">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
+                      <span className="text-center text-[12.6px] capitalize sm:text-lg lg:text-2xl">
+                        {shadeTab}
                       </span>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-center text-lg text-white/70">
-                        {shadeTab.charAt(0).toUpperCase() + shadeTab.slice(1)}{" "}
+                      <span className="text-center text-[12.6px] capitalize text-white/70 sm:text-lg lg:text-2xl">
+                        {shadeTab}
                       </span>
                     </div>
                   </>
                 ) : null}
               </button>
-              {shadeTab === "matched" && (
-                <div className="h-10 px-px py-2">
-                  <div className="h-full border-r border-white"></div>
-                </div>
-              )}
             </Fragment>
           );
         })}
@@ -308,7 +308,7 @@ export function Makeups() {
   return (
     <>
       <div className="flex flex-col items-start">
-        <div className="flex w-full min-w-0 justify-between py-4 peer-has-[data-mode]:hidden">
+        <div className="flex w-full min-w-0 justify-around gap-x-4 py-4 peer-has-[data-mode]:hidden">
           {shadeOptions.map((option, index) => (
             <button
               key={index}
@@ -318,7 +318,7 @@ export function Makeups() {
             >
               <div
                 className={clsx(
-                  "relative flex w-12 shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all",
+                  "text-dm relative flex w-12 shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all",
                   {
                     "bg-gradient-to-r from-[#CA9C43] via-[#916E2B] to-[#473209]":
                       selectedMakeup === option.name,
@@ -342,7 +342,9 @@ export function Makeups() {
                   }
                 />
               </div>
-              <div className="text-white">{option.name}</div>
+              <div className="text-center text-sm !leading-4 text-white lg:text-lg">
+                {option.name}
+              </div>
             </button>
           ))}
         </div>
@@ -390,17 +392,17 @@ export function Accessories() {
   return (
     <>
       <div className="flex flex-col items-start">
-        <div className="flex w-full min-w-0 justify-between py-4 peer-has-[data-mode]:hidden">
+        <div className="flex w-full min-w-0 justify-around gap-x-4 py-4 peer-has-[data-mode]:hidden">
           {shadeOptions.map((option, index) => (
             <button
               key={index}
-              className="flex flex-col items-center space-y-2"
+              className="flex flex-col items-center justify-center space-y-2"
               data-selected={selectedAccessory === option.name}
               onClick={() => setSelectedAccessory(option.name)}
             >
               <div
                 className={clsx(
-                  "relative flex w-12 shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all",
+                  "relative flex h-[34px] w-[42px] shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all sm:h-[44.2px] sm:w-[54.6px]",
                   {
                     "bg-gradient-to-r from-[#CA9C43] via-[#916E2B] to-[#473209]":
                       selectedAccessory === option.name,
@@ -424,7 +426,9 @@ export function Accessories() {
                   }
                 />
               </div>
-              <div className="text-white">{option.name}</div>
+              <div className="text-center text-[9.8px] !leading-4 text-white sm:text-sm lg:text-lg">
+                {option.name}
+              </div>
             </button>
           ))}
         </div>
@@ -540,33 +544,6 @@ export function TopNavigation({
         >
           <X className="size-6 text-white" />
         </Link>
-        <div className="relative -m-0.5 p-0.5">
-          <div
-            className="absolute inset-0 rounded-full border-2 border-transparent"
-            style={
-              {
-                background: `linear-gradient(148deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.77) 100%) border-box`,
-                "-webkit-mask": `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                mask: `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                "-webkit-mask-composite": "destination-out",
-                "mask-composite": "exclude",
-              } as CSSProperties
-            }
-          />
-          <button
-            type="button"
-            className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-            onClick={flipCamera}
-          >
-            <Icons.flipCamera className="size-6 text-white" />
-          </button>
-        </div>
-        <button
-          type="button"
-          className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-black/25 backdrop-blur-3xl"
-        >
-          <Icons.myCart className="size-6 text-white" />
-        </button>
       </div>
     </div>
   );
@@ -591,23 +568,23 @@ function Sidebar() {
 
         <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
           <button className="">
-            <Icons.camera className="size-6 text-white" />
+            <Icons.camera className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.flipCamera className="size-6 text-white" />
+            <Icons.flipCamera className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.expand className="size-6 text-white" />
+            <Icons.expand className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.compare className="size-6 text-white" />
+            <Icons.compare className="size-4 text-white sm:size-6" />
           </button>
           <button className="">
-            <Icons.reset className="size-6 text-white" />
+            <Icons.reset className="size-4 text-white sm:size-6" />
           </button>
           <UploadMediaDialog />
           <button>
-            <Icons.share className="size-6 text-white" />
+            <Icons.share className="size-4 text-white sm:size-6" />
           </button>
         </div>
       </div>
@@ -620,7 +597,7 @@ function UploadMediaDialog() {
     <Dialog.Root>
       <Dialog.Trigger asChild>
         <button type="button" className="flex items-center justify-center">
-          <Icons.upload className="size-6 text-white" />
+          <Icons.upload className="size-4 text-white sm:size-6" />
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>

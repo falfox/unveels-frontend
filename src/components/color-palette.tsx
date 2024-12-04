@@ -40,10 +40,10 @@ export function ColorPalette({
   if ("color" in palette) {
     return (
       <button
-        className={clsx("shrink-0 rounded-full border border-transparent", {
-          "size-10": size === "large",
+        className={clsx("shrink-0 rounded-full border border-transparent transform transition-all", {
+          "size-5 sm:size-[1.875rem]": size === "large",
           "size-2.5": size === "small",
-          "border-white": selected,
+          "border-white scale-[1.3]": selected,
         })}
         style={{ background: palette.color }}
         onClick={onClick}

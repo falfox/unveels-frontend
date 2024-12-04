@@ -11,7 +11,7 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 
 export function SingleLipColorSelector({ product }: { product: Product }) {
   return (
-    <div className="mx-auto w-full divide-y px-4 lg:max-w-xl">
+    <div className="mx-auto w-full divide-y px-4">
       <div>
         <ColorSelector product={product} />
       </div>
@@ -75,28 +75,23 @@ function ColorSelector({ product }: { product: Product }) {
   ).flatMap((color) => color.split(","));
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto py-2.5 no-scrollbar">
         <button
           type="button"
-          className="inline-flex size-10 shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
+          className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
           onClick={handleClearSelection}
         >
-          <Icons.empty className="size-10" />
+          <Icons.empty className="size-5 sm:size-[1.875rem]" />
         </button>
         {extracted_sub_colors.map((color, index) => (
-          <button
-            type="button"
-            key={index}
+          <ColorPalette
+            key={color}
             onClick={() => handleColorClick(color)}
-            className={clsx("cursor-pointer")}
-          >
-            <ColorPalette
-              size="large"
-              palette={{ color }}
-              selected={selectedColors.includes(color)}
-            />
-          </button>
+            size="large"
+            palette={{ color }}
+            selected={selectedColors.includes(color)}
+          />
         ))}
       </div>
       {/* Removed the error message since all buttons are enabled */}
@@ -112,14 +107,14 @@ function TextureSelector({ product }: { product: Product }) {
   const textures = filterTexturesByValue(productTextures);
 
   return (
-    <div className="mx-auto w-full py-4 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.label}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-3 py-1 text-white/80",
+              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -133,7 +128,7 @@ function TextureSelector({ product }: { product: Product }) {
               }
             }}
           >
-            <span className="text-sm">{texture.label}</span>
+            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -166,14 +161,14 @@ function ShadesSelector({ product }: { product: Product }) {
   }
 
   return (
-    <div className="mx-auto w-full py-2 lg:max-w-xl">
-      <div className="flex w-full items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
         {shades.map((shade, index) => (
           <button
             key={shade}
             type="button"
             className={clsx(
-              "relative inline-flex items-center gap-x-2 rounded-full px-3 py-1 text-center text-sm transition-transform",
+              "relative inline-flex items-center gap-x-2 rounded-full px-1 py-1 text-center text-sm transition-transform",
               {
                 "-translate-y-0.5 text-white": selectedMode === shade,
                 "text-white/80": selectedMode !== shade,
@@ -186,7 +181,7 @@ function ShadesSelector({ product }: { product: Product }) {
                 {shade}
               </div>
             ) : null}
-            <span className="relative text-sm">{shade}</span>
+            <span className="relative text-[9.8px] sm:text-sm">{shade}</span>
           </button>
         ))}
 
@@ -198,7 +193,7 @@ function ShadesSelector({ product }: { product: Product }) {
 
 function ProductList({ product }: { product: Product }) {
   return (
-    <div className="flex w-full gap-4 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
+    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {[product].map((product, index) => {
         return <VTOProductCard product={product} key={product.id} />;
       })}

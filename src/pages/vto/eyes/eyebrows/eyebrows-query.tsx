@@ -1,13 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  getEyeMakeupProductTypeIds,
-  getLipsMakeupProductTypeIds,
-  lips_makeup_product_types,
-} from "../../../../api/attributes/makeups";
 import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   baseUrl,
   buildSearchParams,
+  createSimpleAndConfigurableFilters,
   fetchConfigurableProducts,
 } from "../../../../utils/apiUtils";
 
@@ -21,16 +17,71 @@ export function useEyebrowsQuery({
   return useQuery({
     queryKey: ["products", "eyebrows", color, pattern],
     queryFn: async () => {
-      const baseFilters = [
-        {
+      const { simpleFilters, configurableFilters } =
+        createSimpleAndConfigurableFilters([
+          {
+            filters: [
+              {
+                field: "brow_makeup_product_type",
+                value: "",
+                condition_type: "notnull",
+              },
+            ],
+          },
+        ]);
+
+      if (color) {
+        simpleFilters.push({
           filters: [
             {
-              field: "brow_makeup_product_type",
-              value: "",
-              condition_type: "notnull",
+              field: "color",
+              value: color,
+              condition_type: "eq",
             },
           ],
-        },
+        });
+      }
+
+      if (pattern) {
+        simpleFilters.push({
+          filters: [
+            {
+              field: "pattern",
+              value: pattern,
+              condition_type: "finset",
+            },
+          ],
+        });
+      }
+
+      const [simpleResponse, configurableResponse] = await Promise.all([
+        fetch(
+          baseUrl + "/rest/V1/products?" + buildSearchParams(simpleFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+        fetch(
+          baseUrl +
+            "/rest/V1/products?" +
+            buildSearchParams(configurableFilters),
+          {
+            headers: defaultHeaders,
+          },
+        ),
+      ]);
+
+      const simpleResults = (await simpleResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const configurableResults = (await configurableResponse.json()) as {
+        items: Array<Product>;
+      };
+
+      const combinedResults = [
+        ...simpleResults.items,
+        ...configurableResults.items,
       ];
 
       const filters = [];
@@ -59,18 +110,12 @@ export function useEyebrowsQuery({
         });
       }
 
-      const response = await fetch(
-        baseUrl + "/rest/V1/products?" + buildSearchParams([...baseFilters, ...filters]),
+      return fetchConfigurableProducts(
         {
-          headers: defaultHeaders,
+          items: combinedResults,
         },
+        filters,
       );
-
-      const results = (await response.json()) as {
-        items: Array<Product>;
-      };
-
-      return await fetchConfigurableProducts(results, filters);
     },
   });
 }

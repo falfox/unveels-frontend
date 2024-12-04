@@ -140,13 +140,13 @@ export const Icons = {
     </svg>
   ),
   upload: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg role="img" viewBox="0 0 25 25" {...props}>
+    <svg fill="none" viewBox="0 0 18 18" {...props}>
       <path
-        stroke="#fff"
+        stroke="currentColor"
         stroke-linecap="round"
         stroke-linejoin="round"
-        stroke-width="2"
-        d="M21.02 15.08v4a2 2 0 0 1-2 2h-14a2 2 0 0 1-2-2v-4M17.02 8.08l-5-5-5 5M12.02 3.08v12"
+        stroke-width="1.4"
+        d="M15.397 10.956v2.8a1.4 1.4 0 0 1-1.4 1.4h-9.8a1.4 1.4 0 0 1-1.4-1.4v-2.8M12.598 6.055l-3.5-3.5-3.5 3.5M9.098 2.555v8.4"
       />
     </svg>
   ),
