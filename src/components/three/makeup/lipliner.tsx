@@ -21,9 +21,14 @@ import {
 interface LiplinerProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
-const LiplinerInner: React.FC<LiplinerProps> = ({ landmarks, planeSize }) => {
+const LiplinerInner: React.FC<LiplinerProps> = ({
+  landmarks,
+  planeSize,
+  isFlipped,
+}) => {
   const { liplinerColor, liplinerPattern } = useMakeup();
 
   // Memuat semua tekstur sekaligus
@@ -60,6 +65,7 @@ const LiplinerInner: React.FC<LiplinerProps> = ({ landmarks, planeSize }) => {
       landmarks={landmarks}
       material={liplinerMaterial}
       planeSize={planeSize}
+      flipHorizontal={isFlipped}
     />
   );
 };

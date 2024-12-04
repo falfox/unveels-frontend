@@ -68,6 +68,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
   const [maskOpacity, setMaskOpacity] = useState(0.5);
 
+  const isFlipped = true;
+
   const {
     showFoundation,
     showBlush,
@@ -317,41 +319,75 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           )}
 
           {showFoundation && (
-            <Foundation planeSize={planeSize} landmarks={landmarks} />
+            <Foundation
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
-          {showBlush && <Blush planeSize={planeSize} landmarks={landmarks} />}
+          {showBlush && (
+            <Blush
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
+          )}
 
           {showConcealer && (
-            <Concealer planeSize={planeSize} landmarks={landmarks} />
+            <Concealer
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showHighlighter && (
-            <Highlighter planeSize={planeSize} landmarks={landmarks} />
+            <Highlighter
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showContour && (
-            <Contour planeSize={planeSize} landmarks={landmarks} />
+            <Contour
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLipliner && (
-            <Lipliner planeSize={planeSize} landmarks={landmarks} />
+            <Lipliner
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLipplumper && (
-            <Lipplumper planeSize={planeSize} landmarks={landmarks} />
+            <Lipplumper
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLipColor && (
             <LipColor
               planeSize={planeSize}
               landmarks={landmarks}
-              isFlipped={true}
+              isFlipped={isFlipped}
             />
           )}
 
           {showBronzer && (
-            <Bronzer planeSize={planeSize} landmarks={landmarks} />
+            <Bronzer
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLens && (
@@ -359,7 +395,11 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           )}
 
           {showEyebrows && (
-            <Eyebrows planeSize={planeSize} landmarks={landmarks} />
+            <Eyebrows
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {/* <HeadOccluder planeSize={planeSize} landmarks={landmarks} />
@@ -368,6 +408,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showHat && <Hat planeSize={planeSize} landmarks={landmarks} />}
 
+          <Glasess planeSize={planeSize} landmarks={landmarks} />
           {showGlasess && (
             <Glasess planeSize={planeSize} landmarks={landmarks} />
           )}

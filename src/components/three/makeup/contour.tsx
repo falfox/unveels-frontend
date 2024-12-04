@@ -22,9 +22,14 @@ import { Landmark } from "../../../types/landmark";
 interface ContourProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
-const ContourInner: React.FC<ContourProps> = ({ landmarks, planeSize }) => {
+const ContourInner: React.FC<ContourProps> = ({
+  landmarks,
+  planeSize,
+  isFlipped,
+}) => {
   const { contourMode, contourColors, contourShape } = useMakeup();
 
   // Define mappings based on shape index (0 to 5)
@@ -149,6 +154,7 @@ const ContourInner: React.FC<ContourProps> = ({ landmarks, planeSize }) => {
           landmarks={landmarks}
           material={singleMaterial}
           planeSize={planeSize}
+          flipHorizontal={isFlipped}
         />
       )}
 
@@ -159,6 +165,7 @@ const ContourInner: React.FC<ContourProps> = ({ landmarks, planeSize }) => {
               landmarks={landmarks}
               material={dualStandardMaterial}
               planeSize={planeSize}
+              flipHorizontal={isFlipped}
             />
           )}
           {contourColors[1] && (
@@ -166,6 +173,7 @@ const ContourInner: React.FC<ContourProps> = ({ landmarks, planeSize }) => {
               landmarks={landmarks}
               material={dualHighMaterial}
               planeSize={planeSize}
+              flipHorizontal={isFlipped}
             />
           )}
         </>
