@@ -510,26 +510,26 @@ function RecorderStatus() {
   const { finish } = useCamera();
 
   return (
-    <div className="absolute inset-x-0 top-14 flex items-center justify-center gap-4">
+    <div className="another:top-14 ipse:top-10 absolute inset-x-0 flex items-center justify-center gap-4">
       <button
-        className="flex size-8 items-center justify-center"
+        className="ipse:size-5 another:size-8 flex items-center justify-center"
         onClick={handleStartPause}
       >
         {isPaused ? (
-          <CirclePlay className="size-6 text-white" />
+          <CirclePlay className="ipse:size-4 another:size-6 text-white" />
         ) : isRecording ? (
-          <PauseCircle className="size-6 text-white" />
+          <PauseCircle className="ipse:size-4 another:size-6 text-white" />
         ) : null}
       </button>
-      <span className="relative flex size-4">
+      <span className="ipse:size-2 another:size-4 relative flex">
         {isRecording ? (
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
         ) : null}
-        <span className="relative inline-flex size-4 rounded-full bg-red-500"></span>
+        <span className="ipse:size-2 another:size-4 relative inline-flex rounded-full bg-red-500"></span>
       </span>
       <div className="font-serif text-white">{formattedTime}</div>
       <button
-        className="flex size-8 items-center justify-center"
+        className="ipse:size-5 another:size-8 flex items-center justify-center"
         onClick={
           isRecording
             ? () => {
@@ -540,9 +540,9 @@ function RecorderStatus() {
         }
       >
         {isRecording || isPaused ? (
-          <StopCircle className="size-6 text-white" />
+          <StopCircle className="ipse:size-4 another:size-6 text-white" />
         ) : (
-          <CirclePlay className="size-6 text-white" />
+          <CirclePlay className="ipse:size-4 another:size-6 text-white" />
         )}
       </button>
     </div>
@@ -556,7 +556,7 @@ interface SidebarProps {
 function Sidebar({ setCollapsed }: SidebarProps) {
   const { flipCamera, compareCapture, resetCapture, screenShoot } = useCamera();
   return (
-    <div className="pointer-events-none absolute bottom-96 right-5 -mr-1 flex flex-col items-center justify-center [&_button]:pointer-events-auto">
+    <div className="another:bottom-96 ipse:mb-5 another:mb-0 ipse:bottom-80 ipse:right-7 ipse:-mr-1 another:right-5 another:-mr-1 pointer-events-none absolute flex flex-col items-center justify-center [&_button]:pointer-events-auto">
       <div className="relative p-0.5">
         <div
           className="absolute inset-0 rounded-full border-2 border-transparent"
@@ -571,30 +571,33 @@ function Sidebar({ setCollapsed }: SidebarProps) {
           }
         />
 
-        <div className="flex flex-col gap-4 rounded-full bg-black/25 px-1.5 py-2 backdrop-blur-md">
+        <div className="ipse:px-1 ipse:py-1.5 another:px-1.5 another:py-2 flex flex-col gap-4 rounded-full bg-black/25 backdrop-blur-md">
           <button className="" onClick={screenShoot}>
-            <Icons.camera className="size-6 text-white" />
+            <Icons.camera className="ipse:size-4 another:size-6 text-white" />
           </button>
           <button className="" onClick={flipCamera}>
-            <Icons.flipCamera className="size-6 text-white" />
+            <Icons.flipCamera className="ipse:size-4 another:size-6 text-white" />
           </button>
           <button
             className=""
             onClick={() => setCollapsed((prevState) => !prevState)}
           >
-            <Icons.expand className="size-6 text-white" />
+            <Icons.expand className="ipse:size-4 another:size-6 text-white" />
           </button>
           <button className="" onClick={compareCapture}>
-            <Icons.compare className="size-6 text-white" />
+            <Icons.compare className="ipse:size-4 another:size-6 text-white" />
           </button>
           <button className="">
-            <Icons.reset onClick={resetCapture} className="size-6 text-white" />
+            <Icons.reset
+              onClick={resetCapture}
+              className="ipse:size-4 another:size-6 text-white"
+            />
           </button>
           <button className="hidden">
-            <Icons.upload className="size-6 text-white" />
+            <Icons.upload className="ipse:size-4 another:size-6 text-white" />
           </button>
           <button className="hidden">
-            <Icons.share className="size-6 text-white" />
+            <Icons.share className="ipse:size-4 another:size-6 text-white" />
           </button>
         </div>
       </div>
