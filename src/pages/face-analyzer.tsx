@@ -476,15 +476,6 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                     >
                       ADD TO CART
                     </button>
-                    <button
-                      type="button"
-                      className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                      }}
-                    >
-                      SEE IMPROVEMENT
-                    </button>
                   </div>
                 </div>
               );
@@ -544,7 +535,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
                     >
-                      SEE IMPROVEMENT
+                      TRY ON
                     </button>
                   </div>
                 </div>
@@ -612,7 +603,7 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                       type="button"
                       className="flex h-7 w-full items-center justify-center border border-white bg-white text-[0.5rem] font-semibold text-black"
                     >
-                      SEE IMPROVEMENT
+                      TRY ON
                     </button>
                   </div>
                 </div>

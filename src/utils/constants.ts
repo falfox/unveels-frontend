@@ -1,3 +1,4 @@
+import { metalness, roughness } from "three/webgpu";
 import { SkinAnalysisItem } from "../types/skinAnalysisItem";
 
 export const BRIGHTNESS_THRESHOLD = 60;
@@ -1781,3 +1782,31 @@ export const FACECAP = "/media/unveels/vto-assets/facecap/new.glb";
 // hdr acc
 export const HDR_ACCESORIES =
   "/media/unveels/vto-assets/light/hotel_room_1k.hdr";
+
+// hdr makeup
+export const HDR_MAKEUP =
+  "/media/unveels/vto-assets/light/studio_small_05_1k.hdr";
+
+// define material texture
+export const TEXTURE_MATTE = { roughness: 1, metalness: 0 };
+export const TEXTURE_GLOSS = { roughness: 0.2, metalness: 0 };
+export const TEXTURE_SATIN = { roughness: 0.6, metalness: 0 };
+export const TEXTURE_SHEER = { roughness: 0.1, metalness: 0 };
+export const TEXTURE_SHIMMER = { roughness: 0.5, metalness: 0.1 };
+export const TEXTURE_METALIC = { roughness: 0, metalness: 0.2 };
+export const TEXTURE_HOLOGRAPHIC = { roughness: 0, metalness: 0 };
+
+// lips map
+export const LIPS_NORMAL =
+  "/media/unveels/vto-assets/map/lip/lipcolor_normal.jpg";
+export const LIPS_RO = "/media/unveels/vto-assets/map/lip/lipcolor_ro.jpg";
+export const LIPS_MT = "/media/unveels/vto-assets/map/lip/lipcolor_mt.jpg";
+
+export const LIPS_SPRINKLE =
+  "/media/unveels/vto-assets/map/lip/lipcolor_sprinkle.png";
+export const LIPS_SHADOW =
+  "/media/unveels/vto-assets/map/lip/lipplumper_shadow.png";
+
+// blush map
+export const BLUSHON_SPRINKLE =
+  "/media/unveels/vto-assets/map/blushon/blushon_sprinkle.png";

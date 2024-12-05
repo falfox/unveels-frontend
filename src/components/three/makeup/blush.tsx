@@ -47,9 +47,14 @@ import {
 interface BlushProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
-const BlushInner: React.FC<BlushProps> = ({ landmarks, planeSize }) => {
+const BlushInner: React.FC<BlushProps> = ({
+  landmarks,
+  planeSize,
+  isFlipped,
+}) => {
   const { blushMode, blushColor, blushPattern } = useMakeup();
   // Define mappings based on shape index (0 to 5)
   const shapeIndex = useMemo(() => blushPattern, [blushPattern]);
@@ -267,58 +272,66 @@ const BlushInner: React.FC<BlushProps> = ({ landmarks, planeSize }) => {
   ]);
   return (
     <>
-      {blushMode === "One" && blushColor[0] && (
-        <FaceMesh
-          landmarks={landmarks}
-          material={singleMaterial}
-          planeSize={planeSize}
-        />
-      )}
+      <>
+        {blushMode === "One" && blushColor[0] && (
+          <FaceMesh
+            landmarks={landmarks}
+            material={singleMaterial}
+            planeSize={planeSize}
+            flipHorizontal={isFlipped}
+          />
+        )}
 
-      {blushMode === "Dual" && (
-        <>
-          {blushColor[0] && (
-            <FaceMesh
-              landmarks={landmarks}
-              material={dualStandardMaterial}
-              planeSize={planeSize}
-            />
-          )}
-          {blushColor[1] && (
-            <FaceMesh
-              landmarks={landmarks}
-              material={dualHighMaterial}
-              planeSize={planeSize}
-            />
-          )}
-        </>
-      )}
+        {blushMode === "Dual" && (
+          <>
+            {blushColor[0] && (
+              <FaceMesh
+                landmarks={landmarks}
+                material={dualStandardMaterial}
+                planeSize={planeSize}
+                flipHorizontal={isFlipped}
+              />
+            )}
+            {blushColor[1] && (
+              <FaceMesh
+                landmarks={landmarks}
+                material={dualHighMaterial}
+                planeSize={planeSize}
+                flipHorizontal={isFlipped}
+              />
+            )}
+          </>
+        )}
 
-      {blushMode === "Tri" && (
-        <>
-          {blushColor[0] && (
-            <FaceMesh
-              landmarks={landmarks}
-              material={triStandardMaterial}
-              planeSize={planeSize}
-            />
-          )}
-          {blushColor[1] && (
-            <FaceMesh
-              landmarks={landmarks}
-              material={triHighMaterial}
-              planeSize={planeSize}
-            />
-          )}
-          {blushColor[2] && (
-            <FaceMesh
-              landmarks={landmarks}
-              material={triMidMaterial}
-              planeSize={planeSize}
-            />
-          )}
-        </>
-      )}
+        {blushMode === "Tri" && (
+          <>
+            {blushColor[0] && (
+              <FaceMesh
+                landmarks={landmarks}
+                material={triStandardMaterial}
+                planeSize={planeSize}
+                flipHorizontal={isFlipped}
+              />
+            )}
+            {blushColor[1] && (
+              <FaceMesh
+                landmarks={landmarks}
+                material={triHighMaterial}
+                planeSize={planeSize}
+                flipHorizontal={isFlipped}
+              />
+            )}
+            {blushColor[2] && (
+              <FaceMesh
+                landmarks={landmarks}
+                material={triMidMaterial}
+                planeSize={planeSize}
+                flipHorizontal={isFlipped}
+              />
+            )}
+          </>
+        )}
+      </>
     </>
   );
 };

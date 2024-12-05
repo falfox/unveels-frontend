@@ -19,11 +19,13 @@ import {
 interface HighlighterProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
 const HighlighterInner: React.FC<HighlighterProps> = ({
   landmarks,
   planeSize,
+  isFlipped,
 }) => {
   const { highlighterColor, highlighterPattern } = useMakeup();
 
@@ -59,6 +61,7 @@ const HighlighterInner: React.FC<HighlighterProps> = ({
       landmarks={landmarks}
       material={HighlighterMaterial}
       planeSize={planeSize}
+      flipHorizontal={isFlipped}
     />
   );
 };

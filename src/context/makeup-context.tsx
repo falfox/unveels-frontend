@@ -1,5 +1,6 @@
 // MakeupContext.tsx
 import React, { createContext, ReactNode, useContext, useState } from "react";
+import { Texture } from "three";
 
 interface MakeupContextProps {
   //foundation
@@ -95,6 +96,25 @@ interface MakeupContextProps {
   lipColors: string[];
   setLipColors: (colors: string[]) => void;
 
+  lipTexture:
+    | "Matte"
+    | "Gloss"
+    | "Satin"
+    | "Sheer"
+    | "Shimmer"
+    | "Metalic"
+    | "Holographic";
+  setLipTexture: (
+    mode:
+      | "Matte"
+      | "Gloss"
+      | "Satin"
+      | "Sheer"
+      | "Shimmer"
+      | "Metalic"
+      | "Holographic",
+  ) => void;
+
   showBronzer: boolean;
   setShowBronzer: (show: boolean) => void;
 
@@ -127,6 +147,9 @@ interface MakeupContextProps {
 
   hairColor: string;
   setHairColor: (color: string) => void;
+
+  envMapMakeup: Texture | null;
+  setEnvMapMakeup: (texture: Texture | null) => void;
 }
 
 const MakeupContext = createContext<MakeupContextProps | undefined>(undefined);
@@ -171,6 +194,7 @@ type MakeupSelectables =
   | "showLipColor"
   | "lipColorMode"
   | "lipColors"
+  | "lipTexture"
   // Hair
   | "showHair"
   | "hairColor";
@@ -288,6 +312,16 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
     initialValues?.lipColors ?? [],
   );
 
+  const [lipTexture, setLipTexture] = useState<
+    | "Matte"
+    | "Gloss"
+    | "Satin"
+    | "Sheer"
+    | "Shimmer"
+    | "Metalic"
+    | "Holographic"
+  >(initialValues?.lipTexture ?? "Matte");
+
   const [showHair, setShowHair] = useState(initialValues?.showHair ?? false);
   const [hairColor, setHairColor] = useState(
     initialValues?.hairColor ?? "#FFFF",
@@ -304,6 +338,8 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
   const [eyebrowsPattern, setEyebrowsPattern] = useState(0);
   const [eyebrowsVisibility, setEyebrowsVisibility] = useState(0.5);
   const [eyebrowsColor, setEyebrowsColor] = useState("#FFFF");
+
+  const [envMapMakeup, setEnvMapMakeup] = useState<Texture | null>(null);
 
   return (
     <MakeupContext.Provider
@@ -398,6 +434,9 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
         lipColors,
         setLipColors,
 
+        lipTexture,
+        setLipTexture,
+
         showBronzer,
         setShowBronzer,
 
@@ -430,6 +469,9 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
 
         hairColor,
         setHairColor,
+
+        envMapMakeup,
+        setEnvMapMakeup,
       }}
     >
       {children}

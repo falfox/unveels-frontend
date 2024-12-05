@@ -106,7 +106,6 @@ const FaceMesh: React.FC<FaceMeshProps> = ({
       }
 
       position.needsUpdate = true;
-      geometryRef.current.computeVertexNormals();
     }
 
     if (meshRef.current) {
