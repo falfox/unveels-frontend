@@ -24,6 +24,7 @@ function Main() {
     setShowLipColor,
     setLipColorMode,
     setLipColors,
+    setLipTexture,
     setShowLipliner,
     setLiplinerColor,
     setLiplinerPattern,
@@ -84,6 +85,10 @@ function Main() {
 
           if (data.setLipColorMode) {
             setLipColorMode(data.setLipColorMode);
+          }
+
+          if (data.lipTexture) {
+            setLipTexture(data.setLipTexture);
           }
 
           // lipliner

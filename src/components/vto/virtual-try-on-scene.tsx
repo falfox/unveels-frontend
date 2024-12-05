@@ -12,6 +12,7 @@ import {
   VIDEO_WIDTH,
   VIDEO_HEIGHT,
   HDR_ACCESORIES,
+  HDR_MAKEUP,
 } from "../../utils/constants";
 import { ErrorOverlay } from "../error-overlay";
 import { Canvas } from "@react-three/fiber";
@@ -20,8 +21,8 @@ import VirtualTryOnThreeScene from "./virtual-try-on-three-scene";
 import { Landmark } from "../../types/landmark";
 import { useAccesories } from "../../context/accesories-context";
 import HDREnvironment from "../three/hdr-environment";
-import { result } from "lodash";
 import { Blendshape } from "../../types/blendshape";
+import { useMakeup } from "../../context/makeup-context";
 
 export function VirtualTryOnScene() {
   const webcamRef = useRef<Webcam>(null);
@@ -44,12 +45,12 @@ export function VirtualTryOnScene() {
   // Using CameraContext
   const { criterias, flipCamera } = useCamera();
   const { envMapAccesories, setEnvMapAccesories } = useAccesories();
+  const { envMapMakeup, setEnvMapMakeup } = useMakeup();
 
   const legendColors = [[128, 62, 117, 255]];
 
   useEffect(() => {
-    let isMounted = true; // Untuk mencegah pembaruan state setelah unmount
-
+    let isMounted = true;
     const initializeFaceLandmarker = async () => {
       try {
         const filesetResolver = await FilesetResolver.forVisionTasks(
@@ -61,7 +62,7 @@ export function VirtualTryOnScene() {
             baseOptions: {
               modelAssetPath:
                 "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-              delegate: "GPU",
+              delegate: "CPU",
             },
             runningMode: "VIDEO",
             numFaces: 1,
@@ -274,6 +275,7 @@ export function VirtualTryOnScene() {
         gl={{
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1,
+          antialias: true,
           outputColorSpace: SRGBColorSpace,
         }}
       >
@@ -281,6 +283,8 @@ export function VirtualTryOnScene() {
           hdrPath={HDR_ACCESORIES}
           onLoaded={setEnvMapAccesories}
         />
+
+        <HDREnvironment hdrPath={HDR_MAKEUP} onLoaded={setEnvMapMakeup} />
 
         <VirtualTryOnThreeScene
           videoRef={webcamRef}

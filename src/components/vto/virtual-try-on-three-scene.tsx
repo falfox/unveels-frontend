@@ -5,9 +5,6 @@ import {
   RGBFormat,
   VideoTexture,
   DoubleSide,
-  DataTexture,
-  RGBAFormat,
-  UnsignedByteType,
   Texture,
   TextureLoader,
 } from "three";
@@ -60,7 +57,6 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   hairMask,
   ...props
 }) => {
-  const flipped = true;
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
   const [videoTexture, setVideoTexture] = useState<VideoTexture | null>(null);
@@ -408,7 +404,6 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showHat && <Hat planeSize={planeSize} landmarks={landmarks} />}
 
-          <Glasess planeSize={planeSize} landmarks={landmarks} />
           {showGlasess && (
             <Glasess planeSize={planeSize} landmarks={landmarks} />
           )}
