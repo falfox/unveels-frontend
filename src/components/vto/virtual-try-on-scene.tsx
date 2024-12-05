@@ -193,45 +193,45 @@ export function VirtualTryOnScene() {
                 startTimeMs,
               );
 
-              const hairResults = hairSegmenterRef.current.segmentForVideo(
-                video,
-                startTimeMs,
-              );
+              // const hairResults = hairSegmenterRef.current.segmentForVideo(
+              //   video,
+              //   startTimeMs,
+              // );
 
-              if (hairResults?.categoryMask) {
-                hairRef.current = hairResults.categoryMask.getAsFloat32Array();
-                let imageData = ctx.getImageData(
-                  0,
-                  0,
-                  video.videoWidth,
-                  video.videoHeight,
-                ).data;
+              // if (hairResults?.categoryMask) {
+              //   hairRef.current = hairResults.categoryMask.getAsFloat32Array();
+              //   let imageData = ctx.getImageData(
+              //     0,
+              //     0,
+              //     video.videoWidth,
+              //     video.videoHeight,
+              //   ).data;
 
-                let j = 0;
-                for (let i = 0; i < hairRef.current.length; ++i) {
-                  const maskVal = Math.round(hairRef.current[i] * 255.0);
+              //   let j = 0;
+              //   for (let i = 0; i < hairRef.current.length; ++i) {
+              //     const maskVal = Math.round(hairRef.current[i] * 255.0);
 
-                  // Proses hanya untuk label index 1
-                  if (maskVal === 1) {
-                    const legendColor =
-                      legendColors[maskVal % legendColors.length];
-                    imageData[j] = (legendColor[0] + imageData[j]) / 2;
-                    imageData[j + 1] = (legendColor[1] + imageData[j + 1]) / 2;
-                    imageData[j + 2] = (legendColor[2] + imageData[j + 2]) / 2;
-                    imageData[j + 3] = (legendColor[3] + imageData[j + 3]) / 2;
-                  }
-                  j += 4;
-                }
+              //     // Proses hanya untuk label index 1
+              //     if (maskVal === 1) {
+              //       const legendColor =
+              //         legendColors[maskVal % legendColors.length];
+              //       imageData[j] = (legendColor[0] + imageData[j]) / 2;
+              //       imageData[j + 1] = (legendColor[1] + imageData[j + 1]) / 2;
+              //       imageData[j + 2] = (legendColor[2] + imageData[j + 2]) / 2;
+              //       imageData[j + 3] = (legendColor[3] + imageData[j + 3]) / 2;
+              //     }
+              //     j += 4;
+              //   }
 
-                const uint8Array = new Uint8ClampedArray(imageData.buffer);
-                const dataNew = new ImageData(
-                  uint8Array,
-                  video.videoWidth,
-                  video.videoHeight,
-                );
+              //   const uint8Array = new Uint8ClampedArray(imageData.buffer);
+              //   const dataNew = new ImageData(
+              //     uint8Array,
+              //     video.videoWidth,
+              //     video.videoHeight,
+              //   );
 
-                hairMaskRef.current = dataNew;
-              }
+              //   hairMaskRef.current = dataNew;
+              // }
 
               if (results.facialTransformationMatrixes.length > 0) {
                 faceTransformRef.current =
@@ -292,7 +292,7 @@ export function VirtualTryOnScene() {
           handlandmarks={handLandmarksRef}
           faceTransform={faceTransformRef}
           blendshape={blendshapeRef}
-          hairMask={hairMaskRef}
+          //hairMask={hairMaskRef}
         />
       </Canvas>
 

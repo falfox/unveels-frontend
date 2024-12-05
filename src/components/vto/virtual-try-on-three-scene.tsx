@@ -45,7 +45,7 @@ interface VirtualTryOnThreeSceneProps extends MeshProps {
   handlandmarks: React.RefObject<Landmark[]>;
   faceTransform: React.RefObject<number[]>;
   blendshape: React.RefObject<Blendshape[]>;
-  hairMask: React.RefObject<ImageData>; // Tambahkan prop dataNew
+  //hairMask: React.RefObject<ImageData>; // Tambahkan prop dataNew
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
@@ -54,9 +54,10 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   handlandmarks,
   faceTransform,
   blendshape,
-  hairMask,
+  //hairMask,
   ...props
 }) => {
+  const flipped = true;
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
   const [videoTexture, setVideoTexture] = useState<VideoTexture | null>(null);
@@ -101,38 +102,38 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
 
   // Konversi ImageData menjadi RGBA dengan transparansi
-  const processImageDataWithTransparency = (
-    imageData: ImageData,
-  ): ImageData => {
-    const data = new Uint8ClampedArray(imageData.data); // Salin data
-    for (let i = 0; i < data.length; i += 4) {
-      const maskValue = data[i]; // Nilai mask disimpan di channel Red
-      if (maskValue === 0) {
-        // Jika bukan bagian mask, buat transparan
-        data[i + 3] = 0; // Alpha = 0
-      } else {
-        // Jika bagian mask, pastikan alpha penuh
-        data[i + 3] = 255; // Alpha = 255
-      }
-    }
-    return new ImageData(data, imageData.width, imageData.height);
-  };
+  // const processImageDataWithTransparency = (
+  //   imageData: ImageData,
+  // ): ImageData => {
+  //   const data = new Uint8ClampedArray(imageData.data); // Salin data
+  //   for (let i = 0; i < data.length; i += 4) {
+  //     const maskValue = data[i]; // Nilai mask disimpan di channel Red
+  //     if (maskValue === 0) {
+  //       // Jika bukan bagian mask, buat transparan
+  //       data[i + 3] = 0; // Alpha = 0
+  //     } else {
+  //       // Jika bagian mask, pastikan alpha penuh
+  //       data[i + 3] = 255; // Alpha = 255
+  //     }
+  //   }
+  //   return new ImageData(data, imageData.width, imageData.height);
+  // };
 
-  const imageDataToImage = (imageData: ImageData): HTMLImageElement => {
-    const processedImageData = processImageDataWithTransparency(imageData);
-    const canvas = document.createElement("canvas");
-    canvas.width = processedImageData.width;
-    canvas.height = processedImageData.height;
+  // const imageDataToImage = (imageData: ImageData): HTMLImageElement => {
+  //   const processedImageData = processImageDataWithTransparency(imageData);
+  //   const canvas = document.createElement("canvas");
+  //   canvas.width = processedImageData.width;
+  //   canvas.height = processedImageData.height;
 
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.putImageData(processedImageData, 0, 0);
-      const img = new Image();
-      img.src = canvas.toDataURL();
-      return img;
-    }
-    return new Image();
-  };
+  //   const ctx = canvas.getContext("2d");
+  //   if (ctx) {
+  //     ctx.putImageData(processedImageData, 0, 0);
+  //     const img = new Image();
+  //     img.src = canvas.toDataURL();
+  //     return img;
+  //   }
+  //   return new Image();
+  // };
 
   // Handle video readiness and create texture
   useEffect(() => {
@@ -196,19 +197,19 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   }, [videoTexture]);
 
   useFrame(() => {
-    if (hairMask.current) {
-      const image = imageDataToImage(hairMask.current);
-      const loader = new TextureLoader();
+    // if (hairMask.current) {
+    //   const image = imageDataToImage(hairMask.current);
+    //   const loader = new TextureLoader();
 
-      loader.load(image.src, (texture) => {
-        if (!hairMaskTextureRef.current) {
-          hairMaskTextureRef.current = texture;
-        } else {
-          hairMaskTextureRef.current.image = texture.image;
-          hairMaskTextureRef.current.needsUpdate = true;
-        }
-      });
-    }
+    //   loader.load(image.src, (texture) => {
+    //     if (!hairMaskTextureRef.current) {
+    //       hairMaskTextureRef.current = texture;
+    //     } else {
+    //       hairMaskTextureRef.current.image = texture.image;
+    //       hairMaskTextureRef.current.needsUpdate = true;
+    //     }
+    //   });
+    // }
 
     // Pastikan material diperbarui
     if (hairMaskTextureRef.current) {
