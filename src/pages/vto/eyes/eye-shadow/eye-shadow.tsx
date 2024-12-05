@@ -78,8 +78,8 @@ function ColorSelector() {
   }, [selectedMode, selectedColors, setSelectedColors]);
 
   return (
-    <div className="mx-auto w-full py-1 sm:py-2">
-      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
+    <div className="sm:py-2 mx-auto w-full py-1">
+      <div className="sm:space-x-4 sm:py-2.5 flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar">
         <button
           type="button"
           className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
@@ -87,7 +87,7 @@ function ColorSelector() {
             setSelectedColors([]);
           }}
         >
-          <Icons.empty className="size-5 sm:size-[1.875rem]" />
+          <Icons.empty className="sm:size-[1.875rem] size-5" />
         </button>
         {/* {renderPaletteItems()} */}
         {extracted_sub_colors
@@ -111,14 +111,14 @@ const textures = filterTextures(["Metallic", "Matte", "Shimmer"]);
 function TextureSelector() {
   const { selectedTexture, setSelectedTexture } = useEyeShadowContext();
   return (
-    <div className="mx-auto w-full py-1 sm:py-2">
+    <div className="sm:py-2 mx-auto w-full py-1">
       <div className="flex w-full items-center space-x-4 overflow-x-auto py-1 no-scrollbar">
         {textures.map((texture, index) => (
           <button
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
+              "sm:px-3 sm:py-1 inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -132,7 +132,7 @@ function TextureSelector() {
               }
             }}
           >
-            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
+            <span className="sm:text-sm text-[9.8px]">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -156,7 +156,7 @@ function ModeSelector() {
 
   return (
     <>
-      <div className="mx-auto w-full py-1 sm:py-2">
+      <div className="sm:py-2 mx-auto w-full py-1">
         <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
           {modes.map((mode, index) => (
             <button
@@ -176,7 +176,7 @@ function ModeSelector() {
                   {mode.name}
                 </div>
               ) : null}
-              <span className="relative text-[9.8px] sm:text-sm">
+              <span className="sm:text-sm relative text-[9.8px]">
                 {mode.name}
               </span>
             </button>
@@ -186,7 +186,7 @@ function ModeSelector() {
         </div>
       </div>
       {currentMode ? (
-        <div className="mx-auto w-full py-1 sm:py-2">
+        <div className="sm:py-2 mx-auto w-full py-1">
           <div className="flex w-full items-center space-x-4 overflow-x-auto no-scrollbar">
             {[...Array(currentMode.count)].map((_, index) => (
               <button
@@ -204,7 +204,7 @@ function ModeSelector() {
                 <img
                   src={`/media/unveels/vto/eyeshadows/eyeshadow-${currentMode.name.toLowerCase()}-${index + 1}.png`}
                   alt="Eye shadow"
-                  className="size-[35px] shrink-0 sm:size-[50px] lg:size-[65px]"
+                  className="sm:size-[50px] lg:size-[65px] size-[35px] shrink-0"
                 />
               </button>
             ))}
@@ -225,7 +225,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
+    <div className="sm:gap-4 flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (

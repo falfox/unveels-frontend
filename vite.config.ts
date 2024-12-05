@@ -21,6 +21,9 @@ const baseRoutes = [
   "/see-improvement-web",
   "/see-improvement",
   "/virtual-try-on-web",
+  "/virtual-try-on-accesories",
+  "/virtual-try-on-makeup",
+  "/virtual-try-on-product",
 ];
 
 function generateHtmlFromTemplate(route: string) {
@@ -41,7 +44,7 @@ function generateHtmlFromTemplate(route: string) {
   const modifiedHtml =
     beforeScript +
     `    <script>
-      window.__INITIAL_ROUTE__ = "${route}";
+      window._INITIAL_ROUTE_ = "${route}";
     </script>\n` +
     afterScript;
 
@@ -51,7 +54,7 @@ function generateHtmlFromTemplate(route: string) {
 const inputObjects = Object.fromEntries(
   baseRoutes.map((route) => {
     const name = route === "/" ? "index" : route.slice(1);
-    const htmlPath = path.resolve(__dirname, `pages/${name}.html`);
+    const htmlPath = path.resolve(__dirname, "pages/${name}.html");
 
     // Ensure pages directory exists
     if (!fs.existsSync("pages")) {

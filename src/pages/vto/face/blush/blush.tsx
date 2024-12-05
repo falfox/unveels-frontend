@@ -100,8 +100,8 @@ function ColorSelector() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-xl lg:max-w-none">
-      <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">
+    <div className="lg:max-w-none mx-auto w-full max-w-xl">
+      <div className="sm:space-x-4 sm:py-2.5 flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar">
         <button
           type="button"
           className="inline-flex shrink-0 items-center gap-x-2 rounded-full border border-transparent text-white/80"
@@ -109,7 +109,7 @@ function ColorSelector() {
             resetColor();
           }}
         >
-          <Icons.empty className="size-5 sm:size-[1.875rem]" />
+          <Icons.empty className="sm:size-[1.875rem] size-5" />
         </button>
         {extracted_sub_colors.map((color, index) => (
           <ColorPalette
@@ -152,7 +152,7 @@ function TextureSelector() {
             key={texture.value}
             type="button"
             className={clsx(
-              "inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80 sm:px-3 sm:py-1",
+              "sm:px-3 sm:py-1 inline-flex shrink-0 items-center gap-x-2 rounded-full border border-white/80 px-2 py-0.5 text-white/80",
               {
                 "border-white/80 bg-gradient-to-r from-[#CA9C43] to-[#473209]":
                   selectedTexture === texture.value,
@@ -160,7 +160,7 @@ function TextureSelector() {
             )}
             onClick={() => setMaterial(index, texture)}
           >
-            <span className="text-[9.8px] sm:text-sm">{texture.label}</span>
+            <span className="sm:text-sm text-[9.8px]">{texture.label}</span>
           </button>
         ))}
       </div>
@@ -203,7 +203,7 @@ function ShapeSelector() {
             <img
               src={path}
               alt="Highlighter"
-              className="size-[35px] rounded sm:size-[50px] lg:size-[65px]"
+              className="sm:size-[50px] lg:size-[65px] size-[35px] rounded"
             />
           </button>
         ))}
@@ -257,7 +257,7 @@ function ShadesSelector() {
                 {shade}
               </div>
             ) : null}
-            <span className="relative text-[9.8px] sm:text-sm">{shade}</span>
+            <span className="sm:text-sm relative text-[9.8px]">{shade}</span>
           </button>
         ))}
 
@@ -275,7 +275,7 @@ function ProductList() {
   });
 
   return (
-    <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
+    <div className="sm:gap-4 flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing">
       {isLoading ? (
         <LoadingProducts />
       ) : (
