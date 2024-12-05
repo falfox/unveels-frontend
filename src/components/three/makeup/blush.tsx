@@ -20,9 +20,14 @@ import {
 interface BlushProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
-const BlushInner: React.FC<BlushProps> = ({ landmarks, planeSize }) => {
+const BlushInner: React.FC<BlushProps> = ({
+  landmarks,
+  planeSize,
+  isFlipped,
+}) => {
   const { blushColor, blushPattern } = useMakeup();
 
   // Memuat semua tekstur sekaligus
@@ -58,6 +63,7 @@ const BlushInner: React.FC<BlushProps> = ({ landmarks, planeSize }) => {
       landmarks={landmarks}
       material={blushMaterial}
       planeSize={planeSize}
+      flipHorizontal={isFlipped}
     />
   );
 };

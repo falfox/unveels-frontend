@@ -48,13 +48,19 @@ import { NailsMode } from "./pages/vto/nails/nails-makeup";
 import { PressOnNailsSelector } from "./pages/vto/nails/press-on-nails/press-on-nails";
 import { NeckwearSelector } from "./pages/vto/neck-accessories/neckwear/neckwear";
 import { ScarvesSelector } from "./pages/vto/neck-accessories/scarves/scarves";
-import { Path } from "three";
-import { element } from "three/webgpu";
 import { VirtualAvatar } from "./pages/virtual-avatar";
 import { createGuestCart } from "./api/create-guest-cart";
 import { useCartContext } from "./context/cart-context";
 import { SeeImprovementWeb } from "./pages/see-improvement-web";
 import { VirtualTryOnWeb } from "./pages/virtual-try-on-web";
+import {
+  VirtualTryOnMakeups,
+  TryOnSelectorMakeups,
+} from "./pages/virtual-try-on-makeups";
+import {
+  TryOnSelectorAccesories,
+  VirtualTryOnAccesories,
+} from "./pages/virtual-try-on-accesories";
 
 // Define routes using object syntax
 const routes = [
@@ -137,6 +143,65 @@ const routes = [
       { path: "watches", element: <WatchesSelector /> },
     ],
   },
+  {
+    path: "/virtual-try-on-makeups",
+    element: <VirtualTryOnMakeups />,
+    children: [
+      { path: "makeups", element: <TryOnSelectorMakeups /> },
+      // Lips
+      { path: "lips", element: <LipsMode /> },
+      { path: "lip-color", element: <LipColorSelector /> },
+      { path: "lip-liner", element: <LipLinerSelector /> },
+      { path: "lip-plumper", element: <LipPlumperSelector /> },
+      // Eyes
+      { path: "eyes", element: <EyesMode /> },
+      { path: "eyebrows", element: <EyebrowsSelector /> },
+      { path: "eye-shadow", element: <EyeShadowSelector /> },
+      { path: "eye-liner", element: <EyeLinerSelector /> },
+      { path: "lashes", element: <LashesSelector /> },
+      { path: "mascara", element: <MascaraSelector /> },
+      { path: "lenses", element: <LenseSelector /> },
+      // Face
+      { path: "face", element: <FaceMode /> },
+      { path: "foundation", element: <FoundationSelector /> },
+      { path: "concealer", element: <ConcealerSelector /> },
+      { path: "contour", element: <ContourSelector /> },
+      { path: "blush", element: <BlushSelector /> },
+      { path: "bronzer", element: <BronzerSelector /> },
+      { path: "highlighter", element: <HighlighterSelector /> },
+      // Nails
+      { path: "nails", element: <NailsMode /> },
+      { path: "nail-polish", element: <NailPolishSelector /> },
+      { path: "press-on-nails", element: <PressOnNailsSelector /> },
+      // Hair
+      { path: "hair", element: <HairMode /> },
+      { path: "hair-color", element: <HairColorSelector /> },
+    ],
+  },
+  {
+    path: "/virtual-try-on-accesories",
+    element: <VirtualTryOnAccesories />,
+    children: [
+      { path: "accesories", element: <TryOnSelectorAccesories /> },
+      // Head
+      { path: "sunglasses", element: <GlassesSelector /> },
+      { path: "glasses", element: <GlassesSelector /> },
+      { path: "earrings", element: <EarringsSelector /> },
+      { path: "headbands", element: <HeadbandSelector /> },
+      { path: "hats", element: <HatsSelector /> },
+      { path: "tiaras", element: <TiaraSelector /> },
+      // Neck
+      { path: "pendants", element: <NeckwearSelector /> },
+      { path: "necklaces", element: <NeckwearSelector /> },
+      { path: "chokers", element: <NeckwearSelector /> },
+      { path: "scarves", element: <ScarvesSelector /> },
+      // Hand
+      { path: "rings", element: <HandwearSelector /> },
+      { path: "bracelets", element: <HandwearSelector /> },
+      { path: "bangles", element: <HandwearSelector /> },
+      { path: "watches", element: <WatchesSelector /> },
+    ],
+  },
 ];
 
 function Home() {
@@ -160,7 +225,13 @@ function Home() {
       <LinkButton to="/see-improvement-web">See Improvement Web</LinkButton>
       <LinkButton to="/virtual-try-on-web">Virtual Try On Web</LinkButton>
       <LinkButton to="/virtual-try-on/makeups">Virtual Try On</LinkButton>
-      <LinkButton to="/virtual-try-on-product?sku=689304331029">
+      <LinkButton to="/virtual-try-on-makeups/makeups">
+        Virtual Try On Makeup
+      </LinkButton>
+      <LinkButton to="/virtual-try-on-accesories/accesories">
+        Virtual Try On Accesories
+      </LinkButton>
+      <LinkButton to="/virtual-try-on-product?sku=3348901601412">
         Virtual Try On Product
       </LinkButton>
       <LinkButton to="/virtual-assistant">Virtual Assistant</LinkButton>

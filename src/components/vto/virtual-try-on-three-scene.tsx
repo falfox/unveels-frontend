@@ -5,9 +5,6 @@ import {
   RGBFormat,
   VideoTexture,
   DoubleSide,
-  DataTexture,
-  RGBAFormat,
-  UnsignedByteType,
   Texture,
   TextureLoader,
 } from "three";
@@ -48,7 +45,7 @@ interface VirtualTryOnThreeSceneProps extends MeshProps {
   handlandmarks: React.RefObject<Landmark[]>;
   faceTransform: React.RefObject<number[]>;
   blendshape: React.RefObject<Blendshape[]>;
-  hairMask: React.RefObject<ImageData>; // Tambahkan prop dataNew
+  //hairMask: React.RefObject<ImageData>; // Tambahkan prop dataNew
 }
 
 const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
@@ -57,7 +54,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   handlandmarks,
   faceTransform,
   blendshape,
-  hairMask,
+  //hairMask,
   ...props
 }) => {
   const flipped = true;
@@ -67,6 +64,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   const hairMaskTextureRef = useRef<Texture | null>(null);
 
   const [maskOpacity, setMaskOpacity] = useState(0.5);
+
+  const isFlipped = true;
 
   const {
     showFoundation,
@@ -103,38 +102,38 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
 
   // Konversi ImageData menjadi RGBA dengan transparansi
-  const processImageDataWithTransparency = (
-    imageData: ImageData,
-  ): ImageData => {
-    const data = new Uint8ClampedArray(imageData.data); // Salin data
-    for (let i = 0; i < data.length; i += 4) {
-      const maskValue = data[i]; // Nilai mask disimpan di channel Red
-      if (maskValue === 0) {
-        // Jika bukan bagian mask, buat transparan
-        data[i + 3] = 0; // Alpha = 0
-      } else {
-        // Jika bagian mask, pastikan alpha penuh
-        data[i + 3] = 255; // Alpha = 255
-      }
-    }
-    return new ImageData(data, imageData.width, imageData.height);
-  };
+  // const processImageDataWithTransparency = (
+  //   imageData: ImageData,
+  // ): ImageData => {
+  //   const data = new Uint8ClampedArray(imageData.data); // Salin data
+  //   for (let i = 0; i < data.length; i += 4) {
+  //     const maskValue = data[i]; // Nilai mask disimpan di channel Red
+  //     if (maskValue === 0) {
+  //       // Jika bukan bagian mask, buat transparan
+  //       data[i + 3] = 0; // Alpha = 0
+  //     } else {
+  //       // Jika bagian mask, pastikan alpha penuh
+  //       data[i + 3] = 255; // Alpha = 255
+  //     }
+  //   }
+  //   return new ImageData(data, imageData.width, imageData.height);
+  // };
 
-  const imageDataToImage = (imageData: ImageData): HTMLImageElement => {
-    const processedImageData = processImageDataWithTransparency(imageData);
-    const canvas = document.createElement("canvas");
-    canvas.width = processedImageData.width;
-    canvas.height = processedImageData.height;
+  // const imageDataToImage = (imageData: ImageData): HTMLImageElement => {
+  //   const processedImageData = processImageDataWithTransparency(imageData);
+  //   const canvas = document.createElement("canvas");
+  //   canvas.width = processedImageData.width;
+  //   canvas.height = processedImageData.height;
 
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.putImageData(processedImageData, 0, 0);
-      const img = new Image();
-      img.src = canvas.toDataURL();
-      return img;
-    }
-    return new Image();
-  };
+  //   const ctx = canvas.getContext("2d");
+  //   if (ctx) {
+  //     ctx.putImageData(processedImageData, 0, 0);
+  //     const img = new Image();
+  //     img.src = canvas.toDataURL();
+  //     return img;
+  //   }
+  //   return new Image();
+  // };
 
   // Handle video readiness and create texture
   useEffect(() => {
@@ -198,19 +197,19 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   }, [videoTexture]);
 
   useFrame(() => {
-    if (hairMask.current) {
-      const image = imageDataToImage(hairMask.current);
-      const loader = new TextureLoader();
+    // if (hairMask.current) {
+    //   const image = imageDataToImage(hairMask.current);
+    //   const loader = new TextureLoader();
 
-      loader.load(image.src, (texture) => {
-        if (!hairMaskTextureRef.current) {
-          hairMaskTextureRef.current = texture;
-        } else {
-          hairMaskTextureRef.current.image = texture.image;
-          hairMaskTextureRef.current.needsUpdate = true;
-        }
-      });
-    }
+    //   loader.load(image.src, (texture) => {
+    //     if (!hairMaskTextureRef.current) {
+    //       hairMaskTextureRef.current = texture;
+    //     } else {
+    //       hairMaskTextureRef.current.image = texture.image;
+    //       hairMaskTextureRef.current.needsUpdate = true;
+    //     }
+    //   });
+    // }
 
     // Pastikan material diperbarui
     if (hairMaskTextureRef.current) {
@@ -317,41 +316,75 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           )}
 
           {showFoundation && (
-            <Foundation planeSize={planeSize} landmarks={landmarks} />
+            <Foundation
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
-          {showBlush && <Blush planeSize={planeSize} landmarks={landmarks} />}
+          {showBlush && (
+            <Blush
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
+          )}
 
           {showConcealer && (
-            <Concealer planeSize={planeSize} landmarks={landmarks} />
+            <Concealer
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showHighlighter && (
-            <Highlighter planeSize={planeSize} landmarks={landmarks} />
+            <Highlighter
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showContour && (
-            <Contour planeSize={planeSize} landmarks={landmarks} />
+            <Contour
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLipliner && (
-            <Lipliner planeSize={planeSize} landmarks={landmarks} />
+            <Lipliner
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLipplumper && (
-            <Lipplumper planeSize={planeSize} landmarks={landmarks} />
+            <Lipplumper
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLipColor && (
             <LipColor
               planeSize={planeSize}
               landmarks={landmarks}
-              isFlipped={true}
+              isFlipped={isFlipped}
             />
           )}
 
           {showBronzer && (
-            <Bronzer planeSize={planeSize} landmarks={landmarks} />
+            <Bronzer
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {showLens && (
@@ -359,7 +392,11 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
           )}
 
           {showEyebrows && (
-            <Eyebrows planeSize={planeSize} landmarks={landmarks} />
+            <Eyebrows
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
           )}
 
           {/* <HeadOccluder planeSize={planeSize} landmarks={landmarks} />

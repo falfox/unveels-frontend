@@ -20,9 +20,14 @@ import {
 interface BronzerProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
-const BronzerInner: React.FC<BronzerProps> = ({ landmarks, planeSize }) => {
+const BronzerInner: React.FC<BronzerProps> = ({
+  landmarks,
+  planeSize,
+  isFlipped,
+}) => {
   const { bronzerColor, bronzerPattern } = useMakeup();
 
   // Memuat semua tekstur sekaligus
@@ -58,6 +63,7 @@ const BronzerInner: React.FC<BronzerProps> = ({ landmarks, planeSize }) => {
       landmarks={landmarks}
       material={bronzerMaterial}
       planeSize={planeSize}
+      flipHorizontal={isFlipped}
     />
   );
 };

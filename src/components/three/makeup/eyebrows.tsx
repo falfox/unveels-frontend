@@ -28,9 +28,14 @@ import {
 interface EyebrowsProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
+  isFlipped: boolean;
 }
 
-const EyebrowsInner: React.FC<EyebrowsProps> = ({ landmarks, planeSize }) => {
+const EyebrowsInner: React.FC<EyebrowsProps> = ({
+  landmarks,
+  planeSize,
+  isFlipped,
+}) => {
   const { eyebrowsVisibility, eyebrowsPattern, eyebrowsColor } = useMakeup();
 
   // Memuat semua tekstur sekaligus
@@ -71,6 +76,7 @@ const EyebrowsInner: React.FC<EyebrowsProps> = ({ landmarks, planeSize }) => {
       landmarks={landmarks}
       material={eyebrowsMaterial}
       planeSize={planeSize}
+      flipHorizontal={isFlipped}
     />
   );
 };

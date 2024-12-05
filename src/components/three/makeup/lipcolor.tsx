@@ -118,6 +118,7 @@ const LipColorInner: React.FC<LipColorProps> = ({
           landmarks={landmarks}
           material={singleMaterial}
           planeSize={planeSize}
+          flipHorizontal={isFlipped}
         />
       )}
 
