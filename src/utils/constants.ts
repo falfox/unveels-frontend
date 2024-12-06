@@ -1633,3 +1633,120 @@ export const LIPS_SHADOW =
 // blush map
 export const BLUSHON_SPRINKLE =
   "/media/unveels/vto-assets/map/blushon/blushon_sprinkle.png";
+
+//eyeshadow
+//ONE
+export const EYESHADOW_TEXTURE_ONE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/one/eyeshadow-1.png";
+export const EYESHADOW_TEXTURE_ONE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/one/eyeshadow-2.png";
+export const EYESHADOW_TEXTURE_ONE_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/one/eyeshadow-3.png";
+export const EYESHADOW_TEXTURE_ONE_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/one/eyeshadow-4.png";
+//DUAL
+export const EYESHADOW_TEXTURE_DUAL_P_ONE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p0/s2c1-a.png";
+export const EYESHADOW_TEXTURE_DUAL_P_ONE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p0/s2c1-b.png";
+export const EYESHADOW_TEXTURE_DUAL_P_TWO_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p1/s2c2-a.png";
+export const EYESHADOW_TEXTURE_DUAL_P_TWO_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p1/s2c2-b.png";
+export const EYESHADOW_TEXTURE_DUAL_P_THREE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p2/s2c3-a.png";
+export const EYESHADOW_TEXTURE_DUAL_P_THREE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p2/s2c3-b.png";
+export const EYESHADOW_TEXTURE_DUAL_P_FOUR_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p3/s2c4-a.png";
+export const EYESHADOW_TEXTURE_DUAL_P_FOUR_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/dual/p3/s2c4-b.png";
+//TRI
+export const EYESHADOW_TEXTURE_TRI_P_ONE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p0/s3c1-a.png";
+export const EYESHADOW_TEXTURE_TRI_P_ONE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p0/s3c1-b.png";
+export const EYESHADOW_TEXTURE_TRI_P_ONE_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p0/s3c1-c.png";
+export const EYESHADOW_TEXTURE_TRI_P_TWO_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p1/s3c2-a.png";
+export const EYESHADOW_TEXTURE_TRI_P_TWO_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p1/s3c2-b.png";
+export const EYESHADOW_TEXTURE_TRI_P_TWO_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p1/s3c2-c.png";
+export const EYESHADOW_TEXTURE_TRI_P_THREE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p2/s3c3-a.png";
+export const EYESHADOW_TEXTURE_TRI_P_THREE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p2/s3c3-b.png";
+export const EYESHADOW_TEXTURE_TRI_P_THREE_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p2/s3c3-c.png";
+export const EYESHADOW_TEXTURE_TRI_P_FOUR_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p3/s3c4-a.png";
+export const EYESHADOW_TEXTURE_TRI_P_FOUR_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p3/s3c4-b.png";
+export const EYESHADOW_TEXTURE_TRI_P_FOUR_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/tri/p3/s3c4-c.png";
+//Quad
+export const EYESHADOW_TEXTURE_QUAD_P_ONE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p0/s4c1-a.png";
+export const EYESHADOW_TEXTURE_QUAD_P_ONE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p0/s4c1-b.png";
+export const EYESHADOW_TEXTURE_QUAD_P_ONE_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p0/s4c1-c.png";
+export const EYESHADOW_TEXTURE_QUAD_P_ONE_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p0/s4c1-d.png";
+export const EYESHADOW_TEXTURE_QUAD_P_TWO_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p1/s4c2-a.png";
+export const EYESHADOW_TEXTURE_QUAD_P_TWO_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p1/s4c2-b.png";
+export const EYESHADOW_TEXTURE_QUAD_P_TWO_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p1/s4c2-c.png";
+export const EYESHADOW_TEXTURE_QUAD_P_TWO_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p1/s4c2-d.png";
+export const EYESHADOW_TEXTURE_QUAD_P_THREE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p2/s4c3-a.png";
+export const EYESHADOW_TEXTURE_QUAD_P_THREE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p2/s4c3-b.png";
+export const EYESHADOW_TEXTURE_QUAD_P_THREE_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p2/s4c3-c.png";
+export const EYESHADOW_TEXTURE_QUAD_P_THREE_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p2/s4c3-d.png";
+export const EYESHADOW_TEXTURE_QUAD_P_FOUR_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p3/s4c4-a.png";
+export const EYESHADOW_TEXTURE_QUAD_P_FOUR_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p3/s4c4-b.png";
+export const EYESHADOW_TEXTURE_QUAD_P_FOUR_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p3/s4c4-c.png";
+export const EYESHADOW_TEXTURE_QUAD_P_FOUR_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/quad/p3/s4c4-d.png";
+//PENTA
+export const EYESHADOW_TEXTURE_PENTA_P_ONE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p0/s5c1-a.png";
+export const EYESHADOW_TEXTURE_PENTA_P_ONE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p0/s5c1-b.png";
+export const EYESHADOW_TEXTURE_PENTA_P_ONE_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p0/s5c1-c.png";
+export const EYESHADOW_TEXTURE_PENTA_P_ONE_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p0/s5c1-d.png";
+export const EYESHADOW_TEXTURE_PENTA_P_ONE_FIVE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p0/s5c1-e.png";
+export const EYESHADOW_TEXTURE_PENTA_P_TWO_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p1/s5c2-a.png";
+export const EYESHADOW_TEXTURE_PENTA_P_TWO_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p1/s5c2-b.png";
+export const EYESHADOW_TEXTURE_PENTA_P_TWO_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p1/s5c2-c.png";
+export const EYESHADOW_TEXTURE_PENTA_P_TWO_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p1/s5c2-d.png";
+export const EYESHADOW_TEXTURE_PENTA_P_TWO_FIVE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p1/s5c2-e.png";
+export const EYESHADOW_TEXTURE_PENTA_P_THREE_ONE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p2/s5c3-a.png";
+export const EYESHADOW_TEXTURE_PENTA_P_THREE_TWO =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p2/s5c3-b.png";
+export const EYESHADOW_TEXTURE_PENTA_P_THREE_THREE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p2/s5c3-c.png";
+export const EYESHADOW_TEXTURE_PENTA_P_THREE_FOUR =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p2/s5c3-d.png";
+export const EYESHADOW_TEXTURE_PENTA_P_THREE_FIVE =
+  "/media/unveels/vto-assets/texture/eyeshadow/penta/p2/s5c3-e.png";
