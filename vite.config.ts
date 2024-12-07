@@ -82,6 +82,7 @@ export default defineConfig({
   },
   build: {
     manifest: true,
+    assetsDir: "media/unveels",
     rollupOptions: {
       input: inputObjects,
     },
