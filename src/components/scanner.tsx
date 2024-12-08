@@ -13,7 +13,7 @@ export function Scanner() {
   const workerPath =
     import.meta.env.MODE === "development"
       ? new URL("../workers/scannerWorker.ts", import.meta.url) // Path relatif untuk dev
-      : "/static/frontend/Smartwave/porto/en_US/Unveels_Technologies/js/scannerWorker-C0zh0GnA.js"; // Path untuk build/produksi
+      : "/static/frontend/Smartwave/porto/en_US/Unveels_Tech/js/scannerWorker-C0zh0GnA.js"; // Path untuk build/produksi
 
   // Initialize MediaPipe Face Landmarker
   useEffect(() => {

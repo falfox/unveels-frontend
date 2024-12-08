@@ -279,6 +279,8 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
           >
             <X className="size-6 text-white" />
           </Link>
+
+          <TopNavigation cart={inferenceResult.length > 0} />
         </div>
       </div>
 
@@ -343,47 +345,6 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
   );
 }
 
-function PersonalitySection({
-  title,
-  description,
-  score,
-}: {
-  title: string;
-  description: string;
-  score: number;
-}) {
-  // High -> 70% - 100%
-  // Moderate -> above 40% - 69%
-  // low -> 0% - 39%
-  const scoreType = score < 40 ? "Low" : score < 70 ? "Moderate" : "High";
-  return (
-    <div className="py-5">
-      <div className="flex items-center space-x-2 pb-6">
-        <Icons.personalityTriangle className="size-8" />
-
-        <h2 className="text-3xl font-bold text-white">{title}</h2>
-      </div>
-
-      <span className="text-xl font-bold">Description</span>
-      <p className="pb-6 pt-1 text-sm">{description}</p>
-
-      <span className="text-xl font-bold">Score</span>
-      <div
-        className={clsx(
-          "text-sm",
-          score < 40
-            ? "text-[#FF0000]"
-            : score < 70
-              ? "text-[#FAFF00]"
-              : "text-[#5ED400]",
-        )}
-      >
-        {scoreType} {score}%
-      </div>
-    </div>
-  );
-}
-
 function RecommendationsTab({ faceShape }: { faceShape: string }) {
   const { data: fragrances } = useFragrancesProductQuery({
     faceShape,
@@ -396,18 +357,12 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
     faceShape,
   });
 
-  const { guestCartId, addItemToCart } = useCartContext(); // Mengakses CartContext
+  const { addItemToCart } = useCartContext();
 
-  // Fungsi untuk menambahkan item ke keranjang
-  const handleAddToCart = async (sku: string) => {
-    if (!guestCartId) {
-      console.log("Guest Cart ID is not available. Please try again.");
-      return;
-    }
-
+  const handleAddToCart = async (id: string, url: string) => {
     try {
-      await addItemToCart(sku); // Memanggil fungsi dari CartContext
-      console.log(`Product ${sku} added to cart!`);
+      await addItemToCart(id, url);
+      console.log(`Product ${id} added to cart!`);
     } catch (error) {
       console.error("Failed to add product to cart:", error);
     }
@@ -471,7 +426,10 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleAddToCart(product.sku);
+                        handleAddToCart(
+                          product.id.toString(),
+                          `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                        );
                       }}
                     >
                       ADD TO CART
@@ -594,7 +552,10 @@ function RecommendationsTab({ faceShape }: { faceShape: string }) {
                       className="flex h-7 w-full items-center justify-center border border-white text-[0.5rem] font-semibold"
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleAddToCart(product.sku);
+                        handleAddToCart(
+                          product.id.toString(),
+                          `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                        );
                       }}
                     >
                       ADD TO CART
