@@ -104,7 +104,11 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
         <meshBasicMaterial map={texture} />
       </mesh>
       {foundationColor != "" && (
-        <Foundation planeSize={planeSize} landmarks={landmarks} />
+        <Foundation
+          planeSize={planeSize}
+          landmarks={landmarks}
+          isFlipped={true}
+        />
       )}
     </>
   );
