@@ -39,6 +39,7 @@ import { LoopNode } from "three/webgpu";
 import FoundationNew from "../three/makeup/foundation-new";
 import { Blendshape } from "../../types/blendshape";
 import EyeShadow from "../three/makeup/eyeshadow";
+import Eyeliner from "../three/makeup/eyeliner";
 
 interface VirtualTryOnThreeSceneProps extends MeshProps {
   videoRef: React.RefObject<Webcam>;
@@ -82,6 +83,7 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
     showEyebrows,
     showHair,
     showEyeShadow,
+    showEyeliner,
   } = useMakeup();
 
   const {
@@ -403,6 +405,14 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
 
           {showEyeShadow && (
             <EyeShadow
+              planeSize={planeSize}
+              landmarks={landmarks}
+              isFlipped={isFlipped}
+            />
+          )}
+
+          {showEyeliner && (
+            <Eyeliner
               planeSize={planeSize}
               landmarks={landmarks}
               isFlipped={isFlipped}

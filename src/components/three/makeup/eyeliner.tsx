@@ -10,39 +10,45 @@ import FaceMesh from "../face-mesh";
 import { Landmark } from "../../../types/landmark";
 import { useMakeup } from "../../../context/makeup-context";
 import {
-  HIGHLIGHTER_TEXTURE_FOUR,
-  HIGHLIGHTER_TEXTURE_ONE,
-  HIGHLIGHTER_TEXTURE_THREE,
-  HIGHLIGHTER_TEXTURE_TWO,
+  EYELINER_FIVE,
+  EYELINER_FOUR,
+  EYELINER_ONE,
+  EYELINER_SEVEN,
+  EYELINER_SIX,
+  EYELINER_THREE,
+  EYELINER_TWO,
 } from "../../../utils/constants";
 
-interface HighlighterProps extends MeshProps {
+interface EyelinerProps extends MeshProps {
   landmarks: React.RefObject<Landmark[]>;
   planeSize: [number, number];
   isFlipped: boolean;
 }
 
-const HighlighterInner: React.FC<HighlighterProps> = ({
+const EyelinerInner: React.FC<EyelinerProps> = ({
   landmarks,
   planeSize,
   isFlipped,
 }) => {
-  const { highlighterColor, highlighterPattern } = useMakeup();
+  const { eyelinerPattern, eyelinerColor } = useMakeup();
 
-  const highlighterTextures = useLoader(TextureLoader, [
-    HIGHLIGHTER_TEXTURE_ONE,
-    HIGHLIGHTER_TEXTURE_TWO,
-    HIGHLIGHTER_TEXTURE_THREE,
-    HIGHLIGHTER_TEXTURE_FOUR,
+  const eyelinerTextures = useLoader(TextureLoader, [
+    EYELINER_ONE,
+    EYELINER_TWO,
+    EYELINER_THREE,
+    EYELINER_FOUR,
+    EYELINER_FIVE,
+    EYELINER_SIX,
+    EYELINER_SEVEN,
   ]);
 
-  const alphaMap = highlighterTextures[highlighterPattern] || null;
+  const alphaMap = eyelinerTextures[eyelinerPattern] || null;
 
-  const HighlighterMaterial = useMemo(() => {
+  const eyelinerMaterial = useMemo(() => {
     const materialOptions: Partial<MeshBasicMaterialParameters> = {
-      color: new Color(highlighterColor),
+      color: new Color(eyelinerColor),
       transparent: !!alphaMap,
-      opacity: 0.03,
+      opacity: 0.06,
     };
 
     if (alphaMap) {
@@ -51,24 +57,24 @@ const HighlighterInner: React.FC<HighlighterProps> = ({
     }
 
     return new MeshBasicMaterial(materialOptions);
-  }, [highlighterColor, alphaMap]);
+  }, [eyelinerColor, alphaMap]);
 
   return (
     <FaceMesh
       landmarks={landmarks}
-      material={HighlighterMaterial}
+      material={eyelinerMaterial}
       planeSize={planeSize}
       flipHorizontal={isFlipped}
     />
   );
 };
 
-const Highlighter: React.FC<HighlighterProps> = (props) => {
+const Eyeliner: React.FC<EyelinerProps> = (props) => {
   return (
     <Suspense fallback={null}>
-      <HighlighterInner {...props} />
+      <EyelinerInner {...props} />
     </Suspense>
   );
 };
 
-export default Highlighter;
+export default Eyeliner;
