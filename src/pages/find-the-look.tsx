@@ -50,6 +50,7 @@ import { useRecordingControls } from "../hooks/useRecorder";
 import { FindTheLookItems } from "../types/findTheLookItems";
 import { baseApiUrl, getProductAttributes, mediaUrl } from "../utils/apiUtils";
 import { VTOProductCard } from "../components/vto/vto-product-card";
+import { useCartContext } from "../context/cart-context";
 
 export function FindTheLook() {
   return (
@@ -542,6 +543,17 @@ function ProductList({ product_type }: { product_type: string }) {
     type_ids: mapTypes[product_type].values,
   });
 
+  const { addItemToCart } = useCartContext();
+
+  const handleAddToCart = async (id: string, url: string) => {
+    try {
+      await addItemToCart(id, url);
+      console.log(`Product ${id} added to cart!`);
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
+    }
+  };
+
   return (
     <div className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing">
       {data ? (
@@ -586,6 +598,10 @@ function ProductList({ product_type }: { product_type: string }) {
                   className="flex h-5 items-center justify-center bg-gradient-to-r from-[#CA9C43] to-[#92702D] px-2.5 text-[0.5rem] font-semibold text-white sm:h-7"
                   onClick={(event) => {
                     event.stopPropagation();
+                    handleAddToCart(
+                      product.id.toString(),
+                      `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                    );
                   }}
                 >
                   Add to cart
@@ -979,6 +995,17 @@ function ProductHorizontalList({ category }: { category: string }) {
     type_ids: values,
   });
 
+  const { addItemToCart } = useCartContext();
+
+  const handleAddToCart = async (id: string, url: string) => {
+    try {
+      await addItemToCart(id, url);
+      console.log(`Product ${id} added to cart!`);
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
+    }
+  };
+
   return (
     <div key={category}>
       <div className="py-4">
@@ -1030,6 +1057,12 @@ function ProductHorizontalList({ category }: { category: string }) {
                   <button
                     type="button"
                     className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
+                    onClick={() => {
+                      handleAddToCart(
+                        product.id.toString(),
+                        `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                      );
+                    }}
                   >
                     ADD TO CART
                   </button>
@@ -1062,6 +1095,17 @@ function SingleCategoryView({
   onClose: () => void;
 }) {
   const { data } = useLipsProductQuery({});
+
+  const { addItemToCart } = useCartContext();
+
+  const handleAddToCart = async (id: string, url: string) => {
+    try {
+      await addItemToCart(id, url);
+      console.log(`Product ${id} added to cart!`);
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
+    }
+  };
 
   return (
     <div
@@ -1129,6 +1173,12 @@ function SingleCategoryView({
                       <button
                         type="button"
                         className="flex h-10 w-full items-center justify-center border border-white text-xs font-semibold text-white"
+                        onClick={() => {
+                          handleAddToCart(
+                            product.id.toString(),
+                            `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                          );
+                        }}
                       >
                         ADD TO CART
                       </button>

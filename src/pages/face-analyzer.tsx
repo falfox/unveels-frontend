@@ -272,13 +272,13 @@ function Result({ inferenceResult }: { inferenceResult: Classifier[] }) {
             <ChevronLeft className="size-6 text-white" />
           </button>
 
-          <Link
-            type="button"
+          <a
+            href={`${baseApiUrl}technologies`}
+            rel="noopener noreferrer"
             className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-white/25 backdrop-blur-3xl"
-            to="/"
           >
             <X className="size-6 text-white" />
-          </Link>
+          </a>
 
           <TopNavigation cart={inferenceResult.length > 0} />
         </div>

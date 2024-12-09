@@ -40,6 +40,7 @@ import { loadTFLiteModel } from "../utils/tfliteInference";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { ModelLoadingScreen } from "../components/model-loading-screen";
 import { Scanner } from "../components/scanner";
+import { useCartContext } from "../context/cart-context";
 
 export function SkinAnalysis() {
   return (
@@ -369,6 +370,17 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
     skinConcern,
   });
 
+  const { addItemToCart } = useCartContext();
+
+  const handleAddToCart = async (id: string, url: string) => {
+    try {
+      await addItemToCart(id, url);
+      console.log(`Product ${id} added to cart!`);
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
+    }
+  };
+
   return (
     <div className="flex w-full gap-4 overflow-x-auto no-scrollbar active:cursor-grabbing">
       {data ? (
@@ -419,6 +431,10 @@ function ProductList({ skinConcern }: { skinConcern: string }) {
                   className="flex h-4 w-full items-center justify-center border border-white text-[0.28875rem] font-semibold text-white sm:h-5 sm:text-[0.375rem]"
                   onClick={(event) => {
                     event.stopPropagation();
+                    handleAddToCart(
+                      product.id.toString(),
+                      `${baseApiUrl}/${product.custom_attributes.find((attr) => attr.attribute_code === "url_key")?.value as string}.html`,
+                    );
                   }}
                 >
                   ADD TO CART
