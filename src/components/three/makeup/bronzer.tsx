@@ -47,7 +47,7 @@ const BronzerInner: React.FC<BronzerProps> = ({
     const materialOptions: Partial<MeshBasicMaterialParameters> = {
       color: new Color(bronzerColor),
       transparent: !!alphaMap, // Menjadikan transparan jika alphaMap digunakan
-      opacity: 0.03,
+      opacity: 0.73,
     };
 
     if (alphaMap) {

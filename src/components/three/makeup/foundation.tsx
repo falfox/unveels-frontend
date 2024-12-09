@@ -20,7 +20,7 @@ const FoundationInner: React.FC<FoundationProps> = React.memo(
       return new MeshBasicMaterial({
         color: new Color(foundationColor),
         transparent: true,
-        opacity: 0.03,
+        opacity: 0.046,
       });
     }, [foundationColor]);
 

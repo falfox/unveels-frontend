@@ -48,7 +48,7 @@ const EyelinerInner: React.FC<EyelinerProps> = ({
     const materialOptions: Partial<MeshBasicMaterialParameters> = {
       color: new Color(eyelinerColor),
       transparent: !!alphaMap,
-      opacity: 0.06,
+      opacity: 2.5,
     };
 
     if (alphaMap) {

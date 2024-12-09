@@ -190,7 +190,7 @@ const BlushInner: React.FC<BlushProps> = ({
     const material = new MeshBasicMaterial({
       color: blushColor[0],
       transparent: true,
-      opacity: 0.03,
+      opacity: 0.36,
       alphaMap: oneModeTexture,
       alphaTest: 0,
     });
@@ -201,7 +201,7 @@ const BlushInner: React.FC<BlushProps> = ({
     const material = new MeshBasicMaterial({
       color: blushColor[0],
       transparent: true,
-      opacity: 0.03,
+      opacity: 0.36,
       alphaMap: dualStandardTexture,
       alphaTest: 0,
     });
@@ -212,7 +212,7 @@ const BlushInner: React.FC<BlushProps> = ({
     const material = new MeshBasicMaterial({
       color: blushColor[1],
       transparent: true,
-      opacity: 0.03,
+      opacity: 0.36,
       alphaMap: dualHighTexture,
       alphaTest: 0,
     });
@@ -234,7 +234,7 @@ const BlushInner: React.FC<BlushProps> = ({
     const material = new MeshBasicMaterial({
       color: blushColor[1],
       transparent: true,
-      opacity: 0.03,
+      opacity: 0.36,
       alphaMap: triHighTexture,
       alphaTest: 0,
     });
@@ -245,7 +245,7 @@ const BlushInner: React.FC<BlushProps> = ({
     const material = new MeshBasicMaterial({
       color: blushColor[2],
       transparent: true,
-      opacity: 0.03,
+      opacity: 0.36,
       alphaMap: triMidTexture,
       alphaTest: 0,
     });
