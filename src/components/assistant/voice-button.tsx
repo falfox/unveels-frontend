@@ -22,6 +22,13 @@ const VoiceButton = ({
     stopListening();
   };
 
+  const handleMouseLeave = () => {
+    if (recording) {
+      setRecording(false);
+      stopListening();
+    }
+  };
+
   const handleTouchStart = () => {
     setRecording(true);
     startListening();
@@ -37,6 +44,7 @@ const VoiceButton = ({
       type="button"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       className={`relative grid size-28 place-items-center rounded-full [&>*]:col-start-1 [&>*]:row-start-1 ${

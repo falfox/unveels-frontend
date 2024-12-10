@@ -109,7 +109,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     const result = await model.generateContent(prompt);
 
     try {
-      const responseText = await result.response.text(); // Pastikan await di sini jika perlu
+      const responseText = await result.response.text();
       const removeBackticks = responseText.replace(/```/g, "");
       const jsonLabel = removeBackticks.replace(/json/g, "");
       console.log(jsonLabel);

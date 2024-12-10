@@ -916,7 +916,7 @@ function AttributesTab({ data }: { data: Classifier[] | null }) {
         title="Face"
         features={[
           { name: "Face Shape", value: data[14].outputLabel },
-          { name: "Skin Tone", value: data[16].outputLabel },
+          { name: "Skin Tone", value: data[17].outputLabel },
         ]}
       />
       <FeatureSection

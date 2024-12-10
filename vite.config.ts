@@ -73,7 +73,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/rest": {
-        target: "http://magento.local/",
+        target: "https://unveels.com/",
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/rest/, "/en/rest"),
