@@ -123,7 +123,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
         setBlendshape(audioSrc.data.blendData);
         setSpeak(true);
-      }, 750);
+      }, 1000);
     } catch (error) {
       console.error("Error fetching AI response:", error);
     } finally {
@@ -133,6 +133,8 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
   const onSendMessage = (message: string, audioURL: string | null = null) => {
     const timestamp = getCurrentTimestamp();
+
+    console.log(message === "" ? true : false);
 
     if (audioURL) {
       setChats((prev) => [

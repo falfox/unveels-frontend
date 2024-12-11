@@ -152,7 +152,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
         setBlendshape(audioSrc.data.blendData);
         setSpeak(true);
-      }, 750);
+      }, 1000);
     } catch (error) {
       setText(await result.response.text());
       setSpeak(true);
