@@ -16,6 +16,11 @@ import { ProductRequest } from "../../types/productRequest";
 import { Product } from "../../api/shared";
 import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
 import { categories } from "../../api/virtual-assistant-attributes/category";
+import {
+  makeSpeech,
+  talkingAvatarHost,
+} from "../../utils/virtualAssistantUtils";
+import { BlendData } from "../../types/blendData";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -44,6 +49,8 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [fetchProducts, setFetchProducts] = useState(false);
   const [products, setProducts] = useState<ProductRequest[]>([]);
   const [productData, setProductData] = useState<Product[]>([]);
+
+  const [blendshape, setBlendshape] = useState<BlendData[]>([]);
 
   useEffect(() => {
     if (fetchProducts && products.length > 0) {
@@ -107,7 +114,16 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
       setText(respond.chat);
       setLanguage(respond.lang);
-      setSpeak(true);
+
+      // make speech
+      const audioSrc = await makeSpeech(respond.chat, respond.lang);
+
+      // delay to make sure it connect
+      setTimeout(() => {
+        setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
+        setBlendshape(audioSrc.data.blendData);
+        setSpeak(true);
+      }, 750);
     } catch (error) {
       console.error("Error fetching AI response:", error);
     } finally {
@@ -172,14 +188,7 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
       <div className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden">
-        <ModelScene
-          speak={speak}
-          text={text}
-          playing={playing}
-          setAudioSource={setAudioSource}
-          setSpeak={setSpeak}
-          language={language}
-        />
+        <ModelScene speak={speak} playing={playing} blendshape={blendshape} />
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex h-1/2 flex-col bg-gradient-to-b from-[#1B1404] to-[#2C1F06]">

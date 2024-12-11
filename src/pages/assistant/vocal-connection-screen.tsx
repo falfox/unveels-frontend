@@ -22,6 +22,11 @@ import { ProductRequest } from "../../types/productRequest";
 import { Product } from "../../api/shared";
 import { fetchVirtualAssistantProduct } from "../../api/fetch-virtual-asistant-product";
 import { categories } from "../../api/virtual-assistant-attributes/category";
+import { BlendData } from "../../types/blendData";
+import {
+  talkingAvatarHost,
+  makeSpeech,
+} from "../../utils/virtualAssistantUtils";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_BARD_API_KEY);
 
@@ -57,6 +62,8 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const [fetchProducts, setFetchProducts] = useState(false);
   const [products, setProducts] = useState<ProductRequest[]>([]);
   const [productData, setProductData] = useState<Product[]>([]);
+
+  const [blendshape, setBlendshape] = useState<BlendData[]>([]);
 
   const getCurrentTimestamp = (): string => {
     const now = new Date();
@@ -136,7 +143,16 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
       setText(respond.chat);
       setLanguage(respond.lang);
-      setSpeak(true);
+
+      // make speech
+      const audioSrc = await makeSpeech(respond.chat, respond.lang);
+
+      // delay to make sure it connect
+      setTimeout(() => {
+        setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
+        setBlendshape(audioSrc.data.blendData);
+        setSpeak(true);
+      }, 750);
     } catch (error) {
       setText(await result.response.text());
       setSpeak(true);
@@ -155,6 +171,8 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   }
 
   function playerReady() {
+    console.log("run audio");
+
     audioPlayer.current?.audioEl.current?.play();
     setPlaying(true);
   }
@@ -165,7 +183,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       return;
     }
     if (browserSupportsSpeechRecognition) {
-      resetTranscript(); // Clear previous transcript
+      resetTranscript();
       SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
     } else {
       console.error("Voice recognition not supported in this browser.");
@@ -179,7 +197,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     }
     SpeechRecognition.stopListening();
     if (msg.trim()) {
-      addChatMessage(msg); // Add the transcript to chats when recording stops
+      addChatMessage(msg);
     } else {
       console.error("Message cannot be empty.");
     }
@@ -207,24 +225,25 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     setMsg("");
   };
 
+  const stopAudio = () => {
+    if (audioPlayer.current) {
+      audioPlayer.current.audioEl.current?.pause();
+      setPlaying(false);
+      setAudioSource(null);
+    }
+  };
+
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
       <div className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden">
-        <ModelScene
-          speak={speak}
-          text={text}
-          playing={playing}
-          setAudioSource={setAudioSource}
-          setSpeak={setSpeak}
-          language={languange}
-        />
+        <ModelScene speak={speak} playing={playing} blendshape={blendshape} />
       </div>
       <div className="absolute inset-x-0 bottom-0 flex h-1/3 flex-col bg-gradient-to-b from-[#1B1404] to-[#2C1F06]">
         <div className="flex-1 p-4 text-xl text-white">
           {productData.length > 0 && <SuggestedGifts product={productData} />}
           {loading ? <LoadingChat showAvatar={false} /> : msg}
         </div>
-        <div className="relative overflow-hidden rounded-t-3xl bg-black/25 shadow-[inset_0px_1px_0px_0px_#FFFFFF40] backdrop-blur-3xl">
+        <div className="shadow-[inset_0px_1px_ 0px_0px_#FFFFFF40] relative overflow-hidden rounded-t-3xl bg-black/25 backdrop-blur-3xl">
           <div className="pointer-events-none absolute inset-x-0 -top-[116px] flex justify-center">
             <BleedEffect className="h-48" />
           </div>
@@ -262,6 +281,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
                 <button
                   type="button"
                   className="rounded-full border border-white/10 bg-[#171717] p-3"
+                  onClick={stopAudio} // Add stop audio button
                 >
                   <X className="size-6 text-white" />
                 </button>
@@ -275,8 +295,8 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         ref={audioPlayer}
         onEnded={playerEnded}
         onCanPlayThrough={playerReady}
+        autoPlay
       />
-
       <TopNavigation onBack={onBack} />
     </div>
   );
