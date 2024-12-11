@@ -46,7 +46,7 @@ const Avatar = ({ avatar_url, speak, playing, blendshape }: AvatarProps) => {
 
       applyAvatarMaterials(node, textures);
 
-      if (node.name.includes("TeethLowBlendData[]er")) {
+      if (node.name.includes("TeethLower")) {
         morphTargetDictionaryLowerTeeth = node.morphTargetDictionary;
       }
 
@@ -81,6 +81,7 @@ const Avatar = ({ avatar_url, speak, playing, blendshape }: AvatarProps) => {
               "HG_TeethLower",
             ),
           ];
+
           setClips(newClips);
           talkAction.reset().setLoop(THREE.LoopRepeat, Infinity);
           talkAction.clampWhenFinished = true;
