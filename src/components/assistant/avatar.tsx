@@ -26,8 +26,6 @@ const Avatar = ({ avatar_url, speak, playing, blendshape }: AvatarProps) => {
     [gltf.scene],
   );
   const { animations } = gltf;
-  const { actions } = useAnimations(animations, gltf.scene);
-
   const idleAnimation = animations.find((clip) => clip.name === "idle");
   const talkAnimation = animations.find((clip) => clip.name === "talk");
 
@@ -84,6 +82,8 @@ const Avatar = ({ avatar_url, speak, playing, blendshape }: AvatarProps) => {
             ),
           ];
           setClips(newClips);
+          talkAction.reset().setLoop(THREE.LoopRepeat, Infinity);
+          talkAction.clampWhenFinished = true;
         }
       }
     } else {
