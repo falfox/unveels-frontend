@@ -29,9 +29,13 @@ import {
 
 interface VideoStreamProps {
   debugMode?: boolean;
+  onCanvasReady?: (ready: boolean | false) => void;
 }
 
-export function VideoStream({ debugMode = false }: VideoStreamProps) {
+export function VideoStream({
+  debugMode = false,
+  onCanvasReady,
+}: VideoStreamProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
   const isDetectingRef = useRef<boolean>(false);
@@ -161,6 +165,10 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
             drawHeight,
           );
           ctx.restore(); // Kembalikan kondisi canvas ke semula
+
+          if (onCanvasReady) {
+            onCanvasReady(true);
+          }
 
           const startTimeMs = performance.now();
 
@@ -682,6 +690,7 @@ export function VideoStream({ debugMode = false }: VideoStreamProps) {
                       : new Error("Webcam error occurred."),
                   )
                 }
+                style={{ opacity: 0 }} // Menyembunyikan tampilan webcam dengan transparansi
               />
             </>
           )}

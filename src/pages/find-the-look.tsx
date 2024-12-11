@@ -69,6 +69,7 @@ export function FindTheLook() {
 function Main() {
   const { criterias } = useCamera();
   const [selectionMade, setSelectionMade] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
   const modelsRef = useRef<{
     faceLandmarker: FaceLandmarker | null;
