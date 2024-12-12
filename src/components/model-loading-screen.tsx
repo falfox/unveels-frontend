@@ -12,7 +12,7 @@ export function ModelLoadingScreen({ progress }: { progress: number }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
       <div className="text-center text-white">
         <p className="mb-4 animate-pulse text-lg font-semibold">
-          Unveels Technologies
+          Powered By Unveels
         </p>
         <div className="mt-4">
           <img

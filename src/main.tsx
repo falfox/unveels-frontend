@@ -38,11 +38,15 @@ const routes = [
   "virtual-try-on",
   "virtual-assistant",
   "see-improvement",
-  "virtual-avatar-web",
-  "virtual-try-on-web",
   "virtual-try-on-accesories",
   "virtual-try-on-makeup",
   "virtual-try-on-product",
+  "virtual-avatar-web",
+  "virtual-try-on-web",
+  "personality-finder-web",
+  "find-the-look-web",
+  "skin-analysis-web",
+  "see-improvement-web",
 ];
 
 // Delegated event listener
