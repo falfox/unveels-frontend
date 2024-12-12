@@ -3,7 +3,6 @@ import { Icons } from "../../components/icons";
 import {
   BleedEffect,
   LoadingChat,
-  MessageItem,
   ModelScene,
   SuggestedGifts,
   TopNavigation,
@@ -56,8 +55,12 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
   const [loading, setLoading] = useState(false);
   const audioPlayer = useRef<ReactAudioPlayer>(null);
-  const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
+  const {
+    transcript,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    interimTranscript,
+  } = useSpeechRecognition();
 
   const [fetchProducts, setFetchProducts] = useState(false);
   const [products, setProducts] = useState<ProductRequest[]>([]);
@@ -72,6 +75,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
   useEffect(() => {
     setMsg(transcript);
+    console.log(interimTranscript);
   }, [transcript]);
 
   useEffect(() => {
@@ -144,10 +148,8 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       setText(respond.chat);
       setLanguage(respond.lang);
 
-      // make speech
       const audioSrc = await makeSpeech(respond.chat, respond.lang);
 
-      // delay to make sure it connect
       setTimeout(() => {
         setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
         setBlendshape(audioSrc.data.blendData);
@@ -171,8 +173,6 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   }
 
   function playerReady() {
-    console.log("run audio");
-
     audioPlayer.current?.audioEl.current?.play();
     setPlaying(true);
   }
@@ -184,7 +184,10 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     }
     if (browserSupportsSpeechRecognition) {
       resetTranscript();
-      SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
+      SpeechRecognition.startListening({
+        continuous: true,
+        interimResults: true,
+      });
     } else {
       console.error("Voice recognition not supported in this browser.");
     }
@@ -281,7 +284,7 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
                 <button
                   type="button"
                   className="rounded-full border border-white/10 bg-[#171717] p-3"
-                  onClick={stopAudio} // Add stop audio button
+                  onClick={stopAudio}
                 >
                   <X className="size-6 text-white" />
                 </button>
