@@ -51,7 +51,7 @@ const LiplinerInner: React.FC<LiplinerProps> = ({
 
     if (alphaMap) {
       materialOptions.alphaMap = alphaMap;
-      materialOptions.alphaTest = 0;
+      materialOptions.alphaTest = 0.1;
     }
 
     return new MeshBasicMaterial(materialOptions);

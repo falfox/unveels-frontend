@@ -21,35 +21,36 @@ export function VirtualAvatar() {
     incomingLanguage: string,
   ) => {
     console.log("Data received from Flutter:", incomingText, incomingLanguage);
-    setText(incomingText);
-    setLanguage(incomingLanguage);
 
-    // make speech
-    const audioSrc = await makeSpeech(text, language);
+    const audioSrc = await makeSpeech(incomingText, incomingLanguage);
 
-    // delay to make sure it connect
     setTimeout(() => {
       setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
       setBlendshape(audioSrc.data.blendData);
+      if ((window as any).flutter_inappwebview) {
+        (window as any).flutter_inappwebview
+          .callHandler("isSpeak", "true")
+          .then((result: any) => {
+            console.log("Flutter responded with:", result);
+          })
+          .catch((error: any) => {
+            console.error("Error calling Flutter handler:", error);
+          });
+      }
       setSpeak(true);
-    }, 750);
-
-    setSpeak(true);
+    }, 1000);
   };
 
-  // Menambahkan fungsi ke window setelah komponen dimuat
   useEffect(() => {
     console.log("VirtualAvatar component is mounted");
 
-    // Menambahkan receiveTextAndLanguage ke window setelah komponen dimuat
     (window as any).receiveTextAndLanguage = receiveTextAndLanguage;
 
-    // Pembersihan komponen: menghapus fungsi dari window saat komponen di-unmount
     return () => {
       console.log("Cleanup: removing receiveTextAndLanguage from window");
       (window as any).receiveTextAndLanguage = undefined;
     };
-  }, []); // Efek ini hanya berjalan sekali, setelah komponen dimuat
+  }, []);
 
   function playerEnded() {
     setAudioSource(null);
@@ -65,6 +66,11 @@ export function VirtualAvatar() {
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
       <div className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden">
+        <ModelSceneWeb
+          blendshape={blendshape}
+          speak={speak}
+          playing={playing}
+        />
         <ReactAudioPlayer
           src={audioSource ?? undefined}
           ref={audioPlayer}
