@@ -49,7 +49,6 @@ import { useModelLoader } from "../hooks/useModelLoader";
 import { useRecordingControls } from "../hooks/useRecorder";
 import { FindTheLookItems } from "../types/findTheLookItems";
 import { baseApiUrl, getProductAttributes, mediaUrl } from "../utils/apiUtils";
-import { VTOProductCard } from "../components/vto/vto-product-card";
 import { useCartContext } from "../context/cart-context";
 
 export function FindTheLook() {
@@ -69,7 +68,6 @@ export function FindTheLook() {
 function Main() {
   const { criterias } = useCamera();
   const [selectionMade, setSelectionMade] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
 
   const modelsRef = useRef<{
     faceLandmarker: FaceLandmarker | null;

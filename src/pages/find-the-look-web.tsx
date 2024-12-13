@@ -14,6 +14,7 @@ import {
   ObjectDetector,
 } from "@mediapipe/tasks-vision";
 import { useModelLoader } from "../hooks/useModelLoader";
+import { ModelLoadingScreen } from "../components/model-loading-screen";
 
 export function FindTheLookWeb() {
   return (
@@ -104,7 +105,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.9,
+          scoreThreshold: 0.8,
         },
       );
       modelsRef.current.ringDetector = ringDetectorInstance;
@@ -121,7 +122,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.9,
+          scoreThreshold: 0.8,
         },
       );
       modelsRef.current.neckDetector = neckDetectorInstance;
@@ -139,7 +140,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.9,
+          scoreThreshold: 0.8,
         },
       );
       modelsRef.current.earringDetector = earringDetectorInstance;
@@ -173,7 +174,7 @@ function Main() {
           },
           runningMode: "IMAGE",
           maxResults: 1,
-          scoreThreshold: 0.63,
+          scoreThreshold: 0.8,
         },
       );
       modelsRef.current.headDetector = headDetectorInstance;
@@ -207,10 +208,13 @@ function Main() {
     loadModels();
   }, []);
 
-  // Fungsi ini akan dijalankan ketika pilihan sudah dibuat
   const handleSelection = () => {
     setSelectionMade(true);
   };
+
+  if (modelLoading) {
+    return <ModelLoadingScreen progress={progress} />;
+  }
 
   return (
     <>
