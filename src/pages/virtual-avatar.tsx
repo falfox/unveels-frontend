@@ -15,6 +15,8 @@ export function VirtualAvatar() {
 
   const [finishTalking, setFinishTalking] = useState<boolean>(false);
 
+  const [firstTime, setFirstTime] = useState<number>(0);
+
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
   // Fungsi untuk menerima data dari Flutter
@@ -38,9 +40,11 @@ export function VirtualAvatar() {
             console.error("Error calling Flutter handler:", error);
           });
       }
+
+      setFinishTalking(false);
       setSpeak(true);
       setPlaying(true);
-    }, 1000);
+    }, 500);
   };
 
   useEffect(() => {
@@ -55,10 +59,17 @@ export function VirtualAvatar() {
   }, []);
 
   useEffect(() => {
+    console.log(firstTime);
+
     if (finishTalking) {
+      if (firstTime == 0) {
+        setFinishTalking(false);
+        setFirstTime(1);
+      }
       setSpeak(false);
       setPlaying(false);
       setFinishTalking(false);
+      console.log(finishTalking);
     }
   }, [finishTalking]);
 

@@ -92,10 +92,10 @@ const AvatarWeb = ({
           setClips(newClips);
           talkAction.reset().setLoop(THREE.LoopRepeat, Infinity);
           talkAction.clampWhenFinished = true;
+
+          setFinishTalking(true);
         }
       }
-
-      setFinishTalking(true);
     } else {
       if (talkAnimation) {
         const talkAction = mixer.clipAction(talkAnimation);
