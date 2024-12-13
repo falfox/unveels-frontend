@@ -263,9 +263,19 @@ const tabs = [
 
 function SkinProblems({ onClose }: { onClose: () => void }) {
   const { tab, setTab, getTotalScoreByLabel } = useSkinAnalysis();
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const activeClassNames =
     "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text";
+
+  useEffect(() => {
+    if (tabRefs.current[tab]) {
+      tabRefs.current[tab]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [tab]);
 
   return (
     <>
@@ -282,7 +292,7 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
             return (
               <Fragment key={problemTab}>
                 <button
-                  key={problemTab}
+                  ref={(el) => (tabRefs.current[problemTab] = el)}
                   className={clsx(
                     "relative flex h-6 shrink-0 items-center rounded-full border border-white px-3 py-1 text-xs capitalize text-white sm:text-sm",
                     {
@@ -293,26 +303,6 @@ function SkinProblems({ onClose }: { onClose: () => void }) {
                   onClick={() => setTab(problemTab)}
                 >
                   {problemTab}
-
-                  {isActive ? (
-                    <>
-                      <div
-                        className={clsx(
-                          "absolute inset-0 flex items-center justify-center blur-sm",
-                          activeClassNames,
-                        )}
-                      >
-                        <span className="text-center text-sm capitalize md:text-lg">
-                          {problemTab}
-                        </span>
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-center text-sm capitalize text-white/70 md:text-lg">
-                          {problemTab}
-                        </span>
-                      </div>
-                    </>
-                  ) : null}
 
                   <div
                     className={clsx(
