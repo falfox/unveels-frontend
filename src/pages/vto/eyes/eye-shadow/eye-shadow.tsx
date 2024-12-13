@@ -66,6 +66,8 @@ function ColorSelector() {
         ? [...selectedColors, color]
         : [...selectedColors.slice(1), color]; // Remove oldest, add new
 
+        console.log(newColors, "newColors");
+        
     setSelectedColors(newColors);
   };
 
@@ -199,7 +201,10 @@ function ModeSelector() {
                       modeIndex.toString() === index.toString(),
                   },
                 )}
-                onClick={() => setSelectModeIndex(index)}
+                onClick={() => {
+                  console.log(index);
+                  setSelectModeIndex(index);
+                }}
               >
                 <img
                   src={`/media/unveels/vto/eyeshadows/eyeshadow-${currentMode.name.toLowerCase()}-${index + 1}.png`}

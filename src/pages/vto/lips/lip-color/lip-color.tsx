@@ -12,6 +12,8 @@ import { useLipColorQuery } from "./lip-color-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 
 export function LipColorSelector() {
+  console.log("render LipColorSelector");
+  
   return (
     <div className="mx-auto w-full divide-y px-4">
       <div>
@@ -72,12 +74,31 @@ function ColorSelector() {
   const { selectedColors, setSelectedColors, selectedMode, colorFamily } =
     useLipColorContext();
 
+     const { data } = useLipColorQuery({
+       color: colorFamily,
+       sub_color: null,
+       texture: null,
+     });
+
+     if (!colorFamily) {
+       return null;
+     }
+
+     const extracted_sub_colors = extractUniqueCustomAttributes(
+       data?.items ?? [],
+       "hexacode",
+     ).flatMap((item) => item.split(","));
+
   const handleColorClick = (color: string) => {
+    console.log("handleColorClick");
+    console.log(data, "data");
+    
     if (!showLipColor) setShowLipColor(true);
 
     // Handle color deselection
     if (selectedColors.includes(color)) {
       const newColors = selectedColors.filter((c) => c !== color);
+    console.log(newColors, "newColors");
       setSelectedColors(newColors);
       setLipColors(newColors);
       return;
@@ -94,7 +115,8 @@ function ColorSelector() {
       selectedColors.length < maxColors
         ? [...selectedColors, color]
         : [...selectedColors.slice(1), color]; // Remove oldest, add new
-
+    console.log(newColors, "newColors");
+    
     setSelectedColors(newColors);
     setLipColors(newColors);
   };
@@ -105,21 +127,7 @@ function ColorSelector() {
     setShowLipColor(false);
   };
 
-  const { data } = useLipColorQuery({
-    color: colorFamily,
-    sub_color: null,
-    texture: null,
-  });
-
-  if (!colorFamily) {
-    return null;
-  }
-
-  const extracted_sub_colors = extractUniqueCustomAttributes(
-    data?.items ?? [],
-    "hexacode",
-  ).flatMap((item) => item.split(","));
-
+ 
   return (
     <div className="mx-auto w-full py-1 sm:py-2">
       <div className="flex w-full items-center space-x-3 overflow-x-auto py-2 no-scrollbar sm:space-x-4 sm:py-2.5">

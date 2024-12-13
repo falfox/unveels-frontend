@@ -75,6 +75,8 @@ function ColorSelector() {
   }
 
   function setColor(color: string) {
+    console.log(data, "data");
+    
     if (!showLipliner) {
       setShowLipliner(true);
     }

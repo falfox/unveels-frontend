@@ -45,7 +45,8 @@ function ColorSelector() {
     if (!showLipplumper) {
       setShowLipplumper(true);
     }
-
+    console.log(color, "setColor");
+    
     setSelectedColor(color);
     setLipplumperColor(color);
   }

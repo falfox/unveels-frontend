@@ -10,7 +10,13 @@ import {
   StopCircle,
   X,
 } from "lucide-react";
-import { cloneElement, CSSProperties, Fragment, useState } from "react";
+import {
+  cloneElement,
+  CSSProperties,
+  Fragment,
+  useEffect,
+  useState,
+} from "react";
 import { Icons } from "../components/icons";
 
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -62,7 +68,7 @@ import { HeadbandProvider } from "./vto/head-accesories/headband/headband-contex
 import { HandwearProvider } from "./vto/hand-accessories/handwear/handwear-context";
 import { WatchesProvider } from "./vto/hand-accessories/watches/watches-context";
 import VoiceCommand from "../components/voice-command/voice-command";
-import { VirtualTryOnMakeupsVoiceProvider } from "../context/virtual-try-on-makeups-voice-context";
+import { useVirtualTryOnMakeupsVoice, VirtualTryOnMakeupsVoiceProvider } from "../context/virtual-try-on-makeups-voice-context";
 
 interface VirtualTryOnProvider {
   children: React.ReactNode;
@@ -128,7 +134,7 @@ export function VirtualTryOnProvider({ children }: VirtualTryOnProvider) {
   );
 }
 
-export function VirtualTryOn() {
+export function VirtualTryOnMakeupsVoice() {
   return (
     <CameraProvider>
       <SkinColorProvider>
@@ -221,67 +227,12 @@ function MainContent() {
   );
 }
 
-export function TryOnSelector() {
+export function TryOnSelectorMakeupsVoice() {
   const [tab, setTab] = useState("makeup" as "makeup" | "accessories" | null);
-
-  const activeClassNames =
-    "border-white inline-block text-transparent bg-[linear-gradient(90deg,#CA9C43_0%,#916E2B_27.4%,#6A4F1B_59.4%,#473209_100%)] bg-clip-text text-transparent";
 
   return (
     <div className="mx-auto w-full max-w-lg space-y-2 px-4">
-      <div className="flex h-10 w-full items-center justify-between border-b border-gray-600 text-center">
-        {["makeup", "accessories"].map((shadeTab) => {
-          const isActive = tab === shadeTab;
-          return (
-            <Fragment key={shadeTab}>
-              <button
-                key={shadeTab}
-                className={`relative h-10 grow border-b font-luxury text-[12.6px] sm:text-lg lg:text-2xl ${
-                  isActive
-                    ? activeClassNames
-                    : "border-transparent text-gray-500"
-                }`}
-                onClick={() => setTab(shadeTab as "makeup" | "accessories")}
-              >
-                <span
-                  className={clsx(
-                    "capitalize",
-                    isActive ? "text-white/70 blur-sm" : "",
-                  )}
-                >
-                  {shadeTab}
-                </span>
-                {isActive ? (
-                  <>
-                    <div
-                      className={clsx(
-                        "absolute inset-0 flex items-center justify-center text-[12.6px] blur-sm sm:text-lg lg:text-2xl",
-                        activeClassNames,
-                      )}
-                    >
-                      <span className="text-center text-[12.6px] capitalize sm:text-lg lg:text-2xl">
-                        {shadeTab}
-                      </span>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-center text-[12.6px] capitalize text-white/70 sm:text-lg lg:text-2xl">
-                        {shadeTab}
-                      </span>
-                    </div>
-                  </>
-                ) : null}
-              </button>
-            </Fragment>
-          );
-        })}
-      </div>
-
-      {tab === "makeup" ? (
-        <Makeups />
-      ) : tab === "accessories" ? (
-        <Accessories />
-      ) : null}
-      <Outlet />
+      <Makeups />
     </div>
   );
 }
@@ -307,7 +258,7 @@ export function Makeups() {
     },
   ];
 
-  const [selectedMakeup, setSelectedMakeup] = useState<string | null>(null);
+  const {selectedMakeup, setSelectedMakeup} = useVirtualTryOnMakeupsVoice();
 
   return (
     <>
