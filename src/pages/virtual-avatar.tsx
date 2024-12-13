@@ -13,6 +13,8 @@ export function VirtualAvatar() {
 
   const [blendshape, setBlendshape] = useState<BlendData[]>([]);
 
+  const [finishTalking, setFinishTalking] = useState<boolean>(false);
+
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
   // Fungsi untuk menerima data dari Flutter
@@ -25,7 +27,6 @@ export function VirtualAvatar() {
     const audioSrc = await makeSpeech(incomingText, incomingLanguage);
 
     setTimeout(() => {
-      setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
       setBlendshape(audioSrc.data.blendData);
       if ((window as any).flutter_inappwebview) {
         (window as any).flutter_inappwebview
@@ -38,6 +39,7 @@ export function VirtualAvatar() {
           });
       }
       setSpeak(true);
+      setPlaying(true);
     }, 1000);
   };
 
@@ -52,16 +54,13 @@ export function VirtualAvatar() {
     };
   }, []);
 
-  function playerEnded() {
-    setAudioSource(null);
-    setSpeak(false);
-    setPlaying(false);
-  }
-
-  function playerReady() {
-    audioPlayer.current?.audioEl.current?.play();
-    setPlaying(true);
-  }
+  useEffect(() => {
+    if (finishTalking) {
+      setSpeak(false);
+      setPlaying(false);
+      setFinishTalking(false);
+    }
+  }, [finishTalking]);
 
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
@@ -70,19 +69,7 @@ export function VirtualAvatar() {
           blendshape={blendshape}
           speak={speak}
           playing={playing}
-        />
-        <ReactAudioPlayer
-          src={audioSource ?? undefined}
-          ref={audioPlayer}
-          onEnded={playerEnded}
-          onCanPlayThrough={playerReady}
-          onError={(e) => {
-            console.error("Audio Playback Error:", e);
-            console.log(
-              "Audio Source:",
-              audioSource || "No audio source provided",
-            );
-          }}
+          setFinishTalking={setFinishTalking}
         />
       </div>
     </div>

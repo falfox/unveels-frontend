@@ -1,4 +1,4 @@
-import { useAnimations, useFBX, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { LineSegments, Mesh, SkinnedMesh } from "three";
 import * as THREE from "three";
 import _ from "lodash";
@@ -7,7 +7,6 @@ import { useFrame } from "@react-three/fiber";
 import createAnimation from "../../utils/converter";
 import blinkData from "../../assets/blendDataBlink.json";
 import { useLoadTextures } from "../../utils/textures";
-import axios from "axios";
 import { applyAvatarMaterials } from "../../utils/avatarMaterialUtils";
 import { BlendData } from "../../types/blendData";
 
@@ -70,7 +69,7 @@ const Avatar = ({ avatar_url, speak, playing, blendshape }: AvatarProps) => {
         const idleAction = mixer.clipAction(idleAnimation);
         const talkAction = mixer.clipAction(talkAnimation);
 
-        idleAction.crossFadeTo(talkAction, 0.5, false).play();
+        idleAction.crossFadeTo(talkAction, 0.7, false).play();
 
         if (morphTargetDictionaryBody) {
           const newClips = [

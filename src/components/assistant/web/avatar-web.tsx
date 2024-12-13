@@ -15,6 +15,7 @@ interface AvatarWebProps {
   speak: boolean;
   playing: boolean;
   blendshape: BlendData[];
+  setFinishTalking: (finishTalking: boolean) => void;
 }
 
 const AvatarWeb = ({
@@ -22,6 +23,7 @@ const AvatarWeb = ({
   speak,
   playing,
   blendshape,
+  setFinishTalking,
 }: AvatarWebProps) => {
   const gltf = useGLTF(avatar_url);
   const textures = useLoadTextures();
@@ -76,7 +78,7 @@ const AvatarWeb = ({
         const idleAction = mixer.clipAction(idleAnimation);
         const talkAction = mixer.clipAction(talkAnimation);
 
-        idleAction.crossFadeTo(talkAction, 0.5, false).play();
+        idleAction.crossFadeTo(talkAction, 0.7, false).play();
 
         if (morphTargetDictionaryBody) {
           const newClips = [
@@ -88,8 +90,12 @@ const AvatarWeb = ({
             ),
           ];
           setClips(newClips);
+          talkAction.reset().setLoop(THREE.LoopRepeat, Infinity);
+          talkAction.clampWhenFinished = true;
         }
       }
+
+      setFinishTalking(true);
     } else {
       if (talkAnimation) {
         const talkAction = mixer.clipAction(talkAnimation);
