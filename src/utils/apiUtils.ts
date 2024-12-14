@@ -10,11 +10,10 @@ type FilterGroup = {
   filters: Filter[];
 };
 
-export const baseApiUrl =
-  "http://ec2-13-53-99-251.eu-north-1.compute.amazonaws.com/";
+export const baseApiUrl = "https://unveels.com/";
 export const baseUrl = import.meta.env.PROD ? baseApiUrl : "";
 export const baseMediaUrl =
-  "http://ec2-13-53-99-251.eu-north-1.compute.amazonaws.com//media/catalog/product/cache/df714aaa5e59335a5bf39a17764906ba";
+  "https://unveels.com/media/catalog/product/cache/df714aaa5e59335a5bf39a17764906ba";
 
 export function mediaUrl(imagePath: string | undefined) {
   if (!imagePath) {

@@ -56,6 +56,7 @@
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.9",
     "@types/howler": "^2.2.12",
+    "@types/langdetect": "^0.2.2",
     "@types/lodash": "^4.17.13",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

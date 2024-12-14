@@ -58,13 +58,16 @@ function ImageCanvas({ image, canvasRef }: ImageCanvasProps) {
       }
 
       ctx.clearRect(0, 0, width, height);
-
-      // Simpan keadaan awal konteks
-      ctx.save();
-
-      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-      // Kembalikan keadaan awal konteks
-      ctx.restore();
+      ctx.save(); // Simpan kondisi canvas saat ini
+      ctx.scale(-1, 1); // Membalikkan gambar secara horizontal
+      ctx.drawImage(
+        image,
+        -offsetX - drawWidth,
+        offsetY,
+        drawWidth,
+        drawHeight,
+      );
+      ctx.restore(); // Kembalikan kondisi canvas ke semula
     };
 
     drawImage();

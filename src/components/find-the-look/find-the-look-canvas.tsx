@@ -229,6 +229,9 @@ export function FindTheLookCanvas({
       ctx.clearRect(0, 0, width, height);
 
       if (isFlip) {
+        // Draw image normally
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+      } else {
         // Apply horizontal flip
         ctx.save();
         ctx.scale(-1, 1);
@@ -240,9 +243,6 @@ export function FindTheLookCanvas({
           drawHeight,
         );
         ctx.restore();
-      } else {
-        // Draw image normally
-        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
       }
 
       // Reset hitboxes for each draw

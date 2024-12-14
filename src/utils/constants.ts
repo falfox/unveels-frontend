@@ -1421,6 +1421,28 @@ export const skinAnalysisDataItem: SkinAnalysisItem[] = [
   },
 ];
 
+// eyeliner
+export const EYELINER_ONE =
+  "/media/unveels/vto-assets/texture/eyeliner/single-color/eyeliner_01.png";
+
+export const EYELINER_TWO =
+  "/media/unveels/vto-assets/texture/eyeliner/single-color/eyeliner_02.png";
+
+export const EYELINER_THREE =
+  "/media/unveels/vto-assets/texture/eyeliner/single-color/eyeliner_03.png";
+
+export const EYELINER_FOUR =
+  "/media/unveels/vto-assets/texture/eyeliner/single-color/eyeliner_04.png";
+
+export const EYELINER_FIVE =
+  "/media/unveels/vto-assets/texture/eyeliner/single-color/eyeliner_05.png";
+
+export const EYELINER_SIX =
+  "/media/unveels/vto-assets/texture/eyeliner/single-color/eyeliner_06.png";
+
+export const EYELINER_SEVEN =
+  "/media/unveels/vto-assets/texture/eyeliner/single-color/eyeliner_07.png";
+
 // face problem alpha
 export const WRINKLE_ALPHA =
   "/media/unveels/vto-assets/texture/face-problem/wrinkles_alpha(1).jpg";
@@ -1474,16 +1496,75 @@ export const LIP_PLUMPER_TEXTURE_ONE =
   "/media/unveels/vto-assets/texture/lipstick/one/lipstick_one.png";
 
 //blush
-export const BLUSH_TEXTURE_ONE =
+//ONE
+export const BLUSH_TEXTURE_ONE_ONE =
   "/media/unveels/vto-assets/texture/blush/one/b1c1.png";
-export const BLUSH_TEXTURE_TWO =
+export const BLUSH_TEXTURE_ONE_TWO =
   "/media/unveels/vto-assets/texture/blush/one/b1c2.png";
-export const BLUSH_TEXTURE_THREE =
+export const BLUSH_TEXTURE_ONE_THREE =
   "/media/unveels/vto-assets/texture/blush/one/b1c3.png";
-export const BLUSH_TEXTURE_FOUR =
+export const BLUSH_TEXTURE_ONE_FOUR =
   "/media/unveels/vto-assets/texture/blush/one/b1c4.png";
-export const BLUSH_TEXTURE_FIVE =
+export const BLUSH_TEXTURE_ONE_FIVE =
   "/media/unveels/vto-assets/texture/blush/one/b1c5.png";
+
+//DUAL
+export const BLUSH_TEXTURE_DUAL_P_ONE_ONE =
+  "/media/unveels/vto-assets/texture/blush/dual/p0/b2c1-a.png";
+export const BLUSH_TEXTURE_DUAL_P_ONE_TWO =
+  "/media/unveels/vto-assets/texture/blush/dual/p0/b2c1-b.png";
+export const BLUSH_TEXTURE_DUAL_P_DUAL_ONE =
+  "/media/unveels/vto-assets/texture/blush/dual/p1/b2c2-a.png";
+export const BLUSH_TEXTURE_DUAL_P_DUAL_TWO =
+  "/media/unveels/vto-assets/texture/blush/dual/p1/b2c2-b.png";
+export const BLUSH_TEXTURE_DUAL_P_THREE_ONE =
+  "/media/unveels/vto-assets/texture/blush/dual/p2/b2c3-a.png";
+export const BLUSH_TEXTURE_DUAL_P_THREE_TWO =
+  "/media/unveels/vto-assets/texture/blush/dual/p2/b2c3-b.png";
+export const BLUSH_TEXTURE_DUAL_P_FOUR_ONE =
+  "/media/unveels/vto-assets/texture/blush/dual/p3/b2c4-a.png";
+export const BLUSH_TEXTURE_DUAL_P_FOUR_TWO =
+  "/media/unveels/vto-assets/texture/blush/dual/p3/b2c4-b.png";
+export const BLUSH_TEXTURE_DUAL_P_FIVE_ONE =
+  "/media/unveels/vto-assets/texture/blush/dual/p4/b2c5-a.png";
+export const BLUSH_TEXTURE_DUAL_P_FIVE_TWO =
+  "/media/unveels/vto-assets/texture/blush/dual/p4/b2c5-b.png";
+export const BLUSH_TEXTURE_DUAL_P_SIX_ONE =
+  "/media/unveels/vto-assets/texture/blush/dual/p5/b2c6-a.png";
+export const BLUSH_TEXTURE_DUAL_P_SIX_TWO =
+  "/media/unveels/vto-assets/texture/blush/dual/p5/b2c6-b.png";
+
+//TRI
+export const BLUSH_TEXTURE_TRI_P_ONE_ONE =
+  "/media/unveels/vto-assets/texture/blush/tri/p0/b3c1-a.png";
+export const BLUSH_TEXTURE_TRI_P_ONE_TWO =
+  "/media/unveels/vto-assets/texture/blush/tri/p0/b3c1-b.png";
+export const BLUSH_TEXTURE_TRI_P_ONE_THREE =
+  "/media/unveels/vto-assets/texture/blush/tri/p0/b3c1-c.png";
+export const BLUSH_TEXTURE_TRI_P_DUAL_ONE =
+  "/media/unveels/vto-assets/texture/blush/tri/p1/b3c2-a.png";
+export const BLUSH_TEXTURE_TRI_P_DUAL_TWO =
+  "/media/unveels/vto-assets/texture/blush/tri/p1/b3c2-b.png";
+export const BLUSH_TEXTURE_TRI_P_DUAL_THREE =
+  "/media/unveels/vto-assets/texture/blush/tri/p1/b3c2-c.png";
+export const BLUSH_TEXTURE_TRI_P_THREE_ONE =
+  "/media/unveels/vto-assets/texture/blush/tri/p2/b3c3-a.png";
+export const BLUSH_TEXTURE_TRI_P_THREE_TWO =
+  "/media/unveels/vto-assets/texture/blush/tri/p2/b3c3-b.png";
+export const BLUSH_TEXTURE_TRI_P_THREE_THREE =
+  "/media/unveels/vto-assets/texture/blush/tri/p2/b3c3-c.png";
+export const BLUSH_TEXTURE_TRI_P_FOUR_ONE =
+  "/media/unveels/vto-assets/texture/blush/tri/p3/b3c4-a.png";
+export const BLUSH_TEXTURE_TRI_P_FOUR_TWO =
+  "/media/unveels/vto-assets/texture/blush/tri/p3/b3c4-b.png";
+export const BLUSH_TEXTURE_TRI_P_FOUR_THREE =
+  "/media/unveels/vto-assets/texture/blush/tri/p3/b3c4-c.png";
+export const BLUSH_TEXTURE_TRI_P_FIVE_ONE =
+  "/media/unveels/vto-assets/texture/blush/tri/p4/b3c5-a.png";
+export const BLUSH_TEXTURE_TRI_P_FIVE_TWO =
+  "/media/unveels/vto-assets/texture/blush/tri/p4/b3c5-b.png";
+export const BLUSH_TEXTURE_TRI_P_FIVE_THREE =
+  "/media/unveels/vto-assets/texture/blush/tri/p4/b3c5-c.png";
 
 // concealer
 export const CONCEALER_TEXTURE =

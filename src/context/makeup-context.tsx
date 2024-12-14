@@ -297,7 +297,7 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
   );
 
   const [eyelinerColor, setEyelinerColor] = useState(
-    initialValues?.eyelinerColor ?? "#FFFF",
+    initialValues?.eyelinerColor ?? "#0f0f0f",
   );
 
   const [eyelinerPattern, setEyelinerPattern] = useState(
@@ -411,7 +411,7 @@ export const MakeupProvider: React.FC<MakeupProviderProps> = ({
 
   const [showEyebrows, setShowEyebrows] = useState(false);
   const [eyebrowsPattern, setEyebrowsPattern] = useState(0);
-  const [eyebrowsVisibility, setEyebrowsVisibility] = useState(0.5);
+  const [eyebrowsVisibility, setEyebrowsVisibility] = useState(0.6);
   const [eyebrowsColor, setEyebrowsColor] = useState("#FFFF");
 
   const [envMapMakeup, setEnvMapMakeup] = useState<Texture | null>(null);

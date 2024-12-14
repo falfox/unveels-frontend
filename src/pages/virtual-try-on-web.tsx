@@ -107,14 +107,20 @@ function Main() {
           // lipliner
 
           if (data.showLipliner !== undefined) {
+            console.log("show lipliner");
+
             setShowLipliner(data.showLipliner);
           }
 
           if (data.liplinerPattern !== undefined) {
-            setLiplinerPattern(data.setLiplinerPattern);
+            console.log("show lipliner pattern");
+
+            setLiplinerPattern(data.liplinerPattern);
           }
 
           if (data.liplinerColor !== undefined) {
+            console.log("show lipliner color");
+
             setLiplinerColor(data.liplinerColor);
           }
 

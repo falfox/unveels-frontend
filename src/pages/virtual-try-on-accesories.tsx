@@ -21,14 +21,10 @@ import { CameraProvider, useCamera } from "../context/recorder-context";
 import { ShareModal } from "../components/share-modal";
 import { SkinColorProvider } from "../components/skin-tone-finder-scene/skin-color-context";
 import { useRecordingControls } from "../hooks/useRecorder";
-import { EyesMode } from "./vto/eyes/eyes-makeup";
-import { FaceMode } from "./vto/face/face-makeup";
-import { HairMode } from "./vto/hair/hair-makeup";
-import { HandAccessoriesMode } from "./vto/hand-accessories/hand-accessories";
-import { HeadAccessoriesMode } from "./vto/head-accesories/head-accessories";
-import { LipsMode } from "./vto/lips/lips-makeup";
-import { NailsMode } from "./vto/nails/nails-makeup";
-import { NeckAccessoriesMode } from "./vto/neck-accessories/neck-accessories";
+import { HandAccessoriesMode } from "./vto/vto-accesories/hand-accessories/hand-accessories";
+import { HeadAccessoriesMode } from "./vto/vto-accesories/head-accesories/head-accessories";
+import { NailsMode } from "./vto/vto-accesories/nails/nails-makeup";
+import { NeckAccessoriesMode } from "./vto/vto-accesories/neck-accessories/neck-accessories";
 import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
 import { MakeupProvider } from "../context/makeup-context";
 import { AccesoriesProvider } from "../context/accesories-context";
@@ -205,7 +201,7 @@ function MainContent() {
         <button
           type="button"
           onClick={() => {
-            navigate("/virtual-try-on/makeups");
+            navigate("/virtual-try-on-accesories/accesories");
           }}
         >
           <ChevronDown className="size-6 text-white" />

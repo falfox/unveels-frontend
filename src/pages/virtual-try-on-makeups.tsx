@@ -23,20 +23,15 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { Footer } from "../components/footer";
-import { VideoScene } from "../components/recorder/recorder";
 import { CameraProvider, useCamera } from "../context/recorder-context";
 import { ShareModal } from "../components/share-modal";
 import { SkinColorProvider } from "../components/skin-tone-finder-scene/skin-color-context";
-import { usePage } from "../hooks/usePage";
 import { useRecordingControls } from "../hooks/useRecorder";
-import { EyesMode } from "./vto/eyes/eyes-makeup";
-import { FaceMode } from "./vto/face/face-makeup";
-import { HairMode } from "./vto/hair/hair-makeup";
-import { HandAccessoriesMode } from "./vto/hand-accessories/hand-accessories";
-import { HeadAccessoriesMode } from "./vto/head-accesories/head-accessories";
-import { LipsMode } from "./vto/lips/lips-makeup";
-import { NailsMode } from "./vto/nails/nails-makeup";
-import { NeckAccessoriesMode } from "./vto/neck-accessories/neck-accessories";
+import { EyesMode } from "./vto/vto-makeups/eyes/eyes-makeup";
+import { FaceMode } from "./vto/vto-makeups/face/face-makeup";
+import { HairMode } from "./vto/vto-makeups/hair/hair-makeup";
+import { LipsMode } from "./vto/vto-makeups/lips/lips-makeup";
+import { NailsMode } from "./vto/vto-makeups/nails/nails-makeup";
 import { VirtualTryOnScene } from "../components/vto/virtual-try-on-scene";
 import { MakeupProvider } from "../context/makeup-context";
 import { AccesoriesProvider } from "../context/accesories-context";
@@ -213,7 +208,7 @@ function MainContent() {
         <button
           type="button"
           onClick={() => {
-            navigate("/virtual-try-on/makeups");
+            navigate("/virtual-try-on-makeups/makeups");
           }}
         >
           <ChevronDown className="size-6 text-white" />
@@ -224,8 +219,6 @@ function MainContent() {
 }
 
 export function TryOnSelectorMakeups() {
-  const [tab, setTab] = useState("makeup" as "makeup" | "accessories" | null);
-
   return (
     <div className="mx-auto w-full max-w-lg space-y-2 px-4">
       <Makeups />
@@ -310,88 +303,6 @@ export function Makeups() {
           <NailsMode />
         ) : selectedMakeup === "Hair" ? (
           <HairMode />
-        ) : null}
-      </div>
-    </>
-  );
-}
-
-export function Accessories() {
-  const shadeOptions = [
-    {
-      name: "Head Accessories",
-      icon: <Icons.accessoryHead />,
-    },
-    {
-      name: "Neck Accessories",
-      icon: <Icons.accessoryNeck />,
-    },
-    {
-      name: "Hand Accessories",
-      icon: <Icons.accessoryHand />,
-    },
-    {
-      name: "Nails",
-      icon: <Icons.makeupNails />,
-    },
-  ];
-
-  const [selectedAccessory, setSelectedAccessory] = useState<string | null>(
-    null,
-  );
-
-  return (
-    <>
-      <div className="flex flex-col items-start">
-        <div className="flex w-full min-w-0 justify-around gap-x-4 py-4 peer-has-[data-mode]:hidden">
-          {shadeOptions.map((option, index) => (
-            <button
-              key={index}
-              className="flex flex-col items-center justify-center space-y-2"
-              data-selected={selectedAccessory === option.name}
-              onClick={() => setSelectedAccessory(option.name)}
-            >
-              <div
-                className={clsx(
-                  "relative flex h-[34px] w-[42px] shrink-0 items-center justify-center rounded-3xl border border-transparent py-2 text-center text-xs text-white transition-all sm:h-[44.2px] sm:w-[54.6px]",
-                  {
-                    "bg-gradient-to-r from-[#CA9C43] via-[#916E2B] to-[#473209]":
-                      selectedAccessory === option.name,
-                  },
-                )}
-              >
-                {cloneElement(option.icon, {
-                  className: "text-white size-6",
-                })}
-
-                <div
-                  className="absolute inset-0 rounded-3xl border-2 border-transparent p-1"
-                  style={
-                    {
-                      background: `linear-gradient(148deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.77) 100%) border-box`,
-                      "-webkit-mask": `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                      mask: `linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)`,
-                      "-webkit-mask-composite": "destination-out",
-                      "mask-composite": "exclude",
-                    } as CSSProperties
-                  }
-                />
-              </div>
-              <div className="text-center text-[9.8px] !leading-4 text-white sm:text-sm lg:text-lg">
-                {option.name}
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {selectedAccessory === "Head Accessories" ? (
-          <HeadAccessoriesMode />
-        ) : selectedAccessory === "Neck Accessories" ? (
-          <NeckAccessoriesMode />
-        ) : selectedAccessory === "Hand Accessories" ? (
-          <HandAccessoriesMode />
-        ) : selectedAccessory === "Nails" ? (
-          <NailsMode />
         ) : null}
       </div>
     </>
