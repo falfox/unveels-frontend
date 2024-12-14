@@ -6,11 +6,10 @@ import { Icons } from "../../../../components/icons";
 import { LoadingProducts } from "../../../../components/loading";
 import { useMakeup } from "../../../../context/makeup-context";
 import { LipColorProvider, useLipColorContext } from "./lip-color-context";
-
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { useLipColorQuery } from "./lip-color-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "../../../../api/shared";
 
 export function LipColorSelector() {
@@ -237,7 +236,13 @@ function ShadesSelector() {
 function ProductList() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const { colorFamily, selectedTexture, selectedColors } = useLipColorContext();
+  const {
+    colorFamily,
+    selectedTexture,
+    selectedColors,
+    setColorFamily,
+    setSelectedTexture,
+  } = useLipColorContext();
 
   const { data, isLoading } = useLipColorQuery({
     color: colorFamily,
@@ -252,6 +257,10 @@ function ProductList() {
     isLoading,
   });
 
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
   return (
     <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
@@ -264,6 +273,7 @@ function ProductList() {
               key={product.id}
               selectedProduct={selectedProduct}
               setSelectedProduct={setSelectedProduct}
+              onClick={() => handleProductClick(product)}
             />
           );
         })

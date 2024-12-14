@@ -2,21 +2,16 @@ import { Product } from "../../api/shared";
 import { getProductAttributes, mediaUrl } from "../../utils/apiUtils";
 import { BrandName } from "../product/brand";
 
-const handleProductClick = (
-  product: Product,
-  setSelectedProduct: React.Dispatch<React.SetStateAction<Product | null>>,
-) => {
-  setSelectedProduct(product); // Menyimpan produk yang diklik ke dalam state
-};
-
 export function VTOProductCard({
   product,
   selectedProduct,
   setSelectedProduct,
+  onClick,
 }: {
   product: Product;
   selectedProduct: Product | null;
   setSelectedProduct: React.Dispatch<React.SetStateAction<Product | null>>;
+  onClick: () => void;
 }) {
   const imageUrl = mediaUrl(product.media_gallery_entries?.[0]?.file);
 
@@ -35,7 +30,7 @@ export function VTOProductCard({
     <div
       style={cardStyle}
       className="w-[70px] shadow sm:w-[100px]"
-      onClick={() => handleProductClick(product, setSelectedProduct)}
+      onClick={onClick} // Memanggil onClick saat produk diklik
     >
       <div className="relative h-[47.6px] w-[70px] overflow-hidden sm:h-[70px] sm:w-[100px]">
         <img
