@@ -20,6 +20,7 @@ import { BrandName } from "../../../../components/product/brand";
 import { LoadingProducts } from "../../../../components/loading";
 import { useBronzerQuery } from "./bronzer-query";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+import { useState } from "react";
 
 export function BronzerSelector() {
   return (
@@ -177,6 +178,8 @@ function TextureSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { selectedTexture, selectedColor } = useBronzerContext();
 
   const { data, isLoading } = useBronzerQuery({
@@ -190,7 +193,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

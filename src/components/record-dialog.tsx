@@ -16,7 +16,7 @@ export function RecordDialog({
         <AlertDialog.Overlay className="data-[state=open]:animate-overlayShow fixed inset-0 bg-black/50" />
         <AlertDialog.Content className="data-[state=open]:animate-contentShow fixed left-1/2 top-1/2 w-full max-w-xs -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl bg-black/20 p-0.5 backdrop-blur-3xl">
           <div
-            className="absolute inset-0 border-2 border-transparent pointer-events-none rounded-3xl"
+            className="pointer-events-none absolute inset-0 rounded-3xl border-2 border-transparent"
             style={
               {
                 background: `linear-gradient(90deg, #CA9C43 0%, #916E2B 27.4%, #6A4F1B 59.4%, #473209 100%)`,

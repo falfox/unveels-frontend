@@ -11,6 +11,8 @@ import { getPatternByIndex } from "../../../../api/attributes/pattern";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { filterColors } from "../../../../api/attributes/color";
 import { ColorPalette } from "../../../../components/color-palette";
+import { useState } from "react";
+import { Product } from "../../../../api/shared";
 
 const colorFamilies = filterColors(["Brown", "Black"]);
 
@@ -183,6 +185,8 @@ function BrightnessSlider() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedPattern } = useEyebrowsContext();
 
   const { data, isLoading } = useEyebrowsQuery({
@@ -198,7 +202,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

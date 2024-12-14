@@ -8,6 +8,8 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { useLipLinerContext } from "./lip-liner-context";
 import { useLipLinerQuery } from "./lip-liner-query";
 import { ColorPalette } from "../../../../components/color-palette";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 export function LipLinerSelector() {
   return (
@@ -159,6 +161,8 @@ function SizeSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedSize: selectedShade } = useLipLinerContext();
 
   const { data, isLoading } = useLipLinerQuery({
@@ -173,7 +177,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard key={product.id} product={product} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

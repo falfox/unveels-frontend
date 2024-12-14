@@ -9,6 +9,8 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { HatsProvider, useHatsContext } from "./hats-context";
 import { useHatsQuery } from "./hats-query";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 export function HatsSelector() {
   return (
@@ -193,6 +195,8 @@ function FabricSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedOccasion, selectedFabric } = useHatsContext();
 
   const { data, isLoading } = useHatsQuery({
@@ -207,7 +211,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

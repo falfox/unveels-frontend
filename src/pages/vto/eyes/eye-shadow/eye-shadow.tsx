@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { colors } from "../../../../api/attributes/color";
 import { filterTextures } from "../../../../api/attributes/texture";
 import { Icons } from "../../../../components/icons";
@@ -9,6 +9,7 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { EyeShadowProvider, useEyeShadowContext } from "./eye-shadow-context";
 import { useEyeshadowsQuery } from "./eye-shadow-query";
 import { ColorPalette } from "../../../../components/color-palette";
+import { Product } from "../../../../api/shared";
 
 export function EyeShadowSelector() {
   return (
@@ -216,6 +217,8 @@ function ModeSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { selectedTexture, selectedColors } = useEyeShadowContext();
 
   const { data, isLoading } = useEyeshadowsQuery({
@@ -230,7 +233,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

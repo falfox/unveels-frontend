@@ -9,6 +9,8 @@ import { GlassesProvider, useGlassesContext } from "./glasses-context";
 import { useGlassesQuery } from "./glasses-query";
 import { filterShapes } from "../../../../api/attributes/shape";
 import { filterMaterials } from "../../../../api/attributes/material";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 export function GlassesSelector() {
   return (
@@ -215,6 +217,8 @@ function MaterialSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedMaterial, selectedShape } = useGlassesContext();
 
   const { data, isLoading } = useGlassesQuery({
@@ -229,7 +233,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

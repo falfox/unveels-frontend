@@ -10,6 +10,8 @@ import { LipColorProvider, useLipColorContext } from "./lip-color-context";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { useLipColorQuery } from "./lip-color-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
+import { useState } from "react";
+import { Product } from "../../../../api/shared";
 
 export function LipColorSelector() {
   return (
@@ -233,6 +235,8 @@ function ShadesSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedTexture, selectedColors } = useLipColorContext();
 
   const { data, isLoading } = useLipColorQuery({
@@ -254,7 +258,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

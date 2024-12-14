@@ -9,6 +9,8 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { NeckwearProvider, useNeckwearContext } from "./neckwear-context";
 import { useNeckwearQuery } from "./neckwear-query";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 function useActiveNeckwear(): "Chokers" | "Necklaces" | "Pendants" {
   const location = useLocation();
@@ -125,6 +127,8 @@ function ColorSelector() {
 }
 
 function NeckwearProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily } = useNeckwearContext();
   const neckwearType = useActiveNeckwear();
 
@@ -138,7 +142,14 @@ function NeckwearProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

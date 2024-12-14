@@ -6,6 +6,8 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { useHairColorContext } from "./hair-color-context";
 import { useHairColorQuery } from "./hair-color-query";
 import { useMakeup } from "../../../../context/makeup-context";
+import { useState } from "react";
+import { Product } from "../../../../api/shared";
 
 export function HairColorSelector() {
   return (
@@ -105,7 +107,7 @@ function ColorSelector() {
             <img
               src={path}
               alt="Hair Color"
-              className="h-[31.5px] w-[41.3px] rounded sm:h-[45px] sm:w-[59px] lg:h-[58.5px] lg:w-[76.7px] object-cover"
+              className="h-[31.5px] w-[41.3px] rounded object-cover sm:h-[45px] sm:w-[59px] lg:h-[58.5px] lg:w-[76.7px]"
             />
           </button>
         ))}
@@ -115,6 +117,8 @@ function ColorSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily } = useHairColorContext();
 
   const { data, isLoading } = useHairColorQuery({
@@ -128,7 +132,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

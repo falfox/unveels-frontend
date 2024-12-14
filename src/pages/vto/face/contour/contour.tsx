@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 import { ColorPalette } from "../../../../components/color-palette";
 import { ContourProvider, useContourContext } from "./contour-context";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useMakeup } from "../../../../context/makeup-context";
 import { useQuery } from "@tanstack/react-query";
 import { faceMakeupProductTypesFilter } from "../../../../api/attributes/makeups";
@@ -250,6 +250,8 @@ function TextureSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { selectedTexture } = useContourContext();
 
   const { data, isLoading } = useContourQuery({
@@ -261,7 +263,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>
