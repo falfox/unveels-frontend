@@ -233,7 +233,6 @@ function MainContent() {
                   zIndex: 0,
                 }}
               ></div>
-              <RecorderStatus />
               <TopNavigation />
             </>
           )}

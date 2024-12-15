@@ -236,7 +236,7 @@ function MainContent() {
             )}
           </>
         </div>
-        <RecorderStatus />
+
         <TopNavigation />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">

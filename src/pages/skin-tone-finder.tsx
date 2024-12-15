@@ -122,7 +122,6 @@ function Main() {
             }}
           ></div>
         </div>
-        <RecorderStatus />
         <TopNavigation cart={isInferenceFinished} />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0">
