@@ -63,6 +63,7 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+  const [language, setLanguage] = useState("en-US");
 
   const [fetchProducts, setFetchProducts] = useState(false);
   const [products, setProducts] = useState<ProductRequest[]>([]);
@@ -76,25 +77,59 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
           setProductData(fetchedProducts);
           setFetchProducts(false);
 
-          fetchedProducts.forEach((item) => {
-            const imageUrl =
-              mediaUrl(item.media_gallery_entries[0]?.file) ??
-              "https://picsum.photos/id/237/200/300";
+          if (productData.length < 1) {
+            // Tambahkan respons ke chats
             setChats((prevChats) => [
               ...prevChats,
               {
-                id: item.id,
-                type: "product",
+                id: Date.now() + 1,
+                text:
+                  language === "en-US"
+                    ? "sorry, the product is out of stock"
+                    : "عذرا المنتج غير متوفر",
                 sender: "agent",
-                name: item.name,
-                price: item.price,
-                originalPrice: item.price,
-                image: imageUrl,
-                brand: "Tom Ford",
+                type: "chat",
+                mode: "text-connection",
                 timestamp: getCurrentTimestamp(),
               },
             ]);
-          });
+          } else {
+            // Tambahkan respons ke chats
+            setChats((prevChats) => [
+              ...prevChats,
+              {
+                id: Date.now() + 1,
+                text:
+                  language === "en-US"
+                    ? "Here is the product you are looking for"
+                    : "إليك توصيات المنتج التي تبحث عنها",
+                sender: "agent",
+                type: "chat",
+                mode: "text-connection",
+                timestamp: getCurrentTimestamp(),
+              },
+            ]);
+
+            fetchedProducts.forEach((item) => {
+              const imageUrl =
+                mediaUrl(item.media_gallery_entries[0]?.file) ??
+                "https://picsum.photos/id/237/200/300";
+              setChats((prevChats) => [
+                ...prevChats,
+                {
+                  id: item.id,
+                  type: "product",
+                  sender: "agent",
+                  name: item.name,
+                  price: item.price,
+                  originalPrice: item.price,
+                  image: imageUrl,
+                  brand: "Tom Ford",
+                  timestamp: getCurrentTimestamp(),
+                },
+              ]);
+            });
+          }
         })
         .finally(() => setLoading(false));
     }
@@ -129,24 +164,25 @@ const TextConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       console.log(jsonLabel);
       const respond = JSON.parse(jsonLabel);
 
-      // Tambahkan respons ke chats
-      setChats((prevChats) => [
-        ...prevChats,
-        {
-          id: Date.now() + 1,
-          text: respond.chat,
-          sender: "agent",
-          type: "chat",
-          mode: "text-connection",
-          timestamp,
-        },
-      ]);
-
       if (respond.isFinished) {
         setProducts(respond.product);
         setLoading(true);
         setFetchProducts(true);
+      } else {
+        setChats((prevChats) => [
+          ...prevChats,
+          {
+            id: Date.now() + 1,
+            text: respond.chat,
+            sender: "agent",
+            type: "chat",
+            mode: "text-connection",
+            timestamp,
+          },
+        ]);
       }
+
+      setLanguage(respond.lang);
     } catch (error) {
       console.error("Error fetching AI response:", error);
     } finally {

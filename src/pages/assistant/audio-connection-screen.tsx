@@ -59,6 +59,41 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         .then((fetchedProducts) => {
           setProductData(fetchedProducts);
           setFetchProducts(false);
+
+          if (productData.length < 1) {
+            // Tambahkan respons ke chats
+            setChats((prevChats) => [
+              ...prevChats,
+              {
+                id: Date.now() + 1,
+                text:
+                  language === "en-US"
+                    ? "sorry, the product is out of stock"
+                    : "عذرا المنتج غير متوفر",
+                sender: "agent",
+                type: "chat",
+                mode: "text-connection",
+                timestamp: getCurrentTimestamp(),
+              },
+            ]);
+          } else {
+            // Tambahkan respons ke chats
+            setChats((prevChats) => [
+              ...prevChats,
+              {
+                id: Date.now() + 1,
+                text:
+                  language === "en-US"
+                    ? "Here is the product you are looking for"
+                    : "إليك توصيات المنتج التي تبحث عنها",
+                sender: "agent",
+                type: "chat",
+                mode: "text-connection",
+                timestamp: getCurrentTimestamp(),
+              },
+            ]);
+          }
+
           setLoading(false);
         })
         .finally(() => setLoading(false));
@@ -93,23 +128,22 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       console.log(jsonLabel);
       const respond = JSON.parse(jsonLabel);
 
-      // Tambahkan respons ke chats
-      setChats((prevChats) => [
-        ...prevChats,
-        {
-          id: Date.now() + 1,
-          text: respond.chat,
-          sender: "agent",
-          type: "chat",
-          mode: "text-connection",
-          timestamp,
-        },
-      ]);
-
       if (respond.isFinished) {
         setProducts(respond.product);
         setLoading(true);
         setFetchProducts(true);
+      } else {
+        setChats((prevChats) => [
+          ...prevChats,
+          {
+            id: Date.now() + 1,
+            text: respond.chat,
+            sender: "agent",
+            type: "chat",
+            mode: "text-connection",
+            timestamp,
+          },
+        ]);
       }
 
       setText(respond.chat);

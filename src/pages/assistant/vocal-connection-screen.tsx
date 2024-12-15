@@ -85,6 +85,23 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
         .then((fetchedProducts) => {
           setProductData(fetchedProducts);
           setFetchProducts(false);
+          if (productData.length < 1) {
+            // Tambahkan respons ke chats
+            setChats((prevChats) => [
+              ...prevChats,
+              {
+                id: Date.now() + 1,
+                text:
+                  languange === "en-US"
+                    ? "sorry, the product is out of stock"
+                    : "عذرا المنتج غير متوفر",
+                sender: "agent",
+                type: "chat",
+                mode: "text-connection",
+                timestamp: getCurrentTimestamp(),
+              },
+            ]);
+          }
           setLoading(false);
         })
         .finally(() => setLoading(false));
@@ -126,23 +143,23 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
       console.log(jsonLabel);
       const respond = JSON.parse(jsonLabel);
 
-      // Tambahkan respons ke chats
-      setChats((prevChats) => [
-        ...prevChats,
-        {
-          id: Date.now() + 1,
-          text: respond.chat,
-          sender: "agent",
-          type: "chat",
-          mode: "voice-connection",
-          timestamp,
-        },
-      ]);
-
       if (respond.isFinished) {
         setProducts(respond.product);
         setLoading(true);
         setFetchProducts(true);
+      } else {
+        // Tambahkan respons ke chats
+        setChats((prevChats) => [
+          ...prevChats,
+          {
+            id: Date.now() + 1,
+            text: respond.chat,
+            sender: "agent",
+            type: "chat",
+            mode: "voice-connection",
+            timestamp,
+          },
+        ]);
       }
 
       setText(respond.chat);
