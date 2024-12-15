@@ -13,6 +13,10 @@ export function VirtualAvatar() {
 
   const [blendshape, setBlendshape] = useState<BlendData[]>([]);
 
+  const [finishTalking, setFinishTalking] = useState<boolean>(false);
+
+  const [firstTime, setFirstTime] = useState<number>(0);
+
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
   // Fungsi untuk menerima data dari Flutter
@@ -21,62 +25,62 @@ export function VirtualAvatar() {
     incomingLanguage: string,
   ) => {
     console.log("Data received from Flutter:", incomingText, incomingLanguage);
-    setText(incomingText);
-    setLanguage(incomingLanguage);
 
-    // make speech
-    const audioSrc = await makeSpeech(text, language);
+    const audioSrc = await makeSpeech(incomingText, incomingLanguage);
 
-    // delay to make sure it connect
     setTimeout(() => {
-      setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
       setBlendshape(audioSrc.data.blendData);
-      setSpeak(true);
-    }, 750);
+      if ((window as any).flutter_inappwebview) {
+        (window as any).flutter_inappwebview
+          .callHandler("isSpeak", "true")
+          .then((result: any) => {
+            console.log("Flutter responded with:", result);
+          })
+          .catch((error: any) => {
+            console.error("Error calling Flutter handler:", error);
+          });
+      }
 
-    setSpeak(true);
+      setFinishTalking(false);
+      setSpeak(true);
+      setPlaying(true);
+    }, 500);
   };
 
-  // Menambahkan fungsi ke window setelah komponen dimuat
   useEffect(() => {
     console.log("VirtualAvatar component is mounted");
 
-    // Menambahkan receiveTextAndLanguage ke window setelah komponen dimuat
     (window as any).receiveTextAndLanguage = receiveTextAndLanguage;
 
-    // Pembersihan komponen: menghapus fungsi dari window saat komponen di-unmount
     return () => {
       console.log("Cleanup: removing receiveTextAndLanguage from window");
       (window as any).receiveTextAndLanguage = undefined;
     };
-  }, []); // Efek ini hanya berjalan sekali, setelah komponen dimuat
+  }, []);
 
-  function playerEnded() {
-    setAudioSource(null);
-    setSpeak(false);
-    setPlaying(false);
-  }
+  useEffect(() => {
+    console.log(firstTime);
 
-  function playerReady() {
-    audioPlayer.current?.audioEl.current?.play();
-    setPlaying(true);
-  }
+    if (finishTalking) {
+      if (firstTime == 0) {
+        setFinishTalking(false);
+        setFirstTime(1);
+      }
+      setSpeak(false);
+      setPlaying(false);
+      setFinishTalking(false);
+      console.log(finishTalking);
+    }
+  }, [finishTalking]);
 
   return (
     <div className="relative mx-auto flex h-full min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#000000_0%,#0F0B02_41.61%,#47330A_100%)]">
       <div className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden">
-        <ReactAudioPlayer
-          src={audioSource ?? undefined}
-          ref={audioPlayer}
-          onEnded={playerEnded}
-          onCanPlayThrough={playerReady}
-          onError={(e) => {
-            console.error("Audio Playback Error:", e);
-            console.log(
-              "Audio Source:",
-              audioSource || "No audio source provided",
-            );
-          }}
+        <ModelSceneWeb
+          blendshape={blendshape}
+          speak={speak}
+          playing={playing}
+          setFinishTalking={setFinishTalking}
         />
       </div>
     </div>

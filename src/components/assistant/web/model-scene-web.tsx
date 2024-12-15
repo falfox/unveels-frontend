@@ -8,9 +8,15 @@ interface ModelSceneWebProps {
   speak: boolean;
   playing: boolean;
   blendshape: BlendData[];
+  setFinishTalking: (finishTalking: boolean) => void;
 }
 
-const ModelSceneWeb = ({ speak, playing, blendshape }: ModelSceneWebProps) => {
+const ModelSceneWeb = ({
+  speak,
+  playing,
+  blendshape,
+  setFinishTalking,
+}: ModelSceneWebProps) => {
   return (
     <>
       <Canvas dpr={2}>
@@ -45,6 +51,7 @@ const ModelSceneWeb = ({ speak, playing, blendshape }: ModelSceneWebProps) => {
             speak={speak}
             playing={playing}
             blendshape={blendshape}
+            setFinishTalking={setFinishTalking}
           />
         </Suspense>
       </Canvas>

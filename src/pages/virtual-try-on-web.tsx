@@ -111,7 +111,7 @@ function Main() {
           }
 
           if (data.liplinerPattern !== undefined) {
-            setLiplinerPattern(data.setLiplinerPattern);
+            setLiplinerPattern(data.liplinerPattern);
           }
 
           if (data.liplinerColor !== undefined) {
@@ -182,7 +182,7 @@ function Main() {
           // lens
 
           if (data.showLens !== undefined) {
-            setShowLens(data.setShowLens);
+            setShowLens(data.showLens);
           }
 
           if (data.lensPattern !== undefined) {
