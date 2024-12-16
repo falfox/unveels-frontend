@@ -191,6 +191,5 @@ export const talkingAvatarHost = "https://talking-avatar.evorty.id";
 
 export function makeSpeech(text: string, language = "en-US") {
   console.log(text, language);
-
   return axios.post(talkingAvatarHost + "/talk", { text, language });
 }

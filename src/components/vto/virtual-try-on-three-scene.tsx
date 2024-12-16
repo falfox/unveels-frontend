@@ -100,8 +100,8 @@ const VirtualTryOnThreeScene: React.FC<VirtualTryOnThreeSceneProps> = ({
   const filterRef = useRef<ShaderMaterial>(null);
 
   // State for slider-controlled factors
-  const [archFactor, setArchFactor] = useState(0.1);
-  const [pinchFactor, setPinchFactor] = useState(0.1);
+  const [archFactor, setArchFactor] = useState(0.0);
+  const [pinchFactor, setPinchFactor] = useState(0.0);
   const [horizontalShiftFactor, setHorizontalShiftFactor] = useState(0);
   const [verticalShiftFactor, setVerticalShiftFactor] = useState(0);
 
