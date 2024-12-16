@@ -7,6 +7,7 @@ import { useVirtualTryOnMakeupsVoice } from "../../context/virtual-try-on-makeup
 import {
   lipLinerSizes,
   shadesLipColor,
+  stringNumbers,
   subSection,
 } from "../../utils/constants";
 import { capitalizeWords, getLastPathSegment } from "../../utils/other";
@@ -46,10 +47,8 @@ import { useHairColorContext } from "../../pages/vto/hair/hair-color/hair-color-
 import { useQueryClient } from "@tanstack/react-query";
 
 export function useFunctionCommand() {
-  const [recording, setRecording] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [transcript, setTranscript] = useState("");
   const {
     setSelectedMode,
     setSelectedColors,
@@ -114,7 +113,7 @@ export function useFunctionCommand() {
     setSelectedColor: setSelectedColorPlumper,
     setSelectedTexture: setSelectedTexturePlumper,
   } = useLipPlumperContext();
-  
+
   const {
     colorFamily: colorFamilyEyebrows,
     setColorFamily: setColorFamilyEyebrows,
@@ -199,51 +198,64 @@ export function useFunctionCommand() {
     selectedColor: selectedColorHairColor,
     setSelectedColor: setSelectedColorHairColor,
   } = useHairColorContext();
+  const [recording, setRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
-  console.log(getLastPathSegment(pathname), "pathname");
+  // Inisialisasi Speech Recognition
+  const initializeRecognition = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  // Check if Web Speech API is supported
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recognition;
+    if (!SpeechRecognition) {
+      console.error("Web Speech API not supported in this browser.");
+      return null;
+    }
 
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = true; // Hanya mendengarkan satu perintah
-    recognition.lang = "en-GB"; // Mengatur bahasa Inggris UK
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true; // Mendengarkan terus-menerus
+    recognition.lang = "en-GB"; // Bahasa Inggris UK
     recognition.interimResults = false;
 
-    // Event handler ketika hasil pengenalan suara tersedia
+    // Event handler untuk hasil pengenalan suara
     recognition.onresult = (event) => {
       const lastIndex =
         event.results && event.results.length > 0
           ? event.results.length - 1
-          : 0; // Index of the last result
+          : 0; // Index hasil terakhir
       const speechResult = event.results[lastIndex][0].transcript.toLowerCase();
       console.log("Transcript:", speechResult);
-      setTranscript(speechResult); // Update transcript state
-      handleCommand(speechResult); // Handle command setelah mendengarkan
+      handleCommand(speechResult);
     };
 
     recognition.onerror = (event) => {
-      setRecording(false);
       console.error("Speech recognition error:", event.error);
+      setRecording(false);
     };
-  } else {
-    console.error("Web Speech API not supported in this browser.");
-  }
 
+    recognition.onend = () => {
+      console.log("Speech recognition ended.");
+      setRecording(false);
+    };
+
+    return recognition;
+  };
+
+  // Start listening
   const startListening = () => {
-    if (recognition) {
-      setTranscript(""); // Reset transcript
-      recognition.start(); // Mulai mendengarkan
+    if (!recognitionRef.current) {
+      recognitionRef.current = initializeRecognition();
+    }
+
+    if (recognitionRef.current && !recording) {
+      recognitionRef.current.start();
       setRecording(true);
     }
   };
 
+  // Stop listening
   const stopListening = () => {
-    if (recognition) {
-      recognition.stop(); // Berhenti mendengarkan
+    if (recognitionRef.current && recording) {
+      recognitionRef.current.stop();
       setRecording(false);
     }
   };
@@ -305,19 +317,24 @@ export function useFunctionCommand() {
     }
     // Check for color
     if (ColorRegex.test(transcript)) {
-      const color = capitalizeWords(
+      let color = capitalizeWords(
         transcript.match(ColorRegex)[1].toLowerCase().trim(),
       ).replace(" Color", "");
-
+      if (color == 'Gray') {
+        color = 'Grey';
+      }
       const colorValue = colors.find((e) => e.label == color)?.value || "";
       handleSetColor(colorValue, color);
     }
     // Check for color childern
     if (ColorChildernRegex.test(transcript)) {
-      const color = capitalizeWords(
+      let index = capitalizeWords(
         transcript.match(ColorChildernRegex)[1].toLowerCase().trim(),
       );
-      handleSetColorChildern(color);
+      if (stringNumbers.includes(index.toLowerCase())) {
+        index = (stringNumbers.indexOf(index.toLowerCase()) + 1).toString();
+      }
+      handleSetColorChildern(index);
     }
     // Check pattern
     if (patternRegex.test(transcript)) {
@@ -409,7 +426,7 @@ export function useFunctionCommand() {
     }
   }
 
-  const handleSetColor = async(colorCode: string, color: string) => {
+  const handleSetColor = async (colorCode: string, color: string) => {
     if (getLastPathSegment(pathname) == "lip-color" && colorCode !== "") {
       console.log(colorCode, "colorCode");
       setColorFamily(colorCode);
@@ -474,7 +491,7 @@ export function useFunctionCommand() {
   const handleSetColorChildern = (index: string) => {
     if (getLastPathSegment(pathname) == "lip-color") {
       console.log(colorFamily, "colorFamily");
-      const data:any = queryClient.getQueryData([
+      const data: any = queryClient.getQueryData([
         "products",
         "lipcolor",
         colorFamily,
@@ -485,7 +502,6 @@ export function useFunctionCommand() {
         data?.items ?? [],
         "hexacode",
       ).flatMap((item) => item.split(","));
-          
 
       console.log(colorData, "colorData");
 
@@ -548,13 +564,13 @@ export function useFunctionCommand() {
         colorFamilyEyebrows,
         null,
       ]);
-      
+
       const colorData = extractUniqueCustomAttributes(
         datauseEyebrowsQuery?.items ?? [],
         "hexacode",
       ).flatMap((item) => item.split(","));
       console.log(colorData, "colorData");
-      
+
       const indexPattern = parseInt(index) - 1;
       if (indexPattern >= 0) {
         const color = colorData[indexPattern];
@@ -582,10 +598,10 @@ export function useFunctionCommand() {
         "eyeshadows",
         null,
         null,
-        null
+        null,
       ]);
       console.log(datauseEyeshadowsQuery, "datauseEyeshadowsQuery");
-      
+
       const colorData = extractUniqueCustomAttributes(
         datauseEyeshadowsQuery?.items ?? [],
         "hexacode",
@@ -795,7 +811,7 @@ export function useFunctionCommand() {
         "products",
         "bronzers",
         null,
-        null
+        null,
       ]);
       const colorData = extractUniqueCustomAttributes(
         datauseBronzerQuery?.items ?? [],

@@ -27,6 +27,29 @@ export const lipLinerSizes = [
   { label: "Six", value: "Wider" },
 ];
 
+export const stringNumbers = [
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+  "twenty",
+];
+
 export  const subSection = [
     {
       name: "Lip Color",
