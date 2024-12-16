@@ -6,10 +6,11 @@ import { Icons } from "../../../../components/icons";
 import { LoadingProducts } from "../../../../components/loading";
 import { useMakeup } from "../../../../context/makeup-context";
 import { LipColorProvider, useLipColorContext } from "./lip-color-context";
-
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { useLipColorQuery } from "./lip-color-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
+import { useEffect, useState } from "react";
+import { Product } from "../../../../api/shared";
 
 export function LipColorSelector() {
   return (
@@ -30,14 +31,14 @@ export function LipColorSelector() {
 }
 
 function FamilyColorSelector() {
-  const { colorFamily, setColorFamily } = useLipColorContext();
+  const { colorFamily, setColorFamily, colorFamilyToInclude } = useLipColorContext();
 
   return (
     <div
       className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
-      {colors.map((item, index) => (
+      {colors.filter((c) => colorFamilyToInclude?.includes(c.value)).map((item, index) => (
         <button
           type="button"
           className={clsx(
@@ -233,7 +234,15 @@ function ShadesSelector() {
 }
 
 function ProductList() {
-  const { colorFamily, selectedTexture, selectedColors } = useLipColorContext();
+  const {
+    colorFamily,
+    selectedTexture,
+    selectedColors,
+    setColorFamily,
+    setSelectedTexture,
+    colorFamilyToInclude,
+    setColorFamilyToInclude
+  } = useLipColorContext();
 
   const { data, isLoading } = useLipColorQuery({
     color: colorFamily,
@@ -247,6 +256,10 @@ function ProductList() {
     selectedColors,
     isLoading,
   });
+
+  if (colorFamilyToInclude == null && data?.items != null) {
+    setColorFamilyToInclude(data.items.map((d) => d.custom_attributes.find((c) => c.attribute_code === 'color')?.value));
+  }
 
   return (
     <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
