@@ -10,6 +10,8 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { useFoundationContext } from "../foundation/foundation-context";
 import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+import { useState } from "react";
+import { Product } from "../../../../api/shared";
 
 export function ConcealerSelector() {
   return (
@@ -114,6 +116,8 @@ function ColorSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily } = useConcealerContext();
 
   const { data, isLoading } = useConcealerQuery({
@@ -125,7 +129,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

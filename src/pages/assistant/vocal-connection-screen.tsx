@@ -82,25 +82,38 @@ const VocalConnectionScreen = ({ onBack }: { onBack: () => void }) => {
     if (fetchProducts && products.length > 0) {
       setLoading(true);
       fetchVirtualAssistantProduct(products, categories)
-        .then((fetchedProducts) => {
+        .then(async (fetchedProducts) => {
           setProductData(fetchedProducts);
           setFetchProducts(false);
           if (productData.length < 1) {
+            const text =
+              languange === "en-US"
+                ? "sorry, the product is out of stock"
+                : "عذرا المنتج غير متوفر";
+
             // Tambahkan respons ke chats
             setChats((prevChats) => [
               ...prevChats,
               {
                 id: Date.now() + 1,
-                text:
-                  languange === "en-US"
-                    ? "sorry, the product is out of stock"
-                    : "عذرا المنتج غير متوفر",
+                text: text,
                 sender: "agent",
                 type: "chat",
                 mode: "text-connection",
                 timestamp: getCurrentTimestamp(),
               },
             ]);
+
+            const audioSrc = await makeSpeech(
+              text,
+              languange === "en-US" ? "en-US" : "ar-AR",
+            );
+
+            setTimeout(() => {
+              setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
+              setBlendshape(audioSrc.data.blendData);
+              setSpeak(true);
+            }, 1000);
           }
           setLoading(false);
         })

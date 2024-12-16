@@ -2,13 +2,42 @@ import { Product } from "../../api/shared";
 import { getProductAttributes, mediaUrl } from "../../utils/apiUtils";
 import { BrandName } from "../product/brand";
 
-export function VTOProductCard({ product }: { product: Product }) {
+export function VTOProductCard({
+  product,
+  selectedProduct,
+  setSelectedProduct,
+  onClick,
+}: {
+  product: Product;
+  selectedProduct: Product | null;
+  setSelectedProduct: React.Dispatch<React.SetStateAction<Product | null>>;
+  onClick: () => void;
+}) {
   const imageUrl = mediaUrl(product.media_gallery_entries?.[0]?.file);
 
+  const isSelected = selectedProduct?.id === product.id;
+
+  const cardStyle = isSelected
+    ? {
+        border: "1.5px solid transparent", // Atur border dengan warna transparan
+        borderImage:
+          "linear-gradient(90deg, #CA9C43 0%, #916E2B 27.4%, #6A4F1B 59.4%, #473209 100%)", // Terapkan gradien pada border
+        borderImageSlice: 1, // Pastikan border menggunakan gradien sepenuhnya
+      }
+    : {};
+
   return (
-    <div className="w-[70px] shadow sm:w-[100px]">
+    <div
+      style={cardStyle}
+      className="w-[70px] shadow sm:w-[100px]"
+      onClick={onClick} // Memanggil onClick saat produk diklik
+    >
       <div className="relative h-[47.6px] w-[70px] overflow-hidden sm:h-[70px] sm:w-[100px]">
-        <img src={imageUrl} alt="Product" className="rounded object-cover" />
+        <img
+          src={imageUrl}
+          alt="Product"
+          className="h-full w-full rounded object-cover"
+        />
       </div>
 
       <h3 className="line-clamp-2 h-6 py-1 text-[0.425rem] font-semibold text-white sm:h-10 sm:py-2 sm:text-[0.625rem]">

@@ -23,6 +23,7 @@ import { LoadingProducts } from "../../../../components/loading";
 import { filterTextures } from "../../../../api/attributes/texture";
 import { useFaceHighlighterQuery } from "./highlighter-query";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+import { useState } from "react";
 
 export function HighlighterSelector() {
   return (
@@ -188,6 +189,8 @@ function ShapeSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { selectedTexture, selectedColor } = useHighlighterContext();
 
   const { data, isLoading } = useFaceHighlighterQuery({
@@ -201,7 +204,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

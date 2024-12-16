@@ -8,6 +8,8 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { useLipPlumperContext } from "./lip-plumper-context";
 import { useLipPlumperQuery } from "./lip-plumper-query";
 import { ColorPalette } from "../../../../components/color-palette";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 export function LipPlumperSelector() {
   return (
@@ -119,6 +121,8 @@ function TextureSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { selectedColor, selectedTexture } = useLipPlumperContext();
 
   const { data, isLoading } = useLipPlumperQuery({
@@ -132,7 +136,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard key={product.id} product={product} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

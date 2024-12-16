@@ -6,10 +6,11 @@ import { Icons } from "../../../../components/icons";
 import { LoadingProducts } from "../../../../components/loading";
 import { useMakeup } from "../../../../context/makeup-context";
 import { LipColorProvider, useLipColorContext } from "./lip-color-context";
-
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { useLipColorQuery } from "./lip-color-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
+import { useEffect, useState } from "react";
+import { Product } from "../../../../api/shared";
 
 export function LipColorSelector() {
   return (
@@ -69,8 +70,13 @@ function ColorSelector() {
     showLipColor,
     lipColors,
   } = useMakeup();
-  const { selectedColors, setSelectedColors, selectedMode, colorFamily } =
-    useLipColorContext();
+  const {
+    selectedColors,
+    setSelectedColors,
+    selectedMode,
+    colorFamily,
+    selectedTexture,
+  } = useLipColorContext();
 
   const handleColorClick = (color: string) => {
     if (!showLipColor) setShowLipColor(true);
@@ -108,7 +114,7 @@ function ColorSelector() {
   const { data } = useLipColorQuery({
     color: colorFamily,
     sub_color: null,
-    texture: null,
+    texture: selectedTexture,
   });
 
   if (!colorFamily) {
@@ -233,7 +239,16 @@ function ShadesSelector() {
 }
 
 function ProductList() {
-  const { colorFamily, selectedTexture, selectedColors } = useLipColorContext();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const {
+    colorFamily,
+    selectedTexture,
+    selectedColors,
+    setColorFamily,
+    setSelectedColors,
+    setSelectedTexture,
+  } = useLipColorContext();
 
   const { data, isLoading } = useLipColorQuery({
     color: colorFamily,
@@ -248,13 +263,36 @@ function ProductList() {
     isLoading,
   });
 
+  const handleProductClick = (product: Product) => {
+    console.log(product);
+    setSelectedProduct(product);
+    setSelectedColors([
+      product.custom_attributes.find(
+        (item) => item.attribute_code === "hexacode",
+      )?.value,
+    ]);
+    setSelectedTexture(
+      product.custom_attributes.find(
+        (item) => item.attribute_code === "texture",
+      )?.value,
+    );
+  };
+
   return (
     <div className="flex w-full gap-2 overflow-x-auto pb-2 pt-4 no-scrollbar active:cursor-grabbing sm:gap-4">
       {isLoading ? (
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+              onClick={() => handleProductClick(product)}
+            />
+          );
         })
       )}
     </div>

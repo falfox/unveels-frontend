@@ -8,6 +8,8 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { HeadbandProvider, useHeadbandContext } from "./headband-context";
 import { useHeadbandQuery } from "./headband-query";
+import { useState } from "react";
+import { Product } from "../../../../api/shared";
 
 export function HeadbandSelector() {
   return (
@@ -129,6 +131,8 @@ function HeadbandFabricSelector() {
 }
 
 function HeadbandProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedFabric } = useHeadbandContext();
 
   const { data, isLoading } = useHeadbandQuery({
@@ -142,7 +146,14 @@ function HeadbandProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

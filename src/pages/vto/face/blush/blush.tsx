@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { Icons } from "../../../../components/icons";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { filterTextures } from "../../../../api/attributes/texture";
 import { ColorPalette } from "../../../../components/color-palette";
 import { LoadingProducts } from "../../../../components/loading";
@@ -10,6 +10,7 @@ import { useMakeup } from "../../../../context/makeup-context";
 import { useBlushContext } from "./blush-context";
 import { useBlushQuery } from "./blush-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
+import { Product } from "../../../../api/shared";
 
 export function BlushSelector() {
   return (
@@ -268,6 +269,8 @@ function ShadesSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { selectedTexture } = useBlushContext();
 
   const { data, isLoading } = useBlushQuery({
@@ -280,7 +283,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

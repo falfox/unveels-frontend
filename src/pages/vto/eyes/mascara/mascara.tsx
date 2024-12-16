@@ -9,6 +9,8 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { MascaraProvider, useMascaraContext } from "./mascara-context";
 import { useMascaraQuery } from "./mascara-query";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 export function MascaraSelector() {
   return (
@@ -109,6 +111,8 @@ function ColorSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily } = useMascaraContext();
 
   const { data, isLoading } = useMascaraQuery({
@@ -122,7 +126,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

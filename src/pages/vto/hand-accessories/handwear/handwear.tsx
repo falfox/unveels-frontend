@@ -9,6 +9,8 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { HandwearProvider, useHandwearContext } from "./handwear-context";
 import { useHandwearQuery } from "./handwear-query";
+import { useState } from "react";
+import { Product } from "../../../../api/shared";
 
 function useActiveHandwear(): "Rings" | "Bracelets" | "Bangles" {
   const location = useLocation();
@@ -161,6 +163,8 @@ function MaterialSelector() {
 }
 
 function HandwearProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedMaterial, selectedColor } = useHandwearContext();
   const handwearType = useActiveHandwear();
   const { data, isLoading } = useHandwearQuery(handwearType, {
@@ -174,7 +178,14 @@ function HandwearProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>
