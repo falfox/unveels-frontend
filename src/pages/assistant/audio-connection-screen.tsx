@@ -47,58 +47,114 @@ const AudioConnectionScreen = ({ onBack }: { onBack: () => void }) => {
   const audioPlayer = useRef<ReactAudioPlayer>(null);
 
   const [fetchProducts, setFetchProducts] = useState(false);
+  const [fetchComplete, setFetchComplete] = useState(false);
   const [products, setProducts] = useState<ProductRequest[]>([]);
   const [productData, setProductData] = useState<Product[]>([]);
 
   const [blendshape, setBlendshape] = useState<BlendData[]>([]);
 
   useEffect(() => {
-    if (fetchProducts && products.length > 0) {
-      setLoading(true);
-      fetchVirtualAssistantProduct(products, categories)
-        .then((fetchedProducts) => {
+    const fetchAndHandleProducts = async () => {
+      if (fetchProducts && products.length > 0) {
+        setLoading(true);
+
+        try {
+          const fetchedProducts = await fetchVirtualAssistantProduct(
+            products,
+            categories,
+          );
           setProductData(fetchedProducts);
           setFetchProducts(false);
-
-          if (productData.length < 1) {
-            // Tambahkan respons ke chats
-            setChats((prevChats) => [
-              ...prevChats,
-              {
-                id: Date.now() + 1,
-                text:
-                  language === "en-US"
-                    ? "sorry, the product is out of stock"
-                    : "عذرا المنتج غير متوفر",
-                sender: "agent",
-                type: "chat",
-                mode: "text-connection",
-                timestamp: getCurrentTimestamp(),
-              },
-            ]);
-          } else {
-            // Tambahkan respons ke chats
-            setChats((prevChats) => [
-              ...prevChats,
-              {
-                id: Date.now() + 1,
-                text:
-                  language === "en-US"
-                    ? "Here is the product you are looking for"
-                    : "إليك توصيات المنتج التي تبحث عنها",
-                sender: "agent",
-                type: "chat",
-                mode: "text-connection",
-                timestamp: getCurrentTimestamp(),
-              },
-            ]);
-          }
-
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        } finally {
           setLoading(false);
-        })
-        .finally(() => setLoading(false));
-    }
+          setFetchComplete(true);
+        }
+      }
+    };
+
+    fetchAndHandleProducts();
   }, [fetchProducts, products]);
+
+  useEffect(() => {
+    const speak = async () => {
+      console.log(productData);
+
+      if (productData.length < 1) {
+        const text =
+          language === "en-US"
+            ? "sorry, the product is out of stock"
+            : "عذرا المنتج غير متوفر";
+
+        // Tambahkan respons ke chats
+        setChats((prevChats) => [
+          ...prevChats,
+          {
+            id: Date.now() + 1,
+            text: text,
+            sender: "agent",
+            type: "chat",
+            mode: "text-connection",
+            timestamp: getCurrentTimestamp(),
+          },
+        ]);
+
+        try {
+          const audioSrc = await makeSpeech(
+            text,
+            language === "en-US" ? "en-US" : "ar-SA",
+          );
+
+          setTimeout(() => {
+            setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
+            setBlendshape(audioSrc.data.blendData);
+            setSpeak(true);
+          }, 1000);
+        } catch (error) {
+          console.error("Error creating speech:", error);
+        }
+      } else {
+        const text =
+          language === "en-US"
+            ? "Here is the product you are looking for"
+            : "هذا هو المنتج الذي تبحث عنه";
+
+        // Tambahkan respons ke chats
+        setChats((prevChats) => [
+          ...prevChats,
+          {
+            id: Date.now() + 1,
+            text: text,
+            sender: "agent",
+            type: "chat",
+            mode: "text-connection",
+            timestamp: getCurrentTimestamp(),
+          },
+        ]);
+
+        try {
+          const audioSrc = await makeSpeech(
+            text,
+            language === "en-US" ? "en-US" : "ar-SA",
+          );
+
+          setTimeout(() => {
+            setAudioSource(`${talkingAvatarHost}${audioSrc.data.filename}`);
+            setBlendshape(audioSrc.data.blendData);
+            setSpeak(true);
+            setFetchComplete(false);
+          }, 1000);
+        } catch (error) {
+          console.error("Error creating speech:", error);
+        }
+      }
+    };
+
+    if (fetchComplete) {
+      speak();
+    }
+  }, [fetchComplete]);
 
   const getResponse = async (userMsg: string) => {
     const timestamp = getCurrentTimestamp();

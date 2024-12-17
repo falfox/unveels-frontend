@@ -4,8 +4,7 @@ import { defaultHeaders, Product } from "../../../../api/shared";
 import {
   baseUrl,
   buildSearchParams,
-  createSimpleAndConfigurableFilters,
-  fetchConfigurableProducts,
+  fetchAllProducts,
 } from "../../../../utils/apiUtils";
 
 export function useLipColorQuery({
@@ -20,82 +19,31 @@ export function useLipColorQuery({
   return useQuery({
     queryKey: ["products", "lipcolor", color, sub_color, texture],
     queryFn: async () => {
-      const { simpleFilters, configurableFilters } =
-        createSimpleAndConfigurableFilters([
-          {
-            filters: [
-              {
-                field: "lips_makeup_product_type",
-                value: lipsMakeupProductTypesFilter([
-                  "Lipsticks",
-                  "Lip Stains",
-                  "Lip Tints",
-                  "Lip Balms",
-                ]),
-                condition_type: "in",
-              },
-            ],
-          },
-        ]);
-
-      if (color) {
-        simpleFilters.push({
+      const filters = [
+        {
           filters: [
             {
-              field: "color",
-              value: color,
-              condition_type: "eq",
+              field: "lips_makeup_product_type",
+              value: "5726,5727,5728,5731",
+              condition_type: "in",
             },
           ],
-        });
-      }
-
-      if (texture) {
-        simpleFilters.push({
+        },
+        {
           filters: [
             {
-              field: "texture",
-              value: texture,
-              condition_type: "eq",
+              field: "type_id",
+              value: "configurable,simple",
+              condition_type: "in",
             },
           ],
-        });
-      }
-
-      const [simpleResponse, configurableResponse] = await Promise.all([
-        fetch(
-          baseUrl + "/rest/V1/products?" + buildSearchParams(simpleFilters),
-          {
-            headers: defaultHeaders,
-          },
-        ),
-        fetch(
-          baseUrl +
-            "/rest/V1/products?" +
-            buildSearchParams(configurableFilters),
-          {
-            headers: defaultHeaders,
-          },
-        ),
-      ]);
-
-      const simpleResults = (await simpleResponse.json()) as {
-        items: Array<Product>;
-      };
-
-      const configurableResults = (await configurableResponse.json()) as {
-        items: Array<Product>;
-      };
-
-      const combinedResults = [
-        ...simpleResults.items,
-        ...configurableResults.items,
+        },
       ];
 
-      const filters = [];
+      const colorFilter = [];
 
       if (color) {
-        filters.push({
+        colorFilter.push({
           filters: [
             {
               field: "color",
@@ -118,11 +66,23 @@ export function useLipColorQuery({
         });
       }
 
-      return fetchConfigurableProducts(
+      const [productsList] = await Promise.all([
+        fetch(baseUrl + "/rest/V1/products?" + buildSearchParams(filters), {
+          headers: defaultHeaders,
+        }),
+      ]);
+
+      const products = (await productsList.json()) as {
+        items: Array<Product>;
+      };
+
+      const combinedResults = [...products.items];
+
+      return fetchAllProducts(
         {
           items: combinedResults,
         },
-        filters,
+        colorFilter,
       );
     },
   });

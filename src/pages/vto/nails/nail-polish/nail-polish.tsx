@@ -13,6 +13,7 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { filterTextures } from "../../../../api/attributes/texture";
 import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
+import { Product } from "../../../../api/shared";
 
 export function NailPolishSelector() {
   return (
@@ -149,6 +150,8 @@ function TextureSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedTexture } = useNailPolishContext();
 
   const { data, isLoading } = useNailPolishQuery({
@@ -162,7 +165,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

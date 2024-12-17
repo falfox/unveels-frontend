@@ -8,6 +8,8 @@ import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { ScarvesProvider, useScarvesContext } from "./scarves-context";
 import { useScarvesQuery } from "./scarves-query";
+import { useState } from "react";
+import { Product } from "../../../../api/shared";
 
 export function ScarvesSelector() {
   return (
@@ -130,6 +132,8 @@ function FabricSelector() {
 }
 
 function ScarvesProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedFabric } = useScarvesContext();
 
   const { data, isLoading } = useScarvesQuery({
@@ -143,7 +147,14 @@ function ScarvesProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

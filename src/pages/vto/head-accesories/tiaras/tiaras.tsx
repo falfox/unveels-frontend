@@ -8,6 +8,8 @@ import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { TiaraProvider, useTiaraContext } from "./tiaras-context";
 import { useTiarasQuery } from "./tiaras-query";
 import { colors } from "../../../../api/attributes/color";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 export function TiaraSelector() {
   return (
@@ -216,6 +218,8 @@ function FabricSelector() {
 }
 
 function TiaraProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedMaterial, selectedOccasion } = useTiaraContext();
 
   const { data, isLoading } = useTiarasQuery({
@@ -230,7 +234,14 @@ function TiaraProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

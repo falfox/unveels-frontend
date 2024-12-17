@@ -53,6 +53,7 @@ import { TopNavigation } from "../components/top-navigation";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { useModelLoader } from "../hooks/useModelLoader";
 import { ModelLoadingScreen } from "../components/model-loading-screen";
+import { ScreenshotPreview } from "../components/screenshot-preview";
 
 export function SkinToneFinder() {
   return (
@@ -111,6 +112,21 @@ function Main() {
   return (
     <>
       {modelLoading && <ModelLoadingScreen progress={progress} />}
+      {criterias.screenshotImage && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            pointerEvents: "none",
+          }}
+        >
+          <ScreenshotPreview />
+        </div>
+      )}
       <div className="relative mx-auto h-full min-h-dvh w-full bg-black">
         <div className="absolute inset-0">
           <VideoStream debugMode={false} />

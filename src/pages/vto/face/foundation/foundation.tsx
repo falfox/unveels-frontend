@@ -10,6 +10,8 @@ import { useMakeup } from "../../../../context/makeup-context";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { useFoundationContext } from "./foundation-context";
 import { useFoundationQuery } from "./foundation-query";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 export function FoundationSelector() {
   return (
@@ -156,6 +158,8 @@ function TextureSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedTexture } = useFoundationContext();
 
   const { data, isLoading } = useFoundationQuery({
@@ -168,7 +172,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

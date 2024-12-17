@@ -18,7 +18,7 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
   ...props
 }) => {
   const { gl } = useThree();
-  const { skinToneThreeSceneRef } = useCamera();
+  const { skinToneThreeSceneRef, setScreenshotImage } = useCamera();
   const texture = useTexture(imageSrc);
   const { viewport } = useThree();
   const [planeSize, setPlaneSize] = useState<[number, number]>([1, 1]);
@@ -83,10 +83,8 @@ const SkinToneFinderThreeScene: React.FC<SkinToneFinderThreeSceneProps> = ({
       if (canvas) {
         canvas.toBlob((blob) => {
           if (blob) {
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "screenshot.png";
-            link.click();
+            const imageUrl = URL.createObjectURL(blob);
+            setScreenshotImage(imageUrl);
           }
         });
       }

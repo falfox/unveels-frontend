@@ -4,7 +4,7 @@ import { Icons } from "../../../../components/icons";
 import { ColorPalette } from "../../../../components/color-palette";
 import { Link } from "react-router-dom";
 import { EarringsProvider, useEarringsContext } from "./earrings-context";
-import { cloneElement } from "react";
+import { cloneElement, useState } from "react";
 import { useGlassesQuery } from "../glasses/glasses-query";
 import { useGlassesContext } from "../glasses/glasses-context";
 import { LoadingProducts } from "../../../../components/loading";
@@ -13,6 +13,7 @@ import { useEarringsQuery } from "./earrings-query";
 import { filterShapes } from "../../../../api/attributes/shape";
 import { colors } from "../../../../api/attributes/color";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
+import { Product } from "../../../../api/shared";
 
 export function EarringsSelector() {
   return (
@@ -145,6 +146,8 @@ function ShapeSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedShape } = useEarringsContext();
 
   const { data, isLoading } = useEarringsQuery({
@@ -158,7 +161,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

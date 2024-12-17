@@ -55,6 +55,8 @@ export function extractUniqueCustomAttributes(
       }
     }
   }
+  console.log(Array.from(uniqueAttributes));
+
   return Array.from(uniqueAttributes);
 }
 
@@ -153,4 +155,66 @@ export function createSimpleAndConfigurableFilters(filters: FilterGroup[]) {
   ];
 
   return { simpleFilters, configurableFilters };
+}
+
+export async function fetchAllProducts(
+  results: {
+    items: Array<Product>;
+  },
+  parentFilters: FilterGroup[] = [],
+) {
+  // Filter produk dengan type_id configurable dan simple
+  const productFound = results.items.filter(
+    (p) => p.type_id === "configurable" || p.type_id === "simple",
+  );
+
+  if (productFound.length === 0) {
+    return {
+      items: results.items,
+    };
+  }
+
+  // Dapatkan entity_id dari produk yang bertipe configurable atau simple
+  const configurableProductIds = productFound
+    .map((p) => p.extension_attributes.configurable_product_links ?? [])
+    .flat();
+
+  // Dapatkan entity_id untuk produk simple juga
+  const simpleProductIds = productFound
+    .filter((p) => p.type_id === "simple")
+    .map((p) => p.id);
+
+  // Gabungkan configurableProductIds dan simpleProductIds
+  const allProductIds = [...configurableProductIds, ...simpleProductIds];
+
+  const filters = [
+    ...parentFilters,
+    {
+      filters: [
+        {
+          field: "entity_id",
+          value: allProductIds.join(","),
+          condition_type: "in",
+        },
+      ],
+    },
+  ];
+
+  const response = await fetch(
+    baseUrl + "/rest/V1/products?" + buildSearchParams(filters),
+    {
+      headers: defaultHeaders,
+    },
+  );
+
+  const configrableResponse = (await response.json()) as {
+    items: Array<Product>;
+  };
+
+  // Gabungkan hasil produk simple dan configurable menjadi satu array
+  const allResults = [...configrableResponse.items];
+
+  return {
+    items: allResults,
+  };
 }

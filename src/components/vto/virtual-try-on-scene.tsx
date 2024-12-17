@@ -54,7 +54,7 @@ export function VirtualTryOnScene() {
     const initializeFaceLandmarker = async () => {
       try {
         const filesetResolver = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17/wasm",
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.20/wasm",
         );
         const landmarker = await FaceLandmarker.createFromOptions(
           filesetResolver,
@@ -62,15 +62,12 @@ export function VirtualTryOnScene() {
             baseOptions: {
               modelAssetPath:
                 "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-              delegate: "GPU",
+              delegate: "CPU",
             },
-            runningMode: "VIDEO",
+            runningMode: "STREAM",
             numFaces: 1,
-            minFaceDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5,
-            minFacePresenceConfidence: 0.5,
-            outputFaceBlendshapes: true,
-            outputFacialTransformationMatrixes: true,
+            minFaceDetectionConfidence: 0.2,
+            minTrackingConfidence: 0.1,
           },
         );
 
@@ -82,10 +79,10 @@ export function VirtualTryOnScene() {
                 "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
               delegate: "GPU",
             },
-            runningMode: "VIDEO",
+            runningMode: "STREAM",
             numHands: 1,
-            minHandDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5,
+            minHandDetectionConfidence: 0.2,
+            minHandTrackingConfidence: 0.1,
           },
         );
 
@@ -306,7 +303,7 @@ export function VirtualTryOnScene() {
           width: VIDEO_WIDTH,
           height: VIDEO_HEIGHT,
           facingMode: criterias.flipped ? "environment" : "user",
-          frameRate: { exact: 25, ideal: 25, max: 25 },
+          frameRate: { ideal: 30 },
         }}
         onUserMediaError={(err) =>
           setError(

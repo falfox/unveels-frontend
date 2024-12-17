@@ -4,7 +4,7 @@ import { Icons } from "../../../../components/icons";
 import { ColorPalette } from "../../../../components/color-palette";
 
 import { WatchesProvider, useWatchesContext } from "./watches-context";
-import { cloneElement } from "react";
+import { cloneElement, useState } from "react";
 import { useWatchesQuery } from "./watches-query";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { colors } from "../../../../api/attributes/color";
@@ -12,6 +12,7 @@ import { filterShapes } from "../../../../api/attributes/shape";
 import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { filterMaterials } from "../../../../api/attributes/material";
+import { Product } from "../../../../api/shared";
 
 export function WatchesSelector() {
   return (
@@ -224,6 +225,8 @@ function MaterialSelector() {
 }
 
 function WatchesProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedShape, selectedMaterial } = useWatchesContext();
 
   const { data, isLoading } = useWatchesQuery({
@@ -238,7 +241,14 @@ function WatchesProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

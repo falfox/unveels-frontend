@@ -8,6 +8,8 @@ import { useLashesQuery } from "./lashes-query";
 import { LoadingProducts } from "../../../../components/loading";
 import { VTOProductCard } from "../../../../components/vto/vto-product-card";
 import { patterns } from "../../../../api/attributes/pattern";
+import { Product } from "../../../../api/shared";
+import { useState } from "react";
 
 const colorFamilies = [{ name: "Black", value: "#000000" }];
 
@@ -18,8 +20,11 @@ export function LashesSelector() {
 
       <ColorSelector />
 
-      <div className="flex h-[35px] sm:h-10 w-full items-center justify-between text-center">
-        <Link className={`relative grow text-[11.2px] sm:text-base lg:text-[20.8px]`} to="/virtual-try-on/lashes">
+      <div className="flex h-[35px] w-full items-center justify-between text-center sm:h-10">
+        <Link
+          className={`relative grow text-[11.2px] sm:text-base lg:text-[20.8px]`}
+          to="/virtual-try-on/lashes"
+        >
           <span className={"text-white"}>Lashes</span>
         </Link>
         <div className="h-5 border-r border-white"></div>
@@ -143,6 +148,8 @@ function ShapeSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedPattern } = useLashesContext();
 
   const { data, isLoading } = useLashesQuery({
@@ -156,7 +163,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>

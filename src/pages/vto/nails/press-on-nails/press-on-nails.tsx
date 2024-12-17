@@ -14,6 +14,7 @@ import { patterns } from "../../../../api/attributes/pattern";
 import { colors } from "../../../../api/attributes/color";
 import { extractUniqueCustomAttributes } from "../../../../utils/apiUtils";
 import { filterShapes } from "../../../../api/attributes/shape";
+import { Product } from "../../../../api/shared";
 
 export function PressOnNailsSelector() {
   return (
@@ -153,6 +154,8 @@ function ShapeSelector() {
 }
 
 function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const { colorFamily, selectedShape } = usePressOnNailsContext();
 
   const { data, isLoading } = usePressOnNailsQuery({
@@ -166,7 +169,14 @@ function ProductList() {
         <LoadingProducts />
       ) : (
         data?.items.map((product, index) => {
-          return <VTOProductCard product={product} key={product.id} />;
+          return (
+            <VTOProductCard
+              product={product}
+              key={product.id}
+              selectedProduct={selectedProduct}
+              setSelectedProduct={setSelectedProduct}
+            />
+          );
         })
       )}
     </div>
