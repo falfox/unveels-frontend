@@ -31,14 +31,14 @@ export function LipColorSelector() {
 }
 
 function FamilyColorSelector() {
-  const { colorFamily, setColorFamily } = useLipColorContext();
+  const { colorFamily, setColorFamily, colorFamilyToInclude } = useLipColorContext();
 
   return (
     <div
       className="flex w-full items-center space-x-2 overflow-x-auto py-2 no-scrollbar"
       data-mode="lip-color"
     >
-      {colors.map((item, index) => (
+      {colors.filter((c) => colorFamilyToInclude?.includes(c.value)).map((item, index) => (
         <button
           type="button"
           className={clsx(
@@ -242,12 +242,17 @@ function ProductList() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const {
+
     colorFamily,
+
     selectedTexture,
+
     selectedColors,
     setColorFamily,
     setSelectedColors,
     setSelectedTexture,
+    colorFamilyToInclude,
+    setColorFamilyToInclude
   } = useLipColorContext();
 
   const { data, isLoading } = useLipColorQuery({
@@ -262,6 +267,10 @@ function ProductList() {
     selectedColors,
     isLoading,
   });
+
+  if (colorFamilyToInclude == null && data?.items != null) {
+    setColorFamilyToInclude(data.items.map((d) => d.custom_attributes.find((c) => c.attribute_code === 'color')?.value));
+  }
 
   const handleProductClick = (product: Product) => {
     console.log(product);
