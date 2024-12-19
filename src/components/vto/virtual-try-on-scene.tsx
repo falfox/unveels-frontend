@@ -32,8 +32,6 @@ import "@mediapipe/face_mesh";
 import * as tf from "@tensorflow/tfjs";
 
 export function VirtualTryOnScene() {
-  const VIDEO_WIDTH = 320;
-  const VIDEO_HEIGHT = 240;
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -261,7 +259,6 @@ export function VirtualTryOnScene() {
 
       {/* Error Display */}
       {error && <ErrorOverlay message={error.message} />}
-      <div>{ window.devicePixelRatio }</div>
 
     </div>
   );
