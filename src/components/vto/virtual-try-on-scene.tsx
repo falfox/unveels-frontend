@@ -32,6 +32,8 @@ import "@mediapipe/face_mesh";
 import * as tf from "@tensorflow/tfjs";
 
 export function VirtualTryOnScene() {
+  const VIDEO_WIDTH = 320;
+  const VIDEO_HEIGHT = 240;
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -61,7 +63,7 @@ export function VirtualTryOnScene() {
   }, []);
 
   const normalizeLandmarks = (
-    landmarks: Landmark[],
+    landmarks: { x: number; y: number; z: number }[],
     videoWidth: number,
     videoHeight: number,
     canvasWidth: number,
@@ -75,19 +77,24 @@ export function VirtualTryOnScene() {
         ? canvasWidth / videoWidth
         : canvasHeight / videoHeight;
 
+    const xOffset =
+      videoAspect > canvasAspect ? 0 : (canvasWidth - videoWidth * scale) / 2;
+    const yOffset =
+      videoAspect > canvasAspect ? (canvasHeight - videoHeight * scale) / 2 : 0;
+
+    const scaleFactor = 0.5;
+    const xShift = 0.5;
+    const yShift = 0.5;
+
     return landmarks.map(({ x, y, z }) => {
-      // Normalisasi X dan Y ke [0, 1]
-      const normalizedX = x / videoWidth;
-      const normalizedY = y / videoHeight;
+      const normalizedX = x * scale + xOffset;
+      const normalizedY = y * scale + yOffset;
 
-      // Konversi X dan Y ke Three.js [-1, 1]
       const threeX =
-        (normalizedX * 2 - 1) *
-        (videoAspect > canvasAspect ? 1 : videoAspect / canvasAspect);
-      const threeY = normalizedY * 2 - 1; // Hilangkan inversi jika orientasi salah
-
-      // Z: Skalakan ke Three.js sesuai kedalaman
-      const threeZ = z !== undefined ? -z * 0.1 : 0; // Inversi z
+        ((normalizedX / canvasWidth) * 2 - 1) * scaleFactor + xShift;
+      const threeY =
+        ((normalizedY / canvasHeight) * 2 - 1) * scaleFactor + yShift;
+      const threeZ = z !== undefined ? -z * 0.1 : 0;
 
       return { x: threeX, y: threeY, z: threeZ };
     });
@@ -139,8 +146,8 @@ export function VirtualTryOnScene() {
               faces,
               video.videoWidth,
               video.videoHeight,
-              canvasRef.current!.width,
-              canvasRef.current!.height,
+              drawWidth,
+              drawHeight,
             );
 
             landmarksRef.current = normalizedLandmarks;
@@ -254,6 +261,8 @@ export function VirtualTryOnScene() {
 
       {/* Error Display */}
       {error && <ErrorOverlay message={error.message} />}
+      <div>{ window.devicePixelRatio }</div>
+
     </div>
   );
 }
