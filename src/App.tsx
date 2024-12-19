@@ -4,15 +4,10 @@ import { useBrandsQuerySuspense } from "./api/brands";
 import { useCategoriesQuerySuspense } from "./api/categories";
 import "./index.css";
 import { VirtulAssistant } from "./pages/assistant/virtual-assistant";
-import { FaceAnalyzer } from "./pages/face-analyzer";
 import { FindTheLook } from "./pages/find-the-look";
 import { FindTheLookWeb } from "./pages/find-the-look-web";
-import { PersonalityFinder } from "./pages/personality-finder";
-import { PersonalityFinderWeb } from "./pages/personality-finder-web-";
 import { SeeImprovement } from "./pages/see-improvement";
 import { SingleVirtualTryOn } from "./pages/single-virtual-try-on";
-import { SkinAnalysis } from "./pages/skin-analysis";
-import { SkinAnalysisWeb } from "./pages/skin-analysis-web";
 import { SkinToneFinder } from "./pages/skin-tone-finder";
 import { SkinToneFinderWeb } from "./pages/skin-tone-finder-web";
 import { TryOnSelector, VirtualTryOn } from "./pages/virtual-try-on";
@@ -73,15 +68,10 @@ const routes = [
     ),
   },
   { path: "/skin-tone-finder", element: <SkinToneFinder /> },
-  { path: "/personality-finder", element: <PersonalityFinder /> },
-  { path: "/face-analyzer", element: <FaceAnalyzer /> },
-  { path: "/skin-analysis", element: <SkinAnalysis /> },
   { path: "/find-the-look", element: <FindTheLook /> },
-  { path: "/personality-finder-web", element: <PersonalityFinderWeb /> },
   { path: "/find-the-look-web", element: <FindTheLookWeb /> },
   { path: "/skin-tone-finder-web", element: <SkinToneFinderWeb /> },
   { path: "/virtual-assistant", element: <VirtulAssistant /> },
-  { path: "/skin-analysis-web", element: <SkinAnalysisWeb /> },
   { path: "/virtual-avatar-web", element: <VirtualAvatar /> },
   { path: "/see-improvement-web", element: <SeeImprovementWeb /> },
   { path: "/see-improvement", element: <SeeImprovement /> },
@@ -259,10 +249,10 @@ function App() {
 
   const router = import.meta.env.DEV
     ? createMemoryRouter(routes, {
-        initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+        initialEntries: [window.__INITIAL_ROUTE__ || "/virtual-try-on-web"],
       })
     : createMemoryRouter(routes, {
-        initialEntries: [window.__INITIAL_ROUTE__ || "/"],
+        initialEntries: [window.__INITIAL_ROUTE__ || "/virtual-try-on-web"],
       });
   return <RouterProvider router={router} />;
 }

@@ -24,6 +24,13 @@ import HDREnvironment from "../three/hdr-environment";
 import { Blendshape } from "../../types/blendshape";
 import { useMakeup } from "../../context/makeup-context";
 
+import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
+import "@tensorflow/tfjs-core";
+// Register WebGL backend.
+import "@tensorflow/tfjs-backend-webgl";
+import "@mediapipe/face_mesh";
+import * as tf from "@tensorflow/tfjs";
+
 export function VirtualTryOnScene() {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -50,216 +57,141 @@ export function VirtualTryOnScene() {
   const legendColors = [[128, 62, 117, 255]];
 
   useEffect(() => {
-    let isMounted = true;
-    const initializeFaceLandmarker = async () => {
-      try {
-        const filesetResolver = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.20/wasm",
-        );
-        const landmarker = await FaceLandmarker.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath:
-                "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-              delegate: "CPU",
-            },
-            runningMode: "STREAM",
-            numFaces: 1,
-            minFaceDetectionConfidence: 0.2,
-            minTrackingConfidence: 0.1,
-          },
-        );
-
-        const handLandmarker = await HandLandmarker.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath:
-                "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-              delegate: "GPU",
-            },
-            runningMode: "STREAM",
-            numHands: 1,
-            minHandDetectionConfidence: 0.2,
-            minHandTrackingConfidence: 0.1,
-          },
-        );
-
-        const hairSegmenter = await ImageSegmenter.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath:
-                "/media/unveels/models/hair/hair_segmenter.tflite",
-              delegate: "GPU",
-            },
-            runningMode: "VIDEO",
-            outputCategoryMask: true,
-            outputConfidenceMasks: false,
-          },
-        );
-
-        if (isMounted) {
-          faceLandmarkerRef.current = landmarker;
-          handLandmarkerRef.current = handLandmarker;
-          hairSegmenterRef.current = hairSegmenter;
-          startDetection();
-        }
-      } catch (error) {
-        console.error("Gagal menginisialisasi FaceLandmarker:", error);
-        if (isMounted) setError(error as Error);
-      }
-    };
-
-    initializeFaceLandmarker();
-
-    // Cleanup pada unmount
-    return () => {
-      isMounted = false;
-      if (faceLandmarkerRef.current) {
-        faceLandmarkerRef.current.close();
-      }
-      if (handLandmarkerRef.current) {
-        handLandmarkerRef.current.close();
-      }
-      if (hairSegmenterRef.current) {
-        hairSegmenterRef.current.close();
-      }
-
-      isDetectingRef.current = false;
-    };
+    // tf.enableDebugMode();
   }, []);
 
-  // Function to start the detection loop
-  const startDetection = useCallback(() => {
-    if (isDetectingRef.current) return;
-    isDetectingRef.current = true;
+  const normalizeLandmarks = (
+    landmarks: Landmark[],
+    videoWidth: number,
+    videoHeight: number,
+    canvasWidth: number,
+    canvasHeight: number,
+  ) => {
+    const videoAspect = videoWidth / videoHeight;
+    const canvasAspect = canvasWidth / canvasHeight;
 
-    const detect = async () => {
-      if (
-        faceLandmarkerRef.current &&
-        handLandmarkerRef.current &&
-        hairSegmenterRef.current &&
-        webcamRef.current &&
-        webcamRef.current.video &&
-        webcamRef.current.video.readyState === 4
-      ) {
-        const video = webcamRef.current.video;
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            const { innerWidth: width, innerHeight: height } = window;
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            ctx.scale(dpr, dpr);
+    const scale =
+      videoAspect > canvasAspect
+        ? canvasWidth / videoWidth
+        : canvasHeight / videoHeight;
 
-            const imgAspect = video.videoWidth / video.videoHeight;
-            const canvasAspect = width / height;
+    return landmarks.map(({ x, y, z }) => {
+      // Normalisasi X dan Y ke [0, 1]
+      const normalizedX = x / videoWidth;
+      const normalizedY = y / videoHeight;
 
-            let drawWidth: number;
-            let drawHeight: number;
-            let offsetX: number;
-            let offsetY: number;
+      // Konversi X dan Y ke Three.js [-1, 1]
+      const threeX =
+        (normalizedX * 2 - 1) *
+        (videoAspect > canvasAspect ? 1 : videoAspect / canvasAspect);
+      const threeY = normalizedY * 2 - 1; // Hilangkan inversi jika orientasi salah
 
-            if (imgAspect < canvasAspect) {
-              drawWidth = width;
-              drawHeight = width / imgAspect;
-              offsetX = 0;
-              offsetY = (height - drawHeight) / 2;
-            } else {
-              drawWidth = height * imgAspect;
-              drawHeight = height;
-              offsetX = (width - drawWidth) / 2;
-              offsetY = 0;
-            }
+      // Z: Skalakan ke Three.js sesuai kedalaman
+      const threeZ = z !== undefined ? -z * 0.1 : 0; // Inversi z
 
-            ctx.clearRect(0, 0, width, height);
+      return { x: threeX, y: threeY, z: threeZ };
+    });
+  };
 
-            const startTimeMs = performance.now();
-            try {
-              const results = faceLandmarkerRef.current.detectForVideo(
-                video,
-                startTimeMs,
-              );
+  const normalizedLandmark = (
+    faces: [{ x: number; y: number; z: number; name?: string | null }],
+  ) => {
+    if (
+      webcamRef.current &&
+      webcamRef.current.video &&
+      webcamRef.current.video.readyState === 4
+    ) {
+      const video = webcamRef.current.video;
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const { innerWidth: width, innerHeight: height } = window;
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+          ctx.scale(dpr, dpr);
 
-              const handResults = handLandmarkerRef.current.detectForVideo(
-                video,
-                startTimeMs,
-              );
+          const imgAspect = video.videoWidth / video.videoHeight;
+          const canvasAspect = width / height;
 
-              // const hairResults = hairSegmenterRef.current.segmentForVideo(
-              //   video,
-              //   startTimeMs,
-              // );
+          let drawWidth: number;
+          let drawHeight: number;
+          let offsetX: number;
+          let offsetY: number;
 
-              // if (hairResults?.categoryMask) {
-              //   hairRef.current = hairResults.categoryMask.getAsFloat32Array();
-              //   let imageData = ctx.getImageData(
-              //     0,
-              //     0,
-              //     video.videoWidth,
-              //     video.videoHeight,
-              //   ).data;
+          if (imgAspect < canvasAspect) {
+            drawWidth = width;
+            drawHeight = width / imgAspect;
+            offsetX = 0;
+            offsetY = (height - drawHeight) / 2;
+          } else {
+            drawWidth = height * imgAspect;
+            drawHeight = height;
+            offsetX = (width - drawWidth) / 2;
+            offsetY = 0;
+          }
 
-              //   let j = 0;
-              //   for (let i = 0; i < hairRef.current.length; ++i) {
-              //     const maskVal = Math.round(hairRef.current[i] * 255.0);
+          ctx.clearRect(0, 0, width, height);
 
-              //     // Proses hanya untuk label index 1
-              //     if (maskVal === 1) {
-              //       const legendColor =
-              //         legendColors[maskVal % legendColors.length];
-              //       imageData[j] = (legendColor[0] + imageData[j]) / 2;
-              //       imageData[j + 1] = (legendColor[1] + imageData[j + 1]) / 2;
-              //       imageData[j + 2] = (legendColor[2] + imageData[j + 2]) / 2;
-              //       imageData[j + 3] = (legendColor[3] + imageData[j + 3]) / 2;
-              //     }
-              //     j += 4;
-              //   }
+          try {
+            const normalizedLandmarks = normalizeLandmarks(
+              faces,
+              video.videoWidth,
+              video.videoHeight,
+              canvasRef.current!.width,
+              canvasRef.current!.height,
+            );
 
-              //   const uint8Array = new Uint8ClampedArray(imageData.buffer);
-              //   const dataNew = new ImageData(
-              //     uint8Array,
-              //     video.videoWidth,
-              //     video.videoHeight,
-              //   );
+            landmarksRef.current = normalizedLandmarks;
 
-              //   hairMaskRef.current = dataNew;
-              // }
-
-              if (results.facialTransformationMatrixes.length > 0) {
-                faceTransformRef.current =
-                  results.facialTransformationMatrixes[0].data;
-              }
-
-              if (results.faceBlendshapes.length > 0) {
-                blendshapeRef.current = results.faceBlendshapes[0].categories;
-              }
-
-              if (handResults.landmarks && handResults.landmarks.length > 0) {
-                handLandmarksRef.current = handResults.landmarks[0];
-              }
-              if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-                landmarksRef.current = results.faceLandmarks[0];
-              }
-            } catch (err) {
-              console.error("Detection error:", err);
-              setError(err as Error);
-            }
+            console.log(landmarksRef);
+          } catch (err) {
+            console.error("Detection error:", err);
+            setError(err as Error);
           }
         }
       }
+    }
+  };
 
-      if (isDetectingRef.current) {
-        requestAnimationFrame(detect);
+  const runDetector = async (video: HTMLVideoElement) => {
+    const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
+
+    const detector = await faceLandmarksDetection.createDetector(model, {
+      runtime: "mediapipe",
+      refineLandmarks: true,
+      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
+    });
+
+    const detect = async (
+      net: faceLandmarksDetection.FaceLandmarksDetector,
+    ) => {
+      const inputTensor = tf.browser.fromPixels(video);
+      const faces = await net.estimateFaces(inputTensor, {
+        flipHorizontal: false,
+      });
+      if (faces.length > 0 && faces[0].keypoints.length > 0) {
+        requestAnimationFrame(() => normalizedLandmark(faces[0].keypoints));
       }
+      detect(detector);
     };
+    detect(detector);
+  };
 
-    detect();
-  }, []);
+  const handleVideoLoad = () => {
+    if (webcamRef.current) {
+      const video = webcamRef.current.video;
+      if (video) {
+        if (video.readyState === 4) {
+          console.log("Video ready, starting detection.");
+          runDetector(video);
+        } else {
+          console.log("Video not ready yet.");
+        }
+      }
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center">
@@ -300,16 +232,17 @@ export function VirtualTryOnScene() {
         screenshotFormat="image/jpeg"
         mirrored={false}
         videoConstraints={{
-          width: VIDEO_WIDTH,
-          height: VIDEO_HEIGHT,
+          width: 320,
+          height: 240,
           facingMode: criterias.flipped ? "environment" : "user",
-          frameRate: { ideal: 30 },
+          frameRate: { exact: 25, ideal: 25, max: 25 },
         }}
         onUserMediaError={(err) =>
           setError(
             err instanceof Error ? err : new Error("Webcam error occurred."),
           )
         }
+        onLoadedData={handleVideoLoad}
       />
 
       {/* Overlay Canvas */}
